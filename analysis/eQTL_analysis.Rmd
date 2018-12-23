@@ -271,12 +271,17 @@ do_one_eQTL <- function(FBID){
   male_index   <- which(FBID_by_sex == FBID_male)   
   
   # Run the male and female models in GEMMA. It's a set of simple linear models, on the corrected expression data
-  run_command("gemma -bfile dgrp2_QC_all_lines -lm 1 -n {female_index} -o eQTL_{FBID}_females", path = "/data/derived")
-  run_command("gemma -bfile dgrp2_QC_all_lines -lm 1 -n {male_index}   -o eQTL_{FBID}_males",   path = "/data/derived")
+  shh <- capture.output(run_command("gemma -bfile dgrp2_QC_all_lines -lm 1 -n {female_index} -o eQTL_{FBID}_females", path = "/data/derived"))
+  shh <- capture.output(run_command("gemma -bfile dgrp2_QC_all_lines -lm 1 -n {male_index}   -o eQTL_{FBID}_males",   path = "/data/derived"))
   
-  results_females <- read_tsv(glue("data/derived/output/eQTL_{FBID}_females.assoc.txt")) %>% 
+  # There are some transcripts where all the data is missing for one sex, or the test otherwise fails. We just remove these transcripts
+  results_females <- glue("data/derived/output/eQTL_{FBID}_females.assoc.txt")
+  results_males <- glue("data/derived/output/eQTL_{FBID}_males.assoc.txt")
+  if(!all(file.exists(c(results_females, results_males)))) return(NULL)
+  
+  results_females <- read_tsv(results_females, col_types = cols(), progress = FALSE) %>% 
     mutate(FBID = paste(FBID, "_females", sep = "")) 
-  results_males <- read_tsv(glue("data/derived/output/eQTL_{FBID}_males.assoc.txt")) %>% 
+  results_males <- read_tsv(results_males, col_types = cols(), progress = FALSE) %>% 
     mutate(FBID = paste(FBID, "_males", sep = ""))  
   
   # Get a vector of eQTLs that are significant in one or both sexes with p < 0.000001
@@ -298,7 +303,7 @@ do_one_eQTL <- function(FBID){
   return(NULL)
 }
 
-# system.time(do_one_eQTL("FBgn0000015")) # TEST
+# system.time(do_one_eQTL("FBgn0000100")) # TEST
 
 
 # Run the eQTL GWAS, one transcript at a time, across multiple cores, and save the results

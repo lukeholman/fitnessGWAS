@@ -1,0 +1,264 @@
+---
+title: "GWAS for fitness in Drosophila"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+```{r load_data message=FALSE, warning=FALSE, results="hide"}
+library(dplyr)
+library(ggplot2)
+library(readr)
+library(tidyr)
+library(purrr)
+library(gridExtra)
+library(bigsnpr)
+
+# Connect to the database of annotations
+db <- DBI::dbConnect(RSQLite::SQLite(), "data/derived/annotations.sqlite3")
+
+# Results of univariate mixed models, corrected by ashr
+lmm_results <- read_csv("data/derived/lmm_results_ashr.csv") 
+```
+
+
+
+
+
+## Make some plots about the SNP data
+
+### Chromosomal coverage
+
+The SNPs that survived pruning have good coverage of the major chromosomes, with the exception of regions near the centromere, and on chromosome 4 (which does not recombine, so presumably it has much higher LD than the others).
+
+```{r echo=FALSE}
+if(file.exists('data/derived/dgrp2_QC_focal_lines.bk')) unlink('data/derived/dgrp2_QC_focal_lines.bk')
+```
+
+```{r fig.showtext=TRUE}
+dgrp_bed <- snp_readBed("data/derived/dgrp2_QC_focal_lines.bed") %>% snp_attach()
+
+chrs <- paste("Chromosome", c("2L", "2R", "3L", "3R", "X", "4"))
+
+data.frame(pos = dgrp_bed$map$physical.pos,
+           chr = chrs[dgrp_bed$map$chromosome]) %>%
+  ggplot(aes(pos/ 10^6, fill = chr)) +
+  geom_density(adjust = 0.08) + 
+  facet_wrap(~chr, scales = "free", ncol = 2) +
+  xlab("Chromosomal position (Megabases)") + ylab("Marker density") +
+  theme_minimal() + 
+  theme(text = element_text(family = "Raleway")) +
+  theme(legend.position = "none")
+```
+
+### Relatedness among the lines in our sample
+
+The denodrogram shows that a few pairs of lines are quite strongly genetically similar, while the majority show no relatedness. This supports our decision to use linear mixed models for our association tests. 
+```{r fig.height=15}
+get_SNP_genotype_matrix <- function(bigsnp_object){
+  mat <- bigsnp_object$genotypes[1:nrow(bigsnp_object$genotypes), 1:ncol(bigsnp_object$genotypes)]
+  rownames(mat) <- gsub("line", "", bigsnp_object$fam$family.ID)
+  colnames(mat) <- bigsnp_object$map$marker.ID
+  mat
+}
+
+geno_matrix <- get_SNP_geno_matrix(dgrp_bed)
+n_snps <- ncol(geno_matrix)
+n_lines <- nrow(geno_matrix)
+
+dendr <- dendro_data(geno_matrix %>% dist %>% hclust, type="rectangle") 
+
+ggplot() + 
+  geom_segment(data = segment(dendr), aes(x, y, xend = xend, yend = yend)) + 
+  geom_text(data = label(dendr), aes(x, y, label = paste(" ", label), hjust = 0), size = 3) +
+  coord_flip() + scale_y_reverse(expand=c(0.2, 0)) + 
+  theme(axis.line.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.y=element_blank(),
+        panel.background=element_rect(fill="white"),
+        panel.grid=element_blank()) + 
+  ylab("Distance")
+```
+<br></br> 
+**Figure SX**: Cluster dendrogram showing the relatedness structure between the DGRP lines that we measured. The lines were clustered based on 
+
+```{r echo=FALSE}
+rm(list = c("geno_matrix", "dgrp_bed"))
+unlink('data/derived/dgrp2_QC_focal_lines.bk')
+```
+
+
+
+```{r}
+SNP_clumps %>%
+  select(SNP_clump, contains("LFSR")) %>% select(-contains("canon")) %>%
+  filter_at(vars(contains("LFSR")), any_vars(. < 10e-5)) %>% nrow()
+  
+
+# Calculate antagonism....
+antagonism_evidence_ratios <- SNP_clumps %>%
+  filter_at(vars(contains("LFSR")), any_vars(. < 10e-2))  %>%
+  mutate(pp_female_early = ifelse(beta_female_early_mashr_ED > 0, LFSR_female_early_mashr_ED, 1 - LFSR_female_early_mashr_ED),
+         pp_female_late  = ifelse(beta_female_late_mashr_ED > 0, LFSR_female_late_mashr_ED, 1 - LFSR_female_late_mashr_ED),
+         pp_male_early   = ifelse(beta_male_early_mashr_ED > 0, LFSR_male_early_mashr_ED, 1 - LFSR_male_early_mashr_ED),
+         pp_male_late    = ifelse(beta_male_late_mashr_ED > 0, LFSR_male_late_mashr_ED, 1 - LFSR_male_late_mashr_ED)) %>%
+  mutate(p_sex_concord_early = pp_female_early * pp_male_early + (1 - pp_female_early) * (1 - pp_male_early),
+         p_sex_antag_early = pp_female_early * (1 - pp_male_early) + (1 - pp_female_early) * pp_male_early,
+         p_sex_concord_late  = pp_female_late * pp_male_late+ (1 - pp_female_late) * (1 - pp_male_late),
+         p_sex_antag_late = pp_female_late * (1 - pp_male_late) + (1 - pp_female_late) * pp_male_late,
+         p_age_concord_females = pp_female_early * pp_female_late + (1 - pp_female_early) * (1 - pp_female_late),
+         p_age_antag_females = pp_female_early * (1 - pp_female_late) + (1 - pp_female_early) * pp_female_late,
+         p_age_concord_males = pp_male_early * pp_male_late + (1 - pp_male_early) * (1 - pp_male_late),
+         p_age_antag_males = pp_male_early * (1 - pp_male_late) + (1 - pp_male_early) * pp_male_late) %>%
+  mutate(sex_antagonism_early = p_sex_concord_early / p_sex_antag_early,
+         sex_antagonism_late = p_sex_concord_late / p_sex_antag_late,
+         age_antagonism_females = p_age_concord_females / p_age_antag_females,
+         age_antagonism_males = p_age_concord_males / p_age_antag_males) %>%
+  select(SNP_clump,  starts_with("sex_"), starts_with("age_")) %>%
+  gather(trait, evidence_ratio, -SNP_clump) 
+
+
+
+antagonism_evidence_ratios %>%
+  ggplot(aes(log2(evidence_ratio))) + 
+  geom_histogram(data=subset(antagonism_evidence_ratios, log2(evidence_ratio) < 0), bins = 500, fill = "#FF635C") + 
+  geom_histogram(data=subset(antagonism_evidence_ratios, log2(evidence_ratio) > 0), bins = 500, fill = "#5B8AFD") +
+  coord_cartesian(xlim = c(-10, 10), ylim = c(0, 7000)) + 
+  scale_x_continuous(breaks = seq(-10, 10, by = 2), labels = c(paste("1/",(rev(2 ^ seq(2, 10, by = 2))), sep = ""), 2 ^ seq(0, 10, by = 2))) + 
+  facet_wrap(~trait) + xlab("Evidence ratio\n(log scale, blue: concordant, red: antagonistic)") + ylab("Number of variants")
+
+antagonism_evidence_ratios %>% filter(trait == "sex_antagonism_early") %>% arrange(log(evidence_ratio)) %>% left_join(tbl(db, "variants") %>% collect(), by = c("SNP_clump" = "SNP")) %>% left_join(tbl(db, "genes") %>% collect(), by = "FBID") %>% print(n = 100)
+```
+
+
+
+
+
+
+
+```{r}
+lmm_results %>% 
+  select(rs, beta, posterior.estimate, parameter) %>%
+  left_join(db %>% tbl("variants") %>% filter(id %in% lmm_results$rs) %>% collect(), by = c("rs" = "id")) %>%
+  mutate(site.class = replace(site.class, is.na(site.class), "INTERGENIC")) %>%
+  ggplot(aes(y = posterior.estimate, x = site.class)) + 
+  facet_wrap(~parameter) + 
+  geom_boxplot() + coord_flip() 
+
+read_tsv("data/derived/output/all_four_traits.assoc.txt") %>% 
+  select(rs, p_wald) %>%
+  left_join(db %>% tbl("variants") %>% filter(id %in% lmm_results$rs) %>% collect(), by = c("rs" = "id")) %>%
+  mutate(site.class = replace(site.class, is.na(site.class), "INTERGENIC")) %>%
+  ggplot(aes(y = -log10(p_wald), x = site.class)) +
+  geom_boxplot() + coord_flip() 
+```
+
+
+### Distributions of SNP estimates
+```{r}
+lmm_results %>%
+  ggplot(aes(posterior.estimate, weight = se)) +
+  geom_density() + 
+  facet_wrap(~parameter, scales = "free")
+```
+
+
+```{r}
+left_join(lm_results, lmm_results, by = c("rs", "parameter")) %>%
+  ggplot(aes(x = posterior.estimate.x, y = posterior.estimate.y)) + 
+  geom_point() + 
+  facet_wrap(~parameter, scales = "free") + 
+  xlab("Posterior effect size estimate from linear model") + 
+  ylab("Posterior effect size estimate from mixed model")
+```
+
+
+
+```{r}
+make_snp_figure <- function(x, y, results_file, xlab, ylab){
+  
+  dat <- read_tsv(results_file) %>%
+    mutate(sig = "No",
+           sig = replace(sig, p_wald <= 0.0001, "Yes"))
+  print( dat %>% filter(sig == "Yes"))
+  
+  ggplot(dat, aes_string(x, y)) + 
+    geom_point(alpha = 0.1) + 
+    geom_hline(yintercept = 0, linetype = 2) + 
+    geom_vline(xintercept = 0, linetype = 2) + 
+    stat_smooth(colour = "steelblue",  method = "gam") + 
+    geom_point(data = dat %>% filter(sig == "Yes"), aes_string(x, y), fill = "tomato", pch=21, colour = "black", size=2) + 
+    xlab(xlab) + ylab(ylab)
+}
+file <- "data/derived/output/all_four_traits.assoc.txt"
+grid.arrange(
+  make_snp_figure("beta_1", "beta_3", file, "Effect of SNP on female early-life fitness", "Effect of SNP on male early-life fitness"),
+  make_snp_figure("beta_2", "beta_4", file, "Effect of SNP on female late-life fitness", "Effect of SNP on male late-life fitness"),
+  make_snp_figure("beta_1", "beta_2", file, "Effect of SNP on early female early-life fitness", "Effect of SNP on female late-life fitness"),
+  make_snp_figure("beta_3", "beta_4", file, "Effect of SNP on early male early-life fitness", "Effect of SNP on male late-life fitness"), 
+  ncol = 2)
+```
+
+```{r}
+lmm_ashr_results <- read_csv("data/derived/lmm_results_ashr.csv") %>% 
+  select(rs, posterior.estimate, parameter, pp, np) %>%
+  spread(parameter, posterior.estimate) %>%
+  mutate(p_value = map2_dbl(pp, np, ~ max(.x, .y))) %>%
+  group_by(rs) %>%
+  summarise(female_early = female_early[!is.na(female_early)], 
+            female_late = female_late[!is.na(female_late)], 
+            male_early = male_early[!is.na(male_early)], 
+            male_late = male_late[!is.na(male_late)],
+            p_value_bayesian = min(1 - p_value)) %>%
+  ungroup() %>% arrange(p_value_bayesian) %>%
+  mutate(sig = "No",
+         sig = replace(sig, p_value_bayesian <= 0.05, "Yes")) 
+
+make_snp_figure2 <- function(par1, par2, xlab, ylab){
+  dat <- lmm_ashr_results
+  ggplot(dat, aes_string(par1, par2)) + 
+    geom_point(alpha = 0.1) + 
+    geom_hline(yintercept = 0, linetype = 2) + 
+    geom_vline(xintercept = 0, linetype = 2) + 
+    stat_smooth(colour = "steelblue") + 
+    geom_point(data = dat %>% filter(sig == "Yes"), aes_string(par1, par2), fill = "tomato", pch=21, colour = "black", size=2) + 
+    xlab(xlab) + ylab(ylab)
+}
+grid.arrange(
+  make_snp_figure2("male_early", "female_early", "Effect of SNP on female early-life fitness", "Effect of SNP on male fitness"),
+  make_snp_figure2("male_late", "female_late", "Effect of SNP on female fitness", "Effect of SNP on male fitness"),
+  make_snp_figure2("female_early", "female_late", "Effect of SNP on early female fitness", "Effect of SNP on late female fitness"),
+  make_snp_figure2("male_early", "male_late", "Effect of SNP on early male fitness", "Effect of SNP on late male fitness"), 
+  ncol = 2)
+```
+
+
+
+
+```{r}
+lm_results %>% filter(parameter %in% c("male_late", "female_late"),
+                      pp >= 0.5 | np >= 0.5) %>%
+  select(rs) %>% left_join(read.delim("data/derived/output/female_late_male_late.assoc.txt")) %>%
+  ggplot(aes(beta_1, beta_2)) + geom_point() + geom_hline(yintercept = 0, linetype = 2) + geom_vline(xintercept = 0, linetype = 2) + xlab("Effect of SNP on female fitness") + ylab("Effect of SNP on male fitness")
+
+x <- read.delim("data/derived/output/female_early_lm.assoc.txt")
+y <- read.delim("data/derived/output/female_early_lmm.assoc.txt")
+left_join(x, y, by = "rs") %>% ggplot(aes(p_wald.x, p_wald.y)) + geom_point()
+
+read.delim("data/derived/output/female_early_male_early.assoc.txt") %>% arrange(p_wald) %>% head()
+x <- read.delim("data/derived/output/female_late_male_late.assoc.txt")
+ggplot(x %>% filter(p_wald < 0.01), aes(beta_1, beta_2)) + geom_point() 
+
+x <- read.delim("data/derived/output/female_early_lm.assoc.txt")
+x <- read.delim("data/derived/output/female_early_lmm.assoc.txt")
+y <- read.delim("data/derived/output/female_early_bslmm.param.txt") %>% mutate(beta = alpha + beta*gamma)
+left_join(x, y, by = "rs") %>% ggplot(aes(beta.x, beta.y)) + geom_point() + geom_abline()
+
+x <- read.delim("data/derived/output/female_early_bslmm.hyp.txt", sep = "\t", row.names = NULL)
+names(x) <- c(names(x)[-1], "trim") 
+x <- x %>% select(-trim) %>% mutate(h = as.numeric(h))
+plot6 <-  bayesplot::mcmc_areas(x$pge / (x$p))
+do.call("grid.arrange", lapply(1:5, function(i) bayesplot::mcmc_areas(x[, i, drop = FALSE])))
+```
+

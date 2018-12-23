@@ -1,0 +1,156 @@
+---
+title: "GWAS for fitness in Drosophila"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+```{r message=FALSE, warning=FALSE, results="hide"}
+library(ggplot2)
+library(ggExtra)
+library(dplyr)
+library(tidyr)
+library(grid)
+library(gridExtra)
+library(RColorBrewer)
+library(showtext) # For fancy Google font in figures
+font_add_google(name = "Raleway", family = "Raleway", regular.wt = 400, bold.wt = 700) # Install font from Google Fonts
+
+# Load the predicted line means, as calculated by get_predicted_line_means
+predicted_line_means <- read.csv("data/derived/predicted_line_means.csv", stringsAsFactors = FALSE)
+```
+
+## Variance and covariance in line mean phenotypes
+Generally there is positive covariance between line means for different traits, and all 4 measures of fitness exhibit considerable phenotypic variance across lines.
+```{r message=FALSE, warning=FALSE, fig.showtext=TRUE, fig.height = 9, fig.width = 9}
+lims <- c(1.1*min(apply(predicted_line_means[,2:5], 2, min)), 
+          1.1*max(apply(predicted_line_means[,2:5], 2, max)))
+
+fix.title <- function(x){
+  x[x == "female.fitness.early" | x == "femalefitnessearly"] <- "Female early-life fitness"
+  x[x == "male.fitness.early" | x == "malefitnessearly"] <- "Male early-life fitness"
+  x[x == "female.fitness.late" | x == "femalefitnesslate"] <- "Female late-life fitness"
+  x[x == "male.fitness.late" | x == "malefitnesslate"] <- "Male late-life fitness"
+  x
+}
+
+make_figure_1 <- function(){
+
+  nice.plot <- function(df, v1, v2){
+    
+    formula <- as.formula(paste(v2, "~", v1))
+    model <- summary(lm(formula, data = df))
+    r2 <- format(model$r.squared %>% round(2), nsmall = 2)
+    slope <- format(model$coefficients[2,1] %>% round(2), nsmall = 2)
+    se <- format(model$coefficients[2,2] %>% round(2), nsmall = 2)
+    # print(model$coefficients[2,4]) # print p-value of the correlation
+    text1 <- paste("R^2 == ", r2, sep = "")
+    text2 <- paste("β = ", slope, " \u00B1 ", se, sep = "")
+    
+    pp <- df %>% 
+      ggplot(aes_string(x = v1, y = v2)) + 
+      annotate("text", x=min(lims)+0.1, y=max(lims), label = text1, parse = TRUE, hjust= 0) +
+      annotate("text", x=min(lims)+0.1, y=max(lims)-0.4, label = text2, hjust= 0) +
+      geom_point(alpha = 0.7) + 
+      stat_smooth(method = "lm", level = 0, colour = "tomato") + 
+      xlab(fix.title(v1)) + ylab(fix.title(v2)) + 
+      theme_classic() + 
+      theme(text = element_text(family = "Raleway")) +
+      scale_x_continuous(limits = lims) + 
+      scale_y_continuous(limits = lims)
+    
+    if(v1 == "male.fitness.early" & v2 == "female.fitness.early") cols <- c("lightblue", "pink")
+    if(v1 == "male.fitness.late" & v2 == "female.fitness.late")  cols <- c("steelblue", "deeppink2")
+    if(v1 == "male.fitness.early" & v2 == "male.fitness.late") cols <- c("lightblue", "steelblue")
+    if(v1 == "female.fitness.early" & v2 == "female.fitness.late") cols <- c("pink", "deeppink2")
+    
+    ggExtra::ggMarginal(pp, type = "histogram", bins = 15, xparams = list(fill = cols[1]), yparams = list(fill = cols[2]))
+  }
+  
+  p1 <- nice.plot(predicted_line_means, "male.fitness.early", "female.fitness.early")
+  p2 <- nice.plot(predicted_line_means, "male.fitness.late", "female.fitness.late")
+  p3 <- nice.plot(predicted_line_means, "male.fitness.early", "male.fitness.late")
+  p4 <- nice.plot(predicted_line_means, "female.fitness.early", "female.fitness.late")
+  full_plot <- grid.arrange(p1, p2, p3, p4)
+  
+  cairo_ps("figures/figure1.eps", height = 9, width = 9)
+  full_plot
+  invisible(dev.off())
+}
+make_figure_1()
+```
+<br></br>
+**Figure 1**: Correlations among estimated line means for the four fitness components. The line means were estimated from Bayesian mixed models that account for block effects, and the non-independence of our early- and late-life fitness measurements.
+
+
+## Interaction plot showing trait covariance across lines
+All possible types of lines were observed: some lines are uniformly bad, or uniformly good, or good in one sex or age class but bad in the other.
+```{r}
+make_figure_2 <- function(){
+  out.file <- "figures/figure2.eps"
+  
+  interaction.plot <- function(predicted_line_means, x1, x2, title, sex.or.age){
+    if(sex.or.age == "sex"){
+      x.labs <-  c("Female", "Male") 
+      cols <- c("red", "darkgrey", "blue")
+    } else {
+      x.labs <- c("Young", "Old")
+      cols <- c("green", "darkgrey", "purple")
+    }
+    
+    df <- predicted_line_means %>% select_(x1, x2) 
+    df$rank.x1 <- rank(df[,1]) / max(abs(rank(df[,1])))
+    df$rank.x2 <- rank(df[,2]) / max(abs(rank(df[,2])))
+    df %>% mutate(slope = rank.x1 - rank.x2,
+                  line = 1:length(rank.x1)) %>%
+      gather(key = sex_or_age, value = fitness, rank.x1, rank.x2) %>% 
+      mutate(fitness = fitness / max(fitness),
+             title = title) %>%  
+      ggplot(aes(x = sex_or_age, y = fitness, group = line, colour = slope)) + 
+      geom_line(size=0.8, alpha=.7) + 
+      scale_color_gradient2(low = cols[1], mid = cols[2], high = cols[3]) + 
+      scale_x_discrete(expand = c(0.1,0.1), labels = x.labs) + 
+      theme_classic(15) + 
+      theme(strip.background = element_blank(),
+            strip.text = element_text(hjust =0.1, face = "bold")) +
+      xlab(NULL) + ylab(NULL) + 
+      facet_wrap(~title) + 
+      theme(legend.position = "none")
+  }
+  
+  cairo_ps("figures/figure2.eps", height = 9, width = 9)
+  grid.arrange(
+    interaction.plot(predicted_line_means, "female.fitness.early", "male.fitness.early", "Early-life fitness", "sex"),
+    interaction.plot(predicted_line_means, "female.fitness.late", "male.fitness.late", "Late-life fitness", "sex"),
+    interaction.plot(predicted_line_means, "female.fitness.early", "female.fitness.late", "Females", "age"),
+    interaction.plot(predicted_line_means, "male.fitness.early", "male.fitness.late", "Males", "age"),
+    ncol = 2, left = "Fitness rank among the 115 lines (0 is worst, 1 is best)", bottom = "Sex or age category"
+  )
+  invisible(dev.off())
+}
+make_figure_2()
+```
+<br></br>
+**Figure 2**: The relative fitness ranks for each line, for four pairs of fitness traits. The y-axis was calculated by taking the adjusted line mean fitnesses, ranking them, and then dividing by the number of lines. The intensity and hue of the colour helps highlight genotypes that rank highly for one fitness component but not the other. 
+
+
+
+# Relating fitness data to genotype
+
+## Check for effects of wolbachia and inversions
+The Mackay lab have collected data on the Wolbachia infection status of each line, and recorded which chromosomal inversions each line carries. It is possible to statistically account for these variables when doing GWAS, but it makes the analysis more complex. Our fitness data are not correlated with the _Wolbachia_ or inversion data, and in light of this we elected not to include them as predictors when writing our GWAS functions below. Additional analyses (not shown) suggest that the results are essentially identical if we run the models with these predictors included. However, including these parameters as random effects slows down the Bayesian GWAS a lot (and it already takes months of CPU time), so we elected to leave them out.
+```{r message=FALSE, warning=FALSE}
+inv.data <- predicted_line_means %>% 
+  left_join(read.csv("data/input/inversion genotypes.csv", stringsAsFactors = FALSE) %>% 
+              mutate(line = paste("line_", line, sep = "")), by = "line") %>% 
+  left_join(read.csv("data/input/wolbachia.csv", stringsAsFactors = FALSE) %>% 
+              mutate(line = paste("line_", line, sep = "")), by = "line") %>% select(-line, -block)
+inv.data[inv.data == "homozygous"] <- NA
+inv.data[inv.data == "ST"] <- 0
+inv.data[inv.data == "INV"] <- 1
+inv.data[inv.data == "n"] <- 0
+inv.data[inv.data == "y"] <- 1
+for(i in 1:ncol(inv.data)) inv.data[,i] <- inv.data[,i] %>% as.numeric()
+inversion.cors <- cor(inv.data, use = "pairwise.complete.obs")
+heatmap(inversion.cors[!is.na(inversion.cors[,1]), !is.na(inversion.cors[,1])])
+```

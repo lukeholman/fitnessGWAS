@@ -1,0 +1,266 @@
+---
+title: "Tables summarising the GWAS results"
+output:
+  html_document: 
+    code_folding: hide 
+  html_notebook:
+    code_folding: hide 
+---
+
+```{r libraries, message=FALSE, warning=FALSE, results='hide'}
+library(dplyr)
+library(readr)
+library(kableExtra)
+library(tidyr)
+
+kable_table <- function(df) {
+  kable(df, "html") %>%
+  kable_styling() %>%
+  scroll_box(height = "300px")
+}
+
+db <- DBI::dbConnect(RSQLite::SQLite(), "data/derived/annotations.sqlite3")
+```
+
+## Load and clean the data
+Modify column names, reorder columns, filter based on the p-value, etc.
+```{r load_data, message=FALSE}
+# Significant results, from the four univariate linear mixed models run in GEMMA:
+univariate_lmm_results <- read_csv("data/derived/all_univariate_GEMMA_results.csv") %>% 
+  filter(p_wald < 1e-05) %>% 
+  inner_join(tbl(db, "variants") %>% select(-chr, -position) %>% collect(), by = "SNP") %>% 
+  rename(Fitness_component = parameter) %>% 
+  arrange(Fitness_component, p_wald) 
+
+univariate_lmm_results <- univariate_lmm_results %>%
+  left_join(tbl(db, "genes") %>% 
+              select(FBID, gene_name) %>% 
+              filter(FBID %in% univariate_lmm_results$FBID) %>% 
+              collect(), by = "FBID")
+
+univariate_lmm_results <- univariate_lmm_results[,c(1:10, 16, 11:15)]
+
+# Results of one multivariate linear mixed model run in GEMMA:
+multivariate_lmm_results <- read_tsv("data/derived/output/all_four_traits.assoc.txt") %>%
+  filter(p_wald < 1e-05) %>% 
+  inner_join(tbl(db, "variants") %>% select(-chr, -position) %>% collect(), by = "SNP") %>% 
+  arrange(p_wald) %>% 
+  select(-contains("Vbeta"))
+
+multivariate_lmm_results <- multivariate_lmm_results %>%
+  left_join(tbl(db, "genes") %>% 
+              select(FBID, gene_name) %>% 
+              filter(FBID %in% multivariate_lmm_results$FBID) %>% 
+              collect(), by = "FBID")
+
+multivariate_lmm_results <- multivariate_lmm_results[,c(1:8, 14, 9:13)]
+```
+
+
+## Results of univariate association tests {.tabset}
+
+### Female early-life fitness
+```{r}
+univariate_lmm_results %>%
+  filter(Fitness_component == "female_early") %>% select(-Fitness_component) %>%
+  kable_table()
+```
+
+### Female late-life fitness
+```{r}
+univariate_lmm_results %>%
+  filter(Fitness_component == "female_late") %>% select(-Fitness_component) %>%
+  kable_table()
+```
+
+### Male early-life fitness
+```{r}
+univariate_lmm_results %>%
+  filter(Fitness_component == "male_early") %>% select(-Fitness_component) %>%
+  kable_table()
+```
+
+### Male late-life fitness
+```{r}
+univariate_lmm_results %>%
+  filter(Fitness_component == "male_late") %>% select(-Fitness_component) %>%
+  kable_table()
+```
+
+
+## Results of multivariate association tests
+```{r message=FALSE}
+multivariate_lmm_results %>%
+  kable_table()
+
+multivariate_lmm_results %>%
+  mutate(
+    female_early = cell_spec(female_early, "html", color = ifelse(female_early < 0, "tomato", "darkgreen")),
+    female_late = cell_spec(female_late, "html", color = ifelse(female_late < 0, "tomato", "darkgreen")),
+    male_early = cell_spec(male_early, "html", color = ifelse(male_early < 0, "tomato", "darkgreen")),
+    male_late = cell_spec(male_late, "html", color = ifelse(male_late < 0, "tomato", "darkgreen"))
+  ) %>%
+  kable(format = "html", escape = F) %>%
+  kable_styling("striped") %>%
+  scroll_box(height = "300px")
+```
+
+
+
+## Results of SNP clumping analysis {.tabset}
+
+### Female early-life fitness
+```{r message=FALSE}
+read_tsv("data/derived/female_early_SNP_clumps.txt") %>%
+  kable_table()
+```
+
+### Female late-life fitness
+```{r message=FALSE}
+read_tsv("data/derived/female_late_SNP_clumps.txt") %>%
+  kable_table()
+```
+
+### Male early-life fitness
+```{r message=FALSE}
+read_tsv("data/derived/male_early_SNP_clumps.txt") %>%
+  kable_table()
+```
+
+### Male late-life fitness
+```{r message=FALSE}
+read_tsv("data/derived/male_late_SNP_clumps.txt") %>%
+  kable_table()
+```
+
+### All four traits
+```{r message=FALSE}
+read_tsv("data/derived/all_four_traits_SNP_clumps.txt") %>%
+  kable_table()
+```
+
+
+
+
+```{r message=FALSE}
+get_antagonism_scores <- function(lmm_results){
+  get_innocenti_morrow_index <- function(s1, s2) (s1 * s2) / sqrt((s1^2 + s2^2) / 2)
+  tibble(SNP = lmm_results$SNP,
+         early_SA = with(lmm_results, get_innocenti_morrow_index(female_early, male_early)),
+         late_SA = with(lmm_results, get_innocenti_morrow_index(female_late, male_late)),
+         female_age = with(lmm_results, get_innocenti_morrow_index(female_early, female_late)),
+         male_age = with(lmm_results, get_innocenti_morrow_index(male_early, male_late)))
+}
+
+uv_index_snps <- c(read_tsv("data/derived/female_early_SNP_clumps.txt")$index_SNP,
+                   read_tsv("data/derived/female_late_SNP_clumps.txt")$index_SNP,
+                   read_tsv("data/derived/male_late_SNP_clumps.txt")$index_SNP,
+                   read_tsv("data/derived/male_late_SNP_clumps.txt")$index_SNP) %>% unique()
+
+prepare_upset_data <- function(df, index_snps, cutoff){
+   df %>% 
+    mutate(female_early_neg = ifelse(female_early < -cutoff, 1, 0),
+           female_early_null = ifelse(female_early > -cutoff & female_early < cutoff, 1, 0),
+           female_early_pos =  ifelse(female_early > cutoff, 1, 0),
+           female_late_neg = ifelse(female_late < -cutoff, 1, 0),
+           female_late_null = ifelse(female_late > -cutoff & female_late < cutoff, 1, 0),
+           female_late_pos =  ifelse(female_late > cutoff, 1, 0),
+           
+           male_early_neg = ifelse(male_early < -cutoff, 1, 0),
+           male_early_null = ifelse(male_early > -cutoff & male_early < cutoff, 1, 0),
+           male_early_pos =  ifelse(male_early > cutoff, 1, 0),
+           male_late_neg = ifelse(male_late < -cutoff, 1, 0),
+           male_late_null = ifelse(male_late > -cutoff & male_late < cutoff, 1, 0),
+           male_late_pos =  ifelse(male_late > cutoff, 1, 0)
+    )
+}
+
+upset_uv <- (read_csv("data/derived/lmm_results_ashr.csv") %>% 
+    filter(SNP %in% uv_index_snps) %>%
+    arrange(parameter) %>%
+    group_by(SNP) %>%
+    summarise(female_early = posterior.estimate[1],
+              female_late = posterior.estimate[2],
+              male_early = posterior.estimate[3],
+              male_late = posterior.estimate[4]) %>% 
+  prepare_upset_data(uv_index_snps, cutoff = 0.1))[,-(1:5)]
+
+upset_mv <- (multivariate_lmm_results %>% 
+  prepare_upset_data(read_tsv("data/derived/all_four_traits_SNP_clumps.txt")$index_SNP, cutoff = 0.1))[,-(1:14)]
+
+
+# antagonism_scores_mv <- multivariate_lmm_results %>% 
+#   filter(SNP %in% read_tsv("data/derived/all_four_traits_SNP_clumps.txt")$index_SNP) %>%
+#   arrange(SNP) %>% get_antagonism_scores() 
+# 
+# antagonism_scores_uv %>% print(n = Inf)
+# antagonism_scores_mv %>% print(n = Inf)
+```
+
+```{r}
+library(VennDiagram)
+# upsetter with concordants....
+# mashr results more similar?
+make_venn <- function(){
+  
+}
+
+library(UpSetR)
+
+upset(as.data.frame(upset_uv), order.by = c("freq"), nsets = 12)
+upset(as.data.frame(upset_mv), order.by = c("freq"), nsets = 12)
+
+cutoff <- -0.1
+antagonism_scores_mv <- antagonism_scores_mv %>%
+  mutate(is_early_SC = as.numeric(early_SA > cutoff*-1),
+         is_late_SC = as.numeric(early_SA > cutoff*-1),
+         is_female_AC = as.numeric(early_SA > cutoff*-1),
+         is_male_AC = as.numeric(early_SA > cutoff*-1),
+         
+         is_early_SA = as.numeric(early_SA < cutoff),
+         is_late_SA = as.numeric(late_SA < cutoff),
+         is_female_age = as.numeric(female_age < cutoff),
+         is_male_age = as.numeric(male_age < cutoff))
+upset(as.data.frame(antagonism_scores_mv)[,6:13], order.by = c("freq"))
+
+venn.diagram(
+	x = list(
+		Early_SA = which(antagonism_scores$is_early_SA),
+		Late_SA = which(antagonism_scores$is_late_SA),
+		Female_age = which(antagonism_scores$is_female_age),
+		Male_age = which(antagonism_scores$is_male_age)),
+	imagetype = "tiff",
+	filename = "TEST_Venn.tiff") 
+
+venn.diagram(
+	x = list(
+		Early_SA = which(antagonism_scores$is_early_SA),
+		Late_SA = which(antagonism_scores$is_late_SA),
+		Female_age = which(antagonism_scores$is_female_age),
+		Male_age = which(antagonism_scores$is_male_age)),
+	imagetype = "tiff",
+	filename = "TEST_Venn.tiff") 
+```
+
+
+
+
+```{r}
+lmm_canonical <- read_rds("data/derived/lmm_canonical_mashr_results.rds")
+lmm_ED <- read_rds("data/derived/lmm_ED_mashr_results.rds")
+
+barplot(sort(get_estimated_pi(lmm_canonical), decreasing = TRUE), las = 2)
+barplot(sort(get_estimated_pi(lmm_ED), decreasing = TRUE), las = 2)
+
+
+(get_lfsr(lmm_canonical)[get_significant_results(lmm_canonical), ])
+
+print(get_pm(lmm_ED)[get_significant_results(lmm_ED), ] %>% as_tibble(), n = length(get_significant_results(lmm_ED)))
+
+get_pm(lmm_ED) %>% cor()
+
+get_log10bf(lmm_ED) %>% hist # Bayes factors for all the SNPs
+get_n_significant_conditions(lmm_ED) %>% table() # Number of significant traits per SNP (lfsr<0.05)
+get_pairwise_sharing(lmm_ED, factor = 0, lfsr_thresh = 0.05) # When restricting ourselves to cases where we know the sign of the effect with 95% certainty on both phenotypes, what proportion of effects affect each phenotype pair in the same direction?
+```
+

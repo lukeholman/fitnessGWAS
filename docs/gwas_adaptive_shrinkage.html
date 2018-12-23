@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>Correcting the GWAS results using multivariate adaptive shrinkage</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
+<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
+<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fitnessGWAS</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/workflowr">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Correcting the GWAS results using multivariate adaptive shrinkage</h1>
+
+</div>
+
+
+<p><strong>Last updated:</strong> 2018-10-04</p>
+<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
+<ul>
+<li>
+<p><details> <summary> <strong style="color:red;">✖</strong> <strong>R Markdown file:</strong> uncommitted changes </summary> The R Markdown file has unstaged changes. To know which version of the R Markdown file created these results, you’ll want to first commit it to the Git repo. If you’re still working on the analysis, you can ignore this warning. When you’re finished, you can run <code>wflow_publish</code> to commit the R Markdown file and build the HTML.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20180914)</code> </summary></p>
+<p>The command <code>set.seed(20180914)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> 450cb72 </summary></p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    analysis/.DS_Store
+    Ignored:    code/.DS_Store
+    Ignored:    data/.DS_Store
+    Ignored:    data/derived/.DS_Store
+    Ignored:    data/derived/output/.DS_Store
+    Ignored:    data/input/.DS_Store
+    Ignored:    figures/.DS_Store
+
+Untracked files:
+    Untracked:  .pversion
+    Untracked:  ExDeconDemo_c.log
+    Untracked:  ExDeconDemo_loglike.log
+    Untracked:  TEST_Venn.tiff
+    Untracked:  analysis/checking_mashr_results.Rmd
+    Untracked:  code/Drosophila_GWAS.Rmd
+    Untracked:  data/derived/.!25440!dgrp2_focal_lines.bed
+    Untracked:  data/derived/.pversion
+    Untracked:  data/derived/GRM.txt
+    Untracked:  data/derived/TWAS_result_females.csv
+    Untracked:  data/derived/TWAS_result_males.csv
+    Untracked:  data/derived/all_four_traits_SNP_clumps.txt
+    Untracked:  data/derived/all_univariate_GEMMA_results.csv
+    Untracked:  data/derived/annotations.sqlite3
+    Untracked:  data/derived/dgrp2_QC_all_lines.bed
+    Untracked:  data/derived/dgrp2_QC_all_lines.bim
+    Untracked:  data/derived/dgrp2_QC_all_lines.fam
+    Untracked:  data/derived/dgrp2_QC_all_lines.log
+    Untracked:  data/derived/dgrp2_QC_focal_lines.bed
+    Untracked:  data/derived/dgrp2_QC_focal_lines.bim
+    Untracked:  data/derived/dgrp2_QC_focal_lines.bk
+    Untracked:  data/derived/dgrp2_QC_focal_lines.fam
+    Untracked:  data/derived/dgrp2_QC_focal_lines.log
+    Untracked:  data/derived/dgrp2_QC_focal_lines.rds
+    Untracked:  data/derived/dgrp2_transcriptome_subset.bed
+    Untracked:  data/derived/dgrp2_transcriptome_subset.bim
+    Untracked:  data/derived/dgrp2_transcriptome_subset.fam
+    Untracked:  data/derived/dgrp2_transcriptome_subset.log
+    Untracked:  data/derived/female_early_SNP_clumps.txt
+    Untracked:  data/derived/female_late_SNP_clumps.txt
+    Untracked:  data/derived/lines_to_keep.txt
+    Untracked:  data/derived/lmm_ED_mashr_results.rds
+    Untracked:  data/derived/lmm_canonical_mashr_results.rds
+    Untracked:  data/derived/male_early_SNP_clumps.txt
+    Untracked:  data/derived/male_late_SNP_clumps.txt
+    Untracked:  data/derived/mashr_results_ED.rds
+    Untracked:  data/derived/mashr_results_canonical.rds
+    Untracked:  data/derived/output/.pversion
+    Untracked:  data/derived/output/GRM.cXX.txt
+    Untracked:  data/derived/output/GRM.log.txt
+    Untracked:  data/derived/output/GRM_transcriptome.cXX.txt
+    Untracked:  data/derived/output/GRM_transcriptome.log.txt
+    Untracked:  data/derived/output/all_four_traits.assoc.txt
+    Untracked:  data/derived/output/all_four_traits.log.txt
+    Untracked:  data/derived/output/allele_freq_count.assoc.txt
+    Untracked:  data/derived/output/allele_freq_count.log.txt
+    Untracked:  data/derived/output/eigen_decomp.eigenD.txt
+    Untracked:  data/derived/output/eigen_decomp.eigenU.txt
+    Untracked:  data/derived/output/eigen_decomp.log.txt
+    Untracked:  data/derived/output/eigen_decomp_transcriptome.eigenD.txt
+    Untracked:  data/derived/output/eigen_decomp_transcriptome.eigenU.txt
+    Untracked:  data/derived/output/eigen_decomp_transcriptome.log.txt
+    Untracked:  data/derived/plink.frq
+    Untracked:  data/input/.pversion
+    Untracked:  data/input/dgrp2.fam copy
+    Untracked:  data/input/dgrp2.fam.bak
+    Untracked:  data/input/huang_2015_tableS11_eQTL_females.csv
+    Untracked:  data/input/huang_2015_tableS12_eQTL_males.csv
+    Untracked:  data/input/huang_2015_tableS2_gene_expression.csv
+    Untracked:  data/input/huang_2015_tableS5_transcript_heritability.csv
+    Untracked:  dgrp2_clean.log
+    Untracked:  docs/figure/checking_mashr_results.Rmd/
+    Untracked:  gwas_adaptive_shrinkage.R
+
+Unstaged changes:
+    Modified:   analysis/GWAS_tables.Rmd
+    Modified:   analysis/TWAS.Rmd
+    Modified:   analysis/gwas_adaptive_shrinkage.Rmd
+    Modified:   analysis/index.Rmd
+    Modified:   analysis/perform_gwas.Rmd
+    Modified:   analysis/plotting_results.Rmd
+    Deleted:    data/derived/DGRP_SNP_genos.sqlite3
+    Deleted:    data/derived/gwas_db.sqlite3
+    Deleted:    data/derived/lm_results_ashr.csv
+    Modified:   data/derived/lmm_results_ashr.csv
+    Deleted:    data/derived/output/DGRP_GRM.cXX.txt
+    Deleted:    data/derived/output/DGRP_GRM.log.txt
+    Deleted:    data/derived/output/female_early_bslmm.bv.txt
+    Deleted:    data/derived/output/female_early_bslmm.gamma.txt
+    Deleted:    data/derived/output/female_early_bslmm.hyp.txt
+    Deleted:    data/derived/output/female_early_bslmm.log.txt
+    Deleted:    data/derived/output/female_early_bslmm.param.txt
+    Deleted:    data/derived/output/female_early_bslmm_preds.log.txt
+    Deleted:    data/derived/output/female_early_bslmm_preds.prdt.txt
+    Deleted:    data/derived/output/female_early_female_late.assoc.txt
+    Deleted:    data/derived/output/female_early_female_late.log.txt
+    Deleted:    data/derived/output/female_early_lm.assoc.txt
+    Deleted:    data/derived/output/female_early_lm.log.txt
+    Modified:   data/derived/output/female_early_lmm.assoc.txt
+    Modified:   data/derived/output/female_early_lmm.log.txt
+    Deleted:    data/derived/output/female_early_male_early.assoc.txt
+    Deleted:    data/derived/output/female_early_male_early.log.txt
+    Deleted:    data/derived/output/female_late_lm.assoc.txt
+    Deleted:    data/derived/output/female_late_lm.log.txt
+    Modified:   data/derived/output/female_late_lmm.assoc.txt
+    Modified:   data/derived/output/female_late_lmm.log.txt
+    Deleted:    data/derived/output/female_late_male_late.assoc.txt
+    Deleted:    data/derived/output/female_late_male_late.log.txt
+    Deleted:    data/derived/output/male_early_lm.assoc.txt
+    Deleted:    data/derived/output/male_early_lm.log.txt
+    Modified:   data/derived/output/male_early_lmm.assoc.txt
+    Modified:   data/derived/output/male_early_lmm.log.txt
+    Deleted:    data/derived/output/male_early_male_late.assoc.txt
+    Deleted:    data/derived/output/male_early_male_late.log.txt
+    Deleted:    data/derived/output/male_late_lm.assoc.txt
+    Deleted:    data/derived/output/male_late_lm.log.txt
+    Modified:   data/derived/output/male_late_lmm.assoc.txt
+    Modified:   data/derived/output/male_late_lmm.log.txt
+    Deleted:    data/derived/output/result.log.txt
+    Deleted:    data/derived/output/result.prdt.txt
+    Deleted:    data/derived/summed_interSNP_correlations.csv
+    Deleted:    data/derived/trimmed_DGRP.bed
+    Deleted:    data/derived/trimmed_DGRP.bim
+    Deleted:    data/derived/trimmed_DGRP.fam
+    Deleted:    data/derived/trimmed_DGRP.rds
+    Modified:   data/input/dgrp2.fam
+
+</code></pre>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
+</li>
+</ul>
+<details> <summary> <small><strong>Expand here to see past versions:</strong></small> </summary>
+<ul>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+File
+</th>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:left;">
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+450cb72
+</td>
+<td style="text-align:left;">
+Luke Holman
+</td>
+<td style="text-align:left;">
+2018-10-01
+</td>
+<td style="text-align:left;">
+More typos fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+00eaec2
+</td>
+<td style="text-align:left;">
+Luke Holman
+</td>
+<td style="text-align:left;">
+2018-10-01
+</td>
+<td style="text-align:left;">
+Fixed typos in mashr
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+3db7587
+</td>
+<td style="text-align:left;">
+Luke Holman
+</td>
+<td style="text-align:left;">
+2018-10-01
+</td>
+<td style="text-align:left;">
+1st October - lots more work
+</td>
+</tr>
+</tbody>
+</table>
+</ul>
+<p></details></p>
+<hr />
+<p>Note: <code>mashr</code> requires a large amount of RAM, and so to get this script to run on the full SNP dataset, I had to launch R from the Terminal by typing <code>env R_MAX_VSIZE=700Gb R</code>. I then used <code>knitr::purl</code> to generate an R script from this R Markdown document, and ran the script from the Terminal.</p>
+<pre class="r"><code>library(dplyr)
+library(ashr) # Also requires installation of RMosek, which needs a (free) licence. See the ashr Github page for help
+library(mashr) # NB: This has multiple dependencies and was tricky to install. Read the Github page, and good luck!
+library(readr)
+
+# launch this from Terminal with: env R_MAX_VSIZE=700Gb R 
+setwd(&quot;/Users/lholman/Rprojects/fitnessGWAS&quot;)</code></pre>
+<div id="load-the-results-of-the-four-univariate-gwas" class="section level2">
+<h2>Load the results of the four univariate GWAS</h2>
+<p>Load up the GWAS results, which were produced by using linear mixed models implemented in GEMMA, and arrange the data in a ‘wide’ format, where each row is one SNP, and the columns hold the estimates of <span class="math inline">\(\beta\)</span>, the standard error of <span class="math inline">\(\beta\)</span>, and the p-value for the GEMMA association tests on each of the four fitness traits.</p>
+<pre class="r"><code>load_gwas_results &lt;- function(fitness.component){
+  new_names &lt;- c(x = &quot;beta&quot;, y = &quot;se&quot;, z = &quot;p_wald&quot;)
+  names(new_names) &lt;- c(paste(&quot;beta_&quot;, fitness.component, sep = &quot;&quot;), 
+                        paste(&quot;SE_&quot;, fitness.component, sep = &quot;&quot;), 
+                        paste(&quot;pvalue_&quot;, fitness.component, sep = &quot;&quot;))
+  
+  paste(&quot;data/derived/output/&quot;, fitness.component, &quot;_lmm.assoc.txt&quot;, sep = &quot;&quot;) %&gt;%
+    read_tsv() %&gt;%
+    select(SNP, beta, se, p_wald) %&gt;%
+    rename(!!new_names)
+}
+all_univariate_lmm_results &lt;- load_gwas_results(&quot;female_early&quot;) %&gt;%
+  full_join(load_gwas_results(&quot;female_late&quot;), by = &quot;SNP&quot;) %&gt;%
+  full_join(load_gwas_results(&quot;male_early&quot;), by = &quot;SNP&quot;) %&gt;%
+  full_join(load_gwas_results(&quot;male_late&quot;), by = &quot;SNP&quot;) 
+
+print(paste(&quot;Number of SNPs that were analysed with GEMMA:&quot;, nrow(all_univariate_lmm_results)))</code></pre>
+</div>
+<div id="prune-snps-that-are-in-100-linkage-disequilibrium" class="section level2">
+<h2>Prune SNPs that are in 100% linkage disequilibrium</h2>
+<p>Because GEMMA is quick and easy to run, we did not bother working out how to edit PLINK files to identify SNPs that are in complete linkage disequilibrium with one another (and there is lots of short- and long-range LD in the dataset). However, it is easy to perform LD pruning at this stage, becuase we can take advantage of the fact that SNPs in perfect LD with each other will have identical estimates of <span class="math inline">\(|\beta|\)</span> and its standard error, for all four fitness traits. The following code groups together SNPs that have identical association test results, producing a data frame in which the number of rows is equal to the number of unique datasets (i.e. combinations of genotypes and phenotypes) that were statistically analysed by GEMMA.</p>
+<pre class="r"><code>all_univariate_lmm_results &lt;- all_univariate_lmm_results %&gt;%
+  group_by(paste(beta_female_early, beta_female_late, beta_male_early, beta_male_late, # Group loci with identical GWAS results (these are in 100% LD with each other)
+                 SE_female_early, SE_female_late, SE_male_early, SE_male_late)) %&gt;%
+  summarise(SNPs = paste0(SNP, collapse = &quot;, &quot;),    # If there are multiple SNPs, concatenate their names
+            beta_female_early = unique(beta_female_early), 
+            beta_female_late = unique(beta_female_late), 
+            beta_male_early = unique(beta_male_early), 
+            beta_male_late = unique(beta_male_late),
+            SE_female_early = unique(SE_female_early), 
+            SE_female_late = unique(SE_female_late), 
+            SE_male_early = unique(SE_male_early), 
+            SE_male_late = unique(SE_male_late),
+            pvalue_female_early = unique(pvalue_female_early), 
+            pvalue_female_late = unique(pvalue_female_late), 
+            pvalue_male_early = unique(pvalue_male_early), 
+            pvalue_male_late = unique(pvalue_male_late)) %&gt;%
+  ungroup() %&gt;% select(-starts_with(&quot;paste&quot;)) %&gt;% 
+  arrange(pvalue_female_early + pvalue_female_late + pvalue_male_early + pvalue_male_late) # For the following table, arrange from most to least significant</code></pre>
+<div id="inspect-the-first-50-rows-of-the-dataset-passed-to-mashr" class="section level3">
+<h3>Inspect the first 50 rows of the dataset passed to <code>mashr</code></h3>
+<p>Note that the SNPs that are in 100% linkage disequilibrium with each other tend to be right next to each other in the genome, which is reassuring (long-range LD is not too rife).</p>
+<pre class="r"><code>all_univariate_lmm_results %&gt;% head(50) %&gt;% kable_table()
+print(paste(&quot;Number of SNPs (or SNP groups that are in &lt;100% linkage disequilibrium with each other):&quot;, nrow(all_univariate_lmm_results)))</code></pre>
+</div>
+</div>
+<div id="run-multivariate-adaptive-shrinkage-using-mashr" class="section level2">
+<h2>Run multivariate adaptive shrinkage using <code>mashr</code></h2>
+<p>The following code runs the R package <code>mashr</code>, which attempts to infer the true estimates of the SNP effects (the <span class="math inline">\(\beta\)</span>s) based on the multivariate structure of the data. <code>mashr</code> accepts a matrix of <span class="math inline">\(\beta\)</span>s and their standard errors, and uses mixture models to infer the true <span class="math inline">\(\beta\)</span>s, the local false sign rate, the proportion of SNPs that belong to each mixture component, and other useful things. For more information on <code>mashr</code>, see the <a href="https://stephenslab.github.io/mashr/index.html">package website</a>, and the associated paper by Urbut, Wang, and Stephens (<a href="doi:10.1101/096552" class="uri">doi:10.1101/096552</a>).</p>
+<p>Importantly, there are two ways to run <code>mashr</code>: using “canonical” covariance matrices that are defined <em>a priori</em> by the user, or using covariance matrices that are selected by algorithmically investigating the structure of the data. The following code runs both approaches, since the results they provide contain complementary information.</p>
+<p>The canonical method is helpful for testing specific hypotheses about how the effect sizes are correlated across the multiple phenotypes being analysed; in our case, we are interested in identifying and counting SNPs with sex-specific and/or age-specific effects.</p>
+<p>By contrast, the data-driven approach uses the software <code>Extreme Deconvolution</code> to infer the true covariance structure in the data (suing a subset of the most accurately-measured effects), and then selects a number of covariance matrices that provide a good approximation of the true covariance structure in the data.</p>
+<p>The data-driven approach provides “shinked” estimates of <span class="math inline">\(\beta\)</span> that are likely to be closer to the true value than does the canonical approach, since the matrices used in the mixture model are expected to be more realistic. However the mixture proportions produced by the canonical approach are easier to interpret; e.g. we can use them to draw conclusions like “50% of SNPs have non-null effects” or “There are twice as many sexually-concordant SNPs as sexually-antagonistic SNPs”.</p>
+<p>In the ‘canonical’ analysis, we were <em>a priori</em> interested in determining the relative abundances of loci that affect fitness in the following ways:</p>
+<ul>
+<li>null (no effect on fitness)</li>
+<li>uniform (the fitness effect of the allele is identical on all sexes and age classes)</li>
+<li>same sign, variable magnitude (the fitness effect of the allele has the same sign for all sexes and age classes, though its magnitude is allowed to vary)</li>
+<li>sexually antagonistic (one allele is good for one sex and bad for the other, though this effect is the same in young and old individuals)</li>
+<li>age antagonistic (one allele is good for one age class and bad for the other, though this effect is the same in males and females)</li>
+<li>female-specific (there is an effect in females but no effect in males; same sign of effect across age classes)</li>
+<li>male-specific (there is an effect in males but no effect in females; same sign of effect across age classes)</li>
+<li>early-life-specific (the locus affects the fitness of young flies, but has no effect on old flies)</li>
+<li>late-life-specific (the locus affects the fitness of old flies, but has no effect on young flies)</li>
+<li>female-specific effect, with a variable effect across age classes</li>
+<li>male-specific effect, with an effect magnitude and/or sign that changes with age</li>
+<li>female-specific effect, with an effect magnitude and/or sign that changes with age</li>
+<li>early-life-specific effect, with an effect magnitude and/or sign that differs between sexes</li>
+<li>late-life-specific effect, with an effect magnitude and/or sign that differs between sexes</li>
+</ul>
+<p>These categories were chosen to be exhaustive: we reason that loci could conceiveably affect fitness in a manner that depends on age, sex, and the age-sex interaction.</p>
+<pre class="r"><code>run_mashr &lt;- function(beta_and_se, mashr_mode){
+  
+  mashr_setup &lt;- function(beta_and_se){
+    betas &lt;- beta_and_se %&gt;% select(starts_with(&quot;beta&quot;)) %&gt;% as.matrix()
+    SEs &lt;- beta_and_se %&gt;% select(starts_with(&quot;SE&quot;)) %&gt;% as.matrix()
+    rownames(betas) &lt;- beta_and_se$SNP
+    rownames(SEs) &lt;- beta_and_se$SNP
+    mash_set_data(betas, SEs)
+  }
+  
+  mash_data &lt;- mashr_setup(beta_and_se)
+  
+  # Setting mashr_mode == &quot;ED&quot; makes mashr choose the covariance matrices for us, using the
+  #  software Extreme Deconvolution. This software &quot;reconstructs the error-deconvolved or &#39;underlying&#39; 
+  # distribution function common to all samples, even when the individual data points are samples from different distributions&quot;
+  # Following the mashr vignette, we initialise the algorithm in ED using the principal components of the strongest effects in the dataset
+  # Reference for ED: https://arxiv.org/abs/0905.2979
+  if(mashr_mode == &quot;ED&quot;){
+    # Find the strongest effects in the data
+    m.1by1 &lt;- mash_1by1(mash_data) 
+    strong &lt;- get_significant_results(m.1by1, 0.2)   
+    # Obtain data-driven covariance matrices by running Extreme Deconvolution
+    U.pca &lt;- cov_pca(mash_data, npc = 4, subset = strong)
+    U &lt;- cov_ed(mash_data, U.pca, subset = strong)
+  }
+  
+  # Otherwise, we define the covariance matrices ourselves (a long list of a priori interesting matrices are checked)
+  if(mashr_mode == &quot;canonical&quot;){
+    make_SA_matrix &lt;- function(r) matrix(c(1,1,r,r,1,1,r,r,r,r,1,1,r,r,1,1), ncol=4)
+    make_age_antag_matrix &lt;- function(r) matrix(c(1,r,1,r,r,1,r,1,1,r,1,r,r,1,r,1), ncol=4)
+    make_sex_specific &lt;- function(mat, sex){
+      if(sex == &quot;F&quot;) {mat[, 3:4] &lt;- 0;  mat[3:4, ] &lt;- 0}
+      if(sex == &quot;M&quot;) {mat[, 1:2] &lt;- 0; mat[1:2, ] &lt;- 0}
+      mat
+    }
+    make_age_specific &lt;- function(mat, age){
+      if(age == &quot;early&quot;) {mat[, c(2,4)] &lt;- 0; mat[c(2,4), ] &lt;- 0}
+      if(age == &quot;late&quot;)  {mat[, c(1,3)] &lt;- 0; mat[c(1,3), ] &lt;- 0}
+      mat
+    }
+    
+    add_matrix &lt;- function(mat, mat_list, name){
+      mat_list[[length(mat_list) + 1]] &lt;- mat
+      names(mat_list)[length(mat_list)] &lt;- name
+      mat_list
+    }
+    id_matrix &lt;- matrix(1, ncol=4, nrow=4)
+    
+    # Get the mashr default canonical covariance matrices: this includes the ones 
+    # called &quot;null&quot;, &quot;uniform&quot;, and &quot;same sign&quot; in the list that precedes this code chunk
+    U &lt;- cov_canonical(mash_data)
+    
+    # And now our custom covariance matrices: 
+    
+    # Identical across ages, but sex-antagonistic
+    U &lt;- make_SA_matrix(-0.25) %&gt;% add_matrix(U, &quot;Sex_antag_0.25&quot;)   
+    U &lt;- make_SA_matrix(-0.5) %&gt;% add_matrix(U, &quot;Sex_antag_0.5&quot;)
+    U &lt;- make_SA_matrix(-0.75) %&gt;% add_matrix(U, &quot;Sex_antag_0.75&quot;)   
+    U &lt;- make_SA_matrix(-1) %&gt;% add_matrix(U, &quot;Sex_antag_1.0&quot;)       
+    
+    # Identical across sexes, but age-antagonistic
+    U &lt;- make_age_antag_matrix(-0.25) %&gt;% add_matrix(U, &quot;Age_antag_0.25&quot;)
+    U &lt;- make_age_antag_matrix(-0.5) %&gt;% add_matrix(U, &quot;Age_antag_0.5&quot;)
+    U &lt;- make_age_antag_matrix(-0.75) %&gt;% add_matrix(U, &quot;Age_antag_0.75&quot;)
+    U &lt;- make_age_antag_matrix(-1) %&gt;% add_matrix(U, &quot;Age_antag_1.0&quot;)
+    
+    # Sex-specific, identical effect in young and old
+    U &lt;- id_matrix %&gt;% make_sex_specific(&quot;F&quot;) %&gt;% add_matrix(U, &quot;Female_specific_1&quot;)
+    U &lt;- id_matrix %&gt;% make_sex_specific(&quot;M&quot;) %&gt;% add_matrix(U, &quot;Male_specific_1&quot;)
+    
+    # Age-specific, identical effect in males and females
+    U &lt;- id_matrix %&gt;% make_age_specific(&quot;early&quot;) %&gt;% add_matrix(U, &quot;Early_life_specific_1&quot;)
+    U &lt;- id_matrix %&gt;% make_age_specific(&quot;late&quot;)  %&gt;% add_matrix(U, &quot;Late_life_specific_1&quot;)
+    
+    # Positively correlated but variable effect across ages, and also sex-specific
+    U &lt;- make_age_antag_matrix(0.25) %&gt;% make_sex_specific(&quot;F&quot;) %&gt;% add_matrix(U, &quot;Female_specific_0.25&quot;)
+    U &lt;- make_age_antag_matrix(0.5) %&gt;% make_sex_specific(&quot;F&quot;) %&gt;% add_matrix(U, &quot;Female_specific_0.5&quot;)
+    U &lt;- make_age_antag_matrix(0.75) %&gt;% make_sex_specific(&quot;F&quot;) %&gt;% add_matrix(U, &quot;Female_specific_0.75&quot;)
+    U &lt;- make_age_antag_matrix(0.25) %&gt;% make_sex_specific(&quot;M&quot;) %&gt;% add_matrix(U, &quot;Male_specific_0.25&quot;)
+    U &lt;- make_age_antag_matrix(0.5) %&gt;% make_sex_specific(&quot;M&quot;) %&gt;% add_matrix(U, &quot;Male_specific_0.5&quot;)
+    U &lt;- make_age_antag_matrix(0.75) %&gt;% make_sex_specific(&quot;M&quot;) %&gt;% add_matrix(U, &quot;Male_specific_0.75&quot;)
+    
+    # Nwegatively correlated across ages, and also sex-specific
+    U &lt;- make_age_antag_matrix(-0.25) %&gt;% make_sex_specific(&quot;F&quot;) %&gt;% add_matrix(U, &quot;Female_specific_age_antag_0.25&quot;)
+    U &lt;- make_age_antag_matrix(-0.5) %&gt;% make_sex_specific(&quot;F&quot;) %&gt;% add_matrix(U, &quot;Female_specific_age_antag_0.5&quot;)
+    U &lt;- make_age_antag_matrix(-0.75) %&gt;% make_sex_specific(&quot;F&quot;) %&gt;% add_matrix(U, &quot;Female_specific_age_antag_0.75&quot;)
+    U &lt;- make_age_antag_matrix(-0.25) %&gt;% make_sex_specific(&quot;M&quot;) %&gt;% add_matrix(U, &quot;Male_specific_age_antag_0.25&quot;)
+    U &lt;- make_age_antag_matrix(-0.5) %&gt;% make_sex_specific(&quot;M&quot;) %&gt;% add_matrix(U, &quot;Male_specific_age_antag_0.5&quot;)
+    U &lt;- make_age_antag_matrix(-0.75) %&gt;% make_sex_specific(&quot;M&quot;) %&gt;% add_matrix(U, &quot;Male_specific_age_antag_0.75&quot;)
+    
+    # Positively correlated but variable effect across sexes, and also age-specific
+    U &lt;- make_SA_matrix(0.25) %&gt;% make_age_specific(&quot;early&quot;) %&gt;% add_matrix(U, &quot;Early_life_specific_0.25&quot;)
+    U &lt;- make_SA_matrix(0.5) %&gt;% make_age_specific(&quot;early&quot;) %&gt;% add_matrix(U, &quot;Early_life_specific_0.5&quot;)
+    U &lt;- make_SA_matrix(0.75) %&gt;% make_age_specific(&quot;early&quot;) %&gt;% add_matrix(U, &quot;Early_life_specific_0.75&quot;)
+    U &lt;- make_SA_matrix(0.25) %&gt;% make_age_specific(&quot;late&quot;) %&gt;% add_matrix(U, &quot;Late_life_specific_0.25&quot;)
+    U &lt;- make_SA_matrix(0.5) %&gt;% make_age_specific(&quot;late&quot;) %&gt;% add_matrix(U, &quot;Late_life_specific_0.5&quot;)
+    U &lt;- make_SA_matrix(0.75) %&gt;% make_age_specific(&quot;late&quot;) %&gt;% add_matrix(U, &quot;Late_life_specific_0.75&quot;)
+    
+    # Negatively correlated but variable effect across sexes, and also age-specific
+    U &lt;- make_SA_matrix(-0.25) %&gt;% make_age_specific(&quot;early&quot;) %&gt;% add_matrix(U, &quot;Early_life_antag_0.25&quot;)
+    U &lt;- make_SA_matrix(-0.5) %&gt;% make_age_specific(&quot;early&quot;) %&gt;% add_matrix(U, &quot;Early_life_antag_0.5&quot;)
+    U &lt;- make_SA_matrix(-0.75) %&gt;% make_age_specific(&quot;early&quot;) %&gt;% add_matrix(U, &quot;Early_life_antag_0.75&quot;)
+    U &lt;- make_SA_matrix(-0.25) %&gt;% make_age_specific(&quot;late&quot;) %&gt;% add_matrix(U, &quot;Late_life_antag_0.25&quot;)
+    U &lt;- make_SA_matrix(-0.5) %&gt;% make_age_specific(&quot;late&quot;) %&gt;% add_matrix(U, &quot;Late_life_antag_0.5&quot;)
+    U &lt;- make_SA_matrix(-0.75) %&gt;% make_age_specific(&quot;late&quot;) %&gt;% add_matrix(U, &quot;Late_life_antag_0.75&quot;)
+  }
+  
+  return(mash(data = mash_data, Ulist = U)) # Run mashr
+}
+
+# Reorder by SNP name, and save the neatened results from the univariate GEMMA (also needed to interpret the mashr results later)
+all_univariate_lmm_results &lt;- all_univariate_lmm_results %&gt;% arrange(SNPs)
+write_csv(all_univariate_lmm_results, path = &quot;data/derived/all_univariate_GEMMA_results.csv&quot;)
+data_for_mashr &lt;- all_univariate_lmm_results %&gt;% select(starts_with(&quot;beta&quot;), starts_with(&quot;SE&quot;))
+rm(all_univariate_lmm_results)
+
+mashr_results_canonical &lt;- run_mashr(data_for_mashr, mashr_mode = &quot;canonical&quot;)
+mashr_results_ED        &lt;- run_mashr(data_for_mashr, mashr_mode = &quot;ED&quot;)
+
+write_rds(mashr_results_canonical, path = &quot;data/derived/mashr_results_canonical.rds&quot;)
+write_rds(mashr_results_ED, path = &quot;data/derived/mashr_results_ED.rds&quot;)</code></pre>
+</div>
+<div id="add-the-mashr-results-to-the-database" class="section level2">
+<h2>Add the <code>mashr</code> results to the database</h2>
+<p>Here, we make a single large dataframe holding all of the ‘raw’ results from the univariate GEMMA analysis, and the corresponding “shrinked” results from <code>mashr</code> (for both the canonical and data-driven <code>mashr</code> analyses). Because it is so large, we add this sheet of results to the database, allowing memory-efficient searching, joins, etc.</p>
+<pre class="r"><code>all_univariate_lmm_results &lt;- read_csv(&quot;data/derived/all_univariate_GEMMA_results.csv&quot;) %&gt;% 
+  rename_at(vars(-SNPs), funs(str_c(., &quot;_raw&quot;)))
+mashr_results_canonical &lt;- read_rds(&quot;data/derived/mashr_results_canonical.rds&quot;)
+mashr_results_ED &lt;- read_rds(&quot;data/derived/mashr_results_ED.rds&quot;)
+
+
+canonical_estimates &lt;- get_pm(mashr_results_canonical) %&gt;% as_tibble() %&gt;% rename_all(~str_c(., &quot;_mashr_canonical&quot;))
+ED_estimates        &lt;- get_pm(mashr_results_ED) %&gt;% as_tibble() %&gt;% rename_all(~str_c(., &quot;_mashr_ED&quot;))
+
+lfsr_canonical &lt;- get_lfsr(mashr_results_canonical) %&gt;% as_tibble() %&gt;% rename_all(~str_replace_all(., &quot;beta&quot;, &quot;LFSR&quot;)) %&gt;% rename_all(~str_c(., &quot;_mashr_canonical&quot;))
+lfsr_ED &lt;- get_lfsr(mashr_results_ED) %&gt;% as_tibble() %&gt;% rename_all(~str_replace_all(., &quot;beta&quot;, &quot;LFSR&quot;)) %&gt;% rename_all(~str_c(., &quot;_mashr_ED&quot;))
+
+
+all_univariate_lmm_results &lt;- bind_cols(all_univariate_lmm_results, canonical_estimates, ED_estimates, lfsr_canonical, lfsr_ED)
+
+nested &lt;- all_univariate_lmm_results %&gt;% filter(str_detect(SNPs, &quot;, &quot;))
+nested &lt;- lapply(1:nrow(nested), function(i) data.frame(SNP = strsplit(nested$SNPs[i], split = &quot;, &quot;)[[1]],    
+                                                SNP_clump = nested$SNPs[i],
+                                                nested[i,] %&gt;% select(-SNPs), stringsAsFactors = FALSE)) %&gt;%
+  do.call(&quot;rbind&quot;, .) %&gt;% as_tibble()
+
+all_univariate_lmm_results &lt;- all_univariate_lmm_results %&gt;% 
+  filter(!str_detect(SNPs, &quot;, &quot;)) %&gt;%
+  rename(SNP_clump = SNPs) %&gt;% mutate(SNP = SNP_clump) %&gt;%
+  select(SNP, SNP_clump, everything()) %&gt;%
+  bind_rows(nested) %&gt;%
+  arrange(SNP)
+
+db$con %&gt;% db_drop_table(table = &quot;univariate_lmm_results&quot;)
+db %&gt;% copy_to(all_univariate_lmm_results,
+               &quot;univariate_lmm_results&quot;, temporary = FALSE,
+               indexes = list(&quot;SNP&quot;))</code></pre>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.5.1 (2018-07-02)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Running under: macOS High Sierra 10.13.6
+
+Matrix products: default
+BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_AU.UTF-8/en_AU.UTF-8/en_AU.UTF-8/C/en_AU.UTF-8/en_AU.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] readr_1.1.1  mashr_0.2-12 ashr_2.2-13  dplyr_0.7.6 
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.18      plyr_1.8.4        compiler_3.5.1   
+ [4] pillar_1.3.0      git2r_0.23.0      workflowr_1.1.1  
+ [7] bindr_0.1.1       R.methodsS3_1.7.1 R.utils_2.7.0    
+[10] iterators_1.0.10  tools_3.5.1       digest_0.6.15    
+[13] evaluate_0.11     tibble_1.4.2      lattice_0.20-35  
+[16] pkgconfig_2.0.1   rlang_0.2.2       Matrix_1.2-14    
+[19] foreach_1.4.4     yaml_2.2.0        parallel_3.5.1   
+[22] mvtnorm_1.0-8     bindrcpp_0.2.2    stringr_1.3.1    
+[25] knitr_1.20        hms_0.4.2         rprojroot_1.3-2  
+[28] grid_3.5.1        tidyselect_0.2.4  glue_1.3.0       
+[31] R6_2.2.2          rmarkdown_1.10    rmeta_3.0        
+[34] purrr_0.2.5       magrittr_1.5      whisker_0.3-2    
+[37] MASS_7.3-50       backports_1.1.2   codetools_0.2-15 
+[40] htmltools_0.3.6   assertthat_0.2.0  stringi_1.2.4    
+[43] pscl_1.5.2        doParallel_1.0.11 truncnorm_1.0-8  
+[46] SQUAREM_2017.10-1 crayon_1.3.4      R.oo_1.22.0      </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
+  analysis was created with
+  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.1.1
+</p>
+<hr>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

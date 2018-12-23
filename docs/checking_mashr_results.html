@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>GWAS for fitness in Drosophila</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
+<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
+<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fitnessGWAS</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/workflowr">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">GWAS for fitness in Drosophila</h1>
+
+</div>
+
+
+<p><strong>Last updated:</strong> 2018-10-04</p>
+<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
+<ul>
+<li>
+<p><details> <summary> <strong style="color:red;">✖</strong> <strong>R Markdown file:</strong> uncommitted changes </summary> The R Markdown is untracked by Git. To know which version of the R Markdown file created these results, you’ll want to first commit it to the Git repo. If you’re still working on the analysis, you can ignore this warning. When you’re finished, you can run <code>wflow_publish</code> to commit the R Markdown file and build the HTML.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20180914)</code> </summary></p>
+<p>The command <code>set.seed(20180914)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> 450cb72 </summary></p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    analysis/.DS_Store
+    Ignored:    code/.DS_Store
+    Ignored:    data/.DS_Store
+    Ignored:    data/derived/.DS_Store
+    Ignored:    data/derived/output/.DS_Store
+    Ignored:    data/input/.DS_Store
+    Ignored:    figures/.DS_Store
+
+Untracked files:
+    Untracked:  .pversion
+    Untracked:  ExDeconDemo_c.log
+    Untracked:  ExDeconDemo_loglike.log
+    Untracked:  TEST_Venn.tiff
+    Untracked:  analysis/checking_mashr_results.Rmd
+    Untracked:  code/Drosophila_GWAS.Rmd
+    Untracked:  data/derived/.!25440!dgrp2_focal_lines.bed
+    Untracked:  data/derived/.pversion
+    Untracked:  data/derived/GRM.txt
+    Untracked:  data/derived/TWAS_result_females.csv
+    Untracked:  data/derived/TWAS_result_males.csv
+    Untracked:  data/derived/all_four_traits_SNP_clumps.txt
+    Untracked:  data/derived/all_univariate_GEMMA_results.csv
+    Untracked:  data/derived/annotations.sqlite3
+    Untracked:  data/derived/dgrp2_QC_all_lines.bed
+    Untracked:  data/derived/dgrp2_QC_all_lines.bim
+    Untracked:  data/derived/dgrp2_QC_all_lines.fam
+    Untracked:  data/derived/dgrp2_QC_all_lines.log
+    Untracked:  data/derived/dgrp2_QC_focal_lines.bed
+    Untracked:  data/derived/dgrp2_QC_focal_lines.bim
+    Untracked:  data/derived/dgrp2_QC_focal_lines.bk
+    Untracked:  data/derived/dgrp2_QC_focal_lines.fam
+    Untracked:  data/derived/dgrp2_QC_focal_lines.log
+    Untracked:  data/derived/dgrp2_QC_focal_lines.rds
+    Untracked:  data/derived/dgrp2_transcriptome_subset.bed
+    Untracked:  data/derived/dgrp2_transcriptome_subset.bim
+    Untracked:  data/derived/dgrp2_transcriptome_subset.fam
+    Untracked:  data/derived/dgrp2_transcriptome_subset.log
+    Untracked:  data/derived/female_early_SNP_clumps.txt
+    Untracked:  data/derived/female_late_SNP_clumps.txt
+    Untracked:  data/derived/lines_to_keep.txt
+    Untracked:  data/derived/lmm_ED_mashr_results.rds
+    Untracked:  data/derived/lmm_canonical_mashr_results.rds
+    Untracked:  data/derived/male_early_SNP_clumps.txt
+    Untracked:  data/derived/male_late_SNP_clumps.txt
+    Untracked:  data/derived/mashr_results_ED.rds
+    Untracked:  data/derived/mashr_results_canonical.rds
+    Untracked:  data/derived/output/.pversion
+    Untracked:  data/derived/output/GRM.cXX.txt
+    Untracked:  data/derived/output/GRM.log.txt
+    Untracked:  data/derived/output/GRM_transcriptome.cXX.txt
+    Untracked:  data/derived/output/GRM_transcriptome.log.txt
+    Untracked:  data/derived/output/all_four_traits.assoc.txt
+    Untracked:  data/derived/output/all_four_traits.log.txt
+    Untracked:  data/derived/output/allele_freq_count.assoc.txt
+    Untracked:  data/derived/output/allele_freq_count.log.txt
+    Untracked:  data/derived/output/eigen_decomp.eigenD.txt
+    Untracked:  data/derived/output/eigen_decomp.eigenU.txt
+    Untracked:  data/derived/output/eigen_decomp.log.txt
+    Untracked:  data/derived/output/eigen_decomp_transcriptome.eigenD.txt
+    Untracked:  data/derived/output/eigen_decomp_transcriptome.eigenU.txt
+    Untracked:  data/derived/output/eigen_decomp_transcriptome.log.txt
+    Untracked:  data/derived/plink.frq
+    Untracked:  data/input/.pversion
+    Untracked:  data/input/dgrp2.fam copy
+    Untracked:  data/input/dgrp2.fam.bak
+    Untracked:  data/input/huang_2015_tableS11_eQTL_females.csv
+    Untracked:  data/input/huang_2015_tableS12_eQTL_males.csv
+    Untracked:  data/input/huang_2015_tableS2_gene_expression.csv
+    Untracked:  data/input/huang_2015_tableS5_transcript_heritability.csv
+    Untracked:  dgrp2_clean.log
+    Untracked:  gwas_adaptive_shrinkage.R
+
+Unstaged changes:
+    Modified:   analysis/GWAS_tables.Rmd
+    Modified:   analysis/TWAS.Rmd
+    Modified:   analysis/gwas_adaptive_shrinkage.Rmd
+    Modified:   analysis/index.Rmd
+    Modified:   analysis/perform_gwas.Rmd
+    Modified:   analysis/plotting_results.Rmd
+    Deleted:    data/derived/DGRP_SNP_genos.sqlite3
+    Deleted:    data/derived/gwas_db.sqlite3
+    Deleted:    data/derived/lm_results_ashr.csv
+    Modified:   data/derived/lmm_results_ashr.csv
+    Deleted:    data/derived/output/DGRP_GRM.cXX.txt
+    Deleted:    data/derived/output/DGRP_GRM.log.txt
+    Deleted:    data/derived/output/female_early_bslmm.bv.txt
+    Deleted:    data/derived/output/female_early_bslmm.gamma.txt
+    Deleted:    data/derived/output/female_early_bslmm.hyp.txt
+    Deleted:    data/derived/output/female_early_bslmm.log.txt
+    Deleted:    data/derived/output/female_early_bslmm.param.txt
+    Deleted:    data/derived/output/female_early_bslmm_preds.log.txt
+    Deleted:    data/derived/output/female_early_bslmm_preds.prdt.txt
+    Deleted:    data/derived/output/female_early_female_late.assoc.txt
+    Deleted:    data/derived/output/female_early_female_late.log.txt
+    Deleted:    data/derived/output/female_early_lm.assoc.txt
+    Deleted:    data/derived/output/female_early_lm.log.txt
+    Modified:   data/derived/output/female_early_lmm.assoc.txt
+    Modified:   data/derived/output/female_early_lmm.log.txt
+    Deleted:    data/derived/output/female_early_male_early.assoc.txt
+    Deleted:    data/derived/output/female_early_male_early.log.txt
+    Deleted:    data/derived/output/female_late_lm.assoc.txt
+    Deleted:    data/derived/output/female_late_lm.log.txt
+    Modified:   data/derived/output/female_late_lmm.assoc.txt
+    Modified:   data/derived/output/female_late_lmm.log.txt
+    Deleted:    data/derived/output/female_late_male_late.assoc.txt
+    Deleted:    data/derived/output/female_late_male_late.log.txt
+    Deleted:    data/derived/output/male_early_lm.assoc.txt
+    Deleted:    data/derived/output/male_early_lm.log.txt
+    Modified:   data/derived/output/male_early_lmm.assoc.txt
+    Modified:   data/derived/output/male_early_lmm.log.txt
+    Deleted:    data/derived/output/male_early_male_late.assoc.txt
+    Deleted:    data/derived/output/male_early_male_late.log.txt
+    Deleted:    data/derived/output/male_late_lm.assoc.txt
+    Deleted:    data/derived/output/male_late_lm.log.txt
+    Modified:   data/derived/output/male_late_lmm.assoc.txt
+    Modified:   data/derived/output/male_late_lmm.log.txt
+    Deleted:    data/derived/output/result.log.txt
+    Deleted:    data/derived/output/result.prdt.txt
+    Deleted:    data/derived/summed_interSNP_correlations.csv
+    Deleted:    data/derived/trimmed_DGRP.bed
+    Deleted:    data/derived/trimmed_DGRP.bim
+    Deleted:    data/derived/trimmed_DGRP.fam
+    Deleted:    data/derived/trimmed_DGRP.rds
+    Modified:   data/input/dgrp2.fam
+
+</code></pre>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
+</li>
+</ul>
+<hr />
+<pre class="r"><code>library(dplyr)
+library(readr)
+library(ggplot2)
+library(gridExtra)
+library(tidyr)
+
+db &lt;- DBI::dbConnect(RSQLite::SQLite(), &quot;data/derived/annotations.sqlite3&quot;)
+
+# Results for all 1,613,615 SNPs, even those that are in 100% LD with others (these are grouped up by the SNP_clump column)
+all_snps &lt;- tbl(db, &quot;univariate_lmm_results&quot;)
+
+# All SNPs and SNP groups that are in &lt;100% LD with one another (n = 1,201,969)
+SNP_clumps &lt;- all_snps %&gt;% select(-SNP) %&gt;% distinct() %&gt;% collect(n=Inf)</code></pre>
+<div id="inspecting-the-effect-of-adaptive-shrinkage-on-the-snp-effect-size-estimates" class="section level2">
+<h2>Inspecting the effect of adaptive shrinkage on the SNP effect size estimates</h2>
+<p>The plots reveal that the R package <code>mashr</code>, which implemented multivariate adaptive shrinkage, was effective at shrinking the effect size estimates towards zero. The amount of shrinkage applied was stronger when applying <code>mashr</code> using data-driven covariance matrices, as opposed to ‘canonical’ covariance matrices that were selected <em>a priori</em> by us.</p>
+<pre class="r"><code>hex_plot &lt;- function(x, y, xlab, ylab){
+    ggplot(SNP_clumps, aes_string(x, y)) + 
+    geom_abline(linetype = 2) + 
+    geom_vline(xintercept = 0, linetype = 3) +
+    geom_hline(yintercept = 0, linetype = 3) +
+    stat_binhex(bins = 200, colour = &quot;#FFFFFF00&quot;) + 
+    scale_fill_distiller(palette = &quot;Purples&quot;) + 
+    coord_cartesian(xlim = c(-1,1), ylim = c(-1,1)) + 
+    theme_minimal() + xlab(xlab) + ylab(ylab) +
+    theme(legend.position = &quot;none&quot;)
+}
+grid.arrange(
+  hex_plot(&quot;beta_female_early_raw&quot;, &quot;beta_female_early_mashr_canonical&quot;, &quot;Raw estimate of SNP effect size from GEMMA&quot;, &quot;Corrected estimate from mashr (canonical)&quot;),
+  hex_plot(&quot;beta_female_early_raw&quot;, &quot;beta_female_early_mashr_ED&quot;, &quot;Raw estimate of SNP effect size from GEMMA&quot;, &quot;Corrected estimate from mashr (data-driven)&quot;),
+  hex_plot(&quot;beta_female_early_mashr_canonical&quot;, &quot;beta_female_early_mashr_ED&quot;, &quot;Corrected estimate from mashr (canonical)&quot;, &quot;Corrected estimate from mashr (data-driven)&quot;), 
+  ncol = 3)</code></pre>
+<p><img src="figure/checking_mashr_results.Rmd/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="relationship-between-raw-p-values-and-the-local-false-sign-rate" class="section level2">
+<h2>Relationship between raw <span class="math inline">\(p\)</span>-values and the local false sign rate</h2>
+<p>The local false sign rate (defined as the probability that a SNP’s true effect is non-zero <em>and</em> has the same sign as the effect size estimate) was correlated with the raw p-value (as expected). Note that the false sign rate is sometime ‘more significant’ than the p-value; one likely reason for this is that the local false sign rate uses the information provided by the correlations among SNP effects on our four fitness traits, while the <span class="math inline">\(p\)</span>-value ignores this information. Another reason is that the local false sign rate was (noisily) estimated using a Markov chain, in a Bayesian model that incorporates priors, while the p-value is estimated by maximum likelihood and has comes from a frequentist model lacking priors.</p>
+<p>As for the effect sizes, the local false sign rates provided by the data-driven approach are almost always less significant than those provided by the canonical approach.</p>
+<pre class="r"><code>hex_plot2 &lt;- function(p, xlab, ylab){
+    p + 
+    geom_abline(linetype = 2) + 
+    stat_binhex(bins = 200, colour = &quot;#FFFFFF00&quot;) + 
+    scale_fill_distiller(palette = &quot;Blues&quot;) + 
+    scale_x_continuous(expand = c(0,0)) + scale_y_continuous(expand = c(0,0)) +
+    coord_cartesian(xlim = c(0, 8), ylim = c(0, 8)) + 
+    theme_minimal() + xlab(xlab) + ylab(ylab) +
+    theme(legend.position = &quot;none&quot;)
+}
+
+grid.arrange(
+  SNP_clumps %&gt;% ggplot(aes(-log10(pvalue_female_early_raw), -log10(LFSR_female_early_mashr_canonical))) %&gt;% hex_plot2(&quot;-log10 raw p-value from GEMMA&quot;, &quot;-log10 local false sign rate (canonical)&quot;),
+  SNP_clumps %&gt;% ggplot(aes(-log10(pvalue_female_early_raw), -log10(LFSR_female_early_mashr_ED))) %&gt;% hex_plot2(&quot;-log10 raw p-value from GEMMA&quot;, &quot;-log10 local false sign rate (data-driven)&quot;),
+  SNP_clumps %&gt;% ggplot(aes(-log10(LFSR_female_early_mashr_canonical), -log10(LFSR_female_early_mashr_ED))) %&gt;% hex_plot2(&quot;-log10 local false sign rate (canonical)&quot;, &quot;-log10 local false sign rate (data-driven)&quot;),
+  ncol = 3)</code></pre>
+<p><img src="figure/checking_mashr_results.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p>Based on these plots, we elected to focus on the results generated by the data-driven <code>mashr</code> analysis, as opposed to the canonical <code>mashr</code> analysis. This is more conservative, because the effect sizes and local false sign rates are more moderate in the data-driven analysis. Also, using the data-driven approach yields estimates that are independent of our prior expectations about the possible covariance structures that might exist in the data, and is therefore robust to the possibility that our expectations are wrong.</p>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.5.1 (2018-07-02)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Running under: macOS High Sierra 10.13.6
+
+Matrix products: default
+BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_AU.UTF-8/en_AU.UTF-8/en_AU.UTF-8/C/en_AU.UTF-8/en_AU.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] hexbin_1.27.2 tidyr_0.8.1   gridExtra_2.3 ggplot2_3.0.0 readr_1.1.1  
+[6] dplyr_0.7.6  
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.18       RColorBrewer_1.1-2 dbplyr_1.2.2      
+ [4] compiler_3.5.1     pillar_1.3.0       git2r_0.23.0      
+ [7] plyr_1.8.4         workflowr_1.1.1    bindr_0.1.1       
+[10] R.methodsS3_1.7.1  R.utils_2.7.0      tools_3.5.1       
+[13] bit_1.1-14         digest_0.6.15      lattice_0.20-35   
+[16] memoise_1.1.0      RSQLite_2.1.1      evaluate_0.11     
+[19] tibble_1.4.2       gtable_0.2.0       pkgconfig_2.0.1   
+[22] rlang_0.2.2        DBI_1.0.0          yaml_2.2.0        
+[25] bindrcpp_0.2.2     withr_2.1.2        stringr_1.3.1     
+[28] knitr_1.20         hms_0.4.2          bit64_0.9-7       
+[31] rprojroot_1.3-2    grid_3.5.1         tidyselect_0.2.4  
+[34] glue_1.3.0         R6_2.2.2           rmarkdown_1.10    
+[37] blob_1.1.1         purrr_0.2.5        magrittr_1.5      
+[40] whisker_0.3-2      backports_1.1.2    scales_1.0.0      
+[43] htmltools_0.3.6    assertthat_0.2.0   colorspace_1.3-2  
+[46] labeling_0.3       stringi_1.2.4      lazyeval_0.2.1    
+[49] munsell_0.5.0      crayon_1.3.4       R.oo_1.22.0       </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
+  analysis was created with
+  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.1.1
+</p>
+<hr>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

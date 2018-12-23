@@ -1,0 +1,268 @@
+---
+title: "Correcting the GWAS results using multivariate adaptive shrinkage"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+Note: `mashr` requires a large amount of RAM, and so to get this script to run on the full SNP dataset, I had to launch R from the Terminal by typing `env R_MAX_VSIZE=700Gb R`. I then used `knitr::purl` to generate an R script from this R Markdown document, and ran the script from the Terminal. 
+
+
+```{r message=FALSE, warning=FALSE, results="hide"}
+library(dplyr)
+library(ashr) # Also requires installation of RMosek, which needs a (free) licence. See the ashr Github page for help
+library(mashr) # NB: This has multiple dependencies and was tricky to install. Read the Github page, and good luck!
+library(readr)
+
+# launch this from Terminal with: env R_MAX_VSIZE=700Gb R 
+setwd("/Users/lholman/Rprojects/fitnessGWAS")
+```
+
+## Load the results of the four univariate GWAS
+
+Load up the GWAS results, which were produced by using linear mixed models implemented in GEMMA, and arrange the data in a 'wide' format, where each row is one SNP, and the columns hold the estimates of $\beta$, the standard error of $\beta$, and the p-value for the GEMMA association tests on each of the four fitness traits.
+
+```{r eval=FALSE}
+load_gwas_results <- function(fitness.component){
+  new_names <- c(x = "beta", y = "se", z = "p_wald")
+  names(new_names) <- c(paste("beta_", fitness.component, sep = ""), 
+                        paste("SE_", fitness.component, sep = ""), 
+                        paste("pvalue_", fitness.component, sep = ""))
+  
+  paste("data/derived/output/", fitness.component, "_lmm.assoc.txt", sep = "") %>%
+    read_tsv() %>%
+    select(SNP, beta, se, p_wald) %>%
+    rename(!!new_names)
+}
+all_univariate_lmm_results <- load_gwas_results("female_early") %>%
+  full_join(load_gwas_results("female_late"), by = "SNP") %>%
+  full_join(load_gwas_results("male_early"), by = "SNP") %>%
+  full_join(load_gwas_results("male_late"), by = "SNP") 
+```
+
+
+## Prune SNPs that are in 100% linkage disequilibrium
+
+Because GEMMA is quick and easy to run, we did not bother working out how to edit PLINK files to identify SNPs that are in complete linkage disequilibrium with one another (and there is lots of short- and long-range LD in the dataset). However, it is easy to perform LD pruning at this stage, becuase we can take advantage of the fact that SNPs in perfect LD with each other will have identical estimates of $|\beta|$ and its standard error, for all four fitness traits. The following code groups together SNPs that have identical association test results, producing a data frame in which the number of rows is equal to the number of unique datasets (i.e. combinations of genotypes and phenotypes) that were statistically analysed by GEMMA. 
+
+
+```{r eval=FALSE}
+all_univariate_lmm_results <- all_univariate_lmm_results %>%
+  group_by(paste(beta_female_early, beta_female_late, beta_male_early, beta_male_late, # Group loci with identical GWAS results (these are in 100% LD with each other)
+                 SE_female_early, SE_female_late, SE_male_early, SE_male_late)) %>%
+  summarise(SNPs = paste0(SNP, collapse = ", "),    # If there are multiple SNPs, concatenate their names
+            beta_female_early = unique(beta_female_early), 
+            beta_female_late = unique(beta_female_late), 
+            beta_male_early = unique(beta_male_early), 
+            beta_male_late = unique(beta_male_late),
+            SE_female_early = unique(SE_female_early), 
+            SE_female_late = unique(SE_female_late), 
+            SE_male_early = unique(SE_male_early), 
+            SE_male_late = unique(SE_male_late),
+            pvalue_female_early = unique(pvalue_female_early), 
+            pvalue_female_late = unique(pvalue_female_late), 
+            pvalue_male_early = unique(pvalue_male_early), 
+            pvalue_male_late = unique(pvalue_male_late)) %>%
+  ungroup() %>% select(-starts_with("paste")) 
+```
+
+
+
+## Run multivariate adaptive shrinkage using `mashr`
+
+The following code runs the R package `mashr`, which attempts to infer the true estimates of the SNP effects (the $\beta$s) based on the multivariate structure of the data. `mashr` accepts a matrix of $\beta$s and their standard errors, and uses mixture models to infer the true $\beta$s, the local false sign rate, the proportion of SNPs that belong to each mixture component, and other useful things. For more information on `mashr`, see the [package website](https://stephenslab.github.io/mashr/index.html), and the associated paper by Urbut, Wang, and Stephens (doi:10.1101/096552).
+
+Importantly, there are two ways to run `mashr`: using "canonical" covariance matrices that are defined _a priori_ by the user, or using covariance matrices that are selected by algorithmically investigating the structure of the data. The following code runs both approaches, since the results they provide contain complementary information.
+
+The canonical method is helpful for testing specific hypotheses about how the effect sizes are correlated across the multiple phenotypes being analysed; in our case, we are interested in identifying and counting SNPs with sex-specific and/or age-specific effects. 
+
+By contrast, the data-driven approach uses the software `Extreme Deconvolution` to infer the true covariance structure in the data (suing a subset of the most accurately-measured effects), and then selects a number of covariance matrices that provide a good approximation of the true covariance structure in the data. 
+
+The data-driven approach provides "shinked" estimates of $\beta$ that are likely to be closer to the true value than does the canonical approach, since the matrices used in the mixture model are expected to be more realistic. However the mixture proportions produced by the canonical approach are easier to interpret; e.g. we can use them to draw conclusions like "50% of SNPs have non-null effects" or "There are twice as many sexually-concordant SNPs as sexually-antagonistic SNPs".
+
+
+In the 'canonical' analysis, we were _a priori_ interested in determining the relative abundances of loci that affect fitness in the following ways:
+
+  - null (no effect on fitness)
+  - uniform (the fitness effect of the allele is identical on all sexes and age classes)
+  - same sign, variable magnitude (the fitness effect of the allele has the same sign for all sexes and age classes, though its magnitude is allowed to vary)
+  - sexually antagonistic (one allele is good for one sex and bad for the other, though this effect is the same in young and old individuals)
+  - age antagonistic (one allele is good for one age class and bad for the other, though this effect is the same in males and females)
+  - female-specific (there is an effect in females but no effect in males; same sign of effect across age classes)
+  - male-specific (there is an effect in males but no effect in females; same sign of effect across age classes)
+  - early-life-specific (the locus affects the fitness of young flies, but has no effect on old flies)
+  - late-life-specific (the locus affects the fitness of old flies, but has no effect on young flies)
+  - female-specific effect, with a variable effect across age classes
+  - male-specific effect, with an effect magnitude and/or sign that changes with age
+  - female-specific effect, with an effect magnitude and/or sign that changes with age
+  - early-life-specific effect, with an effect magnitude and/or sign that differs between sexes
+  - late-life-specific effect, with an effect magnitude and/or sign that differs between sexes
+
+These categories were chosen to be exhaustive: we reason that loci could conceiveably affect fitness in a manner that depends on age, sex, and the age-sex interaction.
+
+```{r eval=FALSE}
+run_mashr <- function(beta_and_se, mashr_mode, ED_p_cutoff = NULL){
+  
+  mashr_setup <- function(beta_and_se){
+    betas <- beta_and_se %>% select(starts_with("beta")) %>% as.matrix()
+    SEs <- beta_and_se %>% select(starts_with("SE")) %>% as.matrix()
+    rownames(betas) <- beta_and_se$SNP
+    rownames(SEs) <- beta_and_se$SNP
+    mash_set_data(betas, SEs)
+  }
+  
+  mash_data <- mashr_setup(beta_and_se)
+  
+  # Setting mashr_mode == "ED" makes mashr choose the covariance matrices for us, using the
+  #  software Extreme Deconvolution. This software "reconstructs the error-deconvolved or 'underlying' 
+  # distribution function common to all samples, even when the individual data points are samples from different distributions"
+  # Following the mashr vignette, we initialise the algorithm in ED using the principal components of the strongest effects in the dataset
+  # Reference for ED: https://arxiv.org/abs/0905.2979
+  if(mashr_mode == "ED"){
+    # Find the strongest effects in the data
+    m.1by1 <- mash_1by1(mash_data) 
+    strong <- get_significant_results(m.1by1, thresh = ED_p_cutoff)   
+    # Obtain data-driven covariance matrices by running Extreme Deconvolution
+    U.pca <- cov_pca(mash_data, npc = 4, subset = strong)
+    U <- cov_ed(mash_data, U.pca, subset = strong)
+  }
+  
+  # Otherwise, we define the covariance matrices ourselves (a long list of a priori interesting matrices are checked)
+  if(mashr_mode == "canonical"){
+    make_SA_matrix <- function(r) matrix(c(1,1,r,r,1,1,r,r,r,r,1,1,r,r,1,1), ncol=4)
+    make_age_antag_matrix <- function(r) matrix(c(1,r,1,r,r,1,r,1,1,r,1,r,r,1,r,1), ncol=4)
+    make_sex_specific <- function(mat, sex){
+      if(sex == "F") {mat[, 3:4] <- 0;  mat[3:4, ] <- 0}
+      if(sex == "M") {mat[, 1:2] <- 0; mat[1:2, ] <- 0}
+      mat
+    }
+    make_age_specific <- function(mat, age){
+      if(age == "early") {mat[, c(2,4)] <- 0; mat[c(2,4), ] <- 0}
+      if(age == "late")  {mat[, c(1,3)] <- 0; mat[c(1,3), ] <- 0}
+      mat
+    }
+    
+    add_matrix <- function(mat, mat_list, name){
+      mat_list[[length(mat_list) + 1]] <- mat
+      names(mat_list)[length(mat_list)] <- name
+      mat_list
+    }
+    id_matrix <- matrix(1, ncol=4, nrow=4)
+    
+    # Get the mashr default canonical covariance matrices: this includes the ones 
+    # called "null", "uniform", and "same sign" in the list that precedes this code chunk
+    U <- cov_canonical(mash_data)
+    
+    # And now our custom covariance matrices: 
+    
+    # Identical across ages, but sex-antagonistic
+    U <- make_SA_matrix(-0.25) %>% add_matrix(U, "Sex_antag_0.25")   
+    U <- make_SA_matrix(-0.5) %>% add_matrix(U, "Sex_antag_0.5")
+    U <- make_SA_matrix(-0.75) %>% add_matrix(U, "Sex_antag_0.75")   
+    U <- make_SA_matrix(-1) %>% add_matrix(U, "Sex_antag_1.0")       
+    
+    # Identical across sexes, but age-antagonistic
+    U <- make_age_antag_matrix(-0.25) %>% add_matrix(U, "Age_antag_0.25")
+    U <- make_age_antag_matrix(-0.5) %>% add_matrix(U, "Age_antag_0.5")
+    U <- make_age_antag_matrix(-0.75) %>% add_matrix(U, "Age_antag_0.75")
+    U <- make_age_antag_matrix(-1) %>% add_matrix(U, "Age_antag_1.0")
+    
+    # Sex-specific, identical effect in young and old
+    U <- id_matrix %>% make_sex_specific("F") %>% add_matrix(U, "Female_specific_1")
+    U <- id_matrix %>% make_sex_specific("M") %>% add_matrix(U, "Male_specific_1")
+    
+    # Age-specific, identical effect in males and females
+    U <- id_matrix %>% make_age_specific("early") %>% add_matrix(U, "Early_life_specific_1")
+    U <- id_matrix %>% make_age_specific("late")  %>% add_matrix(U, "Late_life_specific_1")
+    
+    # Positively correlated but variable effect across ages, and also sex-specific
+    U <- make_age_antag_matrix(0.25) %>% make_sex_specific("F") %>% add_matrix(U, "Female_specific_0.25")
+    U <- make_age_antag_matrix(0.5) %>% make_sex_specific("F") %>% add_matrix(U, "Female_specific_0.5")
+    U <- make_age_antag_matrix(0.75) %>% make_sex_specific("F") %>% add_matrix(U, "Female_specific_0.75")
+    U <- make_age_antag_matrix(0.25) %>% make_sex_specific("M") %>% add_matrix(U, "Male_specific_0.25")
+    U <- make_age_antag_matrix(0.5) %>% make_sex_specific("M") %>% add_matrix(U, "Male_specific_0.5")
+    U <- make_age_antag_matrix(0.75) %>% make_sex_specific("M") %>% add_matrix(U, "Male_specific_0.75")
+    
+    # Nwegatively correlated across ages, and also sex-specific
+    U <- make_age_antag_matrix(-0.25) %>% make_sex_specific("F") %>% add_matrix(U, "Female_specific_age_antag_0.25")
+    U <- make_age_antag_matrix(-0.5) %>% make_sex_specific("F") %>% add_matrix(U, "Female_specific_age_antag_0.5")
+    U <- make_age_antag_matrix(-0.75) %>% make_sex_specific("F") %>% add_matrix(U, "Female_specific_age_antag_0.75")
+    U <- make_age_antag_matrix(-0.25) %>% make_sex_specific("M") %>% add_matrix(U, "Male_specific_age_antag_0.25")
+    U <- make_age_antag_matrix(-0.5) %>% make_sex_specific("M") %>% add_matrix(U, "Male_specific_age_antag_0.5")
+    U <- make_age_antag_matrix(-0.75) %>% make_sex_specific("M") %>% add_matrix(U, "Male_specific_age_antag_0.75")
+    
+    # Positively correlated but variable effect across sexes, and also age-specific
+    U <- make_SA_matrix(0.25) %>% make_age_specific("early") %>% add_matrix(U, "Early_life_specific_0.25")
+    U <- make_SA_matrix(0.5) %>% make_age_specific("early") %>% add_matrix(U, "Early_life_specific_0.5")
+    U <- make_SA_matrix(0.75) %>% make_age_specific("early") %>% add_matrix(U, "Early_life_specific_0.75")
+    U <- make_SA_matrix(0.25) %>% make_age_specific("late") %>% add_matrix(U, "Late_life_specific_0.25")
+    U <- make_SA_matrix(0.5) %>% make_age_specific("late") %>% add_matrix(U, "Late_life_specific_0.5")
+    U <- make_SA_matrix(0.75) %>% make_age_specific("late") %>% add_matrix(U, "Late_life_specific_0.75")
+    
+    # Negatively correlated but variable effect across sexes, and also age-specific
+    U <- make_SA_matrix(-0.25) %>% make_age_specific("early") %>% add_matrix(U, "Early_life_antag_0.25")
+    U <- make_SA_matrix(-0.5) %>% make_age_specific("early") %>% add_matrix(U, "Early_life_antag_0.5")
+    U <- make_SA_matrix(-0.75) %>% make_age_specific("early") %>% add_matrix(U, "Early_life_antag_0.75")
+    U <- make_SA_matrix(-0.25) %>% make_age_specific("late") %>% add_matrix(U, "Late_life_antag_0.25")
+    U <- make_SA_matrix(-0.5) %>% make_age_specific("late") %>% add_matrix(U, "Late_life_antag_0.5")
+    U <- make_SA_matrix(-0.75) %>% make_age_specific("late") %>% add_matrix(U, "Late_life_antag_0.75")
+  }
+  
+  return(mash(data = mash_data, Ulist = U)) # Run mashr
+}
+
+# Reorder by SNP name, and save the neatened results from the univariate GEMMA (also needed to interpret the mashr results later)
+all_univariate_lmm_results <- all_univariate_lmm_results %>% arrange(SNPs)
+write_csv(all_univariate_lmm_results, path = "data/derived/all_univariate_GEMMA_results.csv")
+data_for_mashr <- all_univariate_lmm_results %>% select(starts_with("beta"), starts_with("SE"))
+rm(all_univariate_lmm_results)
+
+mashr_results_canonical <- run_mashr(data_for_mashr, mashr_mode = "canonical")
+mashr_results_ED        <- run_mashr(data_for_mashr, mashr_mode = "ED", ED_p_cutoff = 0.2)
+
+write_rds(mashr_results_canonical, path = "data/derived/mashr_results_canonical.rds")
+write_rds(mashr_results_ED, path = "data/derived/mashr_results_ED.rds")
+```
+
+
+
+## Add the `mashr` results to the database
+
+Here, we make a single large dataframe holding all of the 'raw' results from the univariate GEMMA analysis, and the corresponding "shrinked" results from `mashr` (for both the canonical and data-driven `mashr` analyses). Because it is so large, we add this sheet of results to the database, allowing memory-efficient searching, joins, etc. 
+
+```{r eval=FALSE}
+all_univariate_lmm_results <- read_csv("data/derived/all_univariate_GEMMA_results.csv") %>% 
+  rename_at(vars(-SNPs), funs(str_c(., "_raw")))
+mashr_results_canonical <- read_rds("data/derived/mashr_results_canonical.rds")
+mashr_results_ED <- read_rds("data/derived/mashr_results_ED.rds")
+
+
+canonical_estimates <- get_pm(mashr_results_canonical) %>% as_tibble() %>% rename_all(~str_c(., "_mashr_canonical"))
+ED_estimates        <- get_pm(mashr_results_ED) %>% as_tibble() %>% rename_all(~str_c(., "_mashr_ED"))
+
+lfsr_canonical <- get_lfsr(mashr_results_canonical) %>% as_tibble() %>% rename_all(~str_replace_all(., "beta", "LFSR")) %>% rename_all(~str_c(., "_mashr_canonical"))
+lfsr_ED <- get_lfsr(mashr_results_ED) %>% as_tibble() %>% rename_all(~str_replace_all(., "beta", "LFSR")) %>% rename_all(~str_c(., "_mashr_ED"))
+
+
+all_univariate_lmm_results <- bind_cols(all_univariate_lmm_results, canonical_estimates, ED_estimates, lfsr_canonical, lfsr_ED)
+
+nested <- all_univariate_lmm_results %>% filter(str_detect(SNPs, ", "))
+nested <- lapply(1:nrow(nested), function(i) data.frame(SNP = strsplit(nested$SNPs[i], split = ", ")[[1]],    
+                                                SNP_clump = nested$SNPs[i],
+                                                nested[i,] %>% select(-SNPs), stringsAsFactors = FALSE)) %>%
+  do.call("rbind", .) %>% as_tibble()
+
+all_univariate_lmm_results <- all_univariate_lmm_results %>% 
+  filter(!str_detect(SNPs, ", ")) %>%
+  rename(SNP_clump = SNPs) %>% mutate(SNP = SNP_clump) %>%
+  select(SNP, SNP_clump, everything()) %>%
+  bind_rows(nested) %>%
+  arrange(SNP)
+
+db$con %>% db_drop_table(table = "univariate_lmm_results")
+db %>% copy_to(all_univariate_lmm_results,
+               "univariate_lmm_results", temporary = FALSE,
+               indexes = list("SNP"))
+```
+
+

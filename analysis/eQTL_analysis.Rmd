@@ -1,0 +1,385 @@
+---
+title: "GWAS for fitness in Drosophila"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+```{r libraries, message=FALSE, warning=FALSE, results='hide'}
+library(plyr)
+library(dplyr)
+library(tibble)
+library(readr)
+library(glue)
+library(stringr)
+library(tidyr)
+library(future.apply)
+library(lme4)
+options(stringsAsFactors = FALSE)
+
+# Load the wolbachia infection status data from the DGRP website
+wolbachia <- read_csv("data/input/wolbachia.csv") %>% 
+  mutate(line = paste("line", line, sep = ""))
+
+# Load the chomosomal inversion data from the DGRP website
+# these are the 5 inversions that Huang et al. PNAS corrected for
+inversions <- read_csv("data/input/inversion genotypes.csv") %>%
+    mutate(line = paste("line", line, sep = "")) %>%
+    select(line, `In(2L)t`, `In(2R)NS`, `In(3R)P`, `In(3R)K`, `In(3R)Mo`) 
+```
+
+## Define helper functions
+```{r}
+# Helper to run shell commands
+run_command <- function(shell_command, wd = getwd(), path = ""){
+  calling_env <- parent.frame()
+  cat(system(glue("cd ", wd, path, "\n",shell_command, .envir = calling_env), intern = TRUE), sep = '\n')
+}
+
+# For loading the Huang et al microarray data
+load_expression_data <- function(sex){
+  
+  if(sex != "both"){
+    expression <- glue("data/input/dgrp.array.exp.{sex}.txt") %>% read_delim(delim = " ")
+    sample_names <- names(expression)[names(expression) != "gene"] %>% str_remove(":[12]") 
+    gene_names <- expression$gene
+    expression <- expression %>% select(-gene) %>% as.matrix() %>% t() 
+    rownames(expression) <- sample_names # rows are samples, columns are genes
+    colnames(expression) <- gene_names 
+    return(expression %>% as.data.frame() %>% tibble::rownames_to_column("line") %>% as_tibble() %>% mutate(line = str_remove_all(line, "[.]1")))
+  }
+  
+  females <- read_delim("data/input/dgrp.array.exp.female.txt", delim = " ")
+  names(females)[-1] <- paste("F_", names(females)[-1],sep="") #%>% str_remove(":[12]") 
+  females <- females %>% left_join(read_delim("data/input/dgrp.array.exp.male.txt", delim = " "), by = "gene")
+  sample_names <- names(females)[names(females) != "gene"] %>% str_remove(":[12]") 
+  gene_names <- females$gene
+  sex <- ifelse(str_detect(sample_names, "F_"), "female", "male")
+  line <- str_remove_all(sample_names, "F_")
+  females <- females %>% select(-gene) %>% t()
+  colnames(females) <- gene_names
+  list(
+    sampleIDs = tibble(sex, line),
+    expression = females
+  )
+}
+
+# Find the line means, and standardise the line mean expression levels to mean = 0, var = 1, separately for each sex
+# Quicker than the built-in scale() function? No as.numeric needed, anyway.
+quick_scale <- function(x) (x - .Internal(mean(x))) / sd(x)
+
+# Get transcript data for both sexes for specific transcript(s)
+get_transcript_data <- function(FBID){
+  if(FBID == "all") return(predicted_line_mean_expression)
+  predicted_line_mean_expression %>% select(line, starts_with(!!FBID))
+}
+
+# Edit the DGRP (all lines) fam file to add the 18,000 transcripts, for both sexes (so, add 36,000 extra columns) 
+replace_pheno_data <-function(FBID) {
+  focal <- read_delim("data/derived/dgrp2_QC_all_lines.fam", delim = " ", col_names = FALSE)[,1:5] %>%
+    left_join(get_transcript_data(FBID), by = c("X1" = "line")) 
+  
+  for(i in 6:ncol(focal)) focal[is.na(focal[,i]), i] <- -9 # Replace NA with -9, for PLINK
+  
+  write.table(focal, file = "data/derived/dgrp2_QC_all_lines.fam", 
+              col.names = FALSE, row.names = FALSE, 
+              quote = FALSE, sep = " ")
+}
+```
+
+
+
+## Load up the expression data 
+
+This microarray data from Huang et al. _PNAS_ was downloaded from the [DGRP website](http://dgrp2.gnets.ncsu.edu/data.html). Similarly to that study, we first estimated the line mean expression level for each transcript in each sex using a linear mixed model that corrects for the _Wolbachia_ infection and the first 10 principal components of the Genomic Relatedness Matrix. A notable difference is that we use a single model for both sexes, with line as a random intercept and sex as a random slope -- this allows the model to use the information contained in the inter-sex correlation when estimating the BLUPs for each line.
+
+```{r}
+bed <- "dgrp2_QC_all_lines -maf 0.05"
+  # GRM <- "-d ./output/eigen_decomp.eigenD.txt -u ./output/eigen_decomp.eigenU.txt"
+  
+if(!file.exists("data/derived/predicted_line_mean_expression.rds")){
+  expression_data <- load_expression_data("both")
+  expression_data <- as_tibble(cbind(expression_data[[1]], expression_data[[2]]))
+  expression_data$line <- gsub("_", "", expression_data$line) 
+  
+  # Calculate the centered GRM for the 185 lines with transcriptome data
+  run_command("gemma -bfile {bed} -gk 1 -o GRM_transcriptome", path = "/data/derived")
+  
+  # Perform decomposition of the GRM, and save its eigenvalues and eigenvectors
+  run_command("gemma -bfile {bed} -k ./output/GRM_transcriptome.cXX.txt -eigen -o eigen_decomp_transcriptome", path = "/data/derived")
+  
+  # Load the top 10 eigenvectors of the GRM
+  eigenvectors <- read_tsv("data/derived/output/eigen_decomp_transcriptome.eigenU.txt", col_names = FALSE) 
+  lines_in_fam <- read_tsv("data/derived/dgrp2_QC_all_lines.fam", col_names = FALSE) %>% # 185 lines with transcriptome data 
+    filter(!str_detect(X1, "0 0 2 -9 -9")) %>%
+    mutate(line = str_extract(X1, "line[:digit:]+")) %>% select(line)
+  eigenvectors <- eigenvectors[, (ncol(eigenvectors) - 9):ncol(eigenvectors)]
+  names(eigenvectors) <- paste("PC", 10:1, sep = "")
+  eigenvectors <- bind_cols(lines_in_fam, eigenvectors)
+  
+  # Set up the chromosomal inversion and Wolbachia covariate data 
+  inversions <- inversions %>%
+    rename(Inv_1 = `In(2L)t`,
+           Inv_2 = `In(2R)NS`,
+           Inv_3 = `In(3R)P`,
+           Inv_4 = `In(3R)K`,
+           Inv_5 = `In(3R)Mo`)
+  wolbachia <- wolbachia %>%
+    mutate(wolbachia = as.numeric(ifelse(wolbachia == "y", 1, 0))) 
+  
+
+  # Bind the expression data to the 10 PCs, inversion, and wolbachia data
+  expression_data <- expression_data %>%
+    left_join(eigenvectors, by = "line") %>%
+    left_join(inversions, by = "line") %>%
+    left_join(wolbachia, by = "line")
+
+  # Using parallelisation, fit a linear mixed model with lme4 package, and use it to estimate 
+  # line mean expression level for each sex, controlling for the PCs and wolbachia infection status
+  # This calculates BLUPs for the expression data, as in Huang et al., prior to GWAS to find the eQTLs
+  focal_cols <- which(substr(names(expression_data), 1, 4) %in% c("FBgn", "XLOC"))
+  jobs <- split(focal_cols, ceiling(seq_along(focal_cols) / 2400))
+  
+  predict_expression <- function(j){ 
+    transcript <- names(expression_data)[j]
+    form <- as.formula(paste(transcript, "~ sex + wolbachia + PC1 + PC2 + PC3 + PC4 + PC5 + PC6 + PC7 + PC8 + PC9 + PC10 + Inv_1 + Inv_2 + Inv_3 + Inv_4 + Inv_5 + (sex | line)"))
+    model <- lmer(form, data = expression_data)
+    new <- expand.grid(sex = c("female", "male"), # Model and predict expression for uninfected line with 'average' multilocus genotype
+                       line = unique(expression_data$line),
+                       wolbachia = 0, 
+                       PC1 = 0, PC2 = 0, PC3 = 0, PC4 = 0, PC5 = 0, 
+                       PC6 = 0, PC7 = 0, PC8 = 0, PC9 = 0, PC10 = 0, 
+                       Inv_1 = "ST", Inv_2 = "ST", Inv_3 = "ST", Inv_4 = "ST", Inv_5 = "ST",
+                       stringsAsFactors = FALSE)
+    predicted_expression <- data.frame(new, expr = predict(model, newdata = new)) %>% 
+      select(line, sex, expr) %>%
+      spread(sex, expr)
+    names(predicted_expression)[2:3] <- c(paste(transcript, "female", sep = "_"),
+                                          paste(transcript, "male",   sep = "_"))
+    return(predicted_expression[, 2:3])
+  }
+  
+  plan("multicore")
+  predicted_line_mean_expression <- future_lapply(jobs, function(job_chunk) {
+    results <- vector(length(job_chunk), mode = "list")
+    for(i in 1:length(job_chunk)) {
+      results[[i]] <- predict_expression(job_chunk[i])
+    }
+    do.call("cbind", results)
+  }) %>% do.call("cbind", .) 
+  
+  # Fix the names (screwed up by future_lapply?)
+  names(predicted_line_mean_expression) <- substr(names(predicted_line_mean_expression), 3, nchar(names(predicted_line_mean_expression)))
+  
+  # Scale all the transcript line means have mean 0, variance 1, and add the line names
+  predicted_line_mean_expression <- bind_cols(line = unique(expression_data$line), 
+                                              predicted_line_mean_expression %>% mutate_all(quick_scale))
+  
+  # Save it
+  write_rds(predicted_line_mean_expression, "data/derived/predicted_line_mean_expression.rds")
+} else { # if already done, just load the file
+  predicted_line_mean_expression <- read_rds("data/derived/predicted_line_mean_expression.rds")
+}
+```
+
+
+
+## Set up for running the eQTL linear model GWAS
+
+### Identify clumps of SNPs in perfect LD
+Here, we identify SNPs that are in <100% linkage disequilibrium with each other, since it's a waste of time to test these separately, as the estimates and p-values would be identical. This is necessary because it takes a long time to test every SNP on all 36k male and female transcripts.
+```{r}
+
+if(!file.exists("data/derived/SNP_clumps_eQTL_analysis.txt")){
+
+  # Make a fam file with all the 36,000+ gene expression traits (that's 18k per sex)
+  replace_pheno_data("all")
+  
+
+  # Do a quick test run. This is used to find clumps of SNPs that are in perfect LD with each other without using 
+  # methods that look at the actual genotype data (which are slower unless coded quite cleverly)
+  run_command("gemma -bfile {bed} -lm 1 -n 1 -o eQTL_test", path = "/data/derived")
+  
+  # Sort by p, and rename the SNP column
+  read_tsv("data/derived/output/eQTL_test.assoc.txt") %>% 
+    arrange(p_wald) %>% rename(SNP = rs) %>% write_tsv("data/derived/output/eQTL_test.assoc.txt")
+  
+  # Make a list of index SNPs that are in <100% LD with each other, 
+  # and a list mapping index SNPs to others from their 100% LD clumps
+  eQTL_SNP_clumps <- read_tsv("data/derived/output/eQTL_test.assoc.txt") %>% 
+    mutate(result = paste(af, beta, se, p_wald, sep = " ")) %>%
+    select(SNP, result) %>%
+    group_by(result) %>% 
+    summarise(index_SNP = SNP[sample(n(), 1)], # index SNP is randomly selected from all the SNPs in perfect LD
+              SNPs = paste0(SNP, collapse = "; ")) %>% 
+    ungroup() %>% select(index_SNP, SNPs) %>% arrange(index_SNP)
+  
+  # There are 1010253 total SNPs that pass quality control
+  # This is reduced to 989922 SNPs if we only run one test for each clump of SNPs in 100% LD (so, we can igore 20331)
+  eQTL_SNP_clumps %>% 
+    write_tsv("data/derived/SNP_clumps_eQTL_analysis.txt")
+  
+  rm(eQTL_SNP_clumps) # tidy up
+  unlink(c("data/derived/output/eQTL_test.assoc.txt",
+            "data/derived/output/eQTL_test.log.txt"))
+}
+```
+
+### Use PLINK to prepare stripped-down BIM/BED/FAM files
+
+Here, we remove all the SNPs other than the 'index SNPs' of each of the SNP slumps that are in 100% LD. This reduced the number of SNPS from 1010253 (i.e. those with MAF of at least 5%) to 989922, saving us running 36,000 * 20331 = 731,916,000 unnecessary linear models! 
+```{r}
+plink  <- bigsnpr::download_plink()
+
+read_tsv("data/derived/SNP_clumps_eQTL_analysis.txt") %>% select(index_SNP) %>%
+  write_tsv("data/derived/SNPs_to_keep.txt", col_names = FALSE)
+
+run_command(glue("plink --bfile dgrp2_QC_all_lines",
+                 " --extract SNPs_to_keep.txt", 
+                 " --geno 0.1 --maf 0.05 --allow-no-sex",
+                 " --make-bed --out {bed}"), path = "/data/derived/")
+
+unlink(c("data/derived/dgrp2_QC_all_lines.bim~", 
+         "data/derived/dgrp2_QC_all_lines.bed~", 
+         "data/derived/dgrp2_QC_all_lines.fam~", 
+         "data/derived/dgrp2_QC_all_lines.log", 
+         "data/derived/SNPs_to_keep.txt"))
+```
+
+## Run the eQTL analysis
+This took about 4.5 days on my 8-core Mac. 
+```{r}
+# Make a fam file with all the 36,000+ gene expression traits (that's 18k per sex)
+replace_pheno_data("all")
+
+# Get vector of all the 36k sex-specific transcripts that were measured in Huang et al's microarrays
+FBID_by_sex <- names(predicted_line_mean_expression %>% select(-line))
+FBIDs <- gsub("_female", "", FBID_by_sex)
+FBIDs <- gsub("_male", "", FBIDs)
+FBIDs <- sort(unique(FBIDs))
+rm(predicted_line_mean_expression)
+
+# Function to look for eQTLs using a simple linear model in GEMMA
+# The LMM version takes too long, and initial trials showed the results were very similar.
+# So, we decided to adjsut the expression data for genome-wide genetic variation and Wolbachia, and then analyse that with a simple LM
+do_one_eQTL <- function(FBID){
+  
+  # Find index of the focal sex-specific transcript column, e.g. "FBgn10005_female"
+  FBID_female <- paste(FBID, "_female", sep = "")
+  FBID_male <- paste(FBID, "_male", sep = "")
+  female_index <- which(FBID_by_sex == FBID_female) 
+  male_index   <- which(FBID_by_sex == FBID_male)   
+  
+  # Run the male and female models in GEMMA. It's a set of simple linear models, on the corrected expression data
+  run_command("gemma -bfile dgrp2_QC_all_lines -lm 1 -n {female_index} -o eQTL_{FBID}_females", path = "/data/derived")
+  run_command("gemma -bfile dgrp2_QC_all_lines -lm 1 -n {male_index}   -o eQTL_{FBID}_males",   path = "/data/derived")
+  
+  results_females <- read_tsv(glue("data/derived/output/eQTL_{FBID}_females.assoc.txt")) %>% 
+    mutate(FBID = paste(FBID, "_females", sep = "")) 
+  results_males <- read_tsv(glue("data/derived/output/eQTL_{FBID}_males.assoc.txt")) %>% 
+    mutate(FBID = paste(FBID, "_males", sep = ""))  
+  
+  # Get a vector of eQTLs that are significant in one or both sexes with p < 0.000001
+  hits_either_sex <- unique(c(
+    results_females %>% filter(p_wald < 0.000001) %>% pull(rs), 
+    results_males   %>% filter(p_wald < 0.000001) %>% pull(rs)))
+  
+  # Now get the results for these eQTLs, including the result for the non-significant sex
+  hits <- bind_rows(results_females, results_males) %>% 
+    select(rs, FBID, beta, se, p_wald) %>%
+    filter(rs %in% hits_either_sex) 
+  
+  saveRDS(hits, file = glue("data/derived/eQTL_results/{FBID}.rds"))
+  
+  try(unlink(glue("data/derived/output/eQTL_{FBID}_females.log.txt"))) # delete the GEMMA files
+  try(unlink(glue("data/derived/output/eQTL_{FBID}_females.assoc.txt")))
+  try(unlink(glue("data/derived/output/eQTL_{FBID}_males.log.txt")))
+  try(unlink(glue("data/derived/output/eQTL_{FBID}_males.assoc.txt")))
+  return(NULL)
+}
+
+# system.time(do_one_eQTL("FBgn0000015")) # TEST
+
+
+# Run the eQTL GWAS, one transcript at a time, across multiple cores, and save the results
+# The result file has about XXXX hits at p < 0.000001; presumably many are false positives, though some have p < 1e-50 etc. 
+plan("multicore")
+future_lapply(FBIDs, do_one_eQTL) %>%
+  do.call("rbind", .) 
+
+list.files("data/derived/eQTL_results") %>% 
+  lapply(readRDS) %>% do.call("rbind", .) %>%
+  rename(eQTL = rs) %>%
+  write_csv("data/derived/eQTL_results/all_eQTL_results.csv")
+```
+
+
+
+```{r}
+xx <- read_csv("data/derived/luke_eQTL_results.csv") %>% 
+  arrange(p_wald) %>% filter(-log10(p_wald) > 8) 
+
+xx <- xx %>%
+  mutate(sex = ifelse(str_detect(FBID, "female"), "Female", "Male"),
+         transcript = str_extract(xx$FBID, "FBgn[:digit:]+"),
+         transcript = ifelse(is.na(transcript), str_extract(xx$FBID, "XLOC_[:digit:]+"), transcript)) 
+library(ggplot2)
+
+# Very imbalanced for females! I think: major alleles that depress female expression are rare... could be opposite way
+xx %>% ggplot(aes(beta)) + geom_histogram(bins = 100) + facet_wrap(~sex)
+
+xx <- xx %>%
+  group_by(eQTL, sex) %>%
+  summarise(mean_beta = mean(beta),
+            FBID = FBID[1]) %>%
+  mutate(chromosome = gsub("_", "", (substr(eQTL, 1, 2))),
+         FBID = str_remove_all(FBID, "_female"),
+         FBID = str_remove_all(FBID, "_male"),
+         position = as.numeric(map_chr(strsplit(eQTL, split = "_"), ~ .x[2]))) 
+
+xx %>%
+  ggplot(aes(sex, mean_beta, group = eQTL)) + 
+  geom_line(alpha = 0.1) + 
+  facet_wrap(~chromosome)
+
+xx %>%
+  ggplot(aes(position, mean_beta, group = 1)) + 
+  geom_line() +
+  facet_wrap(chromosome~sex, ncol = 2, scales = "free_x")
+
+xx %>%
+  spread(sex, mean_beta) %>%
+  filter(!is.na(Female) & !is.na(Male)) %>% 
+  mutate(mean_sex = (Female + Male) / 2) %>%
+  ggplot(aes(position, mean_sex, group = 1)) + 
+  geom_line() +
+  facet_wrap(~chromosome, ncol = 2, scales = "free_x")
+
+xx %>%
+  spread(sex, mean_beta) %>%
+  filter(!is.na(Female) & !is.na(Male)) %>%
+  filter((Female - 0.5) > Male) %>%
+  left_join(tbl(db, "variants") %>% select(SNP, site.class, MAF) %>%
+              collect(), by = c("eQTL" = "SNP")) %>%
+  left_join(tbl(db, "genes") %>% select(FBID, gene_name) %>% collect(), by = "FBID") %>% print(n=Inf)
+
+  
+
+```
+
+
+<!-- # Snipped code for running LMM version. Takes too long to do all transcripts this way! -->
+
+
+<!-- # Remove eigen vectors + values for which the eigenvalue is close to zero, and save the modified file -->
+<!-- # values <- read_tsv("data/derived/output/eigen_decomp_transcriptome.eigenD.txt", col_names = "eigenvalue")$eigenvalue -->
+<!-- # vectors <- read_tsv("data/derived/output/eigen_decomp_transcriptome.eigenU.txt", col_names = FALSE) -->
+<!-- #  -->
+<!-- # n_eigenvectors <- 10 -->
+<!-- # vectors <- vectors[, (ncol(vectors)-n_eigenvectors+1):ncol(vectors)] -->
+<!-- # values <- values %>% tail(10) -->
+<!-- # write_tsv(vectors, path = "data/derived/output/eigen_decomp_transcriptome.eigenU.txt", col_names = FALSE) -->
+<!-- # write_tsv(data.frame(value = values), path = "data/derived/output/eigen_decomp_transcriptome.eigenD.txt", col_names = FALSE) -->
+
+<!-- # Define the paths to the eigenvalues and eigenvectors -->
+<!-- # GRM <- "-d ./output/eigen_decomp_transcriptome.eigenD.txt -u ./output/eigen_decomp_transcriptome.eigenU.txt" -->

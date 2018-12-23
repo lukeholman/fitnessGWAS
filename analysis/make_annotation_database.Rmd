@@ -1,0 +1,104 @@
+---
+title: "Making a database of variant and gene annotations"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+```{r message=FALSE, warning=FALSE, results="hide"}
+library(dplyr)
+library(stringr)
+library(future.apply)
+library(org.Dm.eg.db) # install via source("https://bioconductor.org/biocLite.R"); biocLite("org.Dm.eg.db")
+options(future.globals.maxSize = 2000 * 1024 ^ 2, 
+        stringsAsFactors = FALSE)
+plan("multicore")
+
+# Helper function to split a vector into chunks 
+chunker <- function(x, max_chunk_size) split(x, ceiling(seq_along(x) / max_chunk_size))
+```
+
+## Get the annotations for each DGRP variant
+
+The following function temporarily loads the >1GB annotation file provided on the DGRP website at [http://dgrp2.gnets.ncsu.edu/data/website/dgrp.fb557.annot.txt](http://dgrp2.gnets.ncsu.edu/data/website/dgrp.fb557.annot.txt). We then extract the following variables for each variant, and save them in a SQLite database for memory-efficient searching inside R:
+
+ - The Flybase ID(s), if the variant is within or close to one or more genes
+ - The site class of the variant (e.g. intron, 5'-UTR...)
+ - The distance-to-gene in nucleotides (for UPSTREAM and DOWNSTREAM variants only)
+
+
+```{r}
+get_variant_annotations <- function(){
+  
+  # Load up the big annotation file, get pertinent info. It's stored in some sort of text string format
+  annot <- read.table("data/input/dgrp.fb557.annot.txt", header = FALSE, stringsAsFactors = FALSE)
+  
+  get.info <- function(rows){
+    lapply(rows, function(row){
+      site.class.field <- strsplit(annot$V3[row], split = "]")[[1]][1]
+      num.genes <- str_count(site.class.field, ";") + 1
+      output <- cbind(rep(annot$V1[row], num.genes), 
+                      do.call("rbind", lapply(strsplit(site.class.field, split = ";")[[1]], 
+                                              function(x) strsplit(x, split = "[|]")[[1]])))
+      if(ncol(output) == 5) return(output[,c(1,2,4,5)]) # only return SNPs that have some annotation. Don't get the gene symbol
+      else return(NULL)
+    }) %>% do.call("rbind", .)
+  }
+  
+  variant.details <- future_lapply(chunker(1:nrow(annot), max_chunk_size = 10000), get.info) %>% 
+    do.call("rbind", .) %>% as.data.frame()
+  
+  names(variant.details) <- c("SNP", "FBID", "site.class", "distance.to.gene")
+  variant.details$FBID <- unlist(str_extract_all(variant.details$FBID, "FBgn[:digit:]+")) # clean up text strings for Flybase ID
+  variant.details %>%
+    dplyr::filter(site.class != "FBgn0003638") %>% # NB this is a bug in the DGRP's annotation file
+    mutate(chr = str_remove_all(substr(id, 1, 2), "_")) # get chromosome now for faster sorting later
+}
+```
+
+## Get the annotations for each _Drosophila_ gene
+
+The following function gets the annotations for the all the genes covered by DGRP variants, from the org.Dm.eg.db database object from Bioconductor. I don't like the interface to those objects (it messes up dplyr), so I save the info as a second table in the SQLite database.
+
+```{r}
+get_gene_annotations <- function(FBIDs_to_get){
+  con <- dbconn(org.Dm.eg.db)
+   tbl(con, "genes") %>%
+    left_join(tbl(con, "flybase"), by = "_id") %>%
+    left_join(tbl(con, "gene_info"), by = "_id") %>% 
+    dplyr::select(flybase_id, gene_name, symbol, gene_id) %>%
+    dplyr::rename(FBID = flybase_id, gene_symbol = symbol, entrez_id = gene_id) %>%
+    dplyr::filter(FBID %in% FBIDs_to_get) %>%
+    collect(n = Inf)
+}
+```
+
+## Create the SQLite database and add the two tables of annotations
+
+```{r}
+if(file.exists("data/derived/annotations.sqlite3")) unlink("data/derived/annotations.sqlite3")
+
+db <- src_sqlite("data/derived/annotations.sqlite3", create = TRUE)
+
+db %>% copy_to(get_variant_annotations(), 
+               "variants", temporary = FALSE, 
+               indexes = list("SNP", "FBID", "chr", "site.class")) 
+
+db %>% copy_to(get_gene_annotations(db %>% tbl("variants") %>% pull(FBID)), 
+               "genes", temporary = FALSE)
+```
+
+### View the table of variant annotations
+
+This table is expanded upon a little in the script `perform_gwas.Rmd`, which also adds the minor allele frequencies, the alleles that were treated as the reference and alternate, etc. 
+```{r}
+db %>% tbl("variants")
+```
+
+### View the table of gene annotations
+```{r}
+db %>% tbl("genes")
+```
+
+
+

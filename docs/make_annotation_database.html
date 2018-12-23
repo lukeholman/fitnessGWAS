@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>GWAS for fitness in Drosophila</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
+<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
+<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fitnessGWAS</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/workflowr">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">GWAS for fitness in Drosophila</h1>
+
+</div>
+
+
+<p><strong>Last updated:</strong> 2018-09-17</p>
+<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
+<ul>
+<li>
+<p><details> <summary> <strong style="color:red;">✖</strong> <strong>R Markdown file:</strong> uncommitted changes </summary> The R Markdown is untracked by Git. To know which version of the R Markdown file created these results, you’ll want to first commit it to the Git repo. If you’re still working on the analysis, you can ignore this warning. When you’re finished, you can run <code>wflow_publish</code> to commit the R Markdown file and build the HTML.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20180914)</code> </summary></p>
+<p>The command <code>set.seed(20180914)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> 449a929 </summary></p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    analysis/.DS_Store
+    Ignored:    code/.DS_Store
+    Ignored:    data/.DS_Store
+    Ignored:    data/derived/.DS_Store
+    Ignored:    data/derived/output/.DS_Store
+    Ignored:    data/input/.DS_Store
+    Ignored:    figures/.DS_Store
+
+Untracked files:
+    Untracked:  analysis/make_annotation_database.Rmd
+    Untracked:  analysis/plotting_results.Rmd
+    Untracked:  code/Drosophila_GWAS.Rmd
+    Untracked:  data/derived/annotations.sqlite3
+    Untracked:  data/derived/output/male_late_lm,.assoc.txt
+    Untracked:  data/derived/output/male_late_lm,.log.txt
+    Untracked:  data/derived/trimmed_DGRP.bk
+
+Unstaged changes:
+    Modified:   analysis/get_predicted_line_means.Rmd
+    Modified:   analysis/index.Rmd
+    Modified:   analysis/perform_gwas.Rmd
+    Modified:   analysis/plot_line_means.Rmd
+    Modified:   data/derived/output/DGRP_GRM.log.txt
+    Modified:   data/derived/output/female_early_bslmm.bv.txt
+    Modified:   data/derived/output/female_early_bslmm.gamma.txt
+    Modified:   data/derived/output/female_early_bslmm.hyp.txt
+    Modified:   data/derived/output/female_early_bslmm.log.txt
+    Modified:   data/derived/output/female_early_bslmm.param.txt
+    Modified:   data/derived/output/female_early_female_late.log.txt
+    Modified:   data/derived/output/female_early_lm.log.txt
+    Modified:   data/derived/output/female_early_lmm.log.txt
+    Modified:   data/derived/output/female_early_male_early.log.txt
+    Modified:   data/derived/output/female_late_lm.log.txt
+    Modified:   data/derived/output/female_late_lmm.log.txt
+    Modified:   data/derived/output/female_late_male_late.log.txt
+    Modified:   data/derived/output/male_early_lm.log.txt
+    Modified:   data/derived/output/male_early_lmm.log.txt
+    Modified:   data/derived/output/male_early_male_late.log.txt
+    Modified:   data/derived/output/male_late_lm.log.txt
+    Modified:   data/derived/output/male_late_lmm.log.txt
+    Modified:   figures/figure1.eps
+    Modified:   figures/figure2.eps
+
+</code></pre>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
+</li>
+</ul>
+<hr />
+<pre class="r"><code>library(dplyr)
+library(stringr)
+library(future.apply)
+library(org.Dm.eg.db) # install via source(&quot;https://bioconductor.org/biocLite.R&quot;); biocLite(&quot;org.Dm.eg.db&quot;)
+options(future.globals.maxSize = 2000 * 1024 ^ 2, 
+        stringsAsFactors = FALSE)
+plan(&quot;multicore&quot;)
+
+# Helper function to split a vector into chunks 
+chunker &lt;- function(x, max_chunk_size) split(x, ceiling(seq_along(x) / max_chunk_size))</code></pre>
+<div id="get-the-annotations-for-each-dgrp-variant" class="section level2">
+<h2>Get the annotations for each DGRP variant</h2>
+<p>The following function temporarily loads the &gt;1GB annotation file provided on the DGRP website at <a href="http://dgrp2.gnets.ncsu.edu/data/website/dgrp.fb557.annot.txt" class="uri">http://dgrp2.gnets.ncsu.edu/data/website/dgrp.fb557.annot.txt</a>. We then extract the following variables for each variant, and save them in a SQLite database for memory-efficient searching inside R:</p>
+<ul>
+<li>The Flybase ID(s), if the variant is within or close to a gene</li>
+<li>The site class of the variant (e.g. intron, 5’-UTR…)</li>
+<li>The distance-to-gene in nucleotides (for UPSTREAM and DOWNSTREAM variants only)</li>
+</ul>
+<pre class="r"><code>get_variant_annotations &lt;- function(){
+  
+  # Load up the big annotation file, get pertinent info. It&#39;s stored in some sort of text string format
+  annot &lt;- read.table(&quot;data/input/dgrp.fb557.annot.txt&quot;, header = FALSE, stringsAsFactors = FALSE)
+  
+  get.info &lt;- function(rows){
+    lapply(rows, function(row){
+      site.class.field &lt;- strsplit(annot$V3[row], split = &quot;]&quot;)[[1]][1]
+      num.genes &lt;- str_count(site.class.field, &quot;;&quot;) + 1
+      output &lt;- cbind(rep(annot$V1[row], num.genes), 
+                      do.call(&quot;rbind&quot;, lapply(strsplit(site.class.field, split = &quot;;&quot;)[[1]], 
+                                              function(x) strsplit(x, split = &quot;[|]&quot;)[[1]])))
+      if(ncol(output) == 5) return(output[,c(1,2,4,5)]) # only return SNPs that have some annotation. Don&#39;t get the gene symbol
+      else return(NULL)
+    }) %&gt;% do.call(&quot;rbind&quot;, .)
+  }
+  
+  variant.details &lt;- future_lapply(chunker(1:nrow(annot), max_chunk_size = 10000), get.info) %&gt;% 
+    do.call(&quot;rbind&quot;, .) %&gt;% as.data.frame()
+  
+  names(variant.details) &lt;- c(&quot;id&quot;, &quot;FBID&quot;, &quot;site.class&quot;, &quot;distance.to.gene&quot;)
+  variant.details$FBID &lt;- unlist(str_extract_all(variant.details$FBID, &quot;FBgn[:digit:]+&quot;)) # clean up text strings for Flybase ID
+  variant.details %&gt;%
+    dplyr::filter(site.class != &quot;FBgn0003638&quot;) %&gt;% # NB this is a bug in the DGRP&#39;s annotation file
+    mutate(chr = str_remove_all(substr(id, 1, 2), &quot;_&quot;)) # get chromosome now for faster sorting later
+}</code></pre>
+</div>
+<div id="get-the-annotations-for-each-drosophila-gene" class="section level2">
+<h2>Get the annotations for each <em>Drosophila</em> gene</h2>
+<p>The following function gets the annotations for the all the genes covered by DGRP variants, from the org.Dm.eg.db database object from Bioconductor. I don’t like the interface to those objects (it messes up dplyr), so I save the info as a second table in the SQLite database.</p>
+<pre class="r"><code>get_gene_annotations &lt;- function(FBIDs_to_get){
+  con &lt;- dbconn(org.Dm.eg.db)
+   tbl(con, &quot;genes&quot;) %&gt;%
+    left_join(tbl(con, &quot;flybase&quot;), by = &quot;_id&quot;) %&gt;%
+    left_join(tbl(con, &quot;gene_info&quot;), by = &quot;_id&quot;) %&gt;% 
+    dplyr::select(flybase_id, gene_name, symbol, gene_id) %&gt;%
+    dplyr::rename(FBID = flybase_id, gene_symbol = symbol, entrez_id = gene_id) %&gt;%
+    dplyr::filter(FBID %in% FBIDs_to_get) %&gt;%
+    collect(n = Inf)
+}</code></pre>
+</div>
+<div id="create-the-sqlite-database-and-add-the-two-tables-of-annotations" class="section level2">
+<h2>Create the SQLite database and add the two tables of annotations</h2>
+<pre class="r"><code>if(file.exists(&quot;data/derived/annotations.sqlite3&quot;)) unlink(&quot;data/derived/annotations.sqlite3&quot;)
+
+db &lt;- src_sqlite(&quot;data/derived/annotations.sqlite3&quot;, create = TRUE)
+
+db %&gt;% copy_to(get_variant_annotations(), 
+               &quot;variants&quot;, temporary = FALSE, 
+               indexes = list(&quot;id&quot;, &quot;FBID&quot;, &quot;chr&quot;, &quot;site.class&quot;)) 
+
+db %&gt;% copy_to(get_gene_annotations(db %&gt;% tbl(&quot;variants&quot;) %&gt;% pull(FBID)), 
+               &quot;genes&quot;, temporary = FALSE)</code></pre>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.5.1 (2018-07-02)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Running under: macOS Sierra 10.12.6
+
+Matrix products: default
+BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_AU.UTF-8/en_AU.UTF-8/en_AU.UTF-8/C/en_AU.UTF-8/en_AU.UTF-8
+
+attached base packages:
+[1] parallel  stats4    stats     graphics  grDevices utils     datasets 
+[8] methods   base     
+
+other attached packages:
+ [1] bindrcpp_0.2.2       org.Dm.eg.db_3.6.0   AnnotationDbi_1.42.1
+ [4] IRanges_2.14.10      S4Vectors_0.18.3     Biobase_2.40.0      
+ [7] BiocGenerics_0.26.0  future.apply_1.0.1   future_1.9.0        
+[10] stringr_1.3.1        dplyr_0.7.6         
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.18      dbplyr_1.2.2      compiler_3.5.1   
+ [4] pillar_1.3.0      git2r_0.23.0      workflowr_1.1.1  
+ [7] bindr_0.1.1       R.methodsS3_1.7.1 R.utils_2.7.0    
+[10] tools_3.5.1       bit_1.1-14        digest_0.6.15    
+[13] memoise_1.1.0     RSQLite_2.1.1     evaluate_0.11    
+[16] tibble_1.4.2      pkgconfig_2.0.1   rlang_0.2.1      
+[19] DBI_1.0.0         yaml_2.2.0        knitr_1.20       
+[22] globals_0.12.2    bit64_0.9-7       rprojroot_1.3-2  
+[25] tidyselect_0.2.4  glue_1.3.0        listenv_0.7.0    
+[28] R6_2.2.2          rmarkdown_1.10    blob_1.1.1       
+[31] purrr_0.2.5       magrittr_1.5      whisker_0.3-2    
+[34] backports_1.1.2   codetools_0.2-15  htmltools_0.3.6  
+[37] assertthat_0.2.0  stringi_1.2.4     crayon_1.3.4     
+[40] R.oo_1.22.0      </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
+  analysis was created with
+  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.1.1
+</p>
+<hr>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

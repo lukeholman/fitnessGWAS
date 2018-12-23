@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>GWAS for fitness in Drosophila</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
+<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
+<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fitnessGWAS</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/workflowr">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">GWAS for fitness in Drosophila</h1>
+
+</div>
+
+
+<p><strong>Last updated:</strong> 2018-09-16</p>
+<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
+<ul>
+<li>
+<p><details> <summary> <strong style="color:red;">✖</strong> <strong>R Markdown file:</strong> uncommitted changes </summary> The R Markdown file has unstaged changes. To know which version of the R Markdown file created these results, you’ll want to first commit it to the Git repo. If you’re still working on the analysis, you can ignore this warning. When you’re finished, you can run <code>wflow_publish</code> to commit the R Markdown file and build the HTML.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20180914)</code> </summary></p>
+<p>The command <code>set.seed(20180914)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> 449a929 </summary></p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rproj.user/
+    Ignored:    analysis/.DS_Store
+    Ignored:    code/.DS_Store
+    Ignored:    data/.DS_Store
+    Ignored:    data/derived/.DS_Store
+    Ignored:    data/derived/output/.DS_Store
+    Ignored:    data/input/.DS_Store
+    Ignored:    figures/.DS_Store
+
+Untracked files:
+    Untracked:  code/Drosophila_GWAS.Rmd
+    Untracked:  data/derived/output/male_late_lm,.assoc.txt
+    Untracked:  data/derived/output/male_late_lm,.log.txt
+    Untracked:  data/derived/trimmed_DGRP.bk
+
+Unstaged changes:
+    Modified:   analysis/get_predicted_line_means.Rmd
+    Modified:   analysis/index.Rmd
+    Modified:   analysis/perform_gwas.Rmd
+    Modified:   analysis/plot_line_means.Rmd
+    Modified:   data/derived/output/DGRP_GRM.log.txt
+    Modified:   data/derived/output/female_early_bslmm.bv.txt
+    Modified:   data/derived/output/female_early_bslmm.gamma.txt
+    Modified:   data/derived/output/female_early_bslmm.hyp.txt
+    Modified:   data/derived/output/female_early_bslmm.log.txt
+    Modified:   data/derived/output/female_early_bslmm.param.txt
+    Modified:   data/derived/output/female_early_female_late.log.txt
+    Modified:   data/derived/output/female_early_lm.log.txt
+    Modified:   data/derived/output/female_early_lmm.log.txt
+    Modified:   data/derived/output/female_early_male_early.log.txt
+    Modified:   data/derived/output/female_late_lm.log.txt
+    Modified:   data/derived/output/female_late_lmm.log.txt
+    Modified:   data/derived/output/female_late_male_late.log.txt
+    Modified:   data/derived/output/male_early_lm.log.txt
+    Modified:   data/derived/output/male_early_lmm.log.txt
+    Modified:   data/derived/output/male_early_male_late.log.txt
+    Modified:   data/derived/output/male_late_lmm.log.txt
+    Modified:   figures/figure1.eps
+    Modified:   figures/figure2.eps
+
+</code></pre>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
+</li>
+</ul>
+<details> <summary> <small><strong>Expand here to see past versions:</strong></small> </summary>
+<ul>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+File
+</th>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:left;">
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+449a929
+</td>
+<td style="text-align:left;">
+Luke Holman
+</td>
+<td style="text-align:left;">
+2018-09-14
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+e981b22
+</td>
+<td style="text-align:left;">
+Luke Holman
+</td>
+<td style="text-align:left;">
+2018-09-14
+</td>
+<td style="text-align:left;">
+Made GWAS page
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+64799c1
+</td>
+<td style="text-align:left;">
+Luke Holman
+</td>
+<td style="text-align:left;">
+2018-09-14
+</td>
+<td style="text-align:left;">
+Made get_predicted_line_means
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+64799c1
+</td>
+<td style="text-align:left;">
+Luke Holman
+</td>
+<td style="text-align:left;">
+2018-09-14
+</td>
+<td style="text-align:left;">
+Made get_predicted_line_means
+</td>
+</tr>
+</tbody>
+</table>
+</ul>
+<p></details></p>
+<hr />
+<pre class="r"><code>library(dplyr)
+library(brms)
+library(pander)</code></pre>
+<div id="estimate-the-line-means-for-relative-fitness" class="section level2">
+<h2>Estimate the line means for relative fitness</h2>
+<p>Most studies of the DGRP calculate so-called “line means” by averaging the phenotypes of several individuals per line. Instead, we used Bayesian generalised linear mixed model (GLMMs) to estimate the true line means for each of the 4 fitness traits.</p>
+<p>One notable advantage of using a model instead of a simple average, is that this allows one to statistically remove confounding factors such as block effects, which would otherwise add noise to the line means. Note that we intentionally measured line 352 in every block, in order to have good precision to estimate the block effect.</p>
+<p>Additionally, we must properly account for our experimental design in order to avoid pseudoreplication. Our design involved repeatedly measuring the same individuals to determine early- and late-life fitness.</p>
+<p>For the progeny count data used to measure female fitness, we used a Poisson GLMM with the following formula:</p>
+<p><span class="math inline">\(Y = age + (age|line) + (age|block) + (1|vial.ID)\)</span></p>
+<p>That is, we specify a random intercept for each vial, block and line. Additionally, we specify a random slope with age for each line and block, allowing for differential change in fitness with age between lines and blocks. The then use the <code>fitted</code> function in the <code>brms</code> package to derive the estimated mean progeny production for each combination of age and line. The line means were left on the scale of the linear predictor (as opposed to back-transforming them via the link function), in order to increase their normality. Furthermore, they were scaled to have a mean of zero and standard deviation of one.</p>
+<p>Similarly, for our measure of male fitness (proportion of offspring sired), we used a binomial model with the following formula:</p>
+<p><span class="math inline">\(Y = age + (age|line) + (age|block) + (1|vial.ID)\)</span></p>
+<p>Where <span class="math inline">\(Y\)</span> is a 1 or 0 depending on whether the focal offspring was sired by a male from the focal DGRP line or a rival male, respectively.</p>
+<div id="define-functions-for-prediction" class="section level3">
+<h3>Define functions for prediction</h3>
+<pre class="r"><code>load_and_tidy_fitness_data &lt;- function(){
+  female_fitness &lt;- read.csv(&quot;data/input/female_fitness.csv&quot;, stringsAsFactors = FALSE) %&gt;% 
+    arrange(line) %&gt;%
+    mutate(vial.ID = paste(&quot;F&quot;, block, replicate, line, sep = &quot;_&quot;),
+           line = paste(&quot;line_&quot;, line, sep = &quot;&quot;)) %&gt;% 
+    select(-num.F.late1, -num.F.late2, -num.laying.F.early, -replicate) 
+  female_fitness$female.fitness.early[is.na(female_fitness$female.fitness.early)] &lt;- 0
+  female_fitness$female.fitness.late[is.na(female_fitness$female.fitness.late)] &lt;- 0
+  
+  male_fitness &lt;- read.csv(&quot;data/input/male_fitness.csv&quot;, stringsAsFactors = FALSE ) %&gt;% 
+    arrange(line) %&gt;%
+    mutate(vial.ID = paste(&quot;M&quot;, block, replicate, line, sep = &quot;_&quot;),
+           line = paste(&quot;line_&quot;, line, sep = &quot;&quot;)) %&gt;%
+    select(-num.DGRP.males, -replicate)
+  
+  # Save these tidy files, for data archiving
+  write.csv(female_fitness, file = &quot;data/input/female_fitness_CLEANED.csv&quot;, row.names = FALSE)
+  write.csv(male_fitness, file = &quot;data/input/male_fitness_CLEANED.csv&quot;, row.names = FALSE)
+  
+  list(female_fitness = female_fitness, male_fitness = male_fitness)
+}
+
+
+# This function calculates the means for each line
+get.line.means &lt;- function(){
+  left_join(
+    load_and_tidy_fitness_data()[[1]] %&gt;% select(line, female.fitness.early, female.fitness.late) %&gt;% 
+      group_by(line) %&gt;%
+      summarise(female.fitness.early = mean(female.fitness.early), 
+                female.fitness.late = mean(female.fitness.late)),
+    load_and_tidy_fitness_data()[[2]] %&gt;% 
+      group_by(line) %&gt;%
+      summarise(early.male.rival = sum(early.male.rival),
+                early.male.focal = sum(early.male.focal),
+                late.male.rival = sum(late.male.rival),
+                late.male.focal = sum(late.male.focal),
+                male.fitness.early = early.male.focal / (early.male.focal + early.male.rival),
+                male.fitness.late = late.male.focal / (late.male.focal + late.male.rival)) %&gt;%
+      select(line, male.fitness.early, male.fitness.late),
+    by = &quot;line&quot;) %&gt;% as.data.frame()
+}
+
+# A function to calculate each line&#39;s expected fitness, using brms models to adjust for block + vial random effects
+# For the male late life assay, we also adjust for the number of competitor males that died 
+# (this assumes that their deaths happened randomly with respect to which line we were measuring)
+get_predicted_line_means &lt;- function(){
+  
+  # If it&#39;s already calculated, just load up the file. Otherwise, make the file
+  out.file &lt;- &quot;data/derived/predicted_line_means.csv&quot;
+  if(file.exists(out.file)) return(read.csv(out.file, stringsAsFactors = FALSE))
+  
+  ####### Load the individual-level data
+  # Load the female data and rearrange to long format
+  female_fitness &lt;- load_and_tidy_fitness_data()[[1]] %&gt;% 
+    gather(age, fitness, female.fitness.early, female.fitness.late)
+  
+  # Load the male data and make 5 imputed datasets using the package &#39;mice&#39;
+  # (there are 2 vials with no early-male fitness, and 1 vial with no count of the number of GFP males)
+  # See this link for explanation: https://cran.r-project.org/web/packages/brms/vignettes/brms_missings.html
+  male_fitness &lt;- load_and_tidy_fitness_data()[[2]]
+  male_fitness_imputed &lt;- mice(male_fitness, m = 5, print = FALSE, seed = 1)
+  male_fitness_imputed &lt;- lapply(1:5, function(i) complete(male_fitness_imputed, i))
+  male_fitness_imputed &lt;- lapply(male_fitness_imputed, function(focal) {
+    focal %&gt;% mutate(total1 = early.male.rival + early.male.focal,
+                     total2 = late.male.rival + late.male.focal)})
+  
+  ####### Run model on female data 
+  female_model &lt;- brm(fitness ~ age + (age|line) + (age|block) + (1|vial.ID), 
+                      family = poisson, data = female_fitness,
+                      iter = 4000, chains = 4, cores = 4,
+                      seed = 1, control = list(adapt_delta = 0.999, max_treedepth = 15)) %&gt;% 
+    add_ic(ic = &quot;R2&quot;)
+  writeLines(capture.output(summary(female_model)), con = &quot;data/derived/model_summary_females.txt&quot;)
+  saveRDS(female_model, &quot;data/derived/female_fitness_prediction_model.rds&quot;) # maybe delete later - probably not needed?
+  
+  
+  ### Run model on male data 
+  # Fit a non-linear smooth for num.GFP.males, but only for the late life data
+  # Inspection of the raw data and model results illustrates the non-linear smooth improves model fit appreciably
+  # For example, the &#39;wiggliness&#39; of the smooth term is significantly non-zero
+  # See: https://www.fromthebottomoftheheap.net/2018/04/21/fitting-gams-with-brms/
+  male1 &lt;- bf(early.male.focal | trials(total1) ~ (1|line) + (1|block) + (1|vial.ID))
+  male2 &lt;- bf(late.male.focal  | trials(total2) ~ s(num.GFP.males) + (1|line) + (1|block) + (1|vial.ID))
+  
+  # Run 5 models, on each of the 5 imputed datasets, and combine the results
+  male_model &lt;- brm_multiple(male1 + male2,
+                                 family = binomial, data = male_fitness_imputed,
+                                 iter = 4000, chains = 4, cores = 4,
+                                 seed = 1, control = list(adapt_delta = 0.999, max_treedepth = 15)) %&gt;%
+    add_ic(ic = &quot;R2&quot;)
+  writeLines(capture.output(summary(male_model)), con = &quot;data/derived/model_summary_males.txt&quot;)
+  saveRDS(male_model, &quot;data/derived/male_fitness_prediction_model.rds&quot;) # maybe delete later - probably not needed?
+  male_model &lt;- readRDS(&quot;data/derived/male_fitness_prediction_model.rds&quot;) 
+  
+  ####### Define new data for prediction
+  new.data.female &lt;- female_fitness %&gt;% 
+    select(age, line) %&gt;% distinct() %&gt;% arrange(line, age)
+  
+  new.data.male &lt;- male_fitness %&gt;% 
+    select(line) %&gt;% distinct() %&gt;% arrange(line) %&gt;% 
+    mutate(total1 = 100, # I checked, and changing this number does not affect the line means, as I expected
+           total2 = 100, 
+           num.GFP.males = male_fitness %&gt;% .$num.GFP.males %&gt;% mean(na.rm=TRUE))
+  
+  # Get predicted lines means for early and late life female fitness on linear predictor scale (i.e. normal)
+  female_line_preds &lt;- data.frame(new.data.female, 
+                                  fitted(female_model, 
+                                         newdata = new.data.female, 
+                                         re_formula = &quot;~ (age|line)&quot;, 
+                                         scale = &quot;linear&quot;)) %&gt;%
+    select(age, line, Estimate) %&gt;% 
+    spread(age, Estimate) %&gt;%
+    mutate(female.fitness.early = as.numeric(scale(female.fitness.early)),
+           female.fitness.late = as.numeric(scale(female.fitness.late)))
+  
+  # Get predicted lines means for early and late life male fitness on linear predictor scale (i.e. normal)
+  male_line_preds &lt;- data.frame(new.data.male, 
+                              fitted(male_model_NEW, 
+                                     newdata = new.data.male, 
+                                     re_formula = &quot;~ (1|line)&quot;, 
+                                     scale = &quot;linear&quot;)) %&gt;%
+  select(line, Estimate.earlymalefocal, Estimate.latemalefocal) %&gt;% 
+  mutate(male.fitness.early = as.numeric(scale(Estimate.earlymalefocal)),
+         male.fitness.late = as.numeric(scale(Estimate.latemalefocal))) %&gt;%
+  select(line, male.fitness.early, male.fitness.late)
+
+  # Calculate the proportion of variance explained by line for females
+  
+  ## Get the posterior predicted values for each data point
+  predicted &lt;- data.frame(female_fitness[complete.cases(female_fitness), ],
+                          t(fitted(female_model, summary = FALSE)))
+  
+  ## Define a function to get the ICC for line, for each posterior sample of predictions
+  get_ICC_line &lt;- function(predictions, age_class = NULL){
+    if(!is.null(age_class)) predictions &lt;- predictions %&gt;% filter(age == age_class) 
+    first.col &lt;- which(str_detect(names(predictions), &quot;X&quot;))[1] 
+    sapply(0:7999, function(i){
+       ICCbare(predictions$line, predictions[, i+first.col])
+    })
+  }
+  
+  # Calculate ICC for each sample, separately for old and young females
+  Line_ICC_female_early &lt;- get_ICC_line(predicted, &quot;female.fitness.early&quot;)
+  Line_ICC_female_late &lt;- get_ICC_line(predicted, &quot;female.fitness.late&quot;)
+  
+  # Do the same for males
+  male_preds_early &lt;-  data.frame(line = male_fitness$line,
+                                  t(fitted(male_model, summary = FALSE)[,,1]))
+  male_preds_late &lt;-  data.frame(line = male_fitness$line,
+                                 t(fitted(male_model, summary = FALSE)[,,1]))
+
+  Line_ICC_male_early &lt;- get_ICC_line(male_preds_early)
+  Line_ICC_male_late &lt;- get_ICC_line(male_preds_late)
+  
+  
+  ICC &lt;- posterior_summary(as.mcmc(data.frame(Line_ICC_female_early, 
+                                              Line_ICC_female_late,
+                                              Line_ICC_male_early,
+                                              Line_ICC_male_late)))
+  write.csv(ICC, file = &quot;data/derived/ICC.csv&quot;, row.names = TRUE)
+  
+
+  # Record which block(s) each line was measured in. Generally one block, except for ref line (all blocks)
+  line_blocks &lt;- rbind(female_fitness %&gt;% select(block, line), 
+                       male_fitness   %&gt;% select(block, line)) %&gt;% 
+    mutate(block = replace(block, line == &quot;352&quot;, &quot;reference_line&quot;)) %&gt;% 
+    distinct() %&gt;% 
+    group_by(line) %&gt;% summarise(block = paste0(block, collapse = &quot;, &quot;)) 
+  
+  predicted_line_means &lt;- female_line_preds %&gt;%
+    left_join(male_line_preds, by = &quot;line&quot;) %&gt;% 
+    left_join(line_blocks, by = &quot;line&quot;) %&gt;%
+    arrange(line) %&gt;%
+    mutate(line = paste(&quot;line_&quot;, line, sep = &quot;&quot;)) 
+  
+  write.csv(predicted_line_means, out.file, row.names = FALSE)
+  predicted_line_means %&gt;% mutate(line = gsub(&quot;line_line_&quot;, &quot;line_&quot;, line))
+}</code></pre>
+</div>
+<div id="predict-line-means-and-save-the-results" class="section level3">
+<h3>Predict line means and save the results</h3>
+<p>The object <code>line_means</code> is the raw line means: unscaled, arithmetic means and in the original units.</p>
+<p>The object <code>predicted_line_means</code> is the estimated line means from the Bayesian models. These means are on the scale of the linear predictor (i.e. Poisson for females, binomial for males) rather than on the scale of the original response. They have been scaled to have a mean of 0 and a variance of 1.</p>
+<pre class="r"><code>line_means &lt;- get.line.means()
+predicted_line_means &lt;- get_predicted_line_means() </code></pre>
+</div>
+<div id="summary-of-model-used-to-predict-female-line-means" class="section level3">
+<h3>Summary of model used to predict <em>FEMALE</em> line means:</h3>
+<pre class="r"><code>cat(readLines(&#39;data/derived/model_summary_females.txt&#39;), sep = &#39;\n&#39;)</code></pre>
+<pre><code> Family: poisson 
+  Links: mu = log 
+Formula: fitness ~ age + (age | line) + (age | block) + (1 | vial.ID) 
+   Data: female_fitness (Number of observations: 1500) 
+Samples: 4 chains, each with iter = 4000; warmup = 2000; thin = 1; 
+         total post-warmup samples = 8000
+    ICs: LOO = NA; WAIC = NA; R2 = 0.94
+ 
+Group-Level Effects: 
+~block (Number of levels: 9) 
+                                      Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
+sd(Intercept)                             0.32      0.12     0.16     0.62       5698 1.00
+sd(agefemale.fitness.late)                1.29      0.43     0.74     2.35       4667 1.00
+cor(Intercept,agefemale.fitness.late)    -0.41      0.32    -0.88     0.33       8000 1.00
+
+~line (Number of levels: 115) 
+                                      Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
+sd(Intercept)                             0.54      0.04     0.46     0.63       4294 1.00
+sd(agefemale.fitness.late)                1.58      0.13     1.34     1.87       4293 1.00
+cor(Intercept,agefemale.fitness.late)     0.41      0.10     0.21     0.58       3559 1.00
+
+~vial.ID (Number of levels: 750) 
+              Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
+sd(Intercept)     0.48      0.02     0.45     0.51       3005 1.00
+
+Population-Level Effects: 
+                       Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
+Intercept                  4.40      0.13     4.15     4.65       8000 1.00
+agefemale.fitness.late    -2.96      0.49    -3.96    -2.00       8000 1.00
+
+Samples were drawn using sampling(NUTS). For each parameter, Eff.Sample 
+is a crude measure of effective sample size, and Rhat is the potential 
+scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
+</div>
+<div id="summary-of-model-used-to-predict-male-line-means" class="section level3">
+<h3>Summary of model used to predict <em>MALE</em> line means:</h3>
+<pre class="r"><code>cat(readLines(&#39;data/derived/model_summary_males.txt&#39;), sep = &#39;\n&#39;)</code></pre>
+<pre><code> Family: MV(binomial, binomial) 
+  Links: mu = logit
+         mu = logit 
+Formula: early.male.focal | trials(total1) ~ (1 | line) + (1 | block) + (1 | vial.ID) 
+         late.male.focal | trials(total2) ~ s(num.GFP.males) + (1 | line) + (1 | block) + (1 | vial.ID) 
+   Data: male_fitness_imputed (Number of observations: 750) 
+Samples: 20 chains, each with iter = 4000; warmup = 2000; thin = 5; 
+         total post-warmup samples = 8000
+    ICs: LOO = NA; WAIC = NA; R2 = 0.98
+ 
+Smooth Terms: 
+                                    Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
+sds(latemalefocal_snum.GFP.males_1)     2.80      2.11     0.27     8.30       7683 1.00
+
+Group-Level Effects: 
+~block (Number of levels: 9) 
+                             Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
+sd(earlymalefocal_Intercept)     0.73      0.24     0.41     1.34       7026 1.00
+sd(latemalefocal_Intercept)      1.00      0.38     0.48     1.94       7293 1.00
+
+~line (Number of levels: 115) 
+                             Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
+sd(earlymalefocal_Intercept)     0.57      0.06     0.47     0.68       7060 1.00
+sd(latemalefocal_Intercept)      1.37      0.15     1.09     1.67       7202 1.00
+
+~vial.ID (Number of levels: 750) 
+                             Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
+sd(earlymalefocal_Intercept)     0.81      0.03     0.76     0.87       5630 1.01
+sd(latemalefocal_Intercept)      1.91      0.08     1.76     2.08       6832 1.00
+
+Population-Level Effects: 
+                               Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
+earlymalefocal_Intercept           0.30      0.27    -0.25     0.81       7744 1.00
+latemalefocal_Intercept           -1.17      0.39    -1.94    -0.37       7624 1.00
+latemalefocal_snum.GFP.males_1     0.08      0.60    -1.08     1.43       7941 1.00
+
+Samples were drawn using sampling(NUTS). For each parameter, Eff.Sample 
+is a crude measure of effective sample size, and Rhat is the potential 
+scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
+</div>
+<div id="proportion-of-variance-explained-by-dgrp-line-in-these-two-models" class="section level3">
+<h3>Proportion of variance explained by ‘DGRP line’ in these two models:</h3>
+<pre class="r"><code>read.csv(&#39;data/derived/ICC.csv&#39;) %&gt;% 
+  rename(Parameter = X, Lower.95.CI = X2.5.ile, Upper.95.CI = X97.5.ile) %&gt;% pander()</code></pre>
+<table>
+<colgroup>
+<col width="32%" />
+<col width="14%" />
+<col width="16%" />
+<col width="18%" />
+<col width="18%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">Parameter</th>
+<th align="center">Estimate</th>
+<th align="center">Est.Error</th>
+<th align="center">Lower.95.CI</th>
+<th align="center">Upper.95.CI</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">Line_ICC_female_early</td>
+<td align="center">0.6044</td>
+<td align="center">0.007116</td>
+<td align="center">0.5903</td>
+<td align="center">0.6183</td>
+</tr>
+<tr class="even">
+<td align="center">Line_ICC_female_late</td>
+<td align="center">0.8514</td>
+<td align="center">0.006105</td>
+<td align="center">0.8392</td>
+<td align="center">0.863</td>
+</tr>
+<tr class="odd">
+<td align="center">Line_ICC_male_early</td>
+<td align="center">0.5089</td>
+<td align="center">0.004727</td>
+<td align="center">0.4996</td>
+<td align="center">0.5182</td>
+</tr>
+<tr class="even">
+<td align="center">Line_ICC_male_late</td>
+<td align="center">0.5089</td>
+<td align="center">0.004727</td>
+<td align="center">0.4996</td>
+<td align="center">0.5182</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.5.1 (2018-07-02)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Running under: macOS Sierra 10.12.6
+
+Matrix products: default
+BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_AU.UTF-8/en_AU.UTF-8/en_AU.UTF-8/C/en_AU.UTF-8/en_AU.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] bindrcpp_0.2.2 pander_0.6.2   brms_2.4.0     ggplot2_3.0.0 
+[5] Rcpp_0.12.18   dplyr_0.7.6   
+
+loaded via a namespace (and not attached):
+ [1] Brobdingnag_1.2-5    R.utils_2.7.0        gtools_3.8.1        
+ [4] StanHeaders_2.17.2   threejs_0.3.1        shiny_1.1.0         
+ [7] assertthat_0.2.0     stats4_3.5.1         yaml_2.2.0          
+[10] pillar_1.3.0         backports_1.1.2      lattice_0.20-35     
+[13] glue_1.3.0           digest_0.6.15        promises_1.0.1      
+[16] colorspace_1.3-2     htmltools_0.3.6      httpuv_1.4.5        
+[19] Matrix_1.2-14        R.oo_1.22.0          plyr_1.8.4          
+[22] dygraphs_1.1.1.6     pkgconfig_2.0.1      rstan_2.17.3        
+[25] purrr_0.2.5          xtable_1.8-2         mvtnorm_1.0-8       
+[28] scales_1.0.0         whisker_0.3-2        later_0.7.3         
+[31] git2r_0.23.0         tibble_1.4.2         bayesplot_1.5.0     
+[34] DT_0.4               shinyjs_1.0          withr_2.1.2         
+[37] lazyeval_0.2.1       magrittr_1.5         crayon_1.3.4        
+[40] mime_0.5             evaluate_0.11        R.methodsS3_1.7.1   
+[43] nlme_3.1-137         xts_0.11-0           colourpicker_1.0    
+[46] rsconnect_0.8.8      tools_3.5.1          loo_2.0.0           
+[49] matrixStats_0.54.0   stringr_1.3.1        munsell_0.5.0       
+[52] compiler_3.5.1       rlang_0.2.1          grid_3.5.1          
+[55] ggridges_0.5.0       htmlwidgets_1.2      crosstalk_1.0.0     
+[58] igraph_1.2.1         miniUI_0.1.1.1       base64enc_0.1-3     
+[61] rmarkdown_1.10       gtable_0.2.0         inline_0.3.15       
+[64] abind_1.4-5          reshape2_1.4.3       markdown_0.8        
+[67] R6_2.2.2             gridExtra_2.3        rstantools_1.5.0    
+[70] zoo_1.8-3            knitr_1.20           bridgesampling_0.4-0
+[73] shinythemes_1.1.1    bindr_0.1.1          shinystan_2.5.0     
+[76] workflowr_1.1.1      rprojroot_1.3-2      stringi_1.2.4       
+[79] parallel_3.5.1       tidyselect_0.2.4     coda_0.19-1         </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
+  analysis was created with
+  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.1.1
+</p>
+<hr>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

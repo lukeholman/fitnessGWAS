@@ -1,0 +1,82 @@
+---
+title: "Searching for loci underlying sex- and age-specific fitness"
+site: workflowr::wflow_site
+output:
+  workflowr::wflow_html:
+    toc: false
+---
+
+## Running the analysis
+
+### [1. Setting up a database to hold variant/gene annotations and GWAS results](get_predicted_line_means.html)
+
+This script makes a SQLite3 database holding two tables: one with annotations for each variant (provided by the Mackay lab), and one with annotations for each gene (from Bioconductor). In step 3, we also add the GWAS results to this database, allowing for memory-efficient processing of the results.
+
+
+### [2. Estimating line mean fitness using Bayesian models](get_predicted_line_means.html)
+
+Using Bayesian mixed models implemented in the R package `brms` to estimate the line means for our four fitness traits.
+
+### [3. Calculating quantitative genetic parameters](XXX.html)
+
+Using linear mixed models implemented in the R package `sommer` to estimate the heritability of, and genetic covariance among, our four fitness traits. 
+
+
+### [4. Running the GWAS](perfom_gwas.html)
+
+The script first performs quality control and imputation on the dataset of SNPs and indels for the DGRP. Second, it runs univariate and multivariate association tests on our four fitness traits using the software command-line software [GEMMA](http://www.xzlab.org/software/GEMMAmanual.pdf).
+
+
+### 5. Applying adaptive shrinkage to the GWAS results
+
+#### [5a. Applying adaptive shrinkage to the GWAS results](gwas_adaptive_shrinkage.html)
+
+Here, we use the R package `mashr` to perform multivariate adaptive shrinkage on the results of the univariate association tests. We ran `mashr` using two modes: canonical, and data-driven.
+
+#### [5b. Plots illustrating how adaptive shrinkage affected the results](checking_mashr_results.html)
+
+This script generates some plots to check that `mashr` is performing as expected. The plots also led us to select the data-driven `mashr` results as the most conservative.
+
+
+### [5. Analyses using the transcriptomics data from Huang et al. 2015 _PNAS_](TWAS.html)
+
+________________
+
+
+## Results of the analysis
+
+### [Plots showing line mean fitness](plot_line_means.html)
+
+### [Quantitative genetic parameters](XXXX.html)
+
+### [Tables of GWAS results](GWAS_tables.html)
+
+### [TWAS](XXXX.html)
+
+
+
+Heritability
+ - Correlated with selection experienced by the gene? Angatonism?
+ - Correlated with sex-specificity in expression?
+
+eQTLs
+ - Are there eQTLs with matching, independent, and opposite-sex effects? YES TO ALL. NEED TO RE-DO eQTL ANALYSIS 
+ - Are there more overlaps between the eQTLs and fitness QTLs than expected by chance? Correlation in p-vals?
+
+
+Predictions
+ - eQTLs that affect transciption the same way in both sexes will have SA fitness effects for transcripts under SA selection (or concordant for concordant) We need:
+   - Effect size for the eQTL on the transcript, in both sexes (re-run eQTL)
+   - Effect size for the eQTL on fitness, in both sexes (done)
+   - Effect size for the transcript on fitness (done)
+   - "Allele 1 made the transcript increase in both sexes, good for males and bad for females"
+ - eQTLs that only affect transciption in one sex will have a more sex-specific fitness effect as well (not concordant, not antag)
+ - eQTLs where the + and - alleles are swapped between sexes will be antagonistic or concordant, depending on sex-specific selection on that transcript
+ - Transcripts will show the twin peaks relationship between sex bias in expression and SA selection
+ - Genes targetted by dsx will be extra antagonistic
+
+
+Network
+  - Modules are not correlated with fitness, so no evidence of selection on them?
+  - Find the PCAs of the transcriptome, male vs female axis? Young vs old axis?
+  - Are the modules heritable, and are there SNPs for eigengenes?

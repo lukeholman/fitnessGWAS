@@ -304,13 +304,14 @@ do_one_eQTL <- function(FBID){
 # Run the eQTL GWAS, one transcript at a time, across multiple cores, and save the results
 # The result file has about XXXX hits at p < 0.000001; presumably many are false positives, though some have p < 1e-50 etc. 
 plan("multicore")
-future_lapply(FBIDs, do_one_eQTL) %>%
-  do.call("rbind", .) 
+future_lapply(FBIDs, do_one_eQTL) 
 
 list.files("data/derived/eQTL_results") %>% 
   lapply(readRDS) %>% do.call("rbind", .) %>%
   rename(eQTL = rs) %>%
   write_csv("data/derived/eQTL_results/all_eQTL_results.csv")
+
+# unlink(list.files("data/derived/eQTL_results", pattern = "rds")) # use to clean up
 ```
 
 

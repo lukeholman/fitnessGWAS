@@ -321,6 +321,9 @@ rm(list = c("FBIDs", "FBID_by_sex"))
 ```
 
 
+```{r}
+read_tsv("data/input/huang_transcriptome/dgrp.female.exp.pheno")
+```
 
 
 <!-- # Snipped code for running LMM version. Takes too long to do all transcripts this way! -->

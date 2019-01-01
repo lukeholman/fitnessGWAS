@@ -40,7 +40,7 @@ run_command <- function(shell_command, wd = getwd(), path = ""){
 load_expression_data <- function(sex){
   
   if(sex != "both"){
-    expression <- glue("data/input/dgrp.array.exp.{sex}.txt") %>% read_delim(delim = " ")
+    expression <- glue("data/input/huang_transcriptome/dgrp.array.exp.{sex}.txt") %>% read_delim(delim = " ")
     sample_names <- names(expression)[names(expression) != "gene"] %>% str_remove(":[12]") 
     gene_names <- expression$gene
     expression <- expression %>% select(-gene) %>% as.matrix() %>% t() 
@@ -49,9 +49,9 @@ load_expression_data <- function(sex){
     return(expression %>% as.data.frame() %>% tibble::rownames_to_column("line") %>% as_tibble() %>% mutate(line = str_remove_all(line, "[.]1")))
   }
   
-  females <- read_delim("data/input/dgrp.array.exp.female.txt", delim = " ")
+  females <- read_delim("data/input/huang_transcriptome/dgrp.array.exp.female.txt", delim = " ")
   names(females)[-1] <- paste("F_", names(females)[-1],sep="") #%>% str_remove(":[12]") 
-  females <- females %>% left_join(read_delim("data/input/dgrp.array.exp.male.txt", delim = " "), by = "gene")
+  females <- females %>% left_join(read_delim("data/input/huang_transcriptome/dgrp.array.exp.male.txt", delim = " "), by = "gene")
   sample_names <- names(females)[names(females) != "gene"] %>% str_remove(":[12]") 
   gene_names <- females$gene
   sex <- ifelse(str_detect(sample_names, "F_"), "female", "male")
@@ -74,7 +74,7 @@ get_transcript_data <- function(FBID){
   predicted_line_mean_expression %>% select(line, starts_with(!!FBID))
 }
 
-# Edit the DGRP (all lines) fam file to add the 18,000 transcripts, for both sexes (so, add 36,000 extra columns) 
+# Edit the DGRP (all lines) .fam file to add the 18,000 transcripts, for both sexes (so, add 36,000 extra columns) 
 replace_pheno_data <-function(FBID) {
   focal <- read_delim("data/derived/dgrp2_QC_all_lines.fam", delim = " ", col_names = FALSE)[,1:5] %>%
     left_join(get_transcript_data(FBID), by = c("X1" = "line")) 
@@ -247,6 +247,26 @@ unlink(c("data/derived/dgrp2_QC_all_lines.bim~",
          "data/derived/SNPs_to_keep.txt"))
 ```
 
+```{r}
+make_shuffled_plink_data <- function(seed){
+  set.seed(seed)
+  
+  fam <- read_delim("data/derived/dgrp2_QC_all_lines.fam", delim = " ", col_names = FALSE)
+  non_missing_rows <- which(fam$X6 != -9)
+  shuffle_map <- data.frame(old = non_missing_rows, new = non_missing_rows[sample(length(non_missing_rows))])
+  fam[shuffle_map$new, ] <- fam[shuffle_map$old, ]
+  
+  file.copy("data/derived/dgrp2_QC_all_lines.bim", "data/derived/dgrp2_QC_all_lines_shuffled.bim")
+  file.copy("data/derived/dgrp2_QC_all_lines.bed", "data/derived/dgrp2_QC_all_lines_shuffled.bed")
+  write_delim(fam, "data/derived/dgrp2_QC_all_lines_shuffled.fam", delim = " ", col_names = FALSE)
+}
+
+make_shuffled_plink_data(1)
+
+```
+
+
+
 ## Run the eQTL analysis
 This took a few days on my 8-core Mac. 
 ```{r}
@@ -263,17 +283,26 @@ rm(predicted_line_mean_expression)
 # Function to look for eQTLs using a simple linear model in GEMMA
 # The LMM version takes too long, and initial trials showed the results were very similar.
 # So, we decided to adjsut the expression data for genome-wide genetic variation and Wolbachia, and then analyse that with a simple LM
-do_one_eQTL <- function(FBID){
+do_one_eQTL <- function(FBID, mode = "original_data"){
   
   # Find index of the focal sex-specific transcript column, e.g. "FBgn10005_female"
   FBID_female <- paste(FBID, "_female", sep = "")
   FBID_male <- paste(FBID, "_male", sep = "")
   female_index <- which(FBID_by_sex == FBID_female) 
-  male_index   <- which(FBID_by_sex == FBID_male)   
+  male_index   <- which(FBID_by_sex == FBID_male) 
+  
+  if(mode == "original_data") {
+    bfile <- "dgrp2_QC_all_lines"
+    output_file <- glue("data/derived/eQTL_results/real_data/{FBID}.rds")
+  }
+  if(mode == "shuffled_data") {
+    bfile <- "dgrp2_QC_all_lines_shuffled"
+    output_file <- glue("data/derived/eQTL_results/shuffled_data/{FBID}.rds")
+  }
   
   # Run the male and female models in GEMMA. It's a set of simple linear models, on the corrected expression data
-  shh <- capture.output(run_command("gemma -bfile dgrp2_QC_all_lines -lm 1 -n {female_index} -o eQTL_{FBID}_females", path = "/data/derived"))
-  shh <- capture.output(run_command("gemma -bfile dgrp2_QC_all_lines -lm 1 -n {male_index}   -o eQTL_{FBID}_males",   path = "/data/derived"))
+  shh <- capture.output(run_command("gemma -bfile {bfile} -lm 1 -n {female_index} -o eQTL_{FBID}_females", path = "/data/derived"))
+  shh <- capture.output(run_command("gemma -bfile {bfile} -lm 1 -n {male_index}   -o eQTL_{FBID}_males",   path = "/data/derived"))
   
   # There are some transcripts where all the data is missing for one sex, or the test otherwise fails. We just remove these transcripts
   results_females <- glue("data/derived/output/eQTL_{FBID}_females.assoc.txt")
@@ -295,7 +324,7 @@ do_one_eQTL <- function(FBID){
       select(rs, FBID, beta, se, p_wald) %>%
       filter(rs %in% hits_either_sex) 
     
-    saveRDS(hits, file = glue("data/derived/eQTL_results/{FBID}.rds"))
+    saveRDS(hits, file = output_file)
   }
   
   try(unlink(glue("data/derived/output/eQTL_{FBID}_females.log.txt"))) # delete the GEMMA files
@@ -305,24 +334,31 @@ do_one_eQTL <- function(FBID){
   return(NULL)
 }
 
+do_one_eQTL("FBgn0014417")
+do_one_eQTL("FBgn0014417", mode = "shuffled_data")
+
+readRDS("data/derived/eQTL_results/real_data/FBgn0014417.rds")
+readRDS("data/derived/eQTL_results/shuffled_data/FBgn0014417.rds")
+
 # Run the eQTL GWAS, one transcript at a time, across multiple cores, and save the results
 # The result file has about XXXX hits at p < 0.000001; presumably many are false positives, though some have p < 1e-50 etc. 
 plan("multicore")
 future_lapply(FBIDs, do_one_eQTL) 
+future_lapply(FBIDs, do_one_eQTL, mode = "shuffled_data") 
 
-list.files("data/derived/eQTL_results", full.names = TRUE) %>% 
+list.files("data/derived/eQTL_results/real_data", full.names = TRUE) %>% 
   lapply(readRDS) %>% do.call("rbind", .) %>%
   rename(eQTL = rs) %>%
   write_csv("data/derived/eQTL_results/all_eQTL_results.csv")
 
+list.files("data/derived/eQTL_results/shuffled_data", full.names = TRUE) %>% 
+  lapply(readRDS) %>% do.call("rbind", .) %>%
+  rename(eQTL = rs) %>%
+  write_csv("data/derived/eQTL_results/shuffled_data_eQTL_results.csv")
+
 # unlink(list.files("data/derived/eQTL_results", pattern = "rds")) # use to clean up
 
 rm(list = c("FBIDs", "FBID_by_sex"))
-```
-
-
-```{r}
-read_tsv("data/input/huang_transcriptome/dgrp.female.exp.pheno")
 ```
 
 

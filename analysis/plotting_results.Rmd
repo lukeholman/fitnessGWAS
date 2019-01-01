@@ -354,7 +354,7 @@ types_of_eQTL_table <- wide_results_table %>%
          x = replace(x, effect_male == "none" & effect_female == "negative", "Negative, but only in females"),
          x = replace(x, effect_female == "none" & effect_male == "positive", "Positive, but only in males"),
          x = replace(x, effect_female == "none" & effect_male == "negative", "Negative, but only in males")) %>%
-  left_join(tbl(db, "variants") %>% select(SNP, chr, position, site.class, MAF) %>%
+  left_join(tbl(db, "variants") %>% select(SNP, chr, position, site.class, MAF, FBID) %>% rename(nearby_gene = FBID) %>%
               collect(), by = c("eQTL" = "SNP")) 
 
 types_of_eQTL_table %>%
@@ -365,6 +365,21 @@ with(types_of_eQTL_table, table(x, chr)) %>% as_tibble() %>% filter(x != "none")
   ggplot(aes(x, n)) + geom_bar(stat = "identity") + coord_flip() + xlab("Effect of the major allele on gene expression") + ylab("% eQTLs") + facet_wrap(~chr)
 ```
 
+```{r}
+xx <- types_of_eQTL_table %>% select(eQTL, transcript) %>% rename(affected_gene = transcript) %>% distinct()
+xx <- xx %>% left_join(tbl(db, "variants") %>% select(SNP, FBID, chr, position) %>% collect(), by = c("affected_gene" = "FBID")) %>%
+  group_by(eQTL, affected_gene) %>%
+  summarise(chr = chr[1], 
+            approx_position = round(mean(as.numeric(position)))) %>%
+  mutate(split = strsplit(eQTL, split = "_"),
+         eQTL_chr = map_chr(split, ~ .x[1]),
+         eQTL_pos = map_chr(split, ~ .x[2])) %>% select(-split)
+
+sum(xx$chr == xx$eQTL_chr, na.rm=T)
+sum(is.na(xx$chr == xx$eQTL_chr))
+
+xx %>% filter(chr == eQTL_chr) %>% arrange(abs(approx_position - as.numeric(eQTL_pos))) 
+```
 
 
 ```{r}

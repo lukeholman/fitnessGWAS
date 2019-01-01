@@ -88,10 +88,11 @@ replace_pheno_data <-function(FBID) {
 ```
 
 
-
 ## Load up the expression data 
 
 This microarray data from Huang et al. _PNAS_ was downloaded from the [DGRP website](http://dgrp2.gnets.ncsu.edu/data.html). Similarly to that study, we first estimated the line mean expression level for each transcript in each sex using a linear mixed model that corrects for the _Wolbachia_ infection and the first 10 principal components of the Genomic Relatedness Matrix. A notable difference is that we use a single model for both sexes, with line as a random intercept and sex as a random slope -- this allows the model to use the information contained in the inter-sex correlation when estimating the BLUPs for each line.
+
+<!-- The following code chunk produces the object `predicted_line_mean_expression`, which contains the estimated expression value for each combination of sex and transcript, on a normalised scale (i.e. with mean 0 and SD 1). For some transcripts, the predicted expression values are identical for both sexes in each line, but there is variation among lines. For others, the expression values are equal in magnitude but opposite in sign within lines between sexes. The former occurs when the 'sex' random slope explains little variation; the latter occurs when the 'line' random intercept explains little variation. Note that neither situation means mean there is no sex difference in expression: just that there is no detectable between-line variation that affects expression in a sex-specific manner (former), or that the only detectable genetic variance is that which changes the sexual dimorphism (latter). -->
 
 ```{r}
 bed <- "dgrp2_QC_all_lines -maf 0.05"
@@ -247,7 +248,7 @@ unlink(c("data/derived/dgrp2_QC_all_lines.bim~",
 ```
 
 ## Run the eQTL analysis
-This took about 4.5 days on my 8-core Mac. 
+This took a few days on my 8-core Mac. 
 ```{r}
 # Make a fam file with all the 36,000+ gene expression traits (that's 18k per sex)
 replace_pheno_data("all")
@@ -289,12 +290,13 @@ do_one_eQTL <- function(FBID){
     results_females %>% filter(p_wald < 0.000001) %>% pull(rs), 
     results_males   %>% filter(p_wald < 0.000001) %>% pull(rs)))
   
-  # Now get the results for these eQTLs, including the result for the non-significant sex
-  hits <- bind_rows(results_females, results_males) %>% 
-    select(rs, FBID, beta, se, p_wald) %>%
-    filter(rs %in% hits_either_sex) 
-  
-  saveRDS(hits, file = glue("data/derived/eQTL_results/{FBID}.rds"))
+  if(length(hits_either_sex) > 0){ # get the results for these eQTLs, including the result for the non-significant sex
+    hits <- bind_rows(results_females, results_males) %>% 
+      select(rs, FBID, beta, se, p_wald) %>%
+      filter(rs %in% hits_either_sex) 
+    
+    saveRDS(hits, file = glue("data/derived/eQTL_results/{FBID}.rds"))
+  }
   
   try(unlink(glue("data/derived/output/eQTL_{FBID}_females.log.txt"))) # delete the GEMMA files
   try(unlink(glue("data/derived/output/eQTL_{FBID}_females.assoc.txt")))
@@ -303,75 +305,22 @@ do_one_eQTL <- function(FBID){
   return(NULL)
 }
 
-# system.time(do_one_eQTL("FBgn0000100")) # TEST
-
-
 # Run the eQTL GWAS, one transcript at a time, across multiple cores, and save the results
 # The result file has about XXXX hits at p < 0.000001; presumably many are false positives, though some have p < 1e-50 etc. 
 plan("multicore")
 future_lapply(FBIDs, do_one_eQTL) 
 
-list.files("data/derived/eQTL_results") %>% 
+list.files("data/derived/eQTL_results", full.names = TRUE) %>% 
   lapply(readRDS) %>% do.call("rbind", .) %>%
   rename(eQTL = rs) %>%
   write_csv("data/derived/eQTL_results/all_eQTL_results.csv")
 
 # unlink(list.files("data/derived/eQTL_results", pattern = "rds")) # use to clean up
+
+rm(list = c("FBIDs", "FBID_by_sex"))
 ```
 
 
-
-```{r}
-xx <- read_csv("data/derived/luke_eQTL_results.csv") %>% 
-  arrange(p_wald) %>% filter(-log10(p_wald) > 8) 
-
-xx <- xx %>%
-  mutate(sex = ifelse(str_detect(FBID, "female"), "Female", "Male"),
-         transcript = str_extract(xx$FBID, "FBgn[:digit:]+"),
-         transcript = ifelse(is.na(transcript), str_extract(xx$FBID, "XLOC_[:digit:]+"), transcript)) 
-library(ggplot2)
-
-# Very imbalanced for females! I think: major alleles that depress female expression are rare... could be opposite way
-xx %>% ggplot(aes(beta)) + geom_histogram(bins = 100) + facet_wrap(~sex)
-
-xx <- xx %>%
-  group_by(eQTL, sex) %>%
-  summarise(mean_beta = mean(beta),
-            FBID = FBID[1]) %>%
-  mutate(chromosome = gsub("_", "", (substr(eQTL, 1, 2))),
-         FBID = str_remove_all(FBID, "_female"),
-         FBID = str_remove_all(FBID, "_male"),
-         position = as.numeric(map_chr(strsplit(eQTL, split = "_"), ~ .x[2]))) 
-
-xx %>%
-  ggplot(aes(sex, mean_beta, group = eQTL)) + 
-  geom_line(alpha = 0.1) + 
-  facet_wrap(~chromosome)
-
-xx %>%
-  ggplot(aes(position, mean_beta, group = 1)) + 
-  geom_line() +
-  facet_wrap(chromosome~sex, ncol = 2, scales = "free_x")
-
-xx %>%
-  spread(sex, mean_beta) %>%
-  filter(!is.na(Female) & !is.na(Male)) %>% 
-  mutate(mean_sex = (Female + Male) / 2) %>%
-  ggplot(aes(position, mean_sex, group = 1)) + 
-  geom_line() +
-  facet_wrap(~chromosome, ncol = 2, scales = "free_x")
-
-xx %>%
-  spread(sex, mean_beta) %>%
-  filter(!is.na(Female) & !is.na(Male)) %>%
-  filter((Female - 0.5) > Male) %>%
-  left_join(tbl(db, "variants") %>% select(SNP, site.class, MAF) %>%
-              collect(), by = c("eQTL" = "SNP")) %>%
-  left_join(tbl(db, "genes") %>% select(FBID, gene_name) %>% collect(), by = "FBID") %>% print(n=Inf)
-
-  
-
-```
 
 
 <!-- # Snipped code for running LMM version. Takes too long to do all transcripts this way! -->

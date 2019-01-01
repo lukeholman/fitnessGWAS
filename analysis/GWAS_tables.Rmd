@@ -27,18 +27,15 @@ Modify column names, reorder columns, filter based on the p-value, etc.
 ```{r load_data, message=FALSE}
 # Significant results, from the four univariate linear mixed models run in GEMMA:
 univariate_lmm_results <- read_csv("data/derived/all_univariate_GEMMA_results.csv") %>% 
-  filter(p_wald < 1e-05) %>% 
-  inner_join(tbl(db, "variants") %>% select(-chr, -position) %>% collect(), by = "SNP") %>% 
-  rename(Fitness_component = parameter) %>% 
-  arrange(Fitness_component, p_wald) 
+  filter(pvalue_female_early < 1e-05 | pvalue_female_late < 1e-05 | pvalue_male_early < 1e-05 | pvalue_male_late < 1e-05) 
 
-univariate_lmm_results <- univariate_lmm_results %>%
-  left_join(tbl(db, "genes") %>% 
-              select(FBID, gene_name) %>% 
-              filter(FBID %in% univariate_lmm_results$FBID) %>% 
-              collect(), by = "FBID")
-
-univariate_lmm_results <- univariate_lmm_results[,c(1:10, 16, 11:15)]
+# univariate_lmm_results <- univariate_lmm_results %>%
+#   left_join(tbl(db, "genes") %>% 
+#               select(FBID, gene_name) %>% 
+#               filter(FBID %in% univariate_lmm_results$FBID) %>% 
+#               collect(), by = "FBID")
+# 
+# univariate_lmm_results <- univariate_lmm_results[,c(1:10, 16, 11:15)]
 
 # Results of one multivariate linear mixed model run in GEMMA:
 multivariate_lmm_results <- read_tsv("data/derived/output/all_four_traits.assoc.txt") %>%

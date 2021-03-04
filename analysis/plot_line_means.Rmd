@@ -1,8 +1,8 @@
 ---
-title: "GWAS for fitness in Drosophila"
-output:
-  html_document: default
-  html_notebook: default
+title: "Plotting the estimated mean phenotype for each DGRP line"
+output: 
+  workflowr::wflow_html:
+    code_folding: hide 
 ---
 
 ```{r message=FALSE, warning=FALSE, results="hide"}
@@ -49,8 +49,8 @@ make_figure_1 <- function(){
     
     pp <- df %>% 
       ggplot(aes_string(x = v1, y = v2)) + 
-      annotate("text", x=min(lims)+0.1, y=max(lims), label = text1, parse = TRUE, hjust= 0) +
-      annotate("text", x=min(lims)+0.1, y=max(lims)-0.4, label = text2, hjust= 0) +
+      annotate("text", x=min(lims) + 0.1, y=max(lims), label = text1, parse = TRUE, hjust= 0) +
+      annotate("text", x=min(lims) + 0.1, y=max(lims)-0.4, label = text2, hjust= 0) +
       geom_point(alpha = 0.7) + 
       stat_smooth(method = "lm", level = 0, colour = "tomato") + 
       xlab(fix.title(v1)) + ylab(fix.title(v2)) + 

@@ -1,5 +1,5 @@
 ---
-title: "Searching for loci underlying sex- and age-specific fitness"
+title: "The genetic basis of fitness in _Drosophila_; A genome-wide association study"
 site: workflowr::wflow_site
 output:
   workflowr::wflow_html:
@@ -8,51 +8,71 @@ output:
 
 ## Running the analysis
 
-### [1. Setting up a database to hold variant/gene annotations and GWAS results](get_predicted_line_means.html)
+### [1. Setting up a database to hold variant/gene annotations and GWAS results](make_annotation_database.html)
 
-This script makes a SQLite3 database holding two tables: one with annotations for each variant (provided by the Mackay lab), and one with annotations for each gene (from Bioconductor). In step 3, we also add the GWAS results to this database, allowing for memory-efficient processing of the results.
-
+This script creates a SQLite3 database holding two tables: one with annotations for each variant (provided by the Mackay lab), and one with annotations for each gene (from annotation hub). In step 3, we also add the GWAS results to this database, allowing memory-efficient handling of the results. Using this database also avoids having to load Bioconductor packages that conflict with `dplyr::select()`, etc.
 
 ### [2. Estimating line mean fitness using Bayesian models](get_predicted_line_means.html)
 
-Using Bayesian mixed models implemented in the R package `brms` to estimate the line means for our four fitness traits.
+This script uses Bayesian mixed models implemented in `brms` to estimate the line means for our four fitness traits.
 
 ### [3. Calculating quantitative genetic parameters](XXX.html)
 
 Using linear mixed models implemented in the R package `sommer` to estimate the heritability of, and genetic covariance among, our four fitness traits. 
 
-
 ### [4. Running the GWAS](perfom_gwas.html)
 
-The script first performs quality control and imputation on the dataset of SNPs and indels for the DGRP. Second, it runs univariate and multivariate association tests on our four fitness traits using the software command-line software [GEMMA](http://www.xzlab.org/software/GEMMAmanual.pdf).
+The script first performs quality control and imputation on the dataset of SNPs and indels for the DGRP. Second, it runs association tests on our four phenotypes using the software command-line software [GEMMA](http://www.xzlab.org/software/GEMMAmanual.pdf). Third, it uses PLINK to identify groups of loci that are in complete linkage disequilibrium ('SNP clumps'). 
 
 
 ### 5. Applying adaptive shrinkage to the GWAS results
 
 #### [5a. Applying adaptive shrinkage to the GWAS results](gwas_adaptive_shrinkage.html)
 
-Here, we use the R package `mashr` to perform multivariate adaptive shrinkage on the results of the univariate association tests. We ran `mashr` using two modes: canonical, and data-driven.
+Here, we use the R package `mashr` to perform multivariate adaptive shrinkage on the results of the GWAS. We ran `mashr` using both possible modes: canonical, and data-driven. The canonical approach is useful for testing hypotheses about the relative abundance of different types of fitness-affecting SNPs, e.g. sexually antagonistic, sexually concordant, sex-limited, or null. The data-driven approach adjusts the GWAS estimates most accurately, as it estimates the patterns of covariances in the SNPs' effects on the 4 traits from the data; this is useful for deriving shrinked estimates of all the SNPs' effect sizes.
 
 #### [5b. Plots illustrating how adaptive shrinkage affected the results](checking_mashr_results.html)
 
-This script generates some plots to check that `mashr` is performing as expected. The plots also led us to select the data-driven `mashr` results as the most conservative.
+This script generates some plots of the SNP effect sizes under the two forms of shrinkage (canonical and data-driven) to check that `mashr` is performing as expected.
 
+### [6. Running the GWAS, identifying eQTLs, and applying mashr to the TWAS results](TWAS.html)
 
-### [5. Analyses using the transcriptomics data from Huang et al. 2015 _PNAS_](TWAS.html)
+This script uses the transcriptomic data from Huang et al. 2015 _PNAS_ on the DGRP. In this script, we
+
+- Calculate the average expression and sex bias in expression for each transcript in Huang et al.
+- Identify loci that associated with fitness in our GWAS, and which were also identified as eQTLs in Huang et al.
+- Perform 'TWAS', i.e. searching for transcripts whose expression correlates with our fitness measures across lines
+- Adjust the results of the TWAS linear models using `mashr` in canonical and data-driven modes.
+
 
 ________________
 
 
 ## Results of the analysis
 
-### [Plots showing line mean fitness](plot_line_means.html)
+### [1. Plots showing line mean fitness](plot_line_means.html)
 
-### [Quantitative genetic parameters](XXXX.html)
+Text here
 
-### [Tables of GWAS results](GWAS_tables.html)
+### [2. Quantitative genetic parameters](XXXX.html)
 
-### [TWAS](XXXX.html)
+Text here
 
+### [3. Tables of GWAS results](GWAS_tables.html)
+
+Text here
+
+### [4. Tables of TWAS results](TWAS_tables.html)
+
+Text here
+
+### [5. Plot and model the variant effect sizes](plot_models_variant_effects.html)
+
+Here, we plot the correlations in the estimated effects of each variant (or group of variants in perfect linkage disequilibrium with one another). For the GWAS results, we run linear models to test whether variants differ in their effect on fitness according to chromosome, site class, and minor allele frequency. For the TWAS results, we run linear models to test whether transcripts differ in their effect on fitness according to chromosome, average expression level, and the sex bias in expression.
+
+### [6. GO and KEGG enrichment analyses](GO_KEGG_enrichment.html)
+
+Text here
 
 
 Heritability
@@ -75,8 +95,3 @@ Predictions
  - Transcripts will show the twin peaks relationship between sex bias in expression and SA selection
  - Genes targetted by dsx will be extra antagonistic
 
-
-Network
-  - Modules are not correlated with fitness, so no evidence of selection on them?
-  - Find the PCAs of the transcriptome, male vs female axis? Young vs old axis?
-  - Are the modules heritable, and are there SNPs for eigengenes?

@@ -1,8 +1,8 @@
 ---
 title: "GWAS for fitness in Drosophila"
-output:
-  html_document: default
-  html_notebook: default
+output: 
+  workflowr::wflow_html:
+    code_folding: hide 
 ---
 
 ```{r message=FALSE, warning=FALSE, results="hide"}
@@ -13,20 +13,21 @@ library(glue)
 library(bigsnpr) # to install:   devtools::install_github("privefl/bigsnpr")
 library(readr)
 library(pander)
+library(purrr)
 library(future.apply) # for parallel code
 
 # Load the predicted line means, as calculated by get_predicted_line_means
 predicted_line_means <- read_csv("data/derived/predicted_line_means.csv")
 
-# Load the wolbachia infection status data from the DGRP website
-wolbachia <- read_csv("data/input/wolbachia.csv") %>% 
-  mutate(line = paste("line", line, sep = ""))
-
-# Load the chomosomal inversion data from the DGRP website
-# these are the 5 inversions that Huang et al. PNAS corrected for
-inversions <- read_csv("data/input/inversion genotypes.csv") %>%
-    mutate(line = paste("line", line, sep = "")) %>%
-    select(line, `In(2L)t`, `In(2R)NS`, `In(3R)P`, `In(3R)K`, `In(3R)Mo`) 
+# # Load the wolbachia infection status data from the DGRP website
+# wolbachia <- read_csv("data/input/wolbachia.csv") %>% 
+#   mutate(line = paste("line", line, sep = ""))
+# 
+# # Load the chomosomal inversion data from the DGRP website
+# # these are the 5 inversions that Huang et al. PNAS corrected for
+# inversions <- read_csv("data/input/inversion genotypes.csv") %>%
+#     mutate(line = paste("line", line, sep = "")) %>%
+#     select(line, `In(2L)t`, `In(2R)NS`, `In(3R)P`, `In(3R)K`, `In(3R)Mo`) 
 
 # helper function to pass commands to the terminal
 # Note that we set `intern = TRUE`, and pass the result of `system()` to `cat()`, 
@@ -46,11 +47,9 @@ We cleaned up the DGRP's .bed/.bim/.fam files (available from the [Mackay lab we
 
 Note that in the PLINK-formatted genotype files, lines fixed for the major allele are coded as 2, and lines fixed for the minor allele as 0. This means that in the association tests we calculate, negative effect sizes mean that the minor allele is associated with lower fitness, while positive effect sizes means that the minor allele is associated with higher fitness.
 
-```{r QC_and_imputation, results='hide'}
-# Download a copy of PLINK and Beagle
+```{r QC_and_imputation, results='hide', eval=FALSE}
 plink  <- bigsnpr::download_plink()
 beagle <- bigsnpr::download_beagle()
-
 
 perform_SNP_QC_and_imputation <- function(phenotypes){
   
@@ -60,12 +59,13 @@ perform_SNP_QC_and_imputation <- function(phenotypes){
   lines_to_keep <- gsub("_", "", phenotypes$line) %>% cbind(.,.)
   write.table(lines_to_keep, row.names = FALSE, col.names = FALSE, file = "data/derived/lines_to_keep.txt", quote = FALSE)
   
-  # Define a function to add out phenotype data to a .fam file, which is needed for GWAS analysis and to make sure PLINK includes these samples
+  # Define a function to add our phenotype data to a .fam file, which is needed for GWAS analysis and to make sure PLINK includes these samples
   # The 'phenotypes' data frame needs to have a column called 'line'
   add_phenotypes_to_fam <- function(filepath, phenotypes){
     read_delim(filepath, col_names = FALSE, delim = " ") %>% 
       select(X1, X2, X3, X4, X5) %>% # Get all the non-phenotype columns
-      left_join(phenotypes %>% mutate(line = gsub("_", "", line)), 
+      left_join(phenotypes %>% 
+                  mutate(line = gsub("_", "", line)), 
                 by = c("X1" = "line")) %>%
       write.table(file = filepath, 
                   col.names = FALSE, row.names = FALSE, 
@@ -77,10 +77,10 @@ perform_SNP_QC_and_imputation <- function(phenotypes){
   # Only keep SNPs with a minor allele frequency of 0.05 or higher (--maf 0.05)
   # Finally, write the processed BIM/BED/FAM files to the data/derived directory
   run_command(glue("{plink} --bfile dgrp2",
-                          " --geno 0.1 --maf 0.05 --allow-no-sex", 
-                          " --make-bed --out ../derived/dgrp2_QC_all_lines"), path = "/data/input/")
+                   " --geno 0.1 --maf 0.05 --allow-no-sex", 
+                   " --make-bed --out ../derived/dgrp2_QC_all_lines"), path = "/data/input/")
   
-  # Use the shell command 'sed' to remove underscores from the DGRP line names in the .fam file (e.e. 'line_120' becomes 'line120')
+  # Use the shell command 'sed' to remove underscores from the DGRP line names in the .fam file (e.g. 'line_120' becomes 'line120')
   # Otherwise, these underscores cause trouble when we need to convert from PLINK to vcf format (vcf format uses underscore as a separator)
   for(i in 1:2) run_command("sed -i '' 's/_//' dgrp2_QC_all_lines.fam", path = "/data/derived/")
   
@@ -88,37 +88,42 @@ perform_SNP_QC_and_imputation <- function(phenotypes){
   # This part uses the data for the full DGRP panel of >200 lines, to infer missing genotypes as accurately as possible. 
   # This step uses a lot of memory (I set to 28MB max, and it used 26.5GB), but maybe it can also run on a less powerful computer?
   # The bigsnpr package provides a helpful wrapper for Beagle called snp_beagleImpute(): it translates to a VCF file and back again using PLINK
-  snp_beagleImpute(beagle, plink, "data/derived/dgrp2_QC_all_lines", 
+  snp_beagleImpute(beagle, plink, 
+                   bedfile.in = "data/derived/dgrp2_QC_all_lines.bed", 
+                   bedfile.out = "data/derived/dgrp2_QC_all_lines_imputed.bed",
                    ncores = 7, 
-                   memory.max = 20, "data/derived/dgrp2_QC_all_lines")
+                   memory.max = 20)
   
-  # Again using sed, assign a sex of 'female' to all the DGRP lines (Beagle removed it, and it seems PLINK needs individuals to have a sex in order to work)
-  run_command("sed -i '' 's/	0	0	0/	0	0	2/' dgrp2_QC_all_lines.fam", path = "/data/derived/")
+  # assign a sex of 'female' to all the DGRP lines (Beagle removes the sex, and it seems PLINK needs individuals to have a sex, 
+  # despite PLINK having a command called --allow-no-sex)
+  run_command("sed -i '' 's/	0	0	0/	0	0	2/' dgrp2_QC_all_lines_imputed.fam", path = "/data/derived/")
   
   # Re-write the .bed file, to make sure the MAF threshold and minor/major allele designations are correctly assigned post-Beagle
-  run_command(glue("{plink} --bfile dgrp2_QC_all_lines",
-                          " --geno 0.1 --maf 0.05 --allow-no-sex", 
-                          " --make-bed --out dgrp2_QC_all_lines"), path = "/data/derived/")
-  unlink(list.files("data/derived", pattern = "~", full.names = TRUE)) # delete the original files, which were given a ~ file name by PLINK
+  run_command(glue("{plink} --bfile dgrp2_QC_all_lines_imputed",
+                   " --geno 0.1 --maf 0.05 --allow-no-sex", 
+                   " --make-bed --out dgrp2_QC_all_lines_imputed_correct"), path = "/data/derived/")
+  #unlink(list.files("data/derived", pattern = "~", full.names = TRUE)) # delete the original files, which were given a ~ file name by PLINK
   
   # Use PLINK to get the allele IDs and calculate the MAFs across the whole DGRP, for all SNPs that survived QC
-  run_command("{plink} --bfile dgrp2_QC_all_lines --freq", path = "/data/derived")
-  
-  # file.copy("data/derived/dgrp2_QC_all_lines.bed", "data/derived/dgrp2_QC_all_lines_copy.bed")
-  # file.copy("data/derived/dgrp2_QC_all_lines.bim", "data/derived/dgrp2_QC_all_lines_copy.bim")
-  # file.copy("data/derived/dgrp2_QC_all_lines.fam", "data/derived/dgrp2_QC_all_lines_copy.fam")
-  
+  # The file created is called data/derived/plink.frq
+  run_command("{plink} --bfile dgrp2_QC_all_lines_imputed_correct --freq", path = "/data/derived")
+
   # Now cull the PLINK files to just the lines that we measured, and re-apply the MAF cut-off of 0.05 for the new smaller sample of DGRP lines
-  run_command(glue("{plink} --bfile dgrp2_QC_all_lines",
-                   " --keep-allele-order", # NB: we force PLINK to retain the major and minor allele designations that were defined for the DGRP as a whole! Important for interpretation
+  run_command(glue("{plink} --bfile dgrp2_QC_all_lines_imputed_correct",
+                   " --keep-allele-order", # force PLINK to retain the major/minor allele designations that apply to the DGRP as a whole
                    " --keep lines_to_keep.txt --geno 0.1 --maf 0.05", 
                    " --make-bed --out dgrp2_QC_focal_lines"), path = "/data/derived/")
-
+  
   # edit the new FAM file to add the phenotype data from 'phenotypes'
   add_phenotypes_to_fam("data/derived/dgrp2_QC_focal_lines.fam", phenotypes)
   
   # Clean up:
-  unlink(c("data/derived/lines_to_keep.txt", "data/derived/plink.log"))
+  unlink(c("data/derived/lines_to_keep.txt", 
+           "data/derived/plink.log",
+           "data/derived/dgrp2_QC_all_lines_imputed.bed",
+           "data/derived/dgrp2_QC_all_lines_imputed.bim",
+           "data/derived/dgrp2_QC_all_lines_imputed.fam",
+           "data/derived/dgrp2_QC_all_lines_imputed.log"))
 }
 
 perform_SNP_QC_and_imputation(phenotypes = predicted_line_means)
@@ -129,84 +134,91 @@ perform_SNP_QC_and_imputation(phenotypes = predicted_line_means)
 
 ## Run GWAS using GEMMA
 
-### Create a file of _Wolbachia_ infection status
+<!-- ### Create a file of _Wolbachia_ infection status -->
 
-GEMMA requires that the "covariate" file be in a specific format. Each row needs to match an individual (i.e. a DGRP line) in the PLINK file, and the order should be the same. Each column is one of the covariates. To fit an intercept in addition to the covariates, there should be a column of 1s. Thus, here we make a two-column tsv file wiht the intercept in column 1, and the _Wolbachia_ infection status (a y or a n) in column 2. We elected not to fit the presence/absence of the major inversions (as in sometimes done in studies of the DGRP), since that seems like a trait that will already be captured by the decomposed eigenvectors of the SNP data (since inversions create a block of linked SNPs).
+<!-- GEMMA requires that the "covariate" file be in a specific format. Each row needs to match an individual (i.e. a DGRP line) in the PLINK file, and the order should be the same. Each column is one of the covariates. To fit an intercept in addition to the covariates, there should be a column of 1s. Thus, here we make a two-column tsv file wiht the intercept in column 1, and the _Wolbachia_ infection status (a y or a n) in column 2. We elected not to fit the presence/absence of the major inversions (as in sometimes done in studies of the DGRP), since that seems like a trait that will already be captured by the decomposed eigenvectors of the SNP data (since inversions create a block of linked SNPs). -->
 
-```{r}
-# Get the lines for the coming GWAS from the FAM file
-lines_in_fam <- read_delim("data/derived/dgrp2_QC_focal_lines.fam", 
-                           col_names = FALSE, delim = " ") %>% 
-  select(X1) %>% rename(line = X1)
+<!-- ```{r eval=FALSE} -->
+<!-- # Get the lines for the coming GWAS from the FAM file -->
+<!-- lines_in_fam <- read_delim("data/derived/dgrp2_QC_focal_lines.fam",  -->
+<!--                            col_names = FALSE, delim = " ") %>%  -->
+<!--   select(X1) %>% rename(line = X1) -->
 
-# merge in the covariates: the intercept, the Wolbachia, and the Inversion genotypes
-covariates <- left_join(lines_in_fam, wolbachia, by = "line") %>%
-  left_join(inversions %>%
-              rename(Inv_1 = `In(2L)t`,
-                     Inv_2 = `In(2R)NS`,
-                     Inv_3 = `In(3R)P`,
-                     Inv_4 = `In(3R)K`,
-                     Inv_5 = `In(3R)Mo`), by = "line") %>%
-  mutate(intercept = 1,
-         wolbachia = as.numeric(ifelse(wolbachia == "y", 1, 0))) %>% 
-  select(intercept, wolbachia, Inv_1, Inv_2, Inv_3, Inv_4, Inv_5)
-  
-write_delim(covariates, path = "data/derived/covariate_file_for_GEMMA.txt", col_names = FALSE)
-```
+<!-- # merge in the covariates: the intercept, the Wolbachia, and the Inversion genotypes -->
+<!-- covariates <- left_join(lines_in_fam, wolbachia, by = "line") %>% -->
+<!--   left_join(inversions %>% -->
+<!--               rename(Inv_1 = `In(2L)t`, -->
+<!--                      Inv_2 = `In(2R)NS`, -->
+<!--                      Inv_3 = `In(3R)P`, -->
+<!--                      Inv_4 = `In(3R)K`, -->
+<!--                      Inv_5 = `In(3R)Mo`), by = "line") %>% -->
+<!--   mutate(intercept = 1, -->
+<!--          wolbachia = as.numeric(ifelse(wolbachia == "y", 1, 0))) %>%  -->
+<!--   select(intercept, wolbachia, Inv_1, Inv_2, Inv_3, Inv_4, Inv_5) -->
+
+<!-- write_delim(covariates, path = "data/derived/covariate_file_for_GEMMA.txt", col_names = FALSE) -->
+<!-- ``` -->
 
 ### Decompose the genomic relatedness matrix
 This step is needed as a set up for the mixed model association tests, which use the eigenvectors and values of the GRM to adjust for 'population structure' among our samples. 
 
-```{r decompose}
+```{r eval=FALSE}
 # Any command with {bed} uses this particular PLINK file, double-checking that all the SNPs have MAF > 0.05
 bed <- "dgrp2_QC_focal_lines -maf 0.05" 
+#cov <- "-c covariate_file_for_GEMMA.txt" # not used at present
 
-# Calculate the centered GRM for the focal lines
-run_command("gemma -bfile {bed} -r2 0.99 -c covariate_file_for_GEMMA.txt -gk 1 -o GRM", path = "/data/derived") 
+# Calculate the *centered* GRM for the focal lines (option -gk 1)
+run_command("gemma -bfile {bed} -r2 0.99 -gk 1 -o GRM", path = "/data/derived") 
 
 # Perform decomposition of the GRM, and save its eigenvalues and eigenvectors
-run_command("gemma -bfile {bed} -r2 0.99 -c covariate_file_for_GEMMA.txt -k ./output/GRM.cXX.txt -eigen -o eigen_decomp", path = "/data/derived") 
+run_command("gemma -bfile {bed} -r2 0.99 -k ./output/GRM.cXX.txt -eigen -o eigen_decomp", path = "/data/derived") 
 
 # Remove eigen vectors + values for which the eigenvalue is close to zero, and save the modified file
 values <- read_tsv("data/derived/output/eigen_decomp.eigenD.txt", col_names = "eigenvalue")$eigenvalue
 vectors <- read_tsv("data/derived/output/eigen_decomp.eigenU.txt", col_names = FALSE)
+missing_row <- which(is.na(read_delim("data/derived/dgrp2_QC_focal_lines.fam", delim = " ", col_names = FALSE)$X8))
 
-vectors <- vectors[,-(which(values < 0.2))]
-values <- values[-(which(values < 0.2))]
-write_tsv(vectors, path = "data/derived/output/eigen_decomp.eigenU.txt", col_names = FALSE)
-write_tsv(data.frame(value = values), path = "data/derived/output/eigen_decomp.eigenD.txt", col_names = FALSE)
+write_tsv(vectors, path = "data/derived/output/eigen_decomp.eigenU_female.txt", col_names = FALSE)
+write_tsv(data.frame(values), path = "data/derived/output/eigen_decomp.eigenD_female.txt", col_names = FALSE)
 
-# Define the paths to the eigenvalues and eigenvectors
-GRM <- "-d ./output/eigen_decomp.eigenD.txt -u ./output/eigen_decomp.eigenU.txt"
+write_tsv(vectors[-missing_row, -missing_row], path = "data/derived/output/eigen_decomp.eigenU_male.txt", col_names = FALSE)
+write_tsv(data.frame(values[-missing_row]), path = "data/derived/output/eigen_decomp.eigenD_male.txt", col_names = FALSE)
+unlink("data/derived/output/eigen_decomp.eigenD.txt")
+unlink("data/derived/output/eigen_decomp.eigenU.txt")
+# vectors <- vectors[,-(which(values < 0.2))]
+# values <- values[-(which(values < 0.2))]
+# write_tsv(vectors, path = "data/derived/output/eigen_decomp.eigenU.txt", col_names = FALSE)
+# write_tsv(data.frame(value = values), path = "data/derived/output/eigen_decomp.eigenD.txt", col_names = FALSE)
 ```
 
 
 ### Run univariate and multivariate association tests
 
-The following code chunk runs 5 linear mixed models in parallel, implemented in the command line software [GEMMA](http://www.xzlab.org/software/GEMMAmanual.pdf). Each of the univariate linear mixed models uses the decomposed genomic relatedness matrix from above, and has one of our four fitness traits as the response variable. The multivariate model contains all four traits, and also used the decomposed genomic relatedness matrix.
+The following code chunk runs 5 linear mixed models, implemented in [GEMMA](http://www.xzlab.org/software/GEMMAmanual.pdf). Each of the univariate linear mixed models uses the decomposed genomic relatedness matrix from above, and has one of our four fitness traits as the response variable. The multivariate model contains all four traits, and also uses the decomposed genomic relatedness matrix.
 
-```{r run_gwas, results='hide', eval=FALSE}
-options(future.globals.maxSize = 2000 * 1024 ^ 2)
-plan("multicore")
-
+```{r eval=FALSE}
 # The option "-lmm 1" runs a linear mixed model using Wald test to get the p-values
 # The option "-r2 0.95" only keeps SNPs that are <95% correlated with Wolbachia infection status
 # The option "-c covariate_file_for_GEMMA.txt" adds in the Wolbahia infection status as a covariate, and also tells the model to fit an intercept
-opts <- "-lmm 1 -r2 0.99 -c covariate_file_for_GEMMA.txt"
+opts <- "-lmm 1"
+GRM_female <- "-d ./output/eigen_decomp.eigenD_female.txt -u ./output/eigen_decomp.eigenU_female.txt"
+GRM_male <- "-d ./output/eigen_decomp.eigenD_male.txt -u ./output/eigen_decomp.eigenU_male.txt"
+#cov <- "-c covariate_file_for_GEMMA.txt -r2 0.99" # not used at present
 
-# Run all five GWASs in parallel
-c("gemma -bfile {bed} {GRM} {opts} -n 1 -o female_early_lmm",
-  "gemma -bfile {bed} {GRM} {opts} -n 2 -o female_late_lmm",
-  "gemma -bfile {bed} {GRM} {opts} -n 3 -o male_early_lmm",
-  "gemma -bfile {bed} {GRM} {opts} -n 4 -o male_late_lmm",
-  "gemma -bfile {bed} {GRM} {opts} -n 1 2 3 4 -o all_four_traits") %>%
-  future_lapply(run_command, path = "/data/derived")
+c("gemma -bfile {bed} {GRM_female} {opts} -n 1 -o female_early_lmm",
+  "gemma -bfile {bed} {GRM_female} {opts} -n 2 -o female_late_lmm",
+  "gemma -bfile {bed} {GRM_male} {opts} -n 3 -o male_early_lmm",
+  "gemma -bfile {bed} {GRM_male} {opts} -n 4 -o male_late_lmm") %>%
+  #"gemma -bfile {bed} {GRM_male} {opts} -n 1 2 3 4 -o all_four_traits") %>% 
+  lapply(run_command, path = "/data/derived")
 ```
 
 
 ### Inspect the GEMMA log files from the association tests {.tabset}
 
-According to the GEMMA manual, GEMMA calculates the relatedness matrix from the SNP data, then "extracts the matrix elements corresponding to the analyzed individuals (which may be smaller than the number of total individuals), centers the matrix, and then performs an eigendecomposition". The aim is to better estimate the effects of each SNP independently of the rest of the genome. 
+According to the manual, GEMMA calculates the relatedness matrix from the SNP data, then "extracts the matrix elements corresponding to the analyzed individuals (which may be smaller than the number of total individuals), centers the matrix, and then performs an eigendecomposition". The aim is to better estimate the effects of each SNP independently of the rest of the genome. 
+
+The metric `pve` in the outputs below is "the proportion of variance in the phenotype explained by typed genotypes", also called SNP heritability. Next, `vg` is $V_g$, the variance in phenotype due to variance in genotype, while `ve` is $V_e$, the variance in phenotype due to variance in environment. 
 
 #### Female early-life fitness
 ```{r lmm1}
@@ -228,26 +240,25 @@ cat(readLines("data/derived/output/female_late_lmm.log.txt"), sep = "\n")
 cat(readLines("data/derived/output/male_late_lmm.log.txt"), sep = "\n")
 ```
 
-#### All four traits in MV model
-```{r}
-cat(readLines("data/derived/output/all_four_traits.log.txt"), sep = "\n")
-```
+<!-- #### All four traits in MV model -->
+<!-- ```{r} -->
+<!-- cat(readLines("data/derived/output/all_four_traits.log.txt"), sep = "\n") -->
+<!-- ``` -->
 
 
 ### Add the allele IDs and minor allele frequencies (MAFs) to variant annotation database
 
 This part uses the full DGRP panel, because our aim is to determine how common these alleles are in the original wild population from which the DGRP was captured. These MAFs are the ones used in our statistical analyses and plots.
 
-```{r get_MAF}
-# Extract and save the MAFs
+```{r get_MAF, eval=FALSE}
+# Extract and save the MAFs, SNP positions, and major/minor alleles
 MAFs <- read.table("data/derived/plink.frq", header = TRUE, stringsAsFactors = FALSE) %>% 
   mutate(position = map_chr(strsplit(SNP, split = "_"), function(x) x[2])) %>%
   select(SNP, position, MAF, A1, A2) %>% 
   rename(minor_allele = A1,
          major_allele = A2) 
 
-# Connect to the annotation database
-db <- src_sqlite("data/derived/annotations.sqlite3", create = TRUE)
+db <- DBI::dbConnect(RSQLite::SQLite(), "data/derived/annotations.sqlite3", create = FALSE)
 
 MAFs <- tbl(db, "variants") %>% 
   select(SNP, FBID, site.class, distance.to.gene, chr) %>% collect() %>%
@@ -256,7 +267,7 @@ MAFs <- tbl(db, "variants") %>%
   mutate(site.class = replace(site.class, is.na(site.class), "INTERGENIC"))
 
 # Delete the original variant annotation table from the db, and add the new one back in
-db$con %>% db_drop_table(table = "variants") 
+db %>% db_drop_table(table = "variants") 
 db %>% copy_to(MAFs, 
                "variants", temporary = FALSE, 
                indexes = list("SNP", "FBID", "chr", "site.class")) 
@@ -265,27 +276,62 @@ rm(MAFs)
 
 
 
-### Clean up the multivariate GEMMA results
-```{r clean_up}
-read_tsv("data/derived/output/all_four_traits.assoc.txt") %>% 
-  rename(SNP = rs,
-         female_early = beta_1, 
-         female_late  = beta_2,
-         male_early   = beta_3, 
-         male_late    = beta_4) %>%
-  select(-chr, -ps, -n_miss, -allele1, -allele0, -af) %>%
-  arrange(p_wald) %>% mutate(fdr = p.adjust(p_wald, method = "BH")) %>%
-  write_tsv("data/derived/output/all_four_traits.assoc.txt")
+### Clean up the GEMMA results
+Discard columns we don't need, and rename the SNP column from the name assigned by GEMMA (`rs`) to something more sensible (`SNP`).
+```{r clean_up, eval=FALSE}
+# The 4 univariate files:
+c("data/derived/output/female_early_lmm.assoc.txt",
+  "data/derived/output/female_late_lmm.assoc.txt",
+  "data/derived/output/male_early_lmm.assoc.txt",
+  "data/derived/output/male_late_lmm.assoc.txt") %>%
+  lapply(function(filename){
+    df <- read_tsv(filename)
+    names(df)[names(df) == "rs"] <- "SNP"
+    df %>% select(SNP, beta, se, p_wald) %>% 
+      write_tsv(filename)
+  })
 
-read_tsv("data/derived/output/all_four_traits.assoc.txt") %>% select(SNP, contains("male"), p_wald, fdr)
+# The multivariate file:
+# all_four <- read_tsv("data/derived/output/all_four_traits.assoc.txt") %>% 
+#   rename(SNP = rs,
+#          female_early = beta_1, 
+#          female_late  = beta_2,
+#          male_early   = beta_3, 
+#          male_late    = beta_4) %>%
+#   select(-chr, -ps, -n_miss, -allele1, -allele0, -af) %>%
+#   arrange(p_wald) 
+
+# Perform FDR on p-vals, assuming we only run one test on groups of SNPs in perfect LD with each other
+# p_vals <- all_four %>%
+#   select(female_early, female_late, male_early, male_late, p_wald) %>% 
+#   distinct() %>% 
+#   select(p_wald) %>%
+#   mutate(p_fdr = p.adjust(p_wald, method = "BH"))
+
+# all_four %>%
+#   left_join(p_vals, by = "p_wald") %>% 
+#   write_tsv("data/derived/output/all_four_traits.assoc.txt")
+# 
+# rm(all_four)
 ```
 
 ### Perform SNP clumping using PLINK
 
-```{r}
+```{r snp_clumping, eval=FALSE}
+if(!exists("plink")) plink  <- bigsnpr::download_plink()
+# Use the un-manipulated DGRP bed/bim/fam files, since they don't throw an error from plink
+bed <- "../input/dgrp2"
+
+# Remind plink to only use the SNPs that passed QC
+# read_tsv("data/derived/output/female_early_lmm.assoc.txt") %>% select(SNP) %>%
+#   write_tsv(col_names = FALSE, path = "data/derived/snp_list.txt")
+
+
 do_snp_clumping <- function(trait){
-  run_command(glue("{plink} --bfile dgrp2_QC_focal_lines", 
+
+  run_command(glue("plink --bfile {bed}", 
                    " --clump output/{trait}.assoc.txt",
+                   " --noweb",
                    " --clump-field p_wald --clump-p1 0.00001"), # Each clump must contain one snp with p < 10 ^ -5
               path = "/data/derived")
   trait <- gsub("_lmm", "", trait)
@@ -293,6 +339,7 @@ do_snp_clumping <- function(trait){
   file.rename("data/derived/plink.clumped", file_name)
   
   clumps <- read.table(file_name, header = TRUE) %>% 
+    as_tibble() %>%
     rename(index_SNP = SNP,
            index_SNP_p_value = P,
            num_SNPs_in_clump = TOTAL,
@@ -312,25 +359,93 @@ do_snp_clumping <- function(trait){
     res[!is.na(res)]
   })
   
+  db_local <- tbl(db, "variants") %>% select(SNP, FBID) %>% collect() 
   clumps$FBIDs <- lapply(SNPs, function(x) {
-    focal <- tbl(db, "variants") %>% filter(SNP %in% x) %>% collect()
+    focal <- db_local %>% filter(SNP %in% x) 
     if(nrow(focal) == 0) return(NA)
     focal %>% pull(FBID) %>% unique() %>% paste0(collapse = ", ")
     }) %>% unlist()
   
+  db_local <- tbl(db, "genes") %>% collect()
   clumps$genes <- lapply(clumps$FBIDs, function(x) {
     if(is.na(x)) return(NA)
     FB <- strsplit(x, split = ", ")[[1]]
-    return(tbl(db, "genes") %>% filter(FBID %in% FB) %>% pull(gene_name) %>% paste0(collapse = ", "))
+    return(db_local %>% filter(FBID %in% FB) %>% pull(gene_name) %>% paste0(collapse = ", "))
   }) %>% unlist()
   
   write_tsv(clumps, file_name)
   unlink("data/derived/plink.log")
 }
 
-lapply(c("female_early_lmm", "female_late_lmm", "male_early_lmm", "male_late_lmm", "all_four_traits"), do_snp_clumping)
+lapply(c("female_early_lmm", "female_late_lmm", "male_early_lmm", "male_late_lmm"), do_snp_clumping)
 ```
 
+
+## Concatenate the results of the four univariate GWAS
+
+Load up the GWAS results, which were produced by using linear mixed models implemented in GEMMA, and arrange the data in a 'wide' format, where each row is one SNP, and the columns hold the estimates of $\beta$, the standard error of $\beta$, and the p-value for the GEMMA association tests on each of the four fitness traits.
+
+```{r eval=FALSE}
+load_gwas_results <- function(fitness.component){
+  new_names <- c(x = "beta", y = "se", z = "p_wald")
+  names(new_names) <- c(paste("beta_", fitness.component, sep = ""), 
+                        paste("SE_", fitness.component, sep = ""), 
+                        paste("pvalue_", fitness.component, sep = ""))
+  
+  paste("data/derived/output/", fitness.component, "_lmm.assoc.txt", sep = "") %>%
+    read_tsv() %>%
+    select(SNP, beta, se, p_wald) %>%
+    rename(!!new_names)
+}
+all_univariate_lmm_results <- load_gwas_results("female_early") %>%
+  full_join(load_gwas_results("female_late"), by = "SNP") %>%
+  full_join(load_gwas_results("male_early"), by = "SNP") %>%
+  full_join(load_gwas_results("male_late"), by = "SNP") 
+```
+
+
+## Prune SNPs that are in 100% linkage disequilibrium
+
+Because GEMMA is quick and easy to run, we did not bother working out how to edit PLINK files to identify SNPs that are in complete linkage disequilibrium with one another (and there is lots of short- and long-range LD in the dataset). However, it is easy to perform LD pruning at this stage, because we can take advantage of the fact that SNPs in perfect LD with each other will have identical estimates of $|\beta|$ and its standard error, for all four fitness traits. The following code groups together SNPs that have identical association test results, producing a data frame in which the number of rows is equal to the number of unique datasets (i.e. combinations of genotypes and phenotypes) that were statistically analysed by GEMMA. 
+
+
+```{r eval=FALSE}
+# Group loci with identical GWAS results (these are in 100% LD with each other)
+all_univariate_lmm_results <- all_univariate_lmm_results %>%
+  mutate(pasted = paste(beta_female_early, beta_female_late, beta_male_early, beta_male_late, 
+                        SE_female_early, SE_female_late, SE_male_early, SE_male_late)) %>%
+  group_by(pasted) %>%
+  summarise(SNPs = paste0(SNP, collapse = ", "),    # If there are multiple SNPs, concatenate their names
+            beta_female_early = beta_female_early[1], 
+            beta_female_late = beta_female_late[1], 
+            beta_male_early = beta_male_early[1], 
+            beta_male_late = beta_male_late[1],
+            SE_female_early = SE_female_early[1], 
+            SE_female_late = SE_female_late[1], 
+            SE_male_early = SE_male_early[1], 
+            SE_male_late = SE_male_late[1],
+            pvalue_female_early = pvalue_female_early[1], 
+            pvalue_female_late = pvalue_female_late[1], 
+            pvalue_male_early = pvalue_male_early[1], 
+            pvalue_male_late = pvalue_male_late[1]) %>%
+  ungroup() %>% select(-pasted) %>% 
+  arrange(SNPs)
+
+
+all_univariate_lmm_results <- read_csv("data/derived/all_univariate_GEMMA_results.csv")
+# a handful of SNPs with low MAF could not be estimated and they have beta and SE == NA, so remove them now
+# I think these are SNPs where the only lines with the minor allele were the lines where we measured female but not male fitness
+SNPs_to_remove <- all_univariate_lmm_results$SNPs[!complete.cases(all_univariate_lmm_results)] 
+
+all_univariate_lmm_results <- all_univariate_lmm_results %>% 
+  filter(!(SNPs %in% SNPs_to_remove))
+
+write_csv(all_univariate_lmm_results, path = "data/derived/all_univariate_GEMMA_results.csv")
+unlink("data/derived/output/female_early_lmm.assoc.txt")
+unlink("data/derived/output/female_late_lmm.assoc.txt")
+unlink("data/derived/output/male_early_lmm.assoc.txt")
+unlink("data/derived/output/male_late_lmm.assoc.txt")
+```
 
 
 

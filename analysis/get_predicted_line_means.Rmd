@@ -1,54 +1,86 @@
 ---
-title: "GWAS for fitness in Drosophila"
-output:
-  html_document: default
-  html_notebook: default
+title: "Estimating the mean phenotype for each DGRP line"
+output: 
+  workflowr::wflow_html:
+    code_folding: hide 
 ---
 
+```{r, include=FALSE}
+library(knitrhooks) # for scrollable output of the brms models below
+output_max_height()
+knitr::opts_chunk$set(output_max_height = "300px")
+setwd("~/Rprojects/fitnessGWAS/")
+```
+
 ```{r message=FALSE, warning=FALSE, results="hide"}
-library(dplyr)
+library(tidyverse)
 library(brms)
-library(pander)
 library(mice)
-library(tibble)
+library(ICC)
+library(future)
+library(future.apply)
+library(kableExtra)
 ```
 
 ## Estimate the line means for relative fitness
-Most studies of the DGRP calculate so-called "line means" by averaging the phenotypes of several individuals per line. Instead, we used Bayesian generalised linear mixed model (GLMMs) to estimate the true line means for each of the 4 fitness traits.
+Most studies of the DGRP calculate "line means" simply by averaging the phenotypes of several individuals per line. Instead, we used Bayesian generalised linear mixed model (GLMMs) to estimate the true line means for each of the 4 fitness traits, implemented in the `brms` package.
 
-One notable advantage of using a model instead of a simple average, is that this allows one to statistically remove confounding factors such as block effects, which would otherwise add noise to the line means. Note that we intentionally measured line 352 in every block, in order to have good precision to estimate the block effect.
+One notable advantage of using a model instead of a simple average is that a model allows one to statistically remove confounding factors such as block effects, which would otherwise bias the line means. Note that we intentionally measured line 352 in every block in our experiments, in order to improve our precision to estimate block effects.
 
 Additionally, we must properly account for our experimental design in order to avoid pseudoreplication. Our design involved repeatedly measuring the same individuals to determine early- and late-life fitness. 
 
-For the progeny count data used to measure female fitness, we used a Poisson GLMM with the following formula:
+For the progeny count data used to measure early and late female fitness, we used multivariate model with two components, one for early- and one for late-life fitness, which had the following formulae (in `brms`-like pseudocode):
 
-$Y = age + (age|line) + (age|block) + (1|vial.ID)$
+`Progeny count (early) = Intercept + (1 | p | line) + (1 | q | block) + (1 | r | vial)`
 
-That is, we specify a random intercept for each vial, block and line. Additionally, we specify a random slope with age for each line and block, allowing for differential change in fitness with age between lines and blocks. The then use the ``fitted`` function in the ``brms`` package to derive the estimated mean progeny production for each combination of age and line. The line means were left on the scale of the linear predictor (as opposed to back-transforming them via the link function), in order to increase their normality. Furthermore, they were scaled to have a mean of zero and standard deviation of one.
+`Progeny count (late) = Intercept + (1 | p | line) + (1 | q | block) + (1 | r | vial)`
 
-Similarly, for our measure of male fitness (proportion of offspring sired), we used a binomial model with the following formula:
+To explain, the terms with the form `(1 | x | y)` represent random intercepts for line, block, and vial ID, where the letter between the pipe operator indicates which random intercepts should be assumed to be (potentially) correlated with which other random intercepts. We therefore assume that the effect of line, block, and vial ID on each observation are potentially correlated for both of the response variables, and estiamte that correlation while fitting the multivariate model.
 
-$Y = age + (age|line) + (age|block) + (1|vial.ID)$
+The progeny count data were assumed to follow a Poisson distribution (with the standard log link function).
 
-Where $Y$ is a 1 or 0 depending on whether the focal offspring was sired by a male from the focal DGRP line or a rival male, respectively.
+Similarly, for our measure of male fitness (proportion of offspring sired), we used a multivariate model consisting of a pair of binomial GLMMs, with the following formula:
+
+`Proportion of progeny sired (early) = Intercept + (1 | p | line) + (1 | q | block) + (1 | r | vial)`
+
+`Proportion of progeny sired (late) = Intercept + num.GFP.males + (1 | p | line) + (1 | q | block) + (1 | r | vial)`
+
+Where the response variable was a Bernoulli outcome describing the paternity of each offspring observed. Note that in the late life fitness model, we included the number of surviving rival (GFP) males as an additional predictor. We reasoned that the rival males might die at random with respect to the genotype of the focal males, which lowers competition on the focal males, and so we can get an improved estimate of the focal males' siring success by statistically correcting for their deaths via the model.
 
 
 ### Define functions for prediction
 ```{r}
 load_and_tidy_fitness_data <- function(){
-  female_fitness <- read.csv("data/input/female_fitness.csv", stringsAsFactors = FALSE) %>% 
+  female_fitness <- read_csv("data/input/female_fitness.csv") %>% 
     arrange(line) %>%
-    mutate(vial.ID = paste("F", block, replicate, line, sep = "_"),
+    split(paste(.$block, .$line)) %>%
+    map(~ .x %>% mutate(replicate = 1:n())) %>%
+    bind_rows() %>%
+    mutate(vial = 1:n(),
+           vial = paste("F", line, block, replicate, sep = "_"),
            line = paste("line_", line, sep = "")) %>% 
-    dplyr::select(-num.F.late1, -num.F.late2, -num.laying.F.early, -replicate) 
-  female_fitness$female.fitness.early[is.na(female_fitness$female.fitness.early)] <- 0
-  female_fitness$female.fitness.late[is.na(female_fitness$female.fitness.late)] <- 0
+    dplyr::select(-num.F.late1, -num.F.late2, -num.laying.F.early, -replicate) %>%
+    mutate(female.fitness.early = replace(female.fitness.early, is.na(female.fitness.early), 0),
+           female.fitness.late = replace(female.fitness.late, is.na(female.fitness.late), 0)) 
   
-  male_fitness <- read.csv("data/input/male_fitness.csv", stringsAsFactors = FALSE ) %>% 
+  male_fitness <- read_csv("data/input/male_fitness.csv") %>% 
     arrange(line) %>%
-    mutate(vial.ID = paste("M", block, replicate, line, sep = "_"),
+    split(paste(.$block, .$line)) %>%
+    map(~ .x %>% mutate(replicate = 1:n())) %>%
+    bind_rows() %>%
+    mutate(vial = paste("M", line, block, replicate, sep = "_"),
            line = paste("line_", line, sep = "")) %>%
     dplyr::select(-num.DGRP.males, -replicate)
+  
+  # Remove the small number of observations where the females had no offspring, so we cannot measure the
+  # rival vs focal male competitive abilities
+  # NOTE: Not needed any more, because now I impute this as missing data
+  # exclude_early <- male_fitness$early.male.rival + male_fitness$early.male.focal == 0
+  # exclude_late <- male_fitness$late.male.rival + male_fitness$late.male.focal == 0
+  # male_fitness$early.male.rival[exclude_early] <- NA
+  # male_fitness$early.male.focal[exclude_early] <- NA
+  # male_fitness$late.male.rival[exclude_late] <- NA
+  # male_fitness$late.male.focal[exclude_late] <- NA
   
   # Save these tidy files, for data archiving
   write.csv(female_fitness, file = "data/input/female_fitness_CLEANED.csv", row.names = FALSE)
@@ -58,10 +90,11 @@ load_and_tidy_fitness_data <- function(){
 }
 
 
-# This function calculates the means for each line
-get.line.means <- function(){
+# This function calculates the traditional line means (i.e. simple averages) for each line
+get_line_means <- function(){
   left_join(
-    load_and_tidy_fitness_data()[[1]] %>% select(line, female.fitness.early, female.fitness.late) %>% 
+    load_and_tidy_fitness_data()[[1]] %>% 
+      select(line, female.fitness.early, female.fitness.late) %>% 
       group_by(line) %>%
       summarise(female.fitness.early = mean(female.fitness.early), 
                 female.fitness.late = mean(female.fitness.late)),
@@ -80,120 +113,155 @@ get.line.means <- function(){
 # A function to calculate each line's expected fitness, using brms models to adjust for block + vial random effects
 # For the male late life assay, we also adjust for the number of competitor males that died 
 # (this assumes that their deaths happened randomly with respect to which line we were measuring)
-get_predicted_line_means <- function(){
+get_predicted_line_means <- function(overwrite = FALSE){
   
   # If it's already calculated, just load up the file. Otherwise, make the file
   out.file <- "data/derived/predicted_line_means.csv"
-  if(file.exists(out.file)) return(read.csv(out.file, stringsAsFactors = FALSE))
+  if(file.exists(out.file) & !overwrite) return(read_csv(out.file))
   
-  ####### Load the individual-level data
-  # Load the female data and rearrange to long format
-  female_fitness <- load_and_tidy_fitness_data()[[1]] %>% 
-    gather(age, fitness, female.fitness.early, female.fitness.late)
+  ####### Load the individual-level data for females
+  female_fitness <- load_and_tidy_fitness_data()[[1]] 
   
-  # Load the male data and make 5 imputed datasets using the package 'mice'
-  # (there are 2 vials with no early-male fitness, and 1 vial with no count of the number of GFP males)
+  ####### Load the individual-level data for males, and impute missing values
+  
+  # For one vial, there is no early-life measurement because the females did not produce offspring. 
+  # Therefore we impute that datapoint and make 5 imputed datasets using the package 'mice'
   # See this link for explanation: https://cran.r-project.org/web/packages/brms/vignettes/brms_missings.html
   male_fitness <- load_and_tidy_fitness_data()[[2]]
+  male_fitness <- male_fitness %>% 
+    mutate(early.male.rival = replace(early.male.rival, early.male.rival + early.male.focal == 0, NA),
+           early.male.focal = replace(early.male.focal, is.na(early.male.rival), NA)) 
   male_fitness_imputed <- mice(male_fitness, m = 5, print = FALSE, seed = 1)
-  male_fitness_imputed <- lapply(1:5, function(i) complete(male_fitness_imputed, i))
-  male_fitness_imputed <- lapply(male_fitness_imputed, function(focal) {
-    focal %>% mutate(total1 = early.male.rival + early.male.focal,
-                     total2 = late.male.rival + late.male.focal)})
+  male_fitness_imputed <- lapply(1:5, function(i) { # for each imputed dataset, 
+    complete(male_fitness_imputed, i) %>% 
+      mutate(total1 = early.male.rival + early.male.focal, # tally up the focal+rival offspring for binomial model
+             total2 = late.male.rival + late.male.focal,
+             num.GFP.males = as.numeric(scale(num.GFP.males))) %>% # scale this covariate
+      # For late-life assays where the 5 focal males all died before reaching age 14, 
+      # we need to assign them zero fitness. We did this by assuming that the rivals sired 100/100 offspring.
+      # This scenario happened in 47 vials (out of 810)
+      mutate(late.male.focal = replace(late.male.focal, total2 == 0, 100),
+             total2 = replace(total2, total2 == 0, 100))
+  })
+
+  ####### Run model on the female data 
   
-  ####### Run model on female data 
-  female_model <- brm(fitness ~ age + (age|line) + (age|block) + (1|vial.ID), 
-                      family = poisson, data = female_fitness,
-                      iter = 4000, chains = 4, cores = 4,
-                      seed = 1, control = list(adapt_delta = 0.999, max_treedepth = 15)) %>% 
-    add_ic(ic = "R2")
+  prior_females <- 
+    c(set_prior("cauchy(0, 0.1)", class = "sd", resp = 'femalefitnessearly', group = "line"),
+      set_prior("cauchy(0, 0.1)", class = "sd", resp = 'femalefitnessearly', group = "block"),
+      set_prior("cauchy(0, 0.1)", class = "sd", resp = 'femalefitnessearly', group = "vial"),
+      set_prior("cauchy(0, 0.1)", class = "sd", resp = 'femalefitnesslate', group = "line"),
+      set_prior("cauchy(0, 0.1)", class = "sd", resp = 'femalefitnesslate', group = "block"),
+      set_prior("cauchy(0, 0.1)", class = "sd", resp = 'femalefitnesslate', group = "vial"))
+  
+  prior_males <- 
+    c(set_prior("cauchy(0, 0.1)", class = "sd", resp = 'earlymalefocal', group = "line"),
+      set_prior("cauchy(0, 0.1)", class = "sd", resp = 'earlymalefocal', group = "block"),
+      set_prior("cauchy(0, 0.1)", class = "sd", resp = 'earlymalefocal', group = "vial"),
+      set_prior("cauchy(0, 0.1)", class = "sd", resp = 'latemalefocal', group = "line"),
+      set_prior("cauchy(0, 0.1)", class = "sd", resp = 'latemalefocal', group = "block"),
+      set_prior("cauchy(0, 0.1)", class = "sd", resp = 'latemalefocal', group = "vial"))
+      
+   
+  
+  
+  female1 <- bf(female.fitness.early ~ (1 | p | line) + (1 | q | block) + (1 | r | vial))
+  female2 <- bf(female.fitness.late ~  (1 | p | line) + (1 | q | block) + (1 | r | vial))
+  female_model <- brm(female1 + female2, 
+                      family = "poisson", data = female_fitness,
+                      prior = prior_females,
+                      iter = 5000, chains = 4, cores = 4,
+                      seed = 1, control = list(adapt_delta = 0.999, max_treedepth = 15)) 
   writeLines(capture.output(summary(female_model)), con = "data/derived/model_summary_females.txt")
+  
   saveRDS(female_model, "data/derived/female_fitness_prediction_model.rds") # maybe delete later - probably not needed?
   
   
   ### Run model on male data 
-  # Fit a non-linear smooth for num.GFP.males, but only for the late life data
-  # Inspection of the raw data and model results illustrates the non-linear smooth improves model fit appreciably
-  # For example, the 'wiggliness' of the smooth term is significantly non-zero
-  # See: https://www.fromthebottomoftheheap.net/2018/04/21/fitting-gams-with-brms/
-  male1 <- bf(early.male.focal | trials(total1) ~ (1|line) + (1|block) + (1|vial.ID))
-  male2 <- bf(late.male.focal  | trials(total2) ~ s(num.GFP.males) + (1|line) + (1|block) + (1|vial.ID))
+  # Fit num.GFP.males, but only for the late life data
+  male1 <- bf(early.male.focal | trials(total1) ~ (1 | p | line) + (1 | q | block) + (1 | r | vial))
+  male2 <- bf(late.male.focal  | trials(total2) ~ num.GFP.males + (1 | p | line) + (1 | q | block) + (1 | r | vial))
   
   # Run 5 models, on each of the 5 imputed datasets, and combine the results
   male_model <- brm_multiple(male1 + male2,
-                                 family = binomial, data = male_fitness_imputed,
-                                 iter = 4000, chains = 4, cores = 4,
-                                 seed = 1, control = list(adapt_delta = 0.999, max_treedepth = 15)) %>%
-    add_ic(ic = "R2")
+                             family = "binomial", 
+                             prior = prior_males,
+                             data = male_fitness_imputed,
+                             iter = 5000, chains = 4, cores = 4,
+                             seed = 1, control = list(adapt_delta = 0.999, max_treedepth = 15)) 
   writeLines(capture.output(summary(male_model)), con = "data/derived/model_summary_males.txt")
   saveRDS(male_model, "data/derived/male_fitness_prediction_model.rds") # maybe delete later - probably not needed?
   male_model <- readRDS("data/derived/male_fitness_prediction_model.rds") 
   
   ####### Define new data for prediction
   new.data.female <- female_fitness %>% 
-    select(age, line) %>% distinct() %>% arrange(line, age)
+    select(line) %>% distinct() %>% arrange(line)
   
   new.data.male <- male_fitness %>% 
     select(line) %>% distinct() %>% arrange(line) %>% 
-    mutate(total1 = 100, # I checked, and changing this number does not affect the line means, as I expected
+    mutate(total1 = 100, # I checked, and changing this number does not affect the line means, as expected
            total2 = 100, 
            num.GFP.males = male_fitness %>% .$num.GFP.males %>% mean(na.rm=TRUE))
   
-  # Get predicted lines means for early and late life female fitness on linear predictor scale (i.e. normal)
+  # Get predicted lines means for early and late life *female* fitness on linear predictor scale (i.e. fairly normal)
   female_line_preds <- data.frame(new.data.female, 
                                   fitted(female_model, 
                                          newdata = new.data.female, 
-                                         re_formula = "~ (age|line)", 
+                                         re_formula = "~ ( 1 | line)", 
                                          scale = "linear")) %>%
-    select(age, line, Estimate) %>% 
-    spread(age, Estimate) %>%
-    mutate(female.fitness.early = as.numeric(scale(female.fitness.early)),
+    select(line, Estimate.femalefitnessearly, Estimate.femalefitnesslate) %>% 
+    rename(female.fitness.early = Estimate.femalefitnessearly,
+           female.fitness.late = Estimate.femalefitnesslate) %>%
+    mutate(female.fitness.early = as.numeric(scale(female.fitness.early)), # scale the line means
            female.fitness.late = as.numeric(scale(female.fitness.late)))
   
-  # Get predicted lines means for early and late life male fitness on linear predictor scale (i.e. normal)
+  # Get predicted lines means for early and late life *male* fitness on linear predictor scale (i.e. fairly normal)
   male_line_preds <- data.frame(new.data.male, 
-                              fitted(male_model_NEW, 
-                                     newdata = new.data.male, 
-                                     re_formula = "~ (1|line)", 
-                                     scale = "linear")) %>%
-  select(line, Estimate.earlymalefocal, Estimate.latemalefocal) %>% 
-  mutate(male.fitness.early = as.numeric(scale(Estimate.earlymalefocal)),
-         male.fitness.late = as.numeric(scale(Estimate.latemalefocal))) %>%
-  select(line, male.fitness.early, male.fitness.late)
+                                fitted(male_model, 
+                                       newdata = new.data.male, 
+                                       re_formula = "~ (1 | line)", 
+                                       scale = "linear")) %>%
+    select(line, Estimate.earlymalefocal, Estimate.latemalefocal) %>% 
+    rename(male.fitness.early = Estimate.earlymalefocal,
+           male.fitness.late = Estimate.latemalefocal) %>%
+    mutate(male.fitness.early = as.numeric(scale(male.fitness.early)), # scale the line means
+           male.fitness.late = as.numeric(scale(male.fitness.late))) 
 
-  # Calculate the proportion of variance explained by line for females
-  
-  ## Get the posterior predicted values for each data point
-  predicted <- data.frame(female_fitness[complete.cases(female_fitness), ],
-                          t(fitted(female_model, summary = FALSE)))
-  
-  ## Define a function to get the ICC for line, for each posterior sample of predictions
-  get_ICC_line <- function(predictions, age_class = NULL){
-    if(!is.null(age_class)) predictions <- predictions %>% filter(age == age_class) 
-    first.col <- which(str_detect(names(predictions), "X"))[1] 
-    sapply(0:7999, function(i){
-       ICCbare(predictions$line, predictions[, i+first.col])
-    })
+  ## Define a function to get the ICC for line, for each posterior sample of predicted line means
+  get_ICC_line <- function(predictions){
+    cols <- str_detect(names(predictions), "X")
+    first_posterior_column <- which(cols)[1] 
+    n_draws <- sum(cols)
+    plan("multiprocess")
+    future_lapply(0:(n_draws - 1), function(i){
+       ICCbare(predictions$line, predictions[, i + first_posterior_column])
+    }) %>% unlist()
   }
   
   # Calculate ICC for each sample, separately for old and young females
-  Line_ICC_female_early <- get_ICC_line(predicted, "female.fitness.early")
-  Line_ICC_female_late <- get_ICC_line(predicted, "female.fitness.late")
+  # For females, this is done on the estimated line mean progeny produced (i.e. response scale)
+  predicted <- fitted(female_model, summary = FALSE)
+  Line_ICC_female_early <- get_ICC_line(data.frame(female_fitness, t(predicted[, , 1])))
+  Line_ICC_female_late <- get_ICC_line(data.frame(female_fitness, t(predicted[, , 2])))
   
   # Do the same for males
-  male_preds_early <-  data.frame(line = male_fitness$line,
-                                  t(fitted(male_model, summary = FALSE)[,,1]))
-  male_preds_late <-  data.frame(line = male_fitness$line,
-                                 t(fitted(male_model, summary = FALSE)[,,1]))
-
-  Line_ICC_male_early <- get_ICC_line(male_preds_early)
-  Line_ICC_male_late <- get_ICC_line(male_preds_late)
+  # For males, this is done on the estimated proportion progeny sired (i.e. response scale)
+  new_data <- male_fitness %>% 
+    select(block, line, vial.ID) %>% 
+    mutate(total1 = 100, 
+           total2 = 100, 
+           num.GFP.males = male_fitness %>% .$num.GFP.males %>% mean(na.rm=TRUE))
+  predicted <- fitted(male_model, summary = FALSE, newdata = new_data)
+  Line_ICC_male_early <- get_ICC_line(data.frame(new_data, t(predicted[, , 1])))
+  Line_ICC_male_late <- get_ICC_line(data.frame(new_data, t(predicted[, , 2])))
   
-  
-  ICC <- posterior_summary(as.mcmc(data.frame(Line_ICC_female_early, 
-                                              Line_ICC_female_late,
-                                              Line_ICC_male_early,
-                                              Line_ICC_male_late)))
+  ICC <- list(Line_ICC_female_early, 
+              Line_ICC_female_late,
+              Line_ICC_male_early,
+              Line_ICC_male_late) %>% lapply(posterior_summary) %>% 
+    do.call("rbind", .) %>% as_tibble() %>%
+    mutate(Fitness_trait = c("Female early-life fitness", "Female late-life fitness",
+                             "Male early-life fitness", "Male late-life fitness"))
   write.csv(ICC, file = "data/derived/ICC.csv", row.names = TRUE)
   
 
@@ -207,11 +275,9 @@ get_predicted_line_means <- function(){
   predicted_line_means <- female_line_preds %>%
     left_join(male_line_preds, by = "line") %>% 
     left_join(line_blocks, by = "line") %>%
-    arrange(line) %>%
-    mutate(line = paste("line_", line, sep = "")) 
+    arrange(line) 
   
   write.csv(predicted_line_means, out.file, row.names = FALSE)
-  predicted_line_means %>% mutate(line = gsub("line_line_", "line_", line))
 }
 ```
 
@@ -220,204 +286,162 @@ The object `line_means` is the raw line means: unscaled, arithmetic means and in
 
 The object `predicted_line_means` is the estimated line means from the Bayesian models. These means are on the scale of the linear predictor (i.e. Poisson for females, binomial for males) rather than on the scale of the original response. They have been scaled to have a mean of 0 and a variance of 1. 
 
-```{r}
-line_means <- get.line.means()
-predicted_line_means <- get_predicted_line_means() 
+```{r message=FALSE, warning=FALSE}
+line_means <- get_line_means()
+predicted_line_means <- get_predicted_line_means(overwrite = FALSE) 
 ```
 
 
-### Summary of model used to predict _FEMALE_ line means:
+### Summary of model used to predict **female** line means:
 ```{r comment=''}
 cat(readLines('data/derived/model_summary_females.txt'), sep = '\n')
 ```
 
-### Summary of model used to predict _MALE_ line means:
+### Summary of model used to predict **male** line means:
 ```{r comment=''}
 cat(readLines('data/derived/model_summary_males.txt'), sep = '\n')
 ```
 
-### Proportion of variance explained by 'DGRP line' in these two models:
+### Percent of variance in fitness explained by 'DGRP line':
+The table shows the posterior estimate of the intra-class correlation coefficient (ICC, which measures the proportion of variance within and between lines), using the above models to adjust for block effects (and one covariate in the male late-life fitness analysis). ICC was calculated using `ICC::ICCbare`. 
 ```{r comment=''}
 read.csv('data/derived/ICC.csv') %>% 
-  rename(Parameter = X, Lower.95.CI = X2.5.ile, Upper.95.CI = X97.5.ile) %>% pander()
+  select(Fitness_trait, Estimate, Est.Error, Q2.5, Q97.5) %>%
+  rename(`Fitness trait` = Fitness_trait, `Est. Error` = Est.Error, `Lower 95% CI` = Q2.5, `Upper 95% CI` = Q97.5) %>% 
+  mutate(across(where(is.numeric), ~ .x * 100)) %>%
+  kable(digits = 2) %>% kable_styling(full_width = FALSE)
 ```
 
-```{r}
-library(bigsnpr)
-library(stringr)
-library(sommer)
-bigsnp <- snp_readBed("data/derived/dgrp2_QC_all_lines.bed", backingfile = tempfile())
-bigsnp_attached <- snp_attach(bigsnp)
-G <- A.mat(bigsnp_attached$genotypes[1:nrow(bigsnp_attached$genotypes), 
-                                     1:ncol(bigsnp_attached$genotypes)] - 1) 
-colnames(G) <- bigsnp_attached$fam[,1]
-rownames(G) <- bigsnp_attached$fam[,1]
-G_mod <- G
-diag(G_mod) <- diag(G_mod) + 0.001
-G_inverse <- as(solve(G_mod), "dgCMatrix")
+## Estimate genetic (co)variance from the genomic relatedness matrix
 
+The following fits a multivariate mixed model using `brms`, to estimate the amount of variance explained by the DGRP line, accounting for the genomic relatedness matrix. The response variables are the predicted line means for the four phenotypes, as estimated in the previous section. We fit line as a random effect, specifying a covariance structure among the line effects that is equal to the genomic relatedness matrix (GRM), which we estimate using the SNP genotypes of the full sample of 205 DGRP lines. We use a somewhat informative prior to help the model converge; the prior is that the line and residual variances are not large (which must be true, given that the response variables have overall variance of 1), and that only 10% of the phenotype variance is explained by line (the posterior estimates suggest much higher line variance, indicating strong signal in the data).
 
-female_fitness <- load_and_tidy_fitness_data()[[1]]
-male_fitness <- load_and_tidy_fitness_data()[[2]]
-both_fitness <- full_join(
-    female_fitness, male_fitness, 
-    by = c("line", "block", "vial.ID"))
+The table below indicates that much of the variance in fitness is due to additive genetic effects, and that there is a positive geneti
 
-
-sommer_model <- mmer2(cbind(female.fitness.early, 
-                            female.fitness.late,
-                            male.fitness.early, 
-                            male.fitness.late) ~ 1,
-                      random =~ us(trait):g(line),
-                      G = list(line = G),
-                      data = predicted_line_means %>% 
-                        mutate(line = str_remove_all(line, "_")))
-
-dual <- as.factor(df$individual)
-
-library(sommer)
-mm <- adiag1(unsm(2),unsm(2));mm
-mix <- mmer(cbind(female_trait_1, 
-                  female_trait_2,
-                  male_trait_1,
-                  male_trait_2) ~ 1,
-     random=~vs(genotype,Gtc=unsm(4)) + vs(individual,Gtc=mm),
-     rcov=~vs(units), na.method.Y = "include",
-     data=df)
-
-mix$sigma
-cov2cor(mix$sigma$genotype)
-cov2cor(mix$sigma$individual)
-
-
-sommer_model <- mmer2(
-  cbind(female.fitness.early, 
-        female.fitness.late,
-        male.fitness.early, 
-        male.fitness.late) ~ 1,
+```{r eval=FALSE}
+# Run quant gen model using brms
+if(!file.exists("data/derived/brms_quant_gen.rds")){
   
-  random =~ 
-    us(trait):g(line) + 
-    us(trait):block, 
-    # us(trait):at(sex, c("male","female")):vial.ID,
-
-    # us(at(trait, c("female.fitness.early","female.fitness.late"))):vial.ID +
-    # us(at(trait, c("male.fitness.early","male.fitness.late"))):vial.ID,
-
-  # rcov   =~ us(at(trait, c("female.fitness.early","female.fitness.late"))):units + 
-  #           us(at(trait, c("male.fitness.early","male.fitness.late"))):units,
+  library(bigsnpr)
+  library(MCMCglmm)
+  library(sommer)
   
-  G = list(line = G),
+  # Get the data
+  mcmc_dat <- predicted_line_means %>% 
+    mutate(line = factor(str_remove_all(line, "_"))) %>%
+    filter(!is.na(male.fitness.early)) %>%
+    rename(femalefitnessearly = female.fitness.early,
+           femalefitnesslate = female.fitness.late,
+           malefitnessearly = male.fitness.early,
+           malefitnesslate = male.fitness.late)
   
-  data = both_fitness %>% 
-    mutate(line = str_remove_all(line, "_"),
-           male.fitness.early = early.male.focal / (early.male.focal + early.male.rival),
-           male.fitness.late = late.male.focal / (late.male.rival + late.male.focal),
-           male.fitness.early = asin(sqrt(male.fitness.early)),
-           male.fitness.late = asin(sqrt(male.fitness.late)))
-)
+  # Make inverse genomic relatedness matrix
+  bigsnp <- snp_readBed("data/derived/dgrp2_QC_all_lines.bed", backingfile = tempfile())
+  bigsnp_attached <- snp_attach(bigsnp)
+  G <- A.mat(bigsnp_attached$genotypes[1:nrow(bigsnp_attached$genotypes), 
+                                       1:ncol(bigsnp_attached$genotypes)] - 1) 
+  colnames(G) <- bigsnp_attached$fam[,1]
+  rownames(G) <- bigsnp_attached$fam[,1]
+  focal_lines <- mcmc_dat %>% pull(line)
+  G <- G[rownames(G) %in% focal_lines, 
+         colnames(G) %in% focal_lines]
+  G <- cov2cor(G)
+  
+  brms_quant_gen <- brm(
+    bf(femalefitnessearly ~ 0 + (1 | p | gr(line, cov = G))) +
+   #   bf(femalefitnesslate ~ 0 + (1 | p | gr(line, cov = G))) +
+      bf(malefitnessearly ~ 0 + (1 | p | gr(line, cov = G))) +
+   #   bf(malefitnesslate ~ 0 + (1 | p | gr(line, cov = G))) +
+      set_rescor(FALSE),
+    data = mcmc_dat, data2 = list(G = G), 
+    iter = 30000, chains = 4, cores = 1, warmup = 20000,
+    control = list(adapt_delta = 0.99999, max_treedepth = 20),
+    
+    prior = c(
+      prior(normal(0.5, 0.3), "sd", resp = 'femalefitnessearly', group = "line"),
+      # prior(normal(0.5, 0.12), "sd", resp = 'femalefitnesslate', group = "line"),
+      prior(normal(0.5, 0.3), "sd", resp = 'malefitnessearly', group = "line"),
+      # prior(normal(0.5, 0.12), "sd", resp = 'malefitnesslate', group = "line"),
+      prior(normal(0.5, 0.3), "sigma", resp = 'femalefitnessearly'),
+      # prior(normal(0.5, 0.12), "sigma", resp = 'femalefitnesslate'),
+      prior(normal(0.5, 0.3), "sigma", resp = 'malefitnessearly'),
+      prior(lkj(0.5), class = "cor", group = "line")#,
+      # prior(normal(0.5, 0.12), "sigma", resp = 'malefitnesslate')
+    )
+    
+    # prior = c( # worth a try too...
+    #   prior(Gamma(4,7), "sd", resp = 'femalefitnessearly', group = "line"),
+    #   prior(Gamma(4,7), "sd", resp = 'femalefitnesslate', group = "line"),
+    #   prior(Gamma(4,7), "sd", resp = 'malefitnessearly', group = "line"),
+    #   prior(Gamma(4,7), "sd", resp = 'malefitnesslate', group = "line"),
+    #   prior(Gamma(4,7), "sigma", resp = 'femalefitnessearly'),
+    #   prior(Gamma(4,7), "sigma", resp = 'femalefitnesslate'),
+    #   prior(Gamma(4,7), "sigma", resp = 'malefitnessearly'),
+    #   prior(Gamma(4,7), "sigma", resp = 'malefitnesslate')
+    # )
+    
+    
+    # prior = c(
+    #   # prior(cauchy(0.5, 1), class = "sigma", resp = 'femalefitnessearly'),
+    #   # prior(cauchy(0.5, 1), class = "sigma", resp = 'femalefitnesslate'),
+    #   # prior(cauchy(0.5, 1), class = "sigma", resp = 'malefitnessearly'),
+    #   # prior(cauchy(0.5, 1), class = "sigma", resp = 'malefitnesslate'),
+    #   prior(cauchy(0.5, 1), class = "sd", resp = 'femalefitnessearly', group = "line"),
+    #   prior(cauchy(0.5, 1), class = "sd", resp = 'femalefitnesslate', group = "line"),
+    #   prior(cauchy(0.5, 1), class = "sd", resp = 'malefitnessearly', group = "line"),
+    #   prior(cauchy(0.5, 1), class = "sd", resp = 'malefitnesslate', group = "line"),
+    #   prior(lkj(0.5), class = "cor", group = "line")
+    )
+  )
+  saveRDS(brms_quant_gen, "data/derived/brms_quant_gen.rds")
+} else {
+  brms_quant_gen <- readRDS("data/derived/brms_quant_gen.rds")
+}
 
-data.frame(est =t(bind_rows(sommer_model$sigma)), n = 1:length(sommer_model$sigma)) %>% rownames_to_column("var") %>% filter(est != 0)
-QG_parameters <- rownames_to_column(rbind(
-  pin(sommer_model, h2_female_early ~ V1 / (V1 + V11 + V21)), 
-  pin(sommer_model, h2_female_late ~ V5 / (V5 + V15 + V25)),
-  pin(sommer_model, h2_male_early ~ V8 / (V8 + V18 + V28)),
-  pin(sommer_model, h2_male_late ~ V10 / (V10 + V20 + V30)),
-  pin(sommer_model, cor_fe_fl ~ V2 / sqrt(V1 * V5)),
-  pin(sommer_model, cor_fe_me ~ V3 / sqrt(V1 * V8)),
-  pin(sommer_model, cor_me_ml ~ V9 / sqrt(V8 * V10)),
-  pin(sommer_model, cor_fl_ml ~ V7 / sqrt(V5 * V10))), var = "Parameter")
+p <- posterior_samples(brms_quant_gen)
+p <- tibble(
+  VA_FE = sqrt(p[, "sd_line__femalefitnessearly_Intercept"]),
+  VA_FL = sqrt(p[, "sd_line__femalefitnesslate_Intercept"]),
+  VA_ME = sqrt(p[, "sd_line__malefitnessearly_Intercept"]),
+  VA_ML = sqrt(p[, "sd_line__malefitnesslate_Intercept"]),
+  h2_FE = VA_FE / (VA_FE + sqrt(p[, "sigma_femalefitnessearly"])),
+  h2_FL = VA_FL / (VA_FL + sqrt(p[, "sigma_femalefitnesslate"])),
+  h2_ME = VA_ME / (VA_ME + sqrt(p[, "sigma_malefitnessearly"])),
+  h2_ML = VA_ML / (VA_ML + sqrt(p[, "sigma_malefitnesslate"])),
+  corr_FE_FL = p[,"cor_line__femalefitnessearly_Intercept__femalefitnesslate_Intercept"],
+  corr_FE_ME = p[,"cor_line__femalefitnessearly_Intercept__malefitnessearly_Intercept"],
+  corr_FL_ME = p[,"cor_line__femalefitnesslate_Intercept__malefitnessearly_Intercept"],
+  corr_FE_ML = p[,"cor_line__femalefitnessearly_Intercept__malefitnesslate_Intercept"],
+  corr_FL_ML = p[,"cor_line__femalefitnesslate_Intercept__malefitnesslate_Intercept"],
+  corr_ME_ML = p[,"cor_line__malefitnessearly_Intercept__malefitnesslate_Intercept"],
+  cov_FE_FL = corr_FE_FL * VA_FE^2 * VA_FL^2,
+  cov_FE_ME = corr_FE_ME * VA_FE^2 * VA_ME^2,
+  cov_FL_ME = corr_FL_ME * VA_FL^2 * VA_ME^2,
+  cov_FE_ML = corr_FE_ML * VA_FE^2 * VA_ML^2,
+  cov_FL_ML = corr_FL_ML * VA_FL^2 * VA_ML^2,
+  cov_ME_ML = corr_ME_ML * VA_ME^2 * VA_ML^2,
+  corr_FE_ME_minus_corr_FL_ML = corr_FE_ME - corr_FL_ML,
+  corr_FE_FL_minus_corr_ME_ML = corr_FE_FL - corr_ME_ML
+) %>% gather(Parameter, value)
+
+p %>%
+  group_by(Parameter) %>%
+  summarise(summ = list(posterior_summary(value)),
+            Estimate = map_dbl(summ, ~ .x[[1]]),
+            `Est. Error` = map_dbl(summ, ~ .x[[2]]),
+            `Lower 95% CI` = map_dbl(summ, ~ .x[[3]]),
+            `Upper 95% CI` = map_dbl(summ, ~ .x[[4]]),
+            .groups = "drop") %>%
+  dplyr::select(-summ) %>%
+  mutate(sp = str_split(Parameter, "_"),
+         Type = factor(map_chr(sp, ~ .x[[1]]), c("h2", "corr", "VA", "cov")),
+         Parameter = map_chr(sp, ~ paste0(.x[-1], collapse = " - "))) %>%
+  arrange(Type) %>%
+  dplyr::select(-sp, -Type) %>%
+  kable(digits = 3) %>%
+  kable_styling(full_width = FALSE) %>%
+  pack_rows("Heritabilities", 1, 4) %>%
+  pack_rows("Genetic correlations", 5, 10) %>%
+  pack_rows("Additive genetic variances", 11, 14) %>%
+  pack_rows("Additive genetic covariances", 15, 20)
 ```
-
-
-
-```{r}
-library(MCMCglmm) # useful info here: https://github.com/tmalsburg/MCMCglmm-intro
-
-prior_MCMCglmm <- list(G=list(G1=list(V=diag(4)*1e-3, nu=3, alpha.mu=rep(0,4), alpha.V=diag(4)*1000),  # line
-                              G2=list(V=diag(4)*1e-3, nu=3, alpha.mu=rep(0,4), alpha.V=diag(4)*1000)), # block
-                       R=list(R1=list(V=diag(2), nu=3), # covariance between F-early and F-late residual
-                              R2=list(V=diag(2), nu=3))) # covariance between M-early and M-late residual 
-
-MCMCglmm_output <- MCMCglmm(
-  
-  # 4-column matrix response variable (NAs for wrong-sex traits)
-  cbind(female.fitness.early, 
-        female.fitness.late,
-        male.fitness.early, 
-        male.fitness.late) ~ trait - 1,
-  
-  # 4-column matrix response variable (NAs for wrong-sex traits)
-  random =~ 
-    us(trait):line + 
-    us(trait):block, 
-  
-  rcov = ~us(at.level(trait, 1:2)):units + 
-          us(at.level(trait, 3:4)):units,  
-  
-  ginverse = list(line = G_inverse),
-  pr=TRUE, # Used to get the marginal posterior modes of the random effects (used to get estimated line breeding values)
-  family = rep("gaussian", 4),
-  #nitt = 500000, thin = 450, burnin = 50000,
-  nitt = 100000, thin = 20, burnin = 20000,
-  prior = prior_MCMCglmm,
-  
-  data = both_fitness %>% 
-    mutate(line = str_remove_all(line, "_"),
-           male.fitness.early = early.male.focal / (early.male.focal + early.male.rival),
-           male.fitness.late  = late.male.focal / (late.male.rival + late.male.focal))
-)
-
-summary(MCMCglmm_output)
-```
-
-
-
-<!-- # Fancy brms - does not work -->
-<!-- ```{r} -->
-<!-- female_fitness <- load_and_tidy_fitness_data()[[1]] -->
-<!-- male_fitness <- load_and_tidy_fitness_data()[[2]] -->
-<!-- male_fitness_imputed <- mice(male_fitness, m = 5, print = FALSE, seed = 1) -->
-<!-- male_fitness_imputed <- lapply(1:5, function(i) complete(male_fitness_imputed, i)) -->
-<!-- male_fitness_imputed <- lapply(male_fitness_imputed, function(focal) { -->
-<!--   focal %>% mutate(total1 = early.male.rival + early.male.focal, -->
-<!--                    total2 = late.male.rival + late.male.focal, -->
-<!--                    male_fitness_early = early.male.focal / total1, -->
-<!--                    male_fitness_late = early.male.focal / total1)}) -->
-<!-- both_sex_imputed <- male_fitness_imputed -->
-
-<!-- for(i in 1:length(both_sex_imputed)){ -->
-<!--   both_sex_imputed[[i]] <- full_join( -->
-<!--     female_fitness, both_sex_imputed[[i]],  -->
-<!--     by = c("line", "block", "vial.ID") -->
-<!--   ) -->
-
-<!--   both_sex_imputed[[i]] <- both_sex_imputed[[i]] %>%  -->
-<!--   mutate(sex = ifelse(substr(vial.ID, 1, 1) == "F", "F", "M"), -->
-<!--          female_vial = ifelse(sex == "F", vial.ID, NA), -->
-<!--          male_vial   = ifelse(sex == "M", vial.ID, NA), -->
-<!--          line = str_remove(line, "_"))  -->
-
-<!-- } -->
-<!-- rm(male_fitness_imputed) -->
-
-<!-- female_early_model <- bf(female.fitness.early ~ (1|p|line) + (1|q|block)) #+ (1|r|female_vial)#, family = "poisson") -->
-<!-- female_late_model  <- bf(female.fitness.late  ~ (1|p|line) + (1|q|block)) #+ (1|r|female_vial))#, family = "poisson") -->
-<!-- male_early_model <- bf(male_fitness_early ~ (1|p|line) + (1|q|block)) #+ (1|s|male_vial))#, family = "binomial") -->
-<!-- male_late_model  <- bf(male_fitness_late ~ num.GFP.males + (1|p|line) + (1|q|block)) #+ (1|s|male_vial))#, family = "binomial") -->
-
-<!-- # Run 5 models, on each of the 5 imputed datasets, and combine the results -->
-<!-- unified_model <- brm( -->
-<!--   formula = female_early_model + female_late_model + male_early_model + male_late_model + set_rescor(TRUE), -->
-<!--   cov_ranef = list(line = G), -->
-<!--   data = both_sex_imputed[[i]],   -->
-<!--   iter = 100, chains = 4, cores = 4, seed = 1,  -->
-<!--   control = list(adapt_delta = 0.999, max_treedepth = 15)) %>% -->
-<!--   add_ic(ic = "R2") -->
-
-<!-- # prior = c( -->
-<!-- #     prior(normal(0, 10), "b"), -->
-<!-- #     prior(normal(0, 20), "Intercept"), -->
-<!-- #     prior(student_t(3, 0, 20), "sd"), -->
-<!-- #     prior(student_t(3, 0, 20), "sigma")) -->
-<!-- ``` -->

@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 
 
-<title>GWAS for fitness in Drosophila</title>
+<title>Plotting the effect sizes after adjustment using mashr</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -23,11 +23,30 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
-<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
-<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
+<link href="site_libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
+<script src="site_libs/anchor-sections-1.0/anchor-sections.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -75,9 +94,7 @@ h6 {
 </style>
 
 
-</head>
 
-<body>
 
 <style type = "text/css">
 .main-container {
@@ -91,7 +108,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -101,6 +117,9 @@ img {
 }
 button.code-folding-btn:focus {
   outline: none;
+}
+summary {
+  display: list-item;
 }
 </style>
 
@@ -116,7 +135,6 @@ body {
   padding-top: 56px;
   margin-top: -56px;
 }
-
 .section h2 {
   padding-top: 56px;
   margin-top: -56px;
@@ -136,6 +154,43 @@ body {
 .section h6 {
   padding-top: 56px;
   margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
 }
 </style>
 
@@ -157,47 +212,69 @@ $(document).ready(function () {
 });
 </script>
 
-
-<div class="container-fluid main-container">
-
 <!-- tabsets -->
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-</script>
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
 
 <!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
 
 
-
-
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
 
 <style type="text/css">
 
@@ -211,6 +288,12 @@ $(document).ready(function ()  {
 }
 }
 
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
 
 .toc-content {
   padding-left: 30px;
@@ -246,8 +329,6 @@ div.tocify {
 
 .tocify-subheader .tocify-item {
   font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -256,6 +337,16 @@ div.tocify {
 
 
 </style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
 
 <!-- setup 3col/9col grid for toc_float and main content  -->
 <div class="row-fluid">
@@ -285,15 +376,12 @@ div.tocify {
   <a href="index.html">Home</a>
 </li>
 <li>
-  <a href="about.html">About</a>
-</li>
-<li>
   <a href="license.html">License</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://github.com/jdblischak/workflowr">
+  <a href="https://github.com/lukeholman/fitnessGWAS">
     <span class="fa fa-github"></span>
      
   </a>
@@ -303,220 +391,399 @@ div.tocify {
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-<!-- Add a small amount of space between sections. -->
-<style type="text/css">
-div.section {
-  padding-top: 12px;
-}
-</style>
-
 <div class="fluid-row" id="header">
 
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
 
 
-<h1 class="title toc-ignore">GWAS for fitness in Drosophila</h1>
+
+<h1 class="title toc-ignore">Plotting the effect sizes after adjustment using mashr</h1>
 
 </div>
 
 
-<p><strong>Last updated:</strong> 2018-10-04</p>
-<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
-<ul>
-<li>
-<p><details> <summary> <strong style="color:red;">✖</strong> <strong>R Markdown file:</strong> uncommitted changes </summary> The R Markdown is untracked by Git. To know which version of the R Markdown file created these results, you’ll want to first commit it to the Git repo. If you’re still working on the analysis, you can ignore this warning. When you’re finished, you can run <code>wflow_publish</code> to commit the R Markdown file and build the HTML.</p>
-</details>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2021-03-04
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>fitnessGWAS/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.2). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
 <p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
-</details>
-</li>
-<li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20180914)</code> </summary></p>
-<p>The command <code>set.seed(20180914)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
-</details>
-</li>
-<li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20180914code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20180914)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20180914code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20180914)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
 <p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
-</details>
-</li>
-<li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> 450cb72 </summary></p>
-Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree0af3d4173b4baa94db749512610799224e08da16targetblank0af3d41a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/lukeholman/fitnessGWAS/tree/0af3d4173b4baa94db749512610799224e08da16" target="_blank">0af3d41</a> </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree0af3d4173b4baa94db749512610799224e08da16targetblank0af3d41a" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version <a href="https://github.com/lukeholman/fitnessGWAS/tree/0af3d4173b4baa94db749512610799224e08da16" target="_blank">0af3d41</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
 <pre><code>
 Ignored files:
     Ignored:    .DS_Store
+    Ignored:    .Rapp.history
     Ignored:    .Rhistory
     Ignored:    .Rproj.user/
+    Ignored:    .httr-oauth
+    Ignored:    .pversion
     Ignored:    analysis/.DS_Store
+    Ignored:    analysis/correlations_SNP_effects_cache/
+    Ignored:    analysis/plot_models_variant_effects_cache/
     Ignored:    code/.DS_Store
+    Ignored:    code/Drosophila_GWAS.Rmd
     Ignored:    data/.DS_Store
-    Ignored:    data/derived/.DS_Store
-    Ignored:    data/derived/output/.DS_Store
+    Ignored:    data/derived/
     Ignored:    data/input/.DS_Store
+    Ignored:    data/input/.pversion
+    Ignored:    data/input/dgrp.fb557.annot.txt
+    Ignored:    data/input/dgrp2.bed
+    Ignored:    data/input/dgrp2.bim
+    Ignored:    data/input/dgrp2.fam
+    Ignored:    data/input/huang_transcriptome/
     Ignored:    figures/.DS_Store
 
 Untracked files:
-    Untracked:  .pversion
-    Untracked:  ExDeconDemo_c.log
-    Untracked:  ExDeconDemo_loglike.log
-    Untracked:  TEST_Venn.tiff
-    Untracked:  analysis/checking_mashr_results.Rmd
-    Untracked:  code/Drosophila_GWAS.Rmd
-    Untracked:  data/derived/.!25440!dgrp2_focal_lines.bed
-    Untracked:  data/derived/.pversion
-    Untracked:  data/derived/GRM.txt
-    Untracked:  data/derived/TWAS_result_females.csv
-    Untracked:  data/derived/TWAS_result_males.csv
-    Untracked:  data/derived/all_four_traits_SNP_clumps.txt
-    Untracked:  data/derived/all_univariate_GEMMA_results.csv
-    Untracked:  data/derived/annotations.sqlite3
-    Untracked:  data/derived/dgrp2_QC_all_lines.bed
-    Untracked:  data/derived/dgrp2_QC_all_lines.bim
-    Untracked:  data/derived/dgrp2_QC_all_lines.fam
-    Untracked:  data/derived/dgrp2_QC_all_lines.log
-    Untracked:  data/derived/dgrp2_QC_focal_lines.bed
-    Untracked:  data/derived/dgrp2_QC_focal_lines.bim
-    Untracked:  data/derived/dgrp2_QC_focal_lines.bk
-    Untracked:  data/derived/dgrp2_QC_focal_lines.fam
-    Untracked:  data/derived/dgrp2_QC_focal_lines.log
-    Untracked:  data/derived/dgrp2_QC_focal_lines.rds
-    Untracked:  data/derived/dgrp2_transcriptome_subset.bed
-    Untracked:  data/derived/dgrp2_transcriptome_subset.bim
-    Untracked:  data/derived/dgrp2_transcriptome_subset.fam
-    Untracked:  data/derived/dgrp2_transcriptome_subset.log
-    Untracked:  data/derived/female_early_SNP_clumps.txt
-    Untracked:  data/derived/female_late_SNP_clumps.txt
-    Untracked:  data/derived/lines_to_keep.txt
-    Untracked:  data/derived/lmm_ED_mashr_results.rds
-    Untracked:  data/derived/lmm_canonical_mashr_results.rds
-    Untracked:  data/derived/male_early_SNP_clumps.txt
-    Untracked:  data/derived/male_late_SNP_clumps.txt
-    Untracked:  data/derived/mashr_results_ED.rds
-    Untracked:  data/derived/mashr_results_canonical.rds
-    Untracked:  data/derived/output/.pversion
-    Untracked:  data/derived/output/GRM.cXX.txt
-    Untracked:  data/derived/output/GRM.log.txt
-    Untracked:  data/derived/output/GRM_transcriptome.cXX.txt
-    Untracked:  data/derived/output/GRM_transcriptome.log.txt
-    Untracked:  data/derived/output/all_four_traits.assoc.txt
-    Untracked:  data/derived/output/all_four_traits.log.txt
-    Untracked:  data/derived/output/allele_freq_count.assoc.txt
-    Untracked:  data/derived/output/allele_freq_count.log.txt
-    Untracked:  data/derived/output/eigen_decomp.eigenD.txt
-    Untracked:  data/derived/output/eigen_decomp.eigenU.txt
-    Untracked:  data/derived/output/eigen_decomp.log.txt
-    Untracked:  data/derived/output/eigen_decomp_transcriptome.eigenD.txt
-    Untracked:  data/derived/output/eigen_decomp_transcriptome.eigenU.txt
-    Untracked:  data/derived/output/eigen_decomp_transcriptome.log.txt
-    Untracked:  data/derived/plink.frq
-    Untracked:  data/input/.pversion
-    Untracked:  data/input/dgrp2.fam copy
-    Untracked:  data/input/dgrp2.fam.bak
-    Untracked:  data/input/huang_2015_tableS11_eQTL_females.csv
-    Untracked:  data/input/huang_2015_tableS12_eQTL_males.csv
-    Untracked:  data/input/huang_2015_tableS2_gene_expression.csv
-    Untracked:  data/input/huang_2015_tableS5_transcript_heritability.csv
-    Untracked:  dgrp2_clean.log
-    Untracked:  gwas_adaptive_shrinkage.R
+    Untracked:  Rplots.pdf
+    Untracked:  analysis/GO_KEGG_enrichment.Rmd
+    Untracked:  analysis/TWAS_tables.Rmd
+    Untracked:  analysis/plot_models_variant_effects.Rmd
+    Untracked:  code/GO_and_KEGG_gsea.R
+    Untracked:  code/eQTL_analysis.Rmd
+    Untracked:  code/make_sites_files_for_ARGweaver.R
+    Untracked:  code/plotting_results.Rmd
+    Untracked:  code/run_argweaver.R
+    Untracked:  code/run_mashr.R
+    Untracked:  data/argweaver/
+    Untracked:  data/input/TF_binding_sites.csv
+    Untracked:  figures/GWAS_mixture_proportions.rds
+    Untracked:  figures/GWAS_stats_figure.pdf
+    Untracked:  figures/TWAS_mixture_proportions.rds
+    Untracked:  figures/TWAS_stats_figure.pdf
+    Untracked:  figures/antagonism_ratios.pdf
+    Untracked:  figures/composite_mixture_figure.pdf
+    Untracked:  figures/eff_size_histos.pdf
+    Untracked:  figures/stats_figure.pdf
+    Untracked:  manuscript/
 
 Unstaged changes:
+    Modified:   .gitignore
+    Modified:   README.md
     Modified:   analysis/GWAS_tables.Rmd
     Modified:   analysis/TWAS.Rmd
+    Modified:   analysis/_site.yml
+    Deleted:    analysis/about.Rmd
+    Deleted:    analysis/eQTL_analysis.Rmd
     Modified:   analysis/gwas_adaptive_shrinkage.Rmd
-    Modified:   analysis/index.Rmd
-    Modified:   analysis/perform_gwas.Rmd
+    Modified:   analysis/license.Rmd
+    Modified:   analysis/make_annotation_database.Rmd
+    Modified:   analysis/plot_line_means.Rmd
     Modified:   analysis/plotting_results.Rmd
-    Deleted:    data/derived/DGRP_SNP_genos.sqlite3
-    Deleted:    data/derived/gwas_db.sqlite3
-    Deleted:    data/derived/lm_results_ashr.csv
-    Modified:   data/derived/lmm_results_ashr.csv
-    Deleted:    data/derived/output/DGRP_GRM.cXX.txt
-    Deleted:    data/derived/output/DGRP_GRM.log.txt
-    Deleted:    data/derived/output/female_early_bslmm.bv.txt
-    Deleted:    data/derived/output/female_early_bslmm.gamma.txt
-    Deleted:    data/derived/output/female_early_bslmm.hyp.txt
-    Deleted:    data/derived/output/female_early_bslmm.log.txt
-    Deleted:    data/derived/output/female_early_bslmm.param.txt
-    Deleted:    data/derived/output/female_early_bslmm_preds.log.txt
-    Deleted:    data/derived/output/female_early_bslmm_preds.prdt.txt
-    Deleted:    data/derived/output/female_early_female_late.assoc.txt
-    Deleted:    data/derived/output/female_early_female_late.log.txt
-    Deleted:    data/derived/output/female_early_lm.assoc.txt
-    Deleted:    data/derived/output/female_early_lm.log.txt
-    Modified:   data/derived/output/female_early_lmm.assoc.txt
-    Modified:   data/derived/output/female_early_lmm.log.txt
-    Deleted:    data/derived/output/female_early_male_early.assoc.txt
-    Deleted:    data/derived/output/female_early_male_early.log.txt
-    Deleted:    data/derived/output/female_late_lm.assoc.txt
-    Deleted:    data/derived/output/female_late_lm.log.txt
-    Modified:   data/derived/output/female_late_lmm.assoc.txt
-    Modified:   data/derived/output/female_late_lmm.log.txt
-    Deleted:    data/derived/output/female_late_male_late.assoc.txt
-    Deleted:    data/derived/output/female_late_male_late.log.txt
-    Deleted:    data/derived/output/male_early_lm.assoc.txt
-    Deleted:    data/derived/output/male_early_lm.log.txt
-    Modified:   data/derived/output/male_early_lmm.assoc.txt
-    Modified:   data/derived/output/male_early_lmm.log.txt
-    Deleted:    data/derived/output/male_early_male_late.assoc.txt
-    Deleted:    data/derived/output/male_early_male_late.log.txt
-    Deleted:    data/derived/output/male_late_lm.assoc.txt
-    Deleted:    data/derived/output/male_late_lm.log.txt
-    Modified:   data/derived/output/male_late_lmm.assoc.txt
-    Modified:   data/derived/output/male_late_lmm.log.txt
-    Deleted:    data/derived/output/result.log.txt
-    Deleted:    data/derived/output/result.prdt.txt
-    Deleted:    data/derived/summed_interSNP_correlations.csv
-    Deleted:    data/derived/trimmed_DGRP.bed
-    Deleted:    data/derived/trimmed_DGRP.bim
-    Deleted:    data/derived/trimmed_DGRP.fam
-    Deleted:    data/derived/trimmed_DGRP.rds
-    Modified:   data/input/dgrp2.fam
+    Deleted:    code/gwas_adaptive_shrinkage.R
+    Modified:   data/input/female_fitness.csv
+    Modified:   data/input/female_fitness_CLEANED.csv
+    Modified:   data/input/male_fitness.csv
+    Modified:   data/input/male_fitness_CLEANED.csv
+    Modified:   figures/figure1.eps
+    Deleted:    figures/figure1.png
+    Modified:   figures/figure2.eps
 
 </code></pre>
-Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
-</li>
-</ul>
-<hr />
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/checking_mashr_results.Rmd</code>) and HTML (<code>docs/checking_mashr_results.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/0af3d4173b4baa94db749512610799224e08da16/analysis/checking_mashr_results.Rmd" target="_blank">0af3d41</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2021-03-04
+</td>
+<td>
+big first commit 2021
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/8d54ea56db332d3ac2d391c232936a4dc8106cc1/analysis/checking_mashr_results.Rmd" target="_blank">8d54ea5</a>
+</td>
+<td>
+Luke Holman
+</td>
+<td>
+2018-12-23
+</td>
+<td>
+Initial commit
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/8d54ea56db332d3ac2d391c232936a4dc8106cc1/docs/checking_mashr_results.html" target="_blank">8d54ea5</a>
+</td>
+<td>
+Luke Holman
+</td>
+<td>
+2018-12-23
+</td>
+<td>
+Initial commit
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
 <pre class="r"><code>library(dplyr)
 library(readr)
 library(ggplot2)
 library(gridExtra)
 library(tidyr)
 
-db &lt;- DBI::dbConnect(RSQLite::SQLite(), &quot;data/derived/annotations.sqlite3&quot;)
+db &lt;- DBI::dbConnect(RSQLite::SQLite(), 
+                     &quot;data/derived/annotations.sqlite3&quot;)
 
 # Results for all 1,613,615 SNPs, even those that are in 100% LD with others (these are grouped up by the SNP_clump column)
 all_snps &lt;- tbl(db, &quot;univariate_lmm_results&quot;)
 
-# All SNPs and SNP groups that are in &lt;100% LD with one another (n = 1,201,969)
+# All SNPs and SNP groups that are in &lt;100% LD with one another (n = 1,207,357)
 SNP_clumps &lt;- all_snps %&gt;% select(-SNP) %&gt;% distinct() %&gt;% collect(n=Inf)</code></pre>
 <div id="inspecting-the-effect-of-adaptive-shrinkage-on-the-snp-effect-size-estimates" class="section level2">
 <h2>Inspecting the effect of adaptive shrinkage on the SNP effect size estimates</h2>
-<p>The plots reveal that the R package <code>mashr</code>, which implemented multivariate adaptive shrinkage, was effective at shrinking the effect size estimates towards zero. The amount of shrinkage applied was stronger when applying <code>mashr</code> using data-driven covariance matrices, as opposed to ‘canonical’ covariance matrices that were selected <em>a priori</em> by us.</p>
+<p>The plots reveal that the R package <code>mashr</code>, which implements multivariate adaptive shrinkage, was effective at shrinking the effect size estimates towards zero. The amount of shrinkage applied was slightly stronger when applying <code>mashr</code> using data-driven covariance matrices, as opposed to ‘canonical’ covariance matrices that were selected <em>a priori</em> by us.</p>
 <pre class="r"><code>hex_plot &lt;- function(x, y, xlab, ylab){
-    ggplot(SNP_clumps, aes_string(x, y)) + 
+  ggplot(SNP_clumps, aes_string(x, y)) + 
     geom_abline(linetype = 2) + 
     geom_vline(xintercept = 0, linetype = 3) +
     geom_hline(yintercept = 0, linetype = 3) +
     stat_binhex(bins = 200, colour = &quot;#FFFFFF00&quot;) + 
     scale_fill_distiller(palette = &quot;Purples&quot;) + 
-    coord_cartesian(xlim = c(-1,1), ylim = c(-1,1)) + 
+    coord_cartesian(xlim = c(-1,1), ylim = c(-0.55, 0.3)) + 
     theme_minimal() + xlab(xlab) + ylab(ylab) +
     theme(legend.position = &quot;none&quot;)
 }
 grid.arrange(
-  hex_plot(&quot;beta_female_early_raw&quot;, &quot;beta_female_early_mashr_canonical&quot;, &quot;Raw estimate of SNP effect size from GEMMA&quot;, &quot;Corrected estimate from mashr (canonical)&quot;),
-  hex_plot(&quot;beta_female_early_raw&quot;, &quot;beta_female_early_mashr_ED&quot;, &quot;Raw estimate of SNP effect size from GEMMA&quot;, &quot;Corrected estimate from mashr (data-driven)&quot;),
-  hex_plot(&quot;beta_female_early_mashr_canonical&quot;, &quot;beta_female_early_mashr_ED&quot;, &quot;Corrected estimate from mashr (canonical)&quot;, &quot;Corrected estimate from mashr (data-driven)&quot;), 
+  hex_plot(&quot;beta_female_early_raw&quot;, 
+           &quot;beta_female_early_mashr_canonical&quot;, 
+           &quot;Raw estimate of SNP effect size from LMM&quot;, 
+           &quot;Corrected estimate from mashr (canonical)&quot;),
+  hex_plot(&quot;beta_female_early_raw&quot;, 
+           &quot;beta_female_early_mashr_ED&quot;, 
+           &quot;Raw estimate of SNP effect size from LMM&quot;, 
+           &quot;Corrected estimate from mashr (data-driven)&quot;),
+  hex_plot(&quot;beta_female_early_mashr_canonical&quot;, 
+         &quot;beta_female_early_mashr_ED&quot;, 
+         &quot;Corrected estimate from mashr (canonical)&quot;, 
+         &quot;Corrected estimate from mashr (data-driven)&quot;),
   ncol = 3)</code></pre>
 <p><img src="figure/checking_mashr_results.Rmd/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-2-1">
+Past versions of unnamed-chunk-2-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-2-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/8d54ea56db332d3ac2d391c232936a4dc8106cc1/docs/figure/checking_mashr_results.Rmd/unnamed-chunk-2-1.png" target="_blank">8d54ea5</a>
+</td>
+<td>
+Luke Holman
+</td>
+<td>
+2018-12-23
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="relationship-between-raw-p-values-and-the-local-false-sign-rate" class="section level2">
 <h2>Relationship between raw <span class="math inline">\(p\)</span>-values and the local false sign rate</h2>
-<p>The local false sign rate (defined as the probability that a SNP’s true effect is non-zero <em>and</em> has the same sign as the effect size estimate) was correlated with the raw p-value (as expected). Note that the false sign rate is sometime ‘more significant’ than the p-value; one likely reason for this is that the local false sign rate uses the information provided by the correlations among SNP effects on our four fitness traits, while the <span class="math inline">\(p\)</span>-value ignores this information. Another reason is that the local false sign rate was (noisily) estimated using a Markov chain, in a Bayesian model that incorporates priors, while the p-value is estimated by maximum likelihood and has comes from a frequentist model lacking priors.</p>
-<p>As for the effect sizes, the local false sign rates provided by the data-driven approach are almost always less significant than those provided by the canonical approach.</p>
+<p>The local false sign rate (defined as the probability that a SNP’s true effect is non-zero <em>and</em> has the same sign as the effect size estimate) was positively correlated with the raw p-value, as expected.</p>
+<p>Note that the false sign rate is sometimes ‘more significant’ than the <span class="math inline">\(p\)</span>-value; one likely reason for this is that the local false sign rate (LFSR) uses the information provided by the correlations among SNP effects on our four fitness traits, while the <span class="math inline">\(p\)</span>-value ignores this information.</p>
+<p>A second reason why the LFSR is often higher is that the LFSR was (noisily) estimated using a Markov chain, in a Bayesian model that incorporates priors, while the <span class="math inline">\(p\)</span>-value is estimated by maximum likelihood (so there is no <em>statistical</em> noise) and comes from a frequentist model lacking priors (or rather, it has a completely flat prior, unlike the mashr analysis).</p>
+<p>The LFSR from the canonical and data-driven approaches are pretty much the same, though results from the data-drive <code>mashr</code> analysis are slightly ‘more significant’ on average (shown by the preponderance of points above the line <span class="math inline">\(y = x\)</span>).</p>
 <pre class="r"><code>hex_plot2 &lt;- function(p, xlab, ylab){
     p + 
     geom_abline(linetype = 2) + 
@@ -529,56 +796,108 @@ grid.arrange(
 }
 
 grid.arrange(
-  SNP_clumps %&gt;% ggplot(aes(-log10(pvalue_female_early_raw), -log10(LFSR_female_early_mashr_canonical))) %&gt;% hex_plot2(&quot;-log10 raw p-value from GEMMA&quot;, &quot;-log10 local false sign rate (canonical)&quot;),
-  SNP_clumps %&gt;% ggplot(aes(-log10(pvalue_female_early_raw), -log10(LFSR_female_early_mashr_ED))) %&gt;% hex_plot2(&quot;-log10 raw p-value from GEMMA&quot;, &quot;-log10 local false sign rate (data-driven)&quot;),
-  SNP_clumps %&gt;% ggplot(aes(-log10(LFSR_female_early_mashr_canonical), -log10(LFSR_female_early_mashr_ED))) %&gt;% hex_plot2(&quot;-log10 local false sign rate (canonical)&quot;, &quot;-log10 local false sign rate (data-driven)&quot;),
+  SNP_clumps %&gt;% 
+    ggplot(aes(-log10(pvalue_female_early_raw), 
+               -log10(LFSR_female_early_mashr_canonical))) %&gt;%
+    hex_plot2(&quot;-log10 p-value from LMM&quot;, 
+              &quot;-log10 local false sign rate (canonical)&quot;),
+  SNP_clumps %&gt;% 
+    ggplot(aes(-log10(pvalue_female_early_raw), 
+               -log10(LFSR_female_early_mashr_ED))) %&gt;% 
+    hex_plot2(&quot;-log10 p-value from LMM&quot;, 
+              &quot;-log10 local false sign rate (data-driven)&quot;),
+  SNP_clumps %&gt;% 
+    ggplot(aes(-log10(LFSR_female_early_mashr_canonical), 
+               -log10(LFSR_female_early_mashr_ED))) %&gt;% 
+    hex_plot2(&quot;-log10 local false sign\nrate (canonical)&quot;, 
+              &quot;-log10 local false sign rate (data-driven)&quot;),
   ncol = 3)</code></pre>
 <p><img src="figure/checking_mashr_results.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-3-1">
+Past versions of unnamed-chunk-3-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-3-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/8d54ea56db332d3ac2d391c232936a4dc8106cc1/docs/figure/checking_mashr_results.Rmd/unnamed-chunk-3-1.png" target="_blank">8d54ea5</a>
+</td>
+<td>
+Luke Holman
+</td>
+<td>
+2018-12-23
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="conclusion" class="section level2">
 <h2>Conclusion</h2>
-<p>Based on these plots, we elected to focus on the results generated by the data-driven <code>mashr</code> analysis, as opposed to the canonical <code>mashr</code> analysis. This is more conservative, because the effect sizes and local false sign rates are more moderate in the data-driven analysis. Also, using the data-driven approach yields estimates that are independent of our prior expectations about the possible covariance structures that might exist in the data, and is therefore robust to the possibility that our expectations are wrong.</p>
-</div>
-<div id="session-information" class="section level2">
-<h2>Session information</h2>
+<p>Based on these plots, we elected to focus on the results generated by the data-driven <code>mashr</code> analysis, as opposed to the canonical <code>mashr</code> analysis. This is more conservative, because the effect sizes and local false sign rates are more moderate in the data-driven analysis. Also, using the data-driven approach yields estimates that are independent of our prior expectations about the possible covariance structures that might exist in the data, and is therefore more robust if our expectations are wrong.</p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
 <pre class="r"><code>sessionInfo()</code></pre>
-<pre><code>R version 3.5.1 (2018-07-02)
-Platform: x86_64-apple-darwin15.6.0 (64-bit)
-Running under: macOS High Sierra 10.13.6
+<pre><code>R version 4.0.3 (2020-10-10)
+Platform: x86_64-apple-darwin17.0 (64-bit)
+Running under: macOS Catalina 10.15.7
 
 Matrix products: default
-BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib
-LAPACK: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRlapack.dylib
+BLAS:   /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
 
 locale:
-[1] en_AU.UTF-8/en_AU.UTF-8/en_AU.UTF-8/C/en_AU.UTF-8/en_AU.UTF-8
+[1] en_GB.UTF-8/en_GB.UTF-8/en_GB.UTF-8/C/en_GB.UTF-8/en_GB.UTF-8
 
 attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] hexbin_1.27.2 tidyr_0.8.1   gridExtra_2.3 ggplot2_3.0.0 readr_1.1.1  
-[6] dplyr_0.7.6  
+[1] tidyr_1.1.0     gridExtra_2.3   ggplot2_3.3.2   readr_1.3.1    
+[5] dplyr_1.0.0     workflowr_1.6.2
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.18       RColorBrewer_1.1-2 dbplyr_1.2.2      
- [4] compiler_3.5.1     pillar_1.3.0       git2r_0.23.0      
- [7] plyr_1.8.4         workflowr_1.1.1    bindr_0.1.1       
-[10] R.methodsS3_1.7.1  R.utils_2.7.0      tools_3.5.1       
-[13] bit_1.1-14         digest_0.6.15      lattice_0.20-35   
-[16] memoise_1.1.0      RSQLite_2.1.1      evaluate_0.11     
-[19] tibble_1.4.2       gtable_0.2.0       pkgconfig_2.0.1   
-[22] rlang_0.2.2        DBI_1.0.0          yaml_2.2.0        
-[25] bindrcpp_0.2.2     withr_2.1.2        stringr_1.3.1     
-[28] knitr_1.20         hms_0.4.2          bit64_0.9-7       
-[31] rprojroot_1.3-2    grid_3.5.1         tidyselect_0.2.4  
-[34] glue_1.3.0         R6_2.2.2           rmarkdown_1.10    
-[37] blob_1.1.1         purrr_0.2.5        magrittr_1.5      
-[40] whisker_0.3-2      backports_1.1.2    scales_1.0.0      
-[43] htmltools_0.3.6    assertthat_0.2.0   colorspace_1.3-2  
-[46] labeling_0.3       stringi_1.2.4      lazyeval_0.2.1    
-[49] munsell_0.5.0      crayon_1.3.4       R.oo_1.22.0       </code></pre>
+ [1] Rcpp_1.0.4.6       RColorBrewer_1.1-2 dbplyr_1.4.4       compiler_4.0.3    
+ [5] pillar_1.4.4       later_1.0.0        git2r_0.27.1       tools_4.0.3       
+ [9] bit_1.1-15.2       digest_0.6.25      lattice_0.20-41    memoise_1.1.0     
+[13] RSQLite_2.2.0      evaluate_0.14      lifecycle_0.2.0    tibble_3.0.1      
+[17] gtable_0.3.0       pkgconfig_2.0.3    rlang_0.4.6        DBI_1.1.0         
+[21] yaml_2.2.1         hexbin_1.28.1      xfun_0.19          withr_2.2.0       
+[25] stringr_1.4.0      knitr_1.30         generics_0.0.2     fs_1.4.1          
+[29] vctrs_0.3.0        hms_0.5.3          bit64_0.9-7        rprojroot_1.3-2   
+[33] grid_4.0.3         tidyselect_1.1.0   glue_1.4.2         R6_2.4.1          
+[37] rmarkdown_2.5      farver_2.0.3       blob_1.2.1         purrr_0.3.4       
+[41] magrittr_2.0.1     whisker_0.4        backports_1.1.7    scales_1.1.1      
+[45] promises_1.1.0     htmltools_0.5.0    ellipsis_0.3.1     assertthat_0.2.1  
+[49] colorspace_1.4-1   httpuv_1.5.3.1     labeling_0.3       stringi_1.5.3     
+[53] munsell_0.5.0      crayon_1.3.4      </code></pre>
 </div>
+</div>
+
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
 TeX fonts only; see
@@ -592,14 +911,6 @@ footer is added to webpages before the MathJax javascript. -->
   });
 </script>
 
-<hr>
-<p>
-  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
-  analysis was created with
-  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.1.1
-</p>
-<hr>
-
 
 </div>
 </div>
@@ -610,13 +921,61 @@ footer is added to webpages before the MathJax javascript. -->
 
 // add bootstrap table styles to pandoc tables
 function bootstrapStylePandocTables() {
-  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
 }
 $(document).ready(function () {
   bootstrapStylePandocTables();
 });
 
 
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
 </script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

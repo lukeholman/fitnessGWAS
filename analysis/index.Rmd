@@ -42,7 +42,7 @@ This script uses the transcriptomic data from Huang et al. 2015 _PNAS_ on the DG
 - Adjust the results of the TWAS linear models using `mashr` in canonical and data-driven modes.
 
 
-## Results of the analysis
+## Plots, tables, and analyses of the results
 
 ### [8. Plots showing line mean fitness](plot_line_means.html)
 

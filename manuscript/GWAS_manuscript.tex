@@ -1,0 +1,351 @@
+\documentclass{article}
+
+\usepackage{arxiv}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{lmodern}        % https://github.com/rstudio/rticles/issues/343
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{lipsum}
+\usepackage{graphicx}
+
+\title{The genetic basis of fitness in \textit{Drosophila}: A genome-wide
+association study}
+
+\author{
+    Heidi Wong
+   \\
+    Department of Computer Science \\
+    Cranberry-Lemon University \\
+  Pittsburgh, PA 15213 \\
+  \texttt{\href{mailto:heidi@email.com}{\nolinkurl{heidi@email.com}}} \\
+   \And
+    Luke Holman
+    \thanks{Previous address: Melbourne.}
+   \\
+    School of Applied Sciences \\
+    Edinburgh Napier U \\
+  Edinburgh, UK. \\
+  \texttt{\href{mailto:l.holman@napier.ac.uk}{\nolinkurl{l.holman@napier.ac.uk}}} \\
+  }
+
+
+% Pandoc citation processing
+
+
+
+\begin{document}
+\maketitle
+
+\def\tightlist{}
+
+
+\begin{abstract}
+Enter the text of your abstract here.
+\end{abstract}
+
+\keywords{
+    blah
+   \and
+    blee
+   \and
+    bloo
+   \and
+    these are optional and can be removed
+  }
+
+\section*{Introduction}
+\lipsum[2]
+
+the \textit{Drosophila} Genetic Reference Panel (DGRP), a collection of
+almost entirely homozygous lines that represent a snapshot of natural
+genetic variation from a population in North Carolina (REF: Mackay et
+al., 2012)
+
+\section*{Methods}
+
+\subsection*{Fly stocks and husbandry}
+
+Our study focused on 125 lines randomly selected from the DGRP. All
+flies were reared in 25mm vials with Hoff food medium (REF?), lightly
+sprinkled with dried yeast, at a temperature of 25\textsuperscript{o}C.
+We verified the genotype of each DGRP line using the restriction-based
+assay PCR described in (Mackay et al., 2012) for the eight most
+diagnostic markers, and verifed the genotypes of the lines prior to data
+collection. In addition to the DGRP, we used two stocks carrying the
+visible markers, \textit{brown$^1$} (\textit{bw$^1$}) and
+\textit{P{FRT(w$^{hs}$)}G13 P{Ubi-GFP.nls}2R1 P{Ubi-GFP.nls}2R2} as
+mates and competitors for the DGRP flies, which are hereafter referred
+to as \emph{bw} and \emph{GFP} respectively (\emph{GFP}: green
+fluorescent protein).
+
+\subsection*{Measuring male and female fitness}
+
+We measured sex-specific fitness for each DGRP line using a protocol
+modified from Innocenti and Morrow (REF). In brief, fitness for both
+sexes was defined as the quantity of offspring produced when the focal
+flies were placed in a vial with some bw females and GFP males. For
+females, we recorded the absolute number of offspring produced, and for
+males we recorded the proportion of offspring sired by the focal males.
+We measured fitness twice for both sexes: one fitness measurement was
+performed on 2- to 5-day-old flies (referred to as `early-life
+fitness'), and one was performed on 14- to 17-day-old flies (`late-life
+fitness'). Focal flies and their same-sex competitors were not replaced
+when they died, such that our fitness assays incorporate variance in
+relative mortality, as well as offspring siring/production rate. For
+both the male and female fitness assays, we ran six replicate vials per
+line. Each vial contained 5 DGRP flies, such that we measured a total of
+30 flies per line in six groups. Importantly, we measured the number of
+offspring produced by the focal flies by counting first instar larvae,
+and (for the male assay) recording whether each larva expressed GFP. The
+advantage of this method is that we avoid confounding inter-line
+variation in male mating success or female productivity with inter-line
+variation in egg-to-adult survival.
+
+To ensure consistent larval density across the experiments, all
+experimental lines were reared at a standardised density. For each DGRP
+line, mated females were placed onto grape-agar medium to oviposit for
+24h, and 100 first instar larvae were transferred into yeasted vials.
+For the bw and GFP flies, we placed 15 mated females (1 to 4 days old)
+into yeasted vials, allowed them to oviposit for 36h, then collected
+virgin offspring on days 10-13.
+
+To measure male fitness, we placed 5 males from the focal DGRP line in a
+standard vial (the ``interaction vial'') with 10 GFP males and 15 bw
+females. All flies were virgin and were between 2 and 3 days old
+post-eclosion when first added to the interaction vial. After allowing
+the flies to interact and mate for 3 days, the females were moved to a
+20mm vial with 8ml of grape juice (the ``egg collection vial'') and
+allowed to oviposit for 24h. The females were then transferred back to
+their original interaction vial, containing the surviving DGRP males and
+GFP males. The collected embryos were allowed to develop for 24h, and a
+random sample of up to 200 first instar larvae was collected and scored
+for GFP as a measure of male early-life fitness. The flies were then
+left to age in the interaction vial for 8 days, and were tipped into a
+fresh vial once during this time. Then, when the DGRP and GFP males were
+approximately 14 days old, the old bw females were replaced with 15 new
+2- to 3-day-old virgin bw females, and the flies left to interact for 3
+days (note that dead DGRP males or their GFP competitors were not
+replaced). The females were then placed in a new egg collection vial to
+oviposit for 24h. The GFP status of these first instars were scored as a
+measure of male late-life fitness.
+
+To measure female fitness, 5 females from the focal DGRP line were
+placed in an interaction vial with 15 GFP males and 10 bw females, and
+allowed to interact and mate for 3 days (all flies were 2-3 days-old
+virgins). To measure female early-life fitness, the 5 DGRP females were
+moved to an embryo collection vial and allowed to oviposit for 24h,
+before being returned to the original interaction vial. The eggs were
+allowed to develop into first instar larvae, and the total number of
+larvae was counted (thus, unhatched eggs were not counted towards female
+fitness). To measure female late-life fitness, we waited 8 days (tipping
+once into a fresh vial), and replaced the old GFP males with 15 new 2-
+to 3 days-old virgin GFP males, and allowed the flies to interact for 3
+days (note that dead DGRP females or their bw competitors were not
+replaced). The DGRP females were then moved to the egg collection vials
+and allowed to oviposit for 24h, and we again counted the total number
+of 1st instar larvae that emerged.
+
+The fitness assays were run in nine blocks, and DGRP line 352 was
+included in every block, providing a reference point to help estimate
+block effects on fitness. There were 8-17 lines per block, not including
+the reference line. To estimate the line average for each female early-
+and late-life fitness, we fit a model with offspring number as the
+response variable and line and block as crossed random factors. We then
+took the predicted values for the line mean, assuming that all the assay
+had taken place in block 1. These predicted values, which correct the
+fitness estimates for block effects, were used in all downstream
+analyses of the fitness data. We similarly obtained corrected values for
+line mean male fitness. For males, the response variable was the
+proportion of offspring sired (rather than the number), and we
+additionally corrected for the number of live competitor GFP males that
+were present at the time the females were removed for egg collection (by
+including the number of competitors as a covariate). Thus, we assume
+that the GFP males died randomly with respect to the genotype of the
+DGRP males, and adjusted the fitness of each line accordingly.
+
+\subsection*{Quantifying genetic (co)variance}
+
+\subsection*{Identifying variants that affect male and female fitness}
+
+We estimated selection on each variant using linear regression (REFS).
+The statistical model used to test each variant was a simple linear
+model with the formula Y \textasciitilde{} Genotype, where Y is relative
+fitness (e.g.~the predicted line mean for male early-life fitness,
+divided by the average of all the predicted line means), and Genotype is
+the genotype of the focal line. Genotype was coded as a 0 for lines
+homozygous for the reference allele or 1 for lines homozygous the
+alternate allele for the focal variant - heterozygous loci are rare in
+the DGRP, and were excluded from analysis (because the genotype is
+unknown for these loci in our study). We defined the reference allele as
+the one that was most common across the entire panel of DGRP lines (n =
+205), such that a positive slope means that the minor (i.e.~rarer)
+allele confers higher fitness, and a negative slope means that the major
+(commoner) allele confers higher fitness. For each variant, we recorded
+the effect size, the associated standard error, and the t, df and p
+values for the test. Our approach is equivalent to performing a GWAS
+with relative fitness as the response variable. The reason we did not
+use the GWAS pipeline generously provided online by the creators of the
+DGRP is that we wished to obtain effect size for every variant, and the
+pipeline only provides effect size for statistically significant
+variants. However, we did compare the results of our analysis with the
+results obtained by the Mackay lab's pipeline, and obtained essentially
+identical results (e.g.~our analysis identified the same statistically
+significant variant), suggesting that our approach were very similar.
+One difference is that the Mackay lab's pipeline estimates the effects
+of each variant after correcting for the presence/absence of Wolbachia
+and chromosomal inversions in each line. We conducted pilot analyses
+which showed that including these variables yielded very similar results
+(because Wolbachia and chromosomal inversions were both unassociated
+with fitness in our study; p \textgreater{} 0.05), and so we elected to
+leave them out of our models for simplicity.
+
+\subsection*{Measuring the specificity of selection across sexes and age classes}
+
+We calculated a selection index, termed I, for each variant, by adapting
+the formula from Innocenti and Morrow (XX):
+
+FORMULA
+
+Innocenti and Morrow referred to I as an ``index of sex-specific
+selection'', but I is equally useful for any study that measured
+selection in two categories of individuals; in our case, we calculated I
+to compare the effects of each variant on A) male and female fitness,
+and B) early life and late life fitness.
+
+When I is positive, selection is ``concordant'', meaning that there is
+selection in both sexes or age classes, in the same direction (i.e.~the
+same variant is associated with elevated fitness in both cases). When I
+is close to zero, selection is absent in one or both cases. When I is
+negative, selection is ``antagonistic'' meaning that there is selection
+in both sexes or age classes, but the variant that is associated with
+higher fitness is different in each case. We calculated I to compare
+four kinds of selection: A) males vs females, in early life; B) males vs
+females, in late life; C) young vs old males; D) young vs old females.
+
+To numerically estimate the uncertainty associated with each estimate of
+I, we generated 1000 independent samples of b\_i and b\_j by drawing
+random numbers from a normal distribution with a mean and standard
+deviation obtained from the models used to estimate b\_i and b\_j. This
+yielded 1000 estimates of I, from which we recorded the median and 95\%
+quantiles, which approximate the 95\% confidence limits on I given the
+uncertainty associated with b\_i and b\_j.
+
+\subsection*{Annotations for each variant}
+
+We relied on the annotations generated by the creators of the DGRP, who
+used the software SnpEff to classify each variant by site class
+(e.g.~whether the variant is in an intron, or a non-synonymous codon
+position, etc). Additionally, we assigned a list of KEGG and GO terms to
+each variant, which matched those associated with the gene (or genes) in
+which that variant resides (obtained from NCBI).
+
+\section*{Results}
+
+\subsection*{Variance and covariance in fitness across lines}
+
+There was substantial variation in line mean relative fitness, for both
+sexes and both age classes (Figure 1). All correlations in Figure 1 are
+positive and significant (p \textless{} 0.001), indicating that lines
+with high male fitness tended to have high female fitness, and lines
+with high early-life fitness tended to have high late-life fitness.
+
+In spite of the overall positive correlations between sexes and age
+classes, some lines ranked highly for female fitness had low male
+fitness, and some that ranked highly for early life fitness had low
+late-life fitness (and vice versa; Figure 2). In sum, the data suggest
+that the majority of genetic variance in fitness is concordant across
+sexes and age classes, but alleles with antagonistic fitness effects may
+nevertheless exist.
+
+\subsection*{Genetic variance and covariance in fitness}
+
+The estimated G matrix for our four traits is shown in Table 1. Fitness
+was highly heritable\ldots{}
+
+\subsection*{Distribution of fitness effects across variants}
+
+Figure 3 plots the estimated effects of each of the XX variants on each
+of the four fitness traits: positive numbers mean that the commonest
+variant was associated with elevated fitness, and negative numbers
+indicate the reverse.
+
+Variants had smaller average effects on relative fitness in males
+relative to females, and in young individuals relative to older ones.
+There was positive covariance for all combinations, such that variants
+that positively affected one fitness component tended to positively
+affect another (Figure 3; Table XX). Additionally, we detected XX
+variants that affected fitness in two fitness components, but all of
+these affected fitness in a concordant rather than antagonistic fashion;
+for example, we did not find any alleles that elevated male fitness but
+reduced female fitness.
+
+The mean effect on fitness across all variants was slightly negative for
+all traits, which means that the minor alleles were, on average,
+associated with lower fitness than the major alleles (Table XX).
+Additionally, the distribution of fitness effects was significantly
+positively skewed for all four fitness measures, such that there were
+was an excess of loci with highly positive fitness effects relative to
+the number with highly negative effects (Figure 3; Table XX). This means
+that among the subset of loci with extreme effects on fitness, the
+beneficial allele tended to be the minor rather than major allele.
+
+\subsection*{Almost all loci affect fitness, or are close to a locus that does}
+
+Inspired by Boyle et al.~(xx), we sorted all of the variants by their
+fitness effects, placed them in bins of 1000, and then calculated the
+average fitness effect for each bin. Figure 4 shows that there was a
+very tight correlation (XXX) between the average effects of the variants
+in each bin on male and female fitness. As well as reaffirming our
+earlier results that there is a positive genetic correlation between
+male and female fitness, these results reveal that fitness is an
+extremely polygenic trait. The male and female fitness measurements were
+collected independently, and so Figure 4 allows us to distinguish small
+but genuine effects from statistical noise, despite the low power of our
+study (and most GWAS) to detect variants with weak effects. To see why,
+consider an alternative hypothesis, in which the great majority of
+variants have no effect on fitness, and the genetic (co)variance in
+fitness reported above resulted from a small subset (dozens or hundreds)
+of variants with comparatively large average effects. The plot in Figure
+4 would then be flat in the centre with steep inflections at each end.
+The straight line that we see instead suggests that there a large number
+of variants that each affect fitness - typically in both sexes, in the
+same direction - whose effect sizes range from tiny to moderate (see
+Boyle et al.~XXX). Put another way, the effect size of each 1000-variant
+bin on female fitness was replicated for male fitness, suggesting that
+the effects are real, as opposed to being deviations from a true effect
+of zero caused by statistical uncertainty.
+
+\subsection*{Selection estimates and allele frequencies are correlated}
+
+At loci for which the minor allele was associated with higher fitness,
+the minor allele tended to be more common across the DGRP. This confirms
+the intuitive prediction that\ldots{}
+
+\subsection*{Distribution of fitness effects across chromosomes}
+
+To do\ldots{}
+
+\section*{Discussion}
+
+\newpage
+\section*{Tables}
+
+\textbf{Table 1}: List of variables, and their corresponding
+parameter(s) in the model, which were varied in order to study their
+effects on extinction. \#
+\texttt{\{r\ xtable,\ results="asis"\}\ \#\ print\_table1()\ \#}
+
+\newpage
+\section*{Figures}
+
+\bibliographystyle{unsrt}
+\bibliography{references.bib}
+
+
+\end{document}

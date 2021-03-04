@@ -1,69 +1,24 @@
 ---
 title: "Correcting the GWAS results using multivariate adaptive shrinkage"
-output:
-  html_document: default
-  html_notebook: default
+output: 
+  workflowr::wflow_html:
+    code_folding: hide 
 ---
 
-Note: `mashr` requires a large amount of RAM, and so to get this script to run on the full SNP dataset, I had to launch R from the Terminal by typing `env R_MAX_VSIZE=700Gb R`. I then used `knitr::purl` to generate an R script from this R Markdown document, and ran the script from the Terminal. 
+Note: `mashr` requires a large amount of RAM, and so to get this script to run on the full SNP dataset, I had to launch R from the Terminal with extra memory allocation. I used `knitr::purl(input = "analysis/gwas_adaptive_shrinkage.Rmd", output = "code/run_mashr.R")` to generate an R script from this R Markdown document, then `env R_MAX_VSIZE=700Gb Rscript code/run_mashr.R`. Successfully ran on a late 2015 iMac with 32GB RAM over a few days.
 
 
 ```{r message=FALSE, warning=FALSE, results="hide"}
-library(dplyr)
+library(tidyverse)
 library(ashr) # Also requires installation of RMosek, which needs a (free) licence. See the ashr Github page for help
 library(mashr) # NB: This has multiple dependencies and was tricky to install. Read the Github page, and good luck!
-library(readr)
-
-# launch this from Terminal with: env R_MAX_VSIZE=700Gb R 
-setwd("/Users/lholman/Rprojects/fitnessGWAS")
+library(glue)
+library(kableExtra)
 ```
 
-## Load the results of the four univariate GWAS
-
-Load up the GWAS results, which were produced by using linear mixed models implemented in GEMMA, and arrange the data in a 'wide' format, where each row is one SNP, and the columns hold the estimates of $\beta$, the standard error of $\beta$, and the p-value for the GEMMA association tests on each of the four fitness traits.
-
-```{r eval=FALSE}
-load_gwas_results <- function(fitness.component){
-  new_names <- c(x = "beta", y = "se", z = "p_wald")
-  names(new_names) <- c(paste("beta_", fitness.component, sep = ""), 
-                        paste("SE_", fitness.component, sep = ""), 
-                        paste("pvalue_", fitness.component, sep = ""))
-  
-  paste("data/derived/output/", fitness.component, "_lmm.assoc.txt", sep = "") %>%
-    read_tsv() %>%
-    select(SNP, beta, se, p_wald) %>%
-    rename(!!new_names)
-}
-all_univariate_lmm_results <- load_gwas_results("female_early") %>%
-  full_join(load_gwas_results("female_late"), by = "SNP") %>%
-  full_join(load_gwas_results("male_early"), by = "SNP") %>%
-  full_join(load_gwas_results("male_late"), by = "SNP") 
-```
-
-
-## Prune SNPs that are in 100% linkage disequilibrium
-
-Because GEMMA is quick and easy to run, we did not bother working out how to edit PLINK files to identify SNPs that are in complete linkage disequilibrium with one another (and there is lots of short- and long-range LD in the dataset). However, it is easy to perform LD pruning at this stage, becuase we can take advantage of the fact that SNPs in perfect LD with each other will have identical estimates of $|\beta|$ and its standard error, for all four fitness traits. The following code groups together SNPs that have identical association test results, producing a data frame in which the number of rows is equal to the number of unique datasets (i.e. combinations of genotypes and phenotypes) that were statistically analysed by GEMMA. 
-
-
-```{r eval=FALSE}
-all_univariate_lmm_results <- all_univariate_lmm_results %>%
-  group_by(paste(beta_female_early, beta_female_late, beta_male_early, beta_male_late, # Group loci with identical GWAS results (these are in 100% LD with each other)
-                 SE_female_early, SE_female_late, SE_male_early, SE_male_late)) %>%
-  summarise(SNPs = paste0(SNP, collapse = ", "),    # If there are multiple SNPs, concatenate their names
-            beta_female_early = unique(beta_female_early), 
-            beta_female_late = unique(beta_female_late), 
-            beta_male_early = unique(beta_male_early), 
-            beta_male_late = unique(beta_male_late),
-            SE_female_early = unique(SE_female_early), 
-            SE_female_late = unique(SE_female_late), 
-            SE_male_early = unique(SE_male_early), 
-            SE_male_late = unique(SE_male_late),
-            pvalue_female_early = unique(pvalue_female_early), 
-            pvalue_female_late = unique(pvalue_female_late), 
-            pvalue_male_early = unique(pvalue_male_early), 
-            pvalue_male_late = unique(pvalue_male_late)) %>%
-  ungroup() %>% select(-starts_with("paste")) 
+```{r echo=FALSE}
+# setwd("/Users/lholman/Rprojects/fitnessGWAS")
+#setwd("/data/projects/punim0243/DGRP_mashr")
 ```
 
 
@@ -72,20 +27,20 @@ all_univariate_lmm_results <- all_univariate_lmm_results %>%
 
 The following code runs the R package `mashr`, which attempts to infer the true estimates of the SNP effects (the $\beta$s) based on the multivariate structure of the data. `mashr` accepts a matrix of $\beta$s and their standard errors, and uses mixture models to infer the true $\beta$s, the local false sign rate, the proportion of SNPs that belong to each mixture component, and other useful things. For more information on `mashr`, see the [package website](https://stephenslab.github.io/mashr/index.html), and the associated paper by Urbut, Wang, and Stephens (doi:10.1101/096552).
 
-Importantly, there are two ways to run `mashr`: using "canonical" covariance matrices that are defined _a priori_ by the user, or using covariance matrices that are selected by algorithmically investigating the structure of the data. The following code runs both approaches, since the results they provide contain complementary information.
+Importantly, there are two ways to run `mashr`: using "canonical" covariance matrices that are defined _a priori_ by the user, or using covariance matrices that are selected by algorithmically investigating the structure of the data. The following code runs both approaches, since they provide contain complementary information.
 
 The canonical method is helpful for testing specific hypotheses about how the effect sizes are correlated across the multiple phenotypes being analysed; in our case, we are interested in identifying and counting SNPs with sex-specific and/or age-specific effects. 
 
-By contrast, the data-driven approach uses the software `Extreme Deconvolution` to infer the true covariance structure in the data (suing a subset of the most accurately-measured effects), and then selects a number of covariance matrices that provide a good approximation of the true covariance structure in the data. 
+By contrast, the data-driven approach uses the software `Extreme Deconvolution` to infer the true covariance structure in the data (using a subset of the most accurately-measured effects), and then selects a small number of covariance matrices (six, including the null) that provide a good approximation of the true mixture of covariance structures in the data. 
 
-The data-driven approach provides "shinked" estimates of $\beta$ that are likely to be closer to the true value than does the canonical approach, since the matrices used in the mixture model are expected to be more realistic. However the mixture proportions produced by the canonical approach are easier to interpret; e.g. we can use them to draw conclusions like "50% of SNPs have non-null effects" or "There are twice as many sexually-concordant SNPs as sexually-antagonistic SNPs".
+The data-driven approach provides "shrinked" estimates of $\beta$ that are likely to be closer to the true value than does the canonical approach, since the matrices used in the mixture model are expected to be more realistic. However the mixture proportions produced by the canonical approach are easier to interpret; e.g. we can use them to draw conclusions like "variants whose effects were inferred to female-specific were more common than male-specific ones" or "There are twice as many sexually-concordant variants as sexually-antagonistic variants".
 
 
-In the 'canonical' analysis, we were _a priori_ interested in determining the relative abundances of loci that affect fitness in the following ways:
+In the 'canonical' analysis, we were _a priori_ interested in determining the relative abundances of variants that affect fitness in the following list of possible ways:
 
   - null (no effect on fitness)
-  - uniform (the fitness effect of the allele is identical on all sexes and age classes)
-  - same sign, variable magnitude (the fitness effect of the allele has the same sign for all sexes and age classes, though its magnitude is allowed to vary)
+  - uniform effect (the fitness effect of the allele is identical on all sexes and age classes; termed `equal_effects` in `mashr`)
+  - same sign, variable magnitude (the fitness effect of the allele has the same sign for all sexes and age classes, though its magnitude is allowed to vary; termed `simple_het` in `mashr`)
   - sexually antagonistic (one allele is good for one sex and bad for the other, though this effect is the same in young and old individuals)
   - age antagonistic (one allele is good for one age class and bad for the other, though this effect is the same in males and females)
   - female-specific (there is an effect in females but no effect in males; same sign of effect across age classes)
@@ -98,9 +53,11 @@ In the 'canonical' analysis, we were _a priori_ interested in determining the re
   - early-life-specific effect, with an effect magnitude and/or sign that differs between sexes
   - late-life-specific effect, with an effect magnitude and/or sign that differs between sexes
 
-These categories were chosen to be exhaustive: we reason that loci could conceiveably affect fitness in a manner that depends on age, sex, and the age-sex interaction.
+These categories were chosen because our _a priori_ hypothesis is that different loci conceiveably affect fitness in a manner that depends on age, sex, and the age-sex interaction. There were 46 covariances matrices, including the null.
 
-```{r eval=FALSE}
+Both `mashr` analyses use the default 'null-biased' prior, which means that loci with no effect on any of the fitness components are 10-fold more common than any of the other possibilities. 
+
+```{r}
 run_mashr <- function(beta_and_se, mashr_mode, ED_p_cutoff = NULL){
   
   mashr_setup <- function(beta_and_se){
@@ -211,20 +168,65 @@ run_mashr <- function(beta_and_se, mashr_mode, ED_p_cutoff = NULL){
   return(mash(data = mash_data, Ulist = U)) # Run mashr
 }
 
-# Reorder by SNP name, and save the neatened results from the univariate GEMMA (also needed to interpret the mashr results later)
-all_univariate_lmm_results <- all_univariate_lmm_results %>% arrange(SNPs)
-write_csv(all_univariate_lmm_results, path = "data/derived/all_univariate_GEMMA_results.csv")
-data_for_mashr <- all_univariate_lmm_results %>% select(starts_with("beta"), starts_with("SE"))
-rm(all_univariate_lmm_results)
+data_for_mashr <- read_csv("data/derived/all_univariate_GEMMA_results.csv") %>% 
+  select(starts_with("beta"), starts_with("SE"))
 
-mashr_results_canonical <- run_mashr(data_for_mashr, mashr_mode = "canonical")
-mashr_results_ED        <- run_mashr(data_for_mashr, mashr_mode = "ED", ED_p_cutoff = 0.2)
+if(!file.exists("data/derived/mashr_results_canonical.rds")){
+  run_mashr(data_for_mashr, mashr_mode = "ED", ED_p_cutoff = 0.2) %>%
+    write_rds(path = "data/derived/mashr_results_ED.rds")
+  
+  run_mashr(data_for_mashr, mashr_mode = "canonical") %>%
+    write_rds(path = "data/derived/mashr_results_canonical.rds")
+} else {
+  mashr_results_ED <- read_rds("data/derived/mashr_results_ED.rds")
+  mashr_results_canonical <- read_rds("data/derived/mashr_results_canonical.rds")
+}
+```
 
-write_rds(mashr_results_canonical, path = "data/derived/mashr_results_canonical.rds")
-write_rds(mashr_results_ED, path = "data/derived/mashr_results_ED.rds")
+```{r mashr_by_chromosome}
+mashr_one_chromosome <- function(chr){
+  focal_data <- read_csv("data/derived/all_univariate_GEMMA_results.csv") %>% 
+    filter(grepl(glue("{chr}_"), SNPs)) %>%
+    select(starts_with("beta"), starts_with("SE"))
+  
+  run_mashr(focal_data, mashr_mode = "canonical") %>%
+    write_rds(path = glue("data/derived/mashr_results_canonical_chr{chr}.rds"))
+}
+
+if(!file.exists("data/derived/mashr_results_canonical_chrX.rds")){
+  lapply(c("2L", "2R", "3L", "3R", "X"), mashr_one_chromosome)
+} 
 ```
 
 
+## Find mixture probabilities for each SNP
+This uses the canonical analysis' classifications. Each SNP gets a posterior probability that it belongs to the $i$'th mixture component -- only the mixture components that are not very rare are included. These are: `equal_effects` (i.e. the SNP is predicted to affect all 4 traits equally), female-specific and male-specific (i.e. an effect on females/males only, which is concordant across age categories), sexually antagonistic (again, regardless of age), and null. The null category is the rarest one, despite the prior assuming null SNPs are $10\times$ more common than any other type. The analysis therefore suggests that most SNPs either affect some/all of our 4 phenotypes, or (more likely) are in linkage disequilibrium with a SNP which does. 
+
+```{r get_mixture_assignments}
+# Get the mixture weights, as advised by mash authors here: https://github.com/stephenslab/mashr/issues/68
+posterior_weights_cov <- mashr_results_canonical$posterior_weights 
+colnames(posterior_weights_cov) <- sapply(
+  str_split(colnames(posterior_weights_cov), '\\.'), 
+  function(x) {
+    if(length(x) == 1) return(x)
+    else if(length(x) == 2) return(x[1])
+    else if(length(x) == 3) return(paste(x[1], x[2], sep = "."))
+  })
+posterior_weights_cov <- t(rowsum(t(posterior_weights_cov), 
+                                  colnames(posterior_weights_cov)))
+
+# Make a neat dataframe
+mixture_assignment_probabilities <- data.frame(
+  SNP_clump = read_csv("data/derived/all_univariate_GEMMA_results.csv")$SNPs,
+  posterior_weights_cov,
+  stringsAsFactors = FALSE
+) %>% as_tibble() %>%
+  rename(P_equal_effects = equal_effects,
+         P_female_specific = Female_specific_1,
+         P_male_specific = Male_specific_1,
+         P_null = null,
+         P_sex_antag = Sex_antag_0.25)
+```
 
 ## Add the `mashr` results to the database
 
@@ -232,25 +234,44 @@ Here, we make a single large dataframe holding all of the 'raw' results from the
 
 ```{r eval=FALSE}
 all_univariate_lmm_results <- read_csv("data/derived/all_univariate_GEMMA_results.csv") %>% 
-  rename_at(vars(-SNPs), funs(str_c(., "_raw")))
-mashr_results_canonical <- read_rds("data/derived/mashr_results_canonical.rds")
-mashr_results_ED <- read_rds("data/derived/mashr_results_ED.rds")
+  rename_at(vars(-SNPs), ~ str_c(., "_raw"))
+
+canonical_estimates <- get_pm(mashr_results_canonical) %>% 
+  as_tibble() %>% 
+  rename_all(~str_c(., "_mashr_canonical"))
+
+ED_estimates <- get_pm(mashr_results_ED) %>% 
+  as_tibble() %>% 
+  rename_all(~str_c(., "_mashr_ED"))
+
+lfsr_canonical <- get_lfsr(mashr_results_canonical) %>% 
+  as_tibble() %>% 
+  rename_all(~str_replace_all(., "beta", "LFSR")) %>% 
+  rename_all(~str_c(., "_mashr_canonical"))
+
+lfsr_ED <- get_lfsr(mashr_results_ED) %>% 
+  as_tibble() %>% 
+  rename_all(~str_replace_all(., "beta", "LFSR")) %>% 
+  rename_all(~str_c(., "_mashr_ED"))
 
 
-canonical_estimates <- get_pm(mashr_results_canonical) %>% as_tibble() %>% rename_all(~str_c(., "_mashr_canonical"))
-ED_estimates        <- get_pm(mashr_results_ED) %>% as_tibble() %>% rename_all(~str_c(., "_mashr_ED"))
-
-lfsr_canonical <- get_lfsr(mashr_results_canonical) %>% as_tibble() %>% rename_all(~str_replace_all(., "beta", "LFSR")) %>% rename_all(~str_c(., "_mashr_canonical"))
-lfsr_ED <- get_lfsr(mashr_results_ED) %>% as_tibble() %>% rename_all(~str_replace_all(., "beta", "LFSR")) %>% rename_all(~str_c(., "_mashr_ED"))
-
-
-all_univariate_lmm_results <- bind_cols(all_univariate_lmm_results, canonical_estimates, ED_estimates, lfsr_canonical, lfsr_ED)
+all_univariate_lmm_results <- bind_cols(
+  all_univariate_lmm_results, 
+  canonical_estimates, 
+  ED_estimates, 
+  lfsr_canonical, 
+  lfsr_ED)
 
 nested <- all_univariate_lmm_results %>% filter(str_detect(SNPs, ", "))
-nested <- lapply(1:nrow(nested), function(i) data.frame(SNP = strsplit(nested$SNPs[i], split = ", ")[[1]],    
-                                                SNP_clump = nested$SNPs[i],
-                                                nested[i,] %>% select(-SNPs), stringsAsFactors = FALSE)) %>%
+split_snps <- strsplit(nested$SNPs, split = ", ")
+nested <- lapply(1:nrow(nested), 
+                 function(i) {
+                   data.frame(SNP = split_snps[[i]],    
+                              SNP_clump = nested$SNPs[i],
+                              nested[i,] %>% select(-SNPs), stringsAsFactors = FALSE)
+                   }) %>%
   do.call("rbind", .) %>% as_tibble()
+rm(split_snps)
 
 all_univariate_lmm_results <- all_univariate_lmm_results %>% 
   filter(!str_detect(SNPs, ", ")) %>%
@@ -259,10 +280,61 @@ all_univariate_lmm_results <- all_univariate_lmm_results %>%
   bind_rows(nested) %>%
   arrange(SNP)
 
-db$con %>% db_drop_table(table = "univariate_lmm_results")
+# Merge in the mixture proportions
+all_univariate_lmm_results <- 
+  all_univariate_lmm_results %>%
+  left_join(mixture_assignment_probabilities, by = "SNP_clump")
+
+db <- DBI::dbConnect(RSQLite::SQLite(), 
+                     "data/derived/annotations.sqlite3", create = FALSE)
+
+db %>% db_drop_table(table = "univariate_lmm_results")
 db %>% copy_to(all_univariate_lmm_results,
-               "univariate_lmm_results", temporary = FALSE,
-               indexes = list("SNP"))
+               "univariate_lmm_results", temporary = FALSE)
 ```
 
+### Log likelihood
+
+The data-driven covariance matrices have a likelihood that is 99.2% as high as for the canonical matrices, even though the canonical analysis has far, far more parameters (46 matrices vs 6). This indicates that the data-driven covariance matrices provide a better fit to the data, as expected (see: https://stephenslab.github.io/mashr/articles/simulate_noncanon.html). Thus, we use the data-driven covariance matrices when we wish to derive 'adjusted' effect sizes for each SNP (i.e. adjusted for winner's/loser's curse effects, and for the statistically inferred covariance structure for the variant effects on the four phenotypes). The canonical covariance matrices are instead used for classifying SNPs into easy-to-see categories (e.g. sex-specific, sexually antagonistic, concordant, etc), and estimating the % SNPs that belong to each category
+
+```{r load_mashr_results, echo=FALSE}
+mashr_results_canonical <- read_rds("data/derived/mashr_results_canonical.rds")
+mashr_results_ED <- read_rds("data/derived/mashr_results_ED.rds")
+```
+
+
+```{r}
+tibble(`Mashr version` = c("A. Data-driven covariance matrices",
+                           "B. Cononical covariance matrices",
+                           "Likelihood ratio (A / B)"),
+       `Log likelihood` = c(get_loglik(mashr_results_ED),
+                            get_loglik(mashr_results_canonical),
+                            get_loglik(mashr_results_ED) / get_loglik(mashr_results_canonical))) %>%
+  kable() %>%
+  kable_styling()
+```
+
+
+
+
+## Proportion of 'significant' effect sizes which share the same sign for each pair of phenotypes
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+loci_tested <- nrow(read_csv("data/derived/all_univariate_GEMMA_results.csv"))
+loci_tested <- prettyNum(loci_tested, big.mark=",", scientific=FALSE)
+```
+
+
+To find the proportion of sex or age-antagonistic SNPs among the `r loci_tested` that were tested, we simply take 1 minus this matrix, e.g. $100\times(1 - 0.976) = 2.4\%$ of the loci that significantly (i.e. LFSR < 0.05) affected both male and female early-life fitness had an _opposite_ effect on each sex (as opposed to a same-sign effect). 
+
+Note that this approach is a very conservative way of measuring the % sexually antagonistic (or age antagonistic) loci in the genome, because the LFSR needs to be < 0.05 for _both_ traits (meaning there are 2 chances to make a 'false negative', which matters because the power is low for any individual locus). Also note that this matrix was calculated using the data-driven (not canonical) covariance matrices, which are expected to more accurately estimate effect size of each SNP.
+
+The matrix highlights that there are zero loci where one allele significantly improves early-life fitness and lower late-life fitness with a sex (they might exist, but none were detected using this conservative test and our data). However, some sexually antagonistic loci were detected: about 2.4% of loci were sexually antagonistic in the early-life assay, and 1.2% in the late-life assay. 
+
+```{r pairwise_sharing}
+get_pairwise_sharing(mashr_results_ED, 
+                     factor = 0, 
+                     lfsr_thresh = 0.05) %>% 
+  round(3)
+```
 

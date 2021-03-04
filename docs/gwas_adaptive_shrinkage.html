@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 
@@ -23,11 +23,31 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
-<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
-<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
+<link href="site_libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
+<script src="site_libs/anchor-sections-1.0/anchor-sections.js"></script>
+<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -75,9 +95,7 @@ h6 {
 </style>
 
 
-</head>
 
-<body>
 
 <style type = "text/css">
 .main-container {
@@ -91,7 +109,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -101,6 +118,9 @@ img {
 }
 button.code-folding-btn:focus {
   outline: none;
+}
+summary {
+  display: list-item;
 }
 </style>
 
@@ -116,7 +136,6 @@ body {
   padding-top: 56px;
   margin-top: -56px;
 }
-
 .section h2 {
   padding-top: 56px;
   margin-top: -56px;
@@ -136,6 +155,43 @@ body {
 .section h6 {
   padding-top: 56px;
   margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
 }
 </style>
 
@@ -157,47 +213,69 @@ $(document).ready(function () {
 });
 </script>
 
-
-<div class="container-fluid main-container">
-
 <!-- tabsets -->
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-</script>
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
 
 <!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
 
 
-
-
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
 
 <style type="text/css">
 
@@ -211,6 +289,12 @@ $(document).ready(function ()  {
 }
 }
 
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
 
 .toc-content {
   padding-left: 30px;
@@ -246,8 +330,6 @@ div.tocify {
 
 .tocify-subheader .tocify-item {
   font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -256,6 +338,16 @@ div.tocify {
 
 
 </style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
 
 <!-- setup 3col/9col grid for toc_float and main content  -->
 <div class="row-fluid">
@@ -303,14 +395,15 @@ div.tocify {
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-<!-- Add a small amount of space between sections. -->
-<style type="text/css">
-div.section {
-  padding-top: 12px;
-}
-</style>
-
 <div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
 
 
 
@@ -319,314 +412,306 @@ div.section {
 </div>
 
 
-<p><strong>Last updated:</strong> 2018-10-04</p>
-<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
-<ul>
-<li>
-<p><details> <summary> <strong style="color:red;">✖</strong> <strong>R Markdown file:</strong> uncommitted changes </summary> The R Markdown file has unstaged changes. To know which version of the R Markdown file created these results, you’ll want to first commit it to the Git repo. If you’re still working on the analysis, you can ignore this warning. When you’re finished, you can run <code>wflow_publish</code> to commit the R Markdown file and build the HTML.</p>
-</details>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
-<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
-</details>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> </a>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20180914)</code> </summary></p>
-<p>The command <code>set.seed(20180914)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
-</details>
-</li>
-<li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
-<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
-</details>
-</li>
-<li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> 450cb72 </summary></p>
-Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
-<pre><code>
-Ignored files:
-    Ignored:    .DS_Store
-    Ignored:    .Rhistory
-    Ignored:    .Rproj.user/
-    Ignored:    analysis/.DS_Store
-    Ignored:    code/.DS_Store
-    Ignored:    data/.DS_Store
-    Ignored:    data/derived/.DS_Store
-    Ignored:    data/derived/output/.DS_Store
-    Ignored:    data/input/.DS_Store
-    Ignored:    figures/.DS_Store
-
-Untracked files:
-    Untracked:  .pversion
-    Untracked:  ExDeconDemo_c.log
-    Untracked:  ExDeconDemo_loglike.log
-    Untracked:  TEST_Venn.tiff
-    Untracked:  analysis/checking_mashr_results.Rmd
-    Untracked:  code/Drosophila_GWAS.Rmd
-    Untracked:  data/derived/.!25440!dgrp2_focal_lines.bed
-    Untracked:  data/derived/.pversion
-    Untracked:  data/derived/GRM.txt
-    Untracked:  data/derived/TWAS_result_females.csv
-    Untracked:  data/derived/TWAS_result_males.csv
-    Untracked:  data/derived/all_four_traits_SNP_clumps.txt
-    Untracked:  data/derived/all_univariate_GEMMA_results.csv
-    Untracked:  data/derived/annotations.sqlite3
-    Untracked:  data/derived/dgrp2_QC_all_lines.bed
-    Untracked:  data/derived/dgrp2_QC_all_lines.bim
-    Untracked:  data/derived/dgrp2_QC_all_lines.fam
-    Untracked:  data/derived/dgrp2_QC_all_lines.log
-    Untracked:  data/derived/dgrp2_QC_focal_lines.bed
-    Untracked:  data/derived/dgrp2_QC_focal_lines.bim
-    Untracked:  data/derived/dgrp2_QC_focal_lines.bk
-    Untracked:  data/derived/dgrp2_QC_focal_lines.fam
-    Untracked:  data/derived/dgrp2_QC_focal_lines.log
-    Untracked:  data/derived/dgrp2_QC_focal_lines.rds
-    Untracked:  data/derived/dgrp2_transcriptome_subset.bed
-    Untracked:  data/derived/dgrp2_transcriptome_subset.bim
-    Untracked:  data/derived/dgrp2_transcriptome_subset.fam
-    Untracked:  data/derived/dgrp2_transcriptome_subset.log
-    Untracked:  data/derived/female_early_SNP_clumps.txt
-    Untracked:  data/derived/female_late_SNP_clumps.txt
-    Untracked:  data/derived/lines_to_keep.txt
-    Untracked:  data/derived/lmm_ED_mashr_results.rds
-    Untracked:  data/derived/lmm_canonical_mashr_results.rds
-    Untracked:  data/derived/male_early_SNP_clumps.txt
-    Untracked:  data/derived/male_late_SNP_clumps.txt
-    Untracked:  data/derived/mashr_results_ED.rds
-    Untracked:  data/derived/mashr_results_canonical.rds
-    Untracked:  data/derived/output/.pversion
-    Untracked:  data/derived/output/GRM.cXX.txt
-    Untracked:  data/derived/output/GRM.log.txt
-    Untracked:  data/derived/output/GRM_transcriptome.cXX.txt
-    Untracked:  data/derived/output/GRM_transcriptome.log.txt
-    Untracked:  data/derived/output/all_four_traits.assoc.txt
-    Untracked:  data/derived/output/all_four_traits.log.txt
-    Untracked:  data/derived/output/allele_freq_count.assoc.txt
-    Untracked:  data/derived/output/allele_freq_count.log.txt
-    Untracked:  data/derived/output/eigen_decomp.eigenD.txt
-    Untracked:  data/derived/output/eigen_decomp.eigenU.txt
-    Untracked:  data/derived/output/eigen_decomp.log.txt
-    Untracked:  data/derived/output/eigen_decomp_transcriptome.eigenD.txt
-    Untracked:  data/derived/output/eigen_decomp_transcriptome.eigenU.txt
-    Untracked:  data/derived/output/eigen_decomp_transcriptome.log.txt
-    Untracked:  data/derived/plink.frq
-    Untracked:  data/input/.pversion
-    Untracked:  data/input/dgrp2.fam copy
-    Untracked:  data/input/dgrp2.fam.bak
-    Untracked:  data/input/huang_2015_tableS11_eQTL_females.csv
-    Untracked:  data/input/huang_2015_tableS12_eQTL_males.csv
-    Untracked:  data/input/huang_2015_tableS2_gene_expression.csv
-    Untracked:  data/input/huang_2015_tableS5_transcript_heritability.csv
-    Untracked:  dgrp2_clean.log
-    Untracked:  docs/figure/checking_mashr_results.Rmd/
-    Untracked:  gwas_adaptive_shrinkage.R
-
-Unstaged changes:
-    Modified:   analysis/GWAS_tables.Rmd
-    Modified:   analysis/TWAS.Rmd
-    Modified:   analysis/gwas_adaptive_shrinkage.Rmd
-    Modified:   analysis/index.Rmd
-    Modified:   analysis/perform_gwas.Rmd
-    Modified:   analysis/plotting_results.Rmd
-    Deleted:    data/derived/DGRP_SNP_genos.sqlite3
-    Deleted:    data/derived/gwas_db.sqlite3
-    Deleted:    data/derived/lm_results_ashr.csv
-    Modified:   data/derived/lmm_results_ashr.csv
-    Deleted:    data/derived/output/DGRP_GRM.cXX.txt
-    Deleted:    data/derived/output/DGRP_GRM.log.txt
-    Deleted:    data/derived/output/female_early_bslmm.bv.txt
-    Deleted:    data/derived/output/female_early_bslmm.gamma.txt
-    Deleted:    data/derived/output/female_early_bslmm.hyp.txt
-    Deleted:    data/derived/output/female_early_bslmm.log.txt
-    Deleted:    data/derived/output/female_early_bslmm.param.txt
-    Deleted:    data/derived/output/female_early_bslmm_preds.log.txt
-    Deleted:    data/derived/output/female_early_bslmm_preds.prdt.txt
-    Deleted:    data/derived/output/female_early_female_late.assoc.txt
-    Deleted:    data/derived/output/female_early_female_late.log.txt
-    Deleted:    data/derived/output/female_early_lm.assoc.txt
-    Deleted:    data/derived/output/female_early_lm.log.txt
-    Modified:   data/derived/output/female_early_lmm.assoc.txt
-    Modified:   data/derived/output/female_early_lmm.log.txt
-    Deleted:    data/derived/output/female_early_male_early.assoc.txt
-    Deleted:    data/derived/output/female_early_male_early.log.txt
-    Deleted:    data/derived/output/female_late_lm.assoc.txt
-    Deleted:    data/derived/output/female_late_lm.log.txt
-    Modified:   data/derived/output/female_late_lmm.assoc.txt
-    Modified:   data/derived/output/female_late_lmm.log.txt
-    Deleted:    data/derived/output/female_late_male_late.assoc.txt
-    Deleted:    data/derived/output/female_late_male_late.log.txt
-    Deleted:    data/derived/output/male_early_lm.assoc.txt
-    Deleted:    data/derived/output/male_early_lm.log.txt
-    Modified:   data/derived/output/male_early_lmm.assoc.txt
-    Modified:   data/derived/output/male_early_lmm.log.txt
-    Deleted:    data/derived/output/male_early_male_late.assoc.txt
-    Deleted:    data/derived/output/male_early_male_late.log.txt
-    Deleted:    data/derived/output/male_late_lm.assoc.txt
-    Deleted:    data/derived/output/male_late_lm.log.txt
-    Modified:   data/derived/output/male_late_lmm.assoc.txt
-    Modified:   data/derived/output/male_late_lmm.log.txt
-    Deleted:    data/derived/output/result.log.txt
-    Deleted:    data/derived/output/result.prdt.txt
-    Deleted:    data/derived/summed_interSNP_correlations.csv
-    Deleted:    data/derived/trimmed_DGRP.bed
-    Deleted:    data/derived/trimmed_DGRP.bim
-    Deleted:    data/derived/trimmed_DGRP.fam
-    Deleted:    data/derived/trimmed_DGRP.rds
-    Modified:   data/input/dgrp2.fam
-
-</code></pre>
-Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
+<a data-toggle="tab" href="#versions">Past versions</a>
 </li>
 </ul>
-<details> <summary> <small><strong>Expand here to see past versions:</strong></small> </summary>
-<ul>
-<table style="border-collapse:separate; border-spacing:5px;">
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2021-02-14
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 5 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 2
+</p>
+<p>
+<strong>Knit directory:</strong> <code>fitnessGWAS/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.2). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div class="panel-group" id="workflowr-checks">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges"> <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown file has unstaged changes. To know which version of the R Markdown file created these results, you’ll want to first commit it to the Git repo. If you’re still working on the analysis, you can ignore this warning. When you’re finished, you can run <code>wflow_publish</code> to commit the R Markdown file and build the HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20180914code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20180914)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20180914code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20180914)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongabsolute"> <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> <strong>File paths:</strong> absolute </a>
+</p>
+</div>
+<div id="strongFilepathsstrongabsolute" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Using absolute paths to the files within your workflowr project makes it difficult for you and others to run your code on a different machine. Change the absolute path(s) below to the suggested relative path(s) to make your code more reproducible.
+</p>
+<table class="table table-condensed table-hover">
 <thead>
 <tr>
 <th style="text-align:left;">
-File
+absolute
 </th>
 <th style="text-align:left;">
-Version
-</th>
-<th style="text-align:left;">
-Author
-</th>
-<th style="text-align:left;">
-Date
-</th>
-<th style="text-align:left;">
-Message
+relative
 </th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align:left;">
-Rmd
+/Users/lholman/Rprojects/fitnessGWAS
 </td>
 <td style="text-align:left;">
-450cb72
-</td>
-<td style="text-align:left;">
-Luke Holman
-</td>
-<td style="text-align:left;">
-2018-10-01
-</td>
-<td style="text-align:left;">
-More typos fixed
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Rmd
-</td>
-<td style="text-align:left;">
-00eaec2
-</td>
-<td style="text-align:left;">
-Luke Holman
-</td>
-<td style="text-align:left;">
-2018-10-01
-</td>
-<td style="text-align:left;">
-Fixed typos in mashr
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Rmd
-</td>
-<td style="text-align:left;">
-3db7587
-</td>
-<td style="text-align:left;">
-Luke Holman
-</td>
-<td style="text-align:left;">
-2018-10-01
-</td>
-<td style="text-align:left;">
-1st October - lots more work
+.
 </td>
 </tr>
 </tbody>
 </table>
-</ul>
-<p></details></p>
-<hr />
-<p>Note: <code>mashr</code> requires a large amount of RAM, and so to get this script to run on the full SNP dataset, I had to launch R from the Terminal by typing <code>env R_MAX_VSIZE=700Gb R</code>. I then used <code>knitr::purl</code> to generate an R script from this R Markdown document, and ran the script from the Terminal.</p>
-<pre class="r"><code>library(dplyr)
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreec386787073d6bc80f7be30ea346adfbae7746636targetblankc386787a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/lukeholman/fitnessGWAS/tree/c386787073d6bc80f7be30ea346adfbae7746636" target="_blank">c386787</a> </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreec386787073d6bc80f7be30ea346adfbae7746636targetblankc386787a" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version <a href="https://github.com/lukeholman/fitnessGWAS/tree/c386787073d6bc80f7be30ea346adfbae7746636" target="_blank">c386787</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    .httr-oauth
+    Ignored:    .pversion
+    Ignored:    analysis/.DS_Store
+    Ignored:    analysis/correlations_SNP_effects_cache/
+    Ignored:    code/.DS_Store
+    Ignored:    code/Drosophila_GWAS.Rmd
+    Ignored:    data/.DS_Store
+    Ignored:    data/derived/
+    Ignored:    data/input/.DS_Store
+    Ignored:    data/input/.pversion
+    Ignored:    data/input/dgrp.fb557.annot.txt
+    Ignored:    data/input/dgrp2.bed
+    Ignored:    data/input/dgrp2.bim
+    Ignored:    data/input/dgrp2.fam
+    Ignored:    data/input/huang_transcriptome/
+    Ignored:    figures/.DS_Store
+
+Untracked files:
+    Untracked:  Rplots.pdf
+    Untracked:  analysis/GO_KEGG_enrichment.Rmd
+    Untracked:  analysis/correlations_SNP_effects.Rmd
+    Untracked:  code/GO_and_KEGG_gsea.R
+    Untracked:  code/make_sites_files_for_ARGweaver.R
+    Untracked:  code/run_argweaver.R
+    Untracked:  code/run_mashr.R
+    Untracked:  data/argweaver/
+    Untracked:  figures/mixture_proportions.pdf
+    Untracked:  manuscript/
+
+Unstaged changes:
+    Modified:   .gitignore
+    Modified:   analysis/GWAS_tables.Rmd
+    Modified:   analysis/TWAS.Rmd
+    Modified:   analysis/checking_mashr_results.Rmd
+    Modified:   analysis/eQTL_analysis.Rmd
+    Modified:   analysis/get_predicted_line_means.Rmd
+    Modified:   analysis/gwas_adaptive_shrinkage.Rmd
+    Modified:   analysis/index.Rmd
+    Modified:   analysis/make_annotation_database.Rmd
+    Modified:   analysis/perform_gwas.Rmd
+    Modified:   analysis/plot_line_means.Rmd
+    Modified:   analysis/plotting_results.Rmd
+    Deleted:    code/gwas_adaptive_shrinkage.R
+    Modified:   data/input/female_fitness.csv
+    Modified:   data/input/female_fitness_CLEANED.csv
+    Modified:   data/input/male_fitness.csv
+    Modified:   data/input/male_fitness_CLEANED.csv
+    Modified:   figures/figure1.eps
+    Modified:   figures/figure2.eps
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/gwas_adaptive_shrinkage.Rmd</code>) and HTML (<code>docs/gwas_adaptive_shrinkage.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/8d54ea56db332d3ac2d391c232936a4dc8106cc1/analysis/gwas_adaptive_shrinkage.Rmd" target="_blank">8d54ea5</a>
+</td>
+<td>
+Luke Holman
+</td>
+<td>
+2018-12-23
+</td>
+<td>
+Initial commit
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/8d54ea56db332d3ac2d391c232936a4dc8106cc1/docs/gwas_adaptive_shrinkage.html" target="_blank">8d54ea5</a>
+</td>
+<td>
+Luke Holman
+</td>
+<td>
+2018-12-23
+</td>
+<td>
+Initial commit
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<p>Note: <code>mashr</code> requires a large amount of RAM, and so to get this script to run on the full SNP dataset, I had to launch R from the Terminal with extra memory allocation. I used <code>knitr::purl(input = "analysis/gwas_adaptive_shrinkage.Rmd", output = "code/run_mashr.R")</code> to generate an R script from this R Markdown document, then <code>env R_MAX_VSIZE=700Gb Rscript code/run_mashr.R</code>. Successfully ran on a late 2015 iMac with 32GB RAM over a few days.</p>
+<pre class="r"><code>library(tidyverse)
 library(ashr) # Also requires installation of RMosek, which needs a (free) licence. See the ashr Github page for help
 library(mashr) # NB: This has multiple dependencies and was tricky to install. Read the Github page, and good luck!
-library(readr)
-
-# launch this from Terminal with: env R_MAX_VSIZE=700Gb R 
-setwd(&quot;/Users/lholman/Rprojects/fitnessGWAS&quot;)</code></pre>
-<div id="load-the-results-of-the-four-univariate-gwas" class="section level2">
-<h2>Load the results of the four univariate GWAS</h2>
-<p>Load up the GWAS results, which were produced by using linear mixed models implemented in GEMMA, and arrange the data in a ‘wide’ format, where each row is one SNP, and the columns hold the estimates of <span class="math inline">\(\beta\)</span>, the standard error of <span class="math inline">\(\beta\)</span>, and the p-value for the GEMMA association tests on each of the four fitness traits.</p>
-<pre class="r"><code>load_gwas_results &lt;- function(fitness.component){
-  new_names &lt;- c(x = &quot;beta&quot;, y = &quot;se&quot;, z = &quot;p_wald&quot;)
-  names(new_names) &lt;- c(paste(&quot;beta_&quot;, fitness.component, sep = &quot;&quot;), 
-                        paste(&quot;SE_&quot;, fitness.component, sep = &quot;&quot;), 
-                        paste(&quot;pvalue_&quot;, fitness.component, sep = &quot;&quot;))
-  
-  paste(&quot;data/derived/output/&quot;, fitness.component, &quot;_lmm.assoc.txt&quot;, sep = &quot;&quot;) %&gt;%
-    read_tsv() %&gt;%
-    select(SNP, beta, se, p_wald) %&gt;%
-    rename(!!new_names)
-}
-all_univariate_lmm_results &lt;- load_gwas_results(&quot;female_early&quot;) %&gt;%
-  full_join(load_gwas_results(&quot;female_late&quot;), by = &quot;SNP&quot;) %&gt;%
-  full_join(load_gwas_results(&quot;male_early&quot;), by = &quot;SNP&quot;) %&gt;%
-  full_join(load_gwas_results(&quot;male_late&quot;), by = &quot;SNP&quot;) 
-
-print(paste(&quot;Number of SNPs that were analysed with GEMMA:&quot;, nrow(all_univariate_lmm_results)))</code></pre>
-</div>
-<div id="prune-snps-that-are-in-100-linkage-disequilibrium" class="section level2">
-<h2>Prune SNPs that are in 100% linkage disequilibrium</h2>
-<p>Because GEMMA is quick and easy to run, we did not bother working out how to edit PLINK files to identify SNPs that are in complete linkage disequilibrium with one another (and there is lots of short- and long-range LD in the dataset). However, it is easy to perform LD pruning at this stage, becuase we can take advantage of the fact that SNPs in perfect LD with each other will have identical estimates of <span class="math inline">\(|\beta|\)</span> and its standard error, for all four fitness traits. The following code groups together SNPs that have identical association test results, producing a data frame in which the number of rows is equal to the number of unique datasets (i.e. combinations of genotypes and phenotypes) that were statistically analysed by GEMMA.</p>
-<pre class="r"><code>all_univariate_lmm_results &lt;- all_univariate_lmm_results %&gt;%
-  group_by(paste(beta_female_early, beta_female_late, beta_male_early, beta_male_late, # Group loci with identical GWAS results (these are in 100% LD with each other)
-                 SE_female_early, SE_female_late, SE_male_early, SE_male_late)) %&gt;%
-  summarise(SNPs = paste0(SNP, collapse = &quot;, &quot;),    # If there are multiple SNPs, concatenate their names
-            beta_female_early = unique(beta_female_early), 
-            beta_female_late = unique(beta_female_late), 
-            beta_male_early = unique(beta_male_early), 
-            beta_male_late = unique(beta_male_late),
-            SE_female_early = unique(SE_female_early), 
-            SE_female_late = unique(SE_female_late), 
-            SE_male_early = unique(SE_male_early), 
-            SE_male_late = unique(SE_male_late),
-            pvalue_female_early = unique(pvalue_female_early), 
-            pvalue_female_late = unique(pvalue_female_late), 
-            pvalue_male_early = unique(pvalue_male_early), 
-            pvalue_male_late = unique(pvalue_male_late)) %&gt;%
-  ungroup() %&gt;% select(-starts_with(&quot;paste&quot;)) %&gt;% 
-  arrange(pvalue_female_early + pvalue_female_late + pvalue_male_early + pvalue_male_late) # For the following table, arrange from most to least significant</code></pre>
-<div id="inspect-the-first-50-rows-of-the-dataset-passed-to-mashr" class="section level3">
-<h3>Inspect the first 50 rows of the dataset passed to <code>mashr</code></h3>
-<p>Note that the SNPs that are in 100% linkage disequilibrium with each other tend to be right next to each other in the genome, which is reassuring (long-range LD is not too rife).</p>
-<pre class="r"><code>all_univariate_lmm_results %&gt;% head(50) %&gt;% kable_table()
-print(paste(&quot;Number of SNPs (or SNP groups that are in &lt;100% linkage disequilibrium with each other):&quot;, nrow(all_univariate_lmm_results)))</code></pre>
-</div>
-</div>
+library(glue)
+library(kableExtra)</code></pre>
 <div id="run-multivariate-adaptive-shrinkage-using-mashr" class="section level2">
 <h2>Run multivariate adaptive shrinkage using <code>mashr</code></h2>
 <p>The following code runs the R package <code>mashr</code>, which attempts to infer the true estimates of the SNP effects (the <span class="math inline">\(\beta\)</span>s) based on the multivariate structure of the data. <code>mashr</code> accepts a matrix of <span class="math inline">\(\beta\)</span>s and their standard errors, and uses mixture models to infer the true <span class="math inline">\(\beta\)</span>s, the local false sign rate, the proportion of SNPs that belong to each mixture component, and other useful things. For more information on <code>mashr</code>, see the <a href="https://stephenslab.github.io/mashr/index.html">package website</a>, and the associated paper by Urbut, Wang, and Stephens (<a href="doi:10.1101/096552" class="uri">doi:10.1101/096552</a>).</p>
-<p>Importantly, there are two ways to run <code>mashr</code>: using “canonical” covariance matrices that are defined <em>a priori</em> by the user, or using covariance matrices that are selected by algorithmically investigating the structure of the data. The following code runs both approaches, since the results they provide contain complementary information.</p>
+<p>Importantly, there are two ways to run <code>mashr</code>: using “canonical” covariance matrices that are defined <em>a priori</em> by the user, or using covariance matrices that are selected by algorithmically investigating the structure of the data. The following code runs both approaches, since they provide contain complementary information.</p>
 <p>The canonical method is helpful for testing specific hypotheses about how the effect sizes are correlated across the multiple phenotypes being analysed; in our case, we are interested in identifying and counting SNPs with sex-specific and/or age-specific effects.</p>
-<p>By contrast, the data-driven approach uses the software <code>Extreme Deconvolution</code> to infer the true covariance structure in the data (suing a subset of the most accurately-measured effects), and then selects a number of covariance matrices that provide a good approximation of the true covariance structure in the data.</p>
-<p>The data-driven approach provides “shinked” estimates of <span class="math inline">\(\beta\)</span> that are likely to be closer to the true value than does the canonical approach, since the matrices used in the mixture model are expected to be more realistic. However the mixture proportions produced by the canonical approach are easier to interpret; e.g. we can use them to draw conclusions like “50% of SNPs have non-null effects” or “There are twice as many sexually-concordant SNPs as sexually-antagonistic SNPs”.</p>
-<p>In the ‘canonical’ analysis, we were <em>a priori</em> interested in determining the relative abundances of loci that affect fitness in the following ways:</p>
+<p>By contrast, the data-driven approach uses the software <code>Extreme Deconvolution</code> to infer the true covariance structure in the data (using a subset of the most accurately-measured effects), and then selects a small number of covariance matrices (six, including the null) that provide a good approximation of the true mixture of covariance structures in the data.</p>
+<p>The data-driven approach provides “shrinked” estimates of <span class="math inline">\(\beta\)</span> that are likely to be closer to the true value than does the canonical approach, since the matrices used in the mixture model are expected to be more realistic. However the mixture proportions produced by the canonical approach are easier to interpret; e.g. we can use them to draw conclusions like “variants whose effects were inferred to female-specific were more common than male-specific ones” or “There are twice as many sexually-concordant variants as sexually-antagonistic variants”.</p>
+<p>In the ‘canonical’ analysis, we were <em>a priori</em> interested in determining the relative abundances of variants that affect fitness in the following list of possible ways:</p>
 <ul>
 <li>null (no effect on fitness)</li>
-<li>uniform (the fitness effect of the allele is identical on all sexes and age classes)</li>
-<li>same sign, variable magnitude (the fitness effect of the allele has the same sign for all sexes and age classes, though its magnitude is allowed to vary)</li>
+<li>uniform effect (the fitness effect of the allele is identical on all sexes and age classes; termed <code>equal_effects</code> in <code>mashr</code>)</li>
+<li>same sign, variable magnitude (the fitness effect of the allele has the same sign for all sexes and age classes, though its magnitude is allowed to vary; termed <code>simple_het</code> in <code>mashr</code>)</li>
 <li>sexually antagonistic (one allele is good for one sex and bad for the other, though this effect is the same in young and old individuals)</li>
 <li>age antagonistic (one allele is good for one age class and bad for the other, though this effect is the same in males and females)</li>
 <li>female-specific (there is an effect in females but no effect in males; same sign of effect across age classes)</li>
@@ -639,8 +724,9 @@ print(paste(&quot;Number of SNPs (or SNP groups that are in &lt;100% linkage dis
 <li>early-life-specific effect, with an effect magnitude and/or sign that differs between sexes</li>
 <li>late-life-specific effect, with an effect magnitude and/or sign that differs between sexes</li>
 </ul>
-<p>These categories were chosen to be exhaustive: we reason that loci could conceiveably affect fitness in a manner that depends on age, sex, and the age-sex interaction.</p>
-<pre class="r"><code>run_mashr &lt;- function(beta_and_se, mashr_mode){
+<p>These categories were chosen because our <em>a priori</em> hypothesis is that different loci conceiveably affect fitness in a manner that depends on age, sex, and the age-sex interaction. There were 46 covariances matrices, including the null.</p>
+<p>Both <code>mashr</code> analyses use the default ‘null-biased’ prior, which means that loci with no effect on any of the fitness components are 10-fold more common than any of the other possibilities.</p>
+<pre class="r"><code>run_mashr &lt;- function(beta_and_se, mashr_mode, ED_p_cutoff = NULL){
   
   mashr_setup &lt;- function(beta_and_se){
     betas &lt;- beta_and_se %&gt;% select(starts_with(&quot;beta&quot;)) %&gt;% as.matrix()
@@ -660,7 +746,7 @@ print(paste(&quot;Number of SNPs (or SNP groups that are in &lt;100% linkage dis
   if(mashr_mode == &quot;ED&quot;){
     # Find the strongest effects in the data
     m.1by1 &lt;- mash_1by1(mash_data) 
-    strong &lt;- get_significant_results(m.1by1, 0.2)   
+    strong &lt;- get_significant_results(m.1by1, thresh = ED_p_cutoff)   
     # Obtain data-driven covariance matrices by running Extreme Deconvolution
     U.pca &lt;- cov_pca(mash_data, npc = 4, subset = strong)
     U &lt;- cov_ed(mash_data, U.pca, subset = strong)
@@ -750,41 +836,107 @@ print(paste(&quot;Number of SNPs (or SNP groups that are in &lt;100% linkage dis
   return(mash(data = mash_data, Ulist = U)) # Run mashr
 }
 
-# Reorder by SNP name, and save the neatened results from the univariate GEMMA (also needed to interpret the mashr results later)
-all_univariate_lmm_results &lt;- all_univariate_lmm_results %&gt;% arrange(SNPs)
-write_csv(all_univariate_lmm_results, path = &quot;data/derived/all_univariate_GEMMA_results.csv&quot;)
-data_for_mashr &lt;- all_univariate_lmm_results %&gt;% select(starts_with(&quot;beta&quot;), starts_with(&quot;SE&quot;))
-rm(all_univariate_lmm_results)
+data_for_mashr &lt;- read_csv(&quot;data/derived/all_univariate_GEMMA_results.csv&quot;) %&gt;% 
+  select(starts_with(&quot;beta&quot;), starts_with(&quot;SE&quot;))
 
-mashr_results_canonical &lt;- run_mashr(data_for_mashr, mashr_mode = &quot;canonical&quot;)
-mashr_results_ED        &lt;- run_mashr(data_for_mashr, mashr_mode = &quot;ED&quot;)
+if(!file.exists(&quot;data/derived/mashr_results_canonical.rds&quot;)){
+  run_mashr(data_for_mashr, mashr_mode = &quot;ED&quot;, ED_p_cutoff = 0.2) %&gt;%
+    write_rds(path = &quot;data/derived/mashr_results_ED.rds&quot;)
+  
+  run_mashr(data_for_mashr, mashr_mode = &quot;canonical&quot;) %&gt;%
+    write_rds(path = &quot;data/derived/mashr_results_canonical.rds&quot;)
+} else {
+  mashr_results_ED &lt;- read_rds(&quot;data/derived/mashr_results_ED.rds&quot;)
+  mashr_results_canonical &lt;- read_rds(&quot;data/derived/mashr_results_canonical.rds&quot;)
+}</code></pre>
+<pre class="r"><code>mashr_one_chromosome &lt;- function(chr){
+  focal_data &lt;- read_csv(&quot;data/derived/all_univariate_GEMMA_results.csv&quot;) %&gt;% 
+    filter(grepl(glue(&quot;{chr}_&quot;), SNPs)) %&gt;%
+    select(starts_with(&quot;beta&quot;), starts_with(&quot;SE&quot;))
+  
+  run_mashr(focal_data, mashr_mode = &quot;canonical&quot;) %&gt;%
+    write_rds(path = glue(&quot;data/derived/mashr_results_canonical_chr{chr}.rds&quot;))
+}
 
-write_rds(mashr_results_canonical, path = &quot;data/derived/mashr_results_canonical.rds&quot;)
-write_rds(mashr_results_ED, path = &quot;data/derived/mashr_results_ED.rds&quot;)</code></pre>
+if(!file.exists(&quot;data/derived/mashr_results_canonical_chrX.rds&quot;)){
+  lapply(c(&quot;2L&quot;, &quot;2R&quot;, &quot;3L&quot;, &quot;3R&quot;, &quot;X&quot;), mashr_one_chromosome)
+} else{
+  mashr_2L &lt;- readRDS(&quot;data/derived/mashr_results_canonical_chr2L.rds&quot;)
+  mashr_2R &lt;- readRDS(&quot;data/derived/mashr_results_canonical_chr2R.rds&quot;)
+  mashr_3L &lt;- readRDS(&quot;data/derived/mashr_results_canonical_chr3L.rds&quot;)
+  mashr_3R &lt;- readRDS(&quot;data/derived/mashr_results_canonical_chr3R.rds&quot;)
+  mashr_X &lt;- readRDS(&quot;data/derived/mashr_results_canonical_chrX.rds&quot;)
+}</code></pre>
+</div>
+<div id="find-mixture-probabilities-for-each-snp" class="section level2">
+<h2>Find mixture probabilities for each SNP</h2>
+<p>This uses the canonical analysis’ classifications. Each SNP gets a posterior probability that it belongs to the <span class="math inline">\(i\)</span>’th mixture component – only the mixture components that are not very rare are included. These are: <code>equal_effects</code> (i.e. the SNP is predicted to affect all 4 traits equally), female-specific and male-specific (i.e. an effect on females/males only, which is concordant across age categories), sexually antagonistic (again, regardless of age), and null. The null category is the rarest one, despite the prior assuming null SNPs are <span class="math inline">\(10\times\)</span> more common than any other type. The analysis therefore suggests that most SNPs either affect some/all of our 4 phenotypes, or (more likely) are in linkage disequilibrium with a SNP which does.</p>
+<pre class="r"><code># Get the mixture weights, as advised by mash authors here: https://github.com/stephenslab/mashr/issues/68
+posterior_weights_cov &lt;- mashr_results_canonical$posterior_weights 
+colnames(posterior_weights_cov) &lt;- sapply(
+  str_split(colnames(posterior_weights_cov), &#39;\\.&#39;), 
+  function(x) {
+    if(length(x) == 1) return(x)
+    else if(length(x) == 2) return(x[1])
+    else if(length(x) == 3) return(paste(x[1], x[2], sep = &quot;.&quot;))
+  })
+posterior_weights_cov &lt;- t(rowsum(t(posterior_weights_cov), 
+                                  colnames(posterior_weights_cov)))
+
+# Make a neat dataframe
+mixture_assignment_probabilities &lt;- data.frame(
+  SNP_clump = read_csv(&quot;data/derived/all_univariate_GEMMA_results.csv&quot;)$SNPs,
+  posterior_weights_cov,
+  stringsAsFactors = FALSE
+) %&gt;% as_tibble() %&gt;%
+  rename(P_equal_effects = equal_effects,
+         P_female_specific = Female_specific_1,
+         P_male_specific = Male_specific_1,
+         P_null = null,
+         P_sex_antag = Sex_antag_0.25)</code></pre>
 </div>
 <div id="add-the-mashr-results-to-the-database" class="section level2">
 <h2>Add the <code>mashr</code> results to the database</h2>
 <p>Here, we make a single large dataframe holding all of the ‘raw’ results from the univariate GEMMA analysis, and the corresponding “shrinked” results from <code>mashr</code> (for both the canonical and data-driven <code>mashr</code> analyses). Because it is so large, we add this sheet of results to the database, allowing memory-efficient searching, joins, etc.</p>
 <pre class="r"><code>all_univariate_lmm_results &lt;- read_csv(&quot;data/derived/all_univariate_GEMMA_results.csv&quot;) %&gt;% 
-  rename_at(vars(-SNPs), funs(str_c(., &quot;_raw&quot;)))
-mashr_results_canonical &lt;- read_rds(&quot;data/derived/mashr_results_canonical.rds&quot;)
-mashr_results_ED &lt;- read_rds(&quot;data/derived/mashr_results_ED.rds&quot;)
+  rename_at(vars(-SNPs), ~ str_c(., &quot;_raw&quot;))
+
+canonical_estimates &lt;- get_pm(mashr_results_canonical) %&gt;% 
+  as_tibble() %&gt;% 
+  rename_all(~str_c(., &quot;_mashr_canonical&quot;))
+
+ED_estimates &lt;- get_pm(mashr_results_ED) %&gt;% 
+  as_tibble() %&gt;% 
+  rename_all(~str_c(., &quot;_mashr_ED&quot;))
+
+lfsr_canonical &lt;- get_lfsr(mashr_results_canonical) %&gt;% 
+  as_tibble() %&gt;% 
+  rename_all(~str_replace_all(., &quot;beta&quot;, &quot;LFSR&quot;)) %&gt;% 
+  rename_all(~str_c(., &quot;_mashr_canonical&quot;))
+
+lfsr_ED &lt;- get_lfsr(mashr_results_ED) %&gt;% 
+  as_tibble() %&gt;% 
+  rename_all(~str_replace_all(., &quot;beta&quot;, &quot;LFSR&quot;)) %&gt;% 
+  rename_all(~str_c(., &quot;_mashr_ED&quot;))
 
 
-canonical_estimates &lt;- get_pm(mashr_results_canonical) %&gt;% as_tibble() %&gt;% rename_all(~str_c(., &quot;_mashr_canonical&quot;))
-ED_estimates        &lt;- get_pm(mashr_results_ED) %&gt;% as_tibble() %&gt;% rename_all(~str_c(., &quot;_mashr_ED&quot;))
-
-lfsr_canonical &lt;- get_lfsr(mashr_results_canonical) %&gt;% as_tibble() %&gt;% rename_all(~str_replace_all(., &quot;beta&quot;, &quot;LFSR&quot;)) %&gt;% rename_all(~str_c(., &quot;_mashr_canonical&quot;))
-lfsr_ED &lt;- get_lfsr(mashr_results_ED) %&gt;% as_tibble() %&gt;% rename_all(~str_replace_all(., &quot;beta&quot;, &quot;LFSR&quot;)) %&gt;% rename_all(~str_c(., &quot;_mashr_ED&quot;))
-
-
-all_univariate_lmm_results &lt;- bind_cols(all_univariate_lmm_results, canonical_estimates, ED_estimates, lfsr_canonical, lfsr_ED)
+all_univariate_lmm_results &lt;- bind_cols(
+  all_univariate_lmm_results, 
+  canonical_estimates, 
+  ED_estimates, 
+  lfsr_canonical, 
+  lfsr_ED)
 
 nested &lt;- all_univariate_lmm_results %&gt;% filter(str_detect(SNPs, &quot;, &quot;))
-nested &lt;- lapply(1:nrow(nested), function(i) data.frame(SNP = strsplit(nested$SNPs[i], split = &quot;, &quot;)[[1]],    
-                                                SNP_clump = nested$SNPs[i],
-                                                nested[i,] %&gt;% select(-SNPs), stringsAsFactors = FALSE)) %&gt;%
+split_snps &lt;- strsplit(nested$SNPs, split = &quot;, &quot;)
+nested &lt;- lapply(1:nrow(nested), 
+                 function(i) {
+                   data.frame(SNP = split_snps[[i]],    
+                              SNP_clump = nested$SNPs[i],
+                              nested[i,] %&gt;% select(-SNPs), stringsAsFactors = FALSE)
+                   }) %&gt;%
   do.call(&quot;rbind&quot;, .) %&gt;% as_tibble()
+rm(split_snps)
 
 all_univariate_lmm_results &lt;- all_univariate_lmm_results %&gt;% 
   filter(!str_detect(SNPs, &quot;, &quot;)) %&gt;%
@@ -793,49 +945,250 @@ all_univariate_lmm_results &lt;- all_univariate_lmm_results %&gt;%
   bind_rows(nested) %&gt;%
   arrange(SNP)
 
-db$con %&gt;% db_drop_table(table = &quot;univariate_lmm_results&quot;)
+# Merge in the mixture proportions
+all_univariate_lmm_results &lt;- 
+  all_univariate_lmm_results %&gt;%
+  left_join(mixture_assignment_probabilities, by = &quot;SNP_clump&quot;)
+
+db &lt;- DBI::dbConnect(RSQLite::SQLite(), 
+                     &quot;data/derived/annotations.sqlite3&quot;, create = FALSE)
+
+db %&gt;% db_drop_table(table = &quot;univariate_lmm_results&quot;)
 db %&gt;% copy_to(all_univariate_lmm_results,
-               &quot;univariate_lmm_results&quot;, temporary = FALSE,
-               indexes = list(&quot;SNP&quot;))</code></pre>
+               &quot;univariate_lmm_results&quot;, temporary = FALSE)</code></pre>
+<div id="log-likelihood" class="section level3">
+<h3>Log likelihood</h3>
+<p>The data-driven covariance matrices have a likelihood that is 99.2% as high as for the canonical matrices, even though the canonical analysis has far, far more parameters (46 matrices vs 6). This indicates that the data-driven covariance matrices provide a better fit to the data, as expected (see: <a href="https://stephenslab.github.io/mashr/articles/simulate_noncanon.html" class="uri">https://stephenslab.github.io/mashr/articles/simulate_noncanon.html</a>). Thus, we use the data-driven covariance matrices when we wish to derive ‘adjusted’ effect sizes for each SNP (i.e. adjusted for winner’s/loser’s curse effects, and for the statistically inferred covariance structure for the variant effects on the four phenotypes). The canonical covariance matrices are instead used for classifying SNPs into easy-to-see categories (e.g. sex-specific, sexually antagonistic, concordant, etc), and estimating the % SNPs that belong to each category</p>
+<pre class="r"><code>tibble(`Mashr version` = c(&quot;A. Data-driven covariance matrices&quot;,
+                           &quot;B. Cononical covariance matrices&quot;,
+                           &quot;Likelihood ratio (A / B)&quot;),
+       `Log likelihood` = c(get_loglik(mashr_results_ED),
+                            get_loglik(mashr_results_canonical),
+                            get_loglik(mashr_results_ED) / get_loglik(mashr_results_canonical))) %&gt;%
+  kable() %&gt;%
+  kable_styling()</code></pre>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Mashr version
+</th>
+<th style="text-align:right;">
+Log likelihood
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+A. Data-driven covariance matrices
+</td>
+<td style="text-align:right;">
+3.482416e+06
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+B. Cononical covariance matrices
+</td>
+<td style="text-align:right;">
+3.510870e+06
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Likelihood ratio (A / B)
+</td>
+<td style="text-align:right;">
+9.918955e-01
+</td>
+</tr>
+</tbody>
+</table>
 </div>
-<div id="session-information" class="section level2">
-<h2>Session information</h2>
+</div>
+<div id="mixture-proportions-from-canonical-mashr-analysis" class="section level2">
+<h2>Mixture proportions from canonical <code>mashr</code> analysis</h2>
+<pre class="r"><code>library(gridExtra)
+library(showtext) # For fancy Google font in figures
+font_add_google(name = &quot;Raleway&quot;, family = &quot;Raleway&quot;, regular.wt = 400, bold.wt = 700) # Install font from Google Fonts
+showtext_auto()
+
+mix &lt;- bind_rows(
+  enframe(sort(get_estimated_pi(mashr_results_canonical))) %&gt;%
+    mutate(Chromosome = &quot;All&quot;),
+  enframe(sort(get_estimated_pi(mashr_2L))) %&gt;%
+    mutate(Chromosome = &quot;2L&quot;),
+  enframe(sort(get_estimated_pi(mashr_2R))) %&gt;%
+    mutate(Chromosome = &quot;2R&quot;),
+  enframe(sort(get_estimated_pi(mashr_3L))) %&gt;%
+    mutate(Chromosome = &quot;3L&quot;),
+  enframe(sort(get_estimated_pi(mashr_3R))) %&gt;%
+    mutate(Chromosome = &quot;3R&quot;),
+  enframe(sort(get_estimated_pi(mashr_X))) %&gt;%
+    mutate(Chromosome = &quot;X&quot;)) %&gt;% 
+  rename(Mixture_component = name) 
+
+to_keep &lt;- mix %&gt;%
+  group_by(Mixture_component) %&gt;%
+  summarise(value = max(value), .groups = &quot;drop&quot;) %&gt;%
+  filter(value &gt; 0.01) %&gt;%
+  pull(Mixture_component)
+
+mix &lt;- mix %&gt;%
+  filter(Mixture_component %in% to_keep) %&gt;%
+  spread(Mixture_component, value) %&gt;%
+  rename(`Equal effects on all phenotypes` = equal_effects,
+         `Female-specific effect` = Female_specific_1,
+         `Male-specific effect` = Male_specific_1,
+         `Sexually-antagonistic effect` = Sex_antag_0.25) %&gt;%
+  gather(Mixture_component, value, -Chromosome) %&gt;%
+  arrange(-value) 
+
+chr_levels &lt;- mix %&gt;% 
+  filter(Mixture_component == &quot;Sexually-antagonistic effect&quot;) %&gt;%
+  arrange(value) %&gt;% pull(Chromosome)
+
+mix &lt;- mix %&gt;%
+  mutate(Chromosome = factor(Chromosome, chr_levels),
+         Mixture_component = factor(Mixture_component, 
+                                    c(&quot;Sexually-antagonistic effect&quot;,
+                                      &quot;Equal effects on all phenotypes&quot;,
+                                      &quot;Female-specific effect&quot;,
+                                      &quot;Male-specific effect&quot;,
+                                      &quot;null&quot;))) 
+
+
+p1 &lt;- mix %&gt;%
+  filter(Mixture_component %in% c(&quot;Sexually-antagonistic effect&quot;,
+                                  &quot;Female-specific effect&quot;,
+                                  &quot;Male-specific effect&quot;)) %&gt;%
+  ggplot(aes(Chromosome, 100 * value)) + 
+  geom_bar(stat = &quot;identity&quot;,aes(fill = Chromosome), colour = &quot;grey10&quot;,  size = 0.3) + 
+  scale_fill_brewer(palette = &quot;Spectral&quot;, direction = -1) + 
+  coord_flip() + 
+  theme_bw() + 
+  scale_y_continuous(expand = c(0,0), limits = c(0, 29)) + 
+  scale_x_discrete(expand = c(0.14, 0.14)) + 
+  theme(axis.ticks.y = element_blank(),
+        legend.position = &quot;none&quot;,
+        panel.border = element_rect(size = 0.8),
+        text = element_text(family = &quot;Raleway&quot;, size = 12),
+        strip.background = element_blank(),
+        panel.grid.major.y = element_blank()) +
+  ylab(&quot; &quot;) +
+  xlab(NULL) + 
+  facet_wrap(~ Mixture_component, ncol = 1)
+
+p2 &lt;- mix %&gt;%
+  filter(Mixture_component %in% c(&quot;Equal effects on all phenotypes&quot;)) %&gt;%
+  ggplot(aes(Chromosome, 100 * value)) + 
+  geom_bar(stat = &quot;identity&quot;,aes(fill = Chromosome), colour = &quot;grey10&quot;,  size = 0.3) + 
+  scale_fill_brewer(palette = &quot;Spectral&quot;, direction = -1) + 
+  coord_flip() + 
+  theme_bw() + 
+  scale_y_continuous(expand = c(0,0), limits = c(0, 72)) + 
+  scale_x_discrete(expand = c(0.14, 0.14)) + 
+  theme(axis.ticks.y = element_blank(),
+        text = element_text(family = &quot;Raleway&quot;, size = 12),
+        panel.border = element_rect(size = 0.8),
+        legend.position = &quot;none&quot;,
+        strip.background = element_blank(),
+        panel.grid.major.y = element_blank()) +
+  ylab(&quot;Estimated % of all loci&quot;) +
+  xlab(NULL) + 
+  facet_wrap(~ Mixture_component, ncol = 1)
+
+
+blankPlot &lt;- ggplot() + geom_blank(aes(1, 1)) +
+  theme(plot.background = element_blank(), 
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        panel.border = element_blank(),
+        panel.background = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.x = element_blank(), 
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        axis.line = element_blank())
+
+ggsave(&quot;figures/mixture_proportions.pdf&quot;, grid.arrange(rbind(ggplotGrob(p1), ggplotGrob(p2)), left = &quot;Chromosome&quot;), height = 6, width = 2.8)
+
+grid.arrange(rbind(ggplotGrob(p1), ggplotGrob(p2)), left = &quot;Chromosome&quot;)</code></pre>
+<p><img src="figure/gwas_adaptive_shrinkage.Rmd/plot_mixture_props-1.png" width="268.8" style="display: block; margin: auto;" /> <br></br> <strong>Figure X</strong>: Proportions of each type of locus, as estimated using the mixture model computed by <code>mashr</code> in the analysis using canonical covariance matrices. This analysis involved a number of pre-specified covariance matrices, each corresponding to a type of locus that we hypothesised to exist (shown in panel headings). The analysis fit some other matrix types not shown here, because the corresponding locus type was inferred to be rare/absent (these included neutral loci, estimated to comprise 0.5-1% of those tested, and age-antagonistic loci, none of which were detected). The analysis was run either using all 1,207,357 loci for which data were available (labeled ‘All’) or for all loci on each of the chromosomes (chromosomes 4 and Y had insufficient data). Notably, sexually-antagonistic loci were inferred to be especially common on the X chromosome, and loci that affected males only were inferred to be rarer than those affecting females only.</p>
+</div>
+<div id="proportion-of-significant-effect-sizes-which-share-the-same-sign-for-each-pair-of-phenotypes" class="section level2">
+<h2>Proportion of ‘significant’ effect sizes which share the same sign for each pair of phenotypes</h2>
+<p>To find the proportion of sex or age-antagonistic SNPs among the 1,207,357 that were tested, we simply take 1 minus this matrix, e.g. <span class="math inline">\(100\times(1 - 0.976) = 2.4\%\)</span> of the loci that significantly (i.e. LFSR &lt; 0.05) affected both male and female early-life fitness had an <em>opposite</em> effect on each sex (as opposed to a same-sign effect).</p>
+<p>Note that this approach is a very conservative way of measuring the % sexually antagonistic (or age antagonistic) loci in the genome, because the LFSR needs to be &lt; 0.05 for <em>both</em> traits (meaning there are 2 chances to make a ‘false negative’, which matters because the power is low for any individual locus). Also note that this matrix was calculated using the data-driven (not canonical) covariance matrices, which are expected to more accurately estimate effect size of each SNP.</p>
+<p>The matrix highlights that there are zero loci where one allele significantly improves early-life fitness and lower late-life fitness with a sex (they might exist, but none were detected using this conservative test and our data). However, some sexually antagonistic loci were detected: about 2.4% of loci were sexually antagonistic in the early-life assay, and 1.2% in the late-life assay.</p>
+<pre class="r"><code>get_pairwise_sharing(mashr_results_ED, 
+                     factor = 0, 
+                     lfsr_thresh = 0.05) %&gt;% 
+  round(3)</code></pre>
+<pre><code>                  beta_female_early beta_female_late beta_male_early
+beta_female_early             1.000            1.000           0.976
+beta_female_late              1.000            1.000           0.975
+beta_male_early               0.976            0.975           1.000
+beta_male_late                0.988            0.988           1.000
+                  beta_male_late
+beta_female_early          0.988
+beta_female_late           0.988
+beta_male_early            1.000
+beta_male_late             1.000</code></pre>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
 <pre class="r"><code>sessionInfo()</code></pre>
-<pre><code>R version 3.5.1 (2018-07-02)
-Platform: x86_64-apple-darwin15.6.0 (64-bit)
-Running under: macOS High Sierra 10.13.6
+<pre><code>R version 4.0.3 (2020-10-10)
+Platform: x86_64-apple-darwin17.0 (64-bit)
+Running under: macOS Catalina 10.15.7
 
 Matrix products: default
-BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib
-LAPACK: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRlapack.dylib
+BLAS:   /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
 
 locale:
-[1] en_AU.UTF-8/en_AU.UTF-8/en_AU.UTF-8/C/en_AU.UTF-8/en_AU.UTF-8
+[1] en_GB.UTF-8/en_GB.UTF-8/en_GB.UTF-8/C/en_GB.UTF-8/en_GB.UTF-8
 
 attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] readr_1.1.1  mashr_0.2-12 ashr_2.2-13  dplyr_0.7.6 
+ [1] showtext_0.9-1   showtextdb_3.0   sysfonts_0.8.2   gridExtra_2.3   
+ [5] kableExtra_1.1.0 glue_1.4.2       mashr_0.2.38     ashr_2.2-47     
+ [9] forcats_0.5.0    stringr_1.4.0    dplyr_1.0.0      purrr_0.3.4     
+[13] readr_1.3.1      tidyr_1.1.0      tibble_3.0.1     ggplot2_3.3.2   
+[17] tidyverse_1.3.0 
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.18      plyr_1.8.4        compiler_3.5.1   
- [4] pillar_1.3.0      git2r_0.23.0      workflowr_1.1.1  
- [7] bindr_0.1.1       R.methodsS3_1.7.1 R.utils_2.7.0    
-[10] iterators_1.0.10  tools_3.5.1       digest_0.6.15    
-[13] evaluate_0.11     tibble_1.4.2      lattice_0.20-35  
-[16] pkgconfig_2.0.1   rlang_0.2.2       Matrix_1.2-14    
-[19] foreach_1.4.4     yaml_2.2.0        parallel_3.5.1   
-[22] mvtnorm_1.0-8     bindrcpp_0.2.2    stringr_1.3.1    
-[25] knitr_1.20        hms_0.4.2         rprojroot_1.3-2  
-[28] grid_3.5.1        tidyselect_0.2.4  glue_1.3.0       
-[31] R6_2.2.2          rmarkdown_1.10    rmeta_3.0        
-[34] purrr_0.2.5       magrittr_1.5      whisker_0.3-2    
-[37] MASS_7.3-50       backports_1.1.2   codetools_0.2-15 
-[40] htmltools_0.3.6   assertthat_0.2.0  stringi_1.2.4    
-[43] pscl_1.5.2        doParallel_1.0.11 truncnorm_1.0-8  
-[46] SQUAREM_2017.10-1 crayon_1.3.4      R.oo_1.22.0      </code></pre>
+ [1] nlme_3.1-149       fs_1.4.1           lubridate_1.7.8    webshot_0.5.2     
+ [5] RColorBrewer_1.1-2 httr_1.4.1         rprojroot_1.3-2    tools_4.0.3       
+ [9] backports_1.1.7    R6_2.4.1           irlba_2.3.3        DBI_1.1.0         
+[13] colorspace_1.4-1   rmeta_3.0          withr_2.2.0        tidyselect_1.1.0  
+[17] curl_4.3           compiler_4.0.3     git2r_0.27.1       cli_2.0.2         
+[21] rvest_0.3.5        xml2_1.3.2         labeling_0.3       scales_1.1.1      
+[25] SQUAREM_2020.2     mvtnorm_1.1-0      mixsqp_0.3-43      digest_0.6.25     
+[29] rmarkdown_2.5      pkgconfig_2.0.3    htmltools_0.5.0    dbplyr_1.4.4      
+[33] invgamma_1.1       highr_0.8          rlang_0.4.6        readxl_1.3.1      
+[37] rstudioapi_0.11    farver_2.0.3       generics_0.0.2     jsonlite_1.7.0    
+[41] magrittr_2.0.1     Matrix_1.2-18      Rcpp_1.0.4.6       munsell_0.5.0     
+[45] fansi_0.4.1        abind_1.4-5        lifecycle_0.2.0    stringi_1.5.3     
+[49] whisker_0.4        yaml_2.2.1         plyr_1.8.6         grid_4.0.3        
+[53] blob_1.2.1         promises_1.1.0     crayon_1.3.4       lattice_0.20-41   
+[57] haven_2.3.1        hms_0.5.3          knitr_1.30         pillar_1.4.4      
+[61] reprex_0.3.0       evaluate_0.14      modelr_0.1.8       vctrs_0.3.0       
+[65] httpuv_1.5.3.1     cellranger_1.1.0   gtable_0.3.0       assertthat_0.2.1  
+[69] xfun_0.19          broom_0.5.6        later_1.0.0        viridisLite_0.3.0 
+[73] truncnorm_1.0-8    workflowr_1.6.2    ellipsis_0.3.1    </code></pre>
 </div>
+</div>
+
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
 TeX fonts only; see
@@ -849,14 +1202,6 @@ footer is added to webpages before the MathJax javascript. -->
   });
 </script>
 
-<hr>
-<p>
-  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
-  analysis was created with
-  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.1.1
-</p>
-<hr>
-
 
 </div>
 </div>
@@ -867,13 +1212,61 @@ footer is added to webpages before the MathJax javascript. -->
 
 // add bootstrap table styles to pandoc tables
 function bootstrapStylePandocTables() {
-  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
 }
 $(document).ready(function () {
   bootstrapStylePandocTables();
 });
 
 
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
 </script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

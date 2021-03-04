@@ -20,3 +20,4 @@ data/input/dgrp.array.exp.female.txt
 data/input/dgrp.array.exp.male.txt
 data/input/huang_transcriptome/*
 code/Drosophila_GWAS.Rmd
+.httr-oauth

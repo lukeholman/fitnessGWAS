@@ -1,0 +1,99 @@
+---
+title: "Tables summarising the TWAS results"
+output: 
+  workflowr::wflow_html:
+    code_folding: hide 
+---
+
+```{r libraries, message=FALSE, warning=FALSE, results='hide'}
+library(tidyverse)
+library(DT)
+library(kableExtra)
+
+kable_table <- function(df) { # cool tables
+  kable(df, "html") %>%
+  kable_styling() %>%
+  scroll_box(height = "300px")
+}
+
+my_data_table <- function(df){ # Make html tables:
+  datatable(
+    df, rownames=FALSE,
+    autoHideNavigation = TRUE,
+    extensions = c("Scroller",  "Buttons"),
+    options = list(
+      dom = 'Bfrtip',
+      deferRender=TRUE,
+      scrollX=TRUE, scrollY=400,
+      scrollCollapse=TRUE,
+      buttons = 
+        list('pageLength', 'colvis', 'csv', list(
+          extend = 'pdf',
+          pageSize = 'A4',
+          orientation = 'landscape',
+          filename = 'TWAS_sig_genes')),
+      pageLength = 50
+    )
+  )
+}
+
+sig_transcripts_table <- read_csv("data/derived/TWAS/sig_transcripts_table.csv")
+
+tallies <- sort(table(sig_transcripts_table$type))
+
+big_table <- sig_transcripts_table %>%
+  select(-type) %>%
+  left_join(
+    sig_transcripts_table %>%
+      group_by(FBID) %>%
+      summarise(type = list(type), .groups = "drop") %>%
+      mutate(type = str_remove_all(map_chr(type, ~ paste0(.x, collapse = "; ")), "sig_")),
+    by = "FBID") %>%
+  select(FBID, gene_name, type, chromosome, AveExpr, male_bias_in_expression, everything()) %>%
+  mutate(chromosome = replace(chromosome, is.na(chromosome), "Unknown")) %>%
+  select(-gene_symbol, -entrez_id) %>%
+  arrange(-P_sex_antag) %>%
+  rename(`Gene name` = gene_name,
+         Significance = type,
+         Chromosome = chromosome,
+         `Female early` = beta_FE,
+         `Female late` = beta_FL,
+         `Male early` = beta_ME,
+         `Male late` = beta_ML,
+         `Male bias in expression (logFC)` = male_bias_in_expression,
+         `Average expression level` = AveExpr) %>%
+  distinct() 
+```
+
+
+
+## Table showing the significant transcripts
+
+The table shows the `r nrow(big_table)` transcripts that were significant in one or more ways (shown in the 'significance' column), e.g. transcripts whose abundance showed a sexually antagonistic relationship with fitness in the early-life assays are denoted `SA_early`. Columns 7-10 show the `mashr`-adjusted regression coefficients that relate the line mean transcript abundance to the line mean fitnesses. The last five columns give the mixture assignment probabilities from `mashr`. Abbreviations: AC = age concordant, SC = sexually concordant, SA = sexually antagonistic. 
+
+We define significantly antagonistic transcripts as those where the relationship with fitness is significantly positive for one sex (or age class) and significantly negative for the other, with LFSR < 0.05. Similarly, we define significantly concordant transcripts as those where the relationship with fitness is significantly positive for one sex or age class and also significantly positive for the other (LFSR < 0.05). This is quite conservative, because a transcript needs to have a LFSR < 0.05 for two tests, giving two chances for a 'false negative'.
+
+```{r}
+big_table %>%  my_data_table()
+```
+
+
+### Count the numbers of significant genes
+Abbreviations: AC = age concordant, SC = sexually concordant, SA = sexually antagonistic. 
+```{r}
+tallies %>%
+  enframe() %>%
+  arrange(-value) %>%
+  mutate(x = str_remove_all(name, "sig_"),
+         `Number statistically significant` = value) %>%
+  mutate(x = str_replace_all(x, "AC", "Age concordant"),
+         x = str_replace_all(x, "SC", "Sexually concordant"),
+         x = str_replace_all(x, "SA", "Sexually angatonistic"),
+         x = str_replace_all(x, "_females", " (in females)"),
+         x = str_replace_all(x, "_males", " (in males)"),
+         x = str_replace_all(x, "_early", " (in early life)"),
+         x = str_replace_all(x, "_late", " (in late life)")) %>%
+  rename(`Type of transcript` = x) %>%
+  select(`Type of transcript`, `Number statistically significant`) %>%
+  kable_table()
+```

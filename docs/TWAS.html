@@ -1,0 +1,2438 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Transcriptome-wide association study (TWAS)</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
+<script src="site_libs/anchor-sections-1.0/anchor-sections.js"></script>
+<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fitnessGWAS</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/workflowr">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Transcriptome-wide association study (TWAS)</h1>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2021-02-28
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>fitnessGWAS/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.2). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges"> <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown file has unstaged changes. To know which version of the R Markdown file created these results, you’ll want to first commit it to the Git repo. If you’re still working on the analysis, you can ignore this warning. When you’re finished, you can run <code>wflow_publish</code> to commit the R Markdown file and build the HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20180914code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20180914)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20180914code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20180914)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreec386787073d6bc80f7be30ea346adfbae7746636targetblankc386787a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/lukeholman/fitnessGWAS/tree/c386787073d6bc80f7be30ea346adfbae7746636" target="_blank">c386787</a> </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreec386787073d6bc80f7be30ea346adfbae7746636targetblankc386787a" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version <a href="https://github.com/lukeholman/fitnessGWAS/tree/c386787073d6bc80f7be30ea346adfbae7746636" target="_blank">c386787</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rapp.history
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    .httr-oauth
+    Ignored:    .pversion
+    Ignored:    analysis/.DS_Store
+    Ignored:    analysis/correlations_SNP_effects_cache/
+    Ignored:    analysis/plot_models_variant_effects_cache/
+    Ignored:    code/.DS_Store
+    Ignored:    code/Drosophila_GWAS.Rmd
+    Ignored:    data/.DS_Store
+    Ignored:    data/derived/
+    Ignored:    data/input/.DS_Store
+    Ignored:    data/input/.pversion
+    Ignored:    data/input/dgrp.fb557.annot.txt
+    Ignored:    data/input/dgrp2.bed
+    Ignored:    data/input/dgrp2.bim
+    Ignored:    data/input/dgrp2.fam
+    Ignored:    data/input/huang_transcriptome/
+    Ignored:    figures/.DS_Store
+
+Untracked files:
+    Untracked:  Rplots.pdf
+    Untracked:  analysis/GO_KEGG_enrichment.Rmd
+    Untracked:  analysis/TWAS_tables.Rmd
+    Untracked:  analysis/plot_models_variant_effects.Rmd
+    Untracked:  code/GO_and_KEGG_gsea.R
+    Untracked:  code/make_sites_files_for_ARGweaver.R
+    Untracked:  code/run_argweaver.R
+    Untracked:  code/run_mashr.R
+    Untracked:  data/argweaver/
+    Untracked:  data/input/TF_binding_sites.csv
+    Untracked:  figures/GWAS_mixture_proportions.rds
+    Untracked:  figures/GWAS_stats_figure.pdf
+    Untracked:  figures/TWAS_mixture_proportions.rds
+    Untracked:  figures/TWAS_stats_figure.pdf
+    Untracked:  figures/antagonism_ratios.pdf
+    Untracked:  figures/composite_mixture_figure.pdf
+    Untracked:  figures/eff_size_histos.pdf
+    Untracked:  figures/stats_figure.pdf
+    Untracked:  manuscript/
+
+Unstaged changes:
+    Modified:   .gitignore
+    Modified:   analysis/GWAS_tables.Rmd
+    Modified:   analysis/TWAS.Rmd
+    Modified:   analysis/checking_mashr_results.Rmd
+    Modified:   analysis/eQTL_analysis.Rmd
+    Modified:   analysis/get_predicted_line_means.Rmd
+    Modified:   analysis/gwas_adaptive_shrinkage.Rmd
+    Modified:   analysis/index.Rmd
+    Modified:   analysis/make_annotation_database.Rmd
+    Modified:   analysis/perform_gwas.Rmd
+    Modified:   analysis/plot_line_means.Rmd
+    Modified:   analysis/plotting_results.Rmd
+    Deleted:    code/gwas_adaptive_shrinkage.R
+    Modified:   data/input/female_fitness.csv
+    Modified:   data/input/female_fitness_CLEANED.csv
+    Modified:   data/input/male_fitness.csv
+    Modified:   data/input/male_fitness_CLEANED.csv
+    Deleted:    figures/figure1.eps
+    Deleted:    figures/figure1.png
+    Deleted:    figures/figure2.eps
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/TWAS.Rmd</code>) and HTML (<code>docs/TWAS.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/8d54ea56db332d3ac2d391c232936a4dc8106cc1/analysis/TWAS.Rmd" target="_blank">8d54ea5</a>
+</td>
+<td>
+Luke Holman
+</td>
+<td>
+2018-12-23
+</td>
+<td>
+Initial commit
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div id="setting-up" class="section level2">
+<h2>Setting up</h2>
+<div id="libraries-and-helper-functions" class="section level3">
+<h3>Libraries and helper functions</h3>
+<pre class="r"><code>library(edgeR)
+library(tidyverse)
+library(glue)
+library(future)
+library(future.apply)
+library(parallel)
+library(kableExtra)
+library(DT)
+library(ashr)
+library(mashr)
+
+options(stringsAsFactors = FALSE)
+
+# Connect to the database of annotations
+db &lt;- DBI::dbConnect(RSQLite::SQLite(), &quot;data/derived/annotations.sqlite3&quot;)
+
+# Helper to run shell commands
+run_command &lt;- function(shell_command, wd = getwd(), path = &quot;&quot;){
+  cat(system(glue(&quot;cd &quot;, wd, path, &quot;\n&quot;,shell_command), intern = TRUE), sep = &#39;\n&#39;)
+}
+
+kable_table &lt;- function(df) { # cool tables
+  kable(df, &quot;html&quot;) %&gt;%
+  kable_styling() %&gt;%
+  scroll_box(height = &quot;300px&quot;)
+}
+
+my_data_table &lt;- function(df){ # Make html tables:
+  datatable(
+    df, rownames=FALSE,
+    autoHideNavigation = TRUE,
+    extensions = c(&quot;Scroller&quot;,  &quot;Buttons&quot;),
+    options = list(
+      dom = &#39;Bfrtip&#39;,
+      deferRender=TRUE,
+      scrollX=TRUE, scrollY=400,
+      scrollCollapse=TRUE,
+      buttons = 
+        list(&#39;pageLength&#39;, &#39;colvis&#39;, &#39;csv&#39;, list(
+          extend = &#39;pdf&#39;,
+          pageSize = &#39;A4&#39;,
+          orientation = &#39;landscape&#39;,
+          filename = &#39;TWAS_enrichment&#39;)),
+       columnDefs = list(list(targets = c(8,10), visible = FALSE)),
+      pageLength = 50
+    )
+  )
+}
+
+# Helper to load Huang et al.&#39;s data
+load_expression_data &lt;- function(sex){
+  
+  if(sex != &quot;both&quot;){
+    expression &lt;- glue(&quot;data/input/huang_transcriptome/dgrp.array.exp.{sex}.txt&quot;) %&gt;% read_delim(delim = &quot; &quot;)
+    sample_names &lt;- names(expression)[names(expression) != &quot;gene&quot;] %&gt;% str_remove(&quot;:[12]&quot;) 
+    gene_names &lt;- expression$gene
+    expression &lt;- expression %&gt;% select(-gene) %&gt;% as.matrix() %&gt;% t() 
+    rownames(expression) &lt;- sample_names # rows are samples, columns are genes
+    colnames(expression) &lt;- gene_names 
+    return(expression %&gt;% as.data.frame() %&gt;% 
+             tibble::rownames_to_column(&quot;line&quot;) %&gt;% 
+             as_tibble() %&gt;%
+             mutate(line = str_remove_all(line, &quot;[.]1&quot;)))
+  }
+  
+  females &lt;- read_delim(&quot;data/input/huang_transcriptome/dgrp.array.exp.female.txt&quot;, delim = &quot; &quot;)
+  names(females)[-1] &lt;- paste(&quot;F_&quot;, names(females)[-1],sep=&quot;&quot;) #%&gt;% str_remove(&quot;:[12]&quot;) 
+  females &lt;- females %&gt;% left_join(read_delim(&quot;data/input/huang_transcriptome/dgrp.array.exp.male.txt&quot;, delim = &quot; &quot;), by = &quot;gene&quot;)
+  sample_names &lt;- names(females)[names(females) != &quot;gene&quot;] %&gt;% str_remove(&quot;:[12]&quot;) 
+  gene_names &lt;- females$gene
+  sex &lt;- ifelse(str_detect(sample_names, &quot;F_&quot;), &quot;female&quot;, &quot;male&quot;)
+  line &lt;- str_remove_all(sample_names, &quot;F_&quot;)
+  females &lt;- females %&gt;% select(-gene) %&gt;% t()
+  colnames(females) &lt;- gene_names
+  list(
+    sampleIDs = tibble(sex, line),
+    expression = females
+  )
+}</code></pre>
+</div>
+<div id="load-all-data" class="section level3">
+<h3>Load all data</h3>
+<pre class="r"><code># Load the predicted line means, as calculated in get_predicted_line_means.Rmd
+predicted_line_means &lt;- read_csv(&quot;data/derived/predicted_line_means.csv&quot;)
+
+# Load the results of four univariate linear mixed models run in GEMMA and corrected by mashr
+univariate_lmm_results &lt;- tbl(db, &quot;univariate_lmm_results&quot;) %&gt;%
+  left_join(tbl(db, &quot;variants&quot;) %&gt;% select(SNP, FBID, site.class, MAF), by = &quot;SNP&quot;) %&gt;%
+  left_join(tbl(db, &quot;genes&quot;) %&gt;% select(FBID, gene_name), by = &quot;FBID&quot;)
+
+# Results of one multivariate linear mixed model run in GEMMA:
+# multivariate_lmm_results &lt;- read_tsv(&quot;data/derived/output/all_four_traits.assoc.txt&quot;) %&gt;%
+#   select(-contains(&quot;Vbeta&quot;)) %&gt;%
+#   left_join(tbl(db, &quot;variants&quot;) %&gt;% select(SNP, FBID, site.class, MAF) %&gt;% collect(), by = &quot;SNP&quot;) %&gt;% 
+#   left_join(tbl(db, &quot;genes&quot;) %&gt;% 
+#               select(FBID, gene_name) %&gt;% 
+#               collect(), by = &quot;FBID&quot;) %&gt;% 
+#   left_join(univariate_lmm_results %&gt;% select(SNP, SNP_clump) %&gt;% collect(n=Inf), by = &quot;SNP&quot;) %&gt;%
+#   select(SNP, SNP_clump, gene_name, FBID, contains(&quot;male&quot;), p_wald, fdr) 
+
+
+# Load the supplementary data files from Huang et al. 2015 PNAS
+# Table S2: results of statistical tests for sex, line and sex-by-line effects on expression of each transcript
+# huang_expression &lt;- read_csv(&quot;data/input/huang_2015_tableS2_gene_expression.csv&quot;)
+
+# Table S5: heritability of the expression level of each transcript (as measured in males, or females)
+huang_heritability &lt;- read_csv(&quot;data/input/huang_2015_tableS5_transcript_heritability.csv&quot;)
+
+# Table S11+S12: statistically significant eQTLs, and the transcripts they affect (for each sex)
+huang_eQTL_females &lt;- read_csv(&quot;data/input/huang_2015_tableS11_eQTL_females.csv&quot;) %&gt;%
+  left_join(tbl(db, &quot;genes&quot;) %&gt;% select(FBID, gene_name) %&gt;% collect(), by = &quot;FBID&quot;) %&gt;%
+  rename(Affected_FBID = FBID, Affected_gene = gene_name)
+
+huang_eQTL_males &lt;- read_csv(&quot;data/input/huang_2015_tableS12_eQTL_males.csv&quot;) %&gt;%
+  left_join(tbl(db, &quot;genes&quot;) %&gt;% select(FBID, gene_name) %&gt;% collect(), by = &quot;FBID&quot;) %&gt;%
+  rename(Affected_FBID = FBID, Affected_gene = gene_name)</code></pre>
+</div>
+</div>
+<div id="calculate-sex-bias-in-expression-for-each-transcript" class="section level2">
+<h2>Calculate sex bias in expression for each transcript</h2>
+<p>The following takes the 368 female samples and the 369 male samples, and finds the log fold difference in expression between sexes, and the average expression across both sexes, using the edgeR package.</p>
+<pre class="r"><code>expression_data_both_sexes &lt;- load_expression_data(&quot;both&quot;) %&gt;% unname()
+
+voom_gene_data &lt;- calcNormFactors(DGEList(t(expression_data_both_sexes[[2]])))
+mm &lt;- model.matrix(~ sex, data = expression_data_both_sexes[[1]])
+colnames(mm) &lt;- gsub(&quot;sex&quot;, &quot;&quot;, colnames(mm))
+
+sex_bias_in_expression &lt;- voom_gene_data %&gt;% 
+  voom(mm, plot = FALSE) %&gt;% 
+  lmFit(mm) %&gt;% 
+  eBayes() %&gt;%
+  topTable(n = Inf) %&gt;% 
+  rownames_to_column(&quot;FBID&quot;) %&gt;%
+  select(FBID, logFC, AveExpr) %&gt;% 
+  rename(male_bias_in_expression = logFC) %&gt;%
+  as_tibble() %&gt;% arrange(male_bias_in_expression)
+
+write_csv(sex_bias_in_expression, &quot;data/derived/gene_expression_by_sex.csv&quot;)
+
+rm(expression_data_both_sexes)</code></pre>
+</div>
+<div id="overlap-between-our-significant-snps-and-known-eqtls" class="section level2 tabset">
+<h2>Overlap between our significant SNPs and known eQTls</h2>
+<div id="eqtls-that-affect-female-expression" class="section level3">
+<h3>eQTLs that affect female expression</h3>
+<pre class="r"><code>make_eQTL_overlap_table &lt;- function(huang_data){
+  huang_data %&gt;%
+    select(Affected_FBID, Affected_gene, eQTL) %&gt;%
+    inner_join(univariate_lmm_results %&gt;%
+                 select(SNP, FBID, gene_name, contains(&quot;mashr_ED&quot;)) %&gt;%
+                 filter(SNP %in% !!huang_data$eQTL) %&gt;%
+                 collect(n = Inf) %&gt;%
+                 filter_at(vars(contains(&quot;LFSR&quot;)), any_vars(. &lt; 0.001)) %&gt;%    
+                 rename(eQTL_location_FBID = FBID,
+                        eQTL_location_gene = gene_name), 
+               by = c(&quot;eQTL&quot; = &quot;SNP&quot;)) %&gt;%
+    mutate(`Cis- or trans- eQTL` = ifelse(eQTL_location_FBID == Affected_FBID, &quot;cis&quot;, &quot;trans&quot;)) %&gt;%
+    arrange(`Cis- or trans- eQTL`, Affected_FBID, eQTL) %&gt;% as_tibble() %&gt;%
+    select(eQTL, `Cis- or trans- eQTL`, everything()) %&gt;%
+    rename_all(~ str_remove_all(.x, &quot;_mashr_ED&quot;))
+}
+
+eQTL_uv_females &lt;- huang_eQTL_females %&gt;% make_eQTL_overlap_table() 
+eQTL_uv_females %&gt;% kable_table()</code></pre>
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:300px; ">
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+eQTL
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+Cis- or trans- eQTL
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+Affected_FBID
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+Affected_gene
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+eQTL_location_FBID
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+eQTL_location_gene
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+beta_female_early
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+beta_female_late
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+beta_male_early
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+beta_male_late
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+LFSR_female_early
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+LFSR_female_late
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+LFSR_male_early
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+LFSR_male_late
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+X_21274093_SNP
+</td>
+<td style="text-align:left;">
+cis
+</td>
+<td style="text-align:left;">
+FBgn0031176
+</td>
+<td style="text-align:left;">
+what else
+</td>
+<td style="text-align:left;">
+FBgn0031176
+</td>
+<td style="text-align:left;">
+what else
+</td>
+<td style="text-align:right;">
+-0.1333078
+</td>
+<td style="text-align:right;">
+-0.1824160
+</td>
+<td style="text-align:right;">
+-0.0611220
+</td>
+<td style="text-align:right;">
+-0.0427285
+</td>
+<td style="text-align:right;">
+0.0004122
+</td>
+<td style="text-align:right;">
+0.0004200
+</td>
+<td style="text-align:right;">
+0.0681336
+</td>
+<td style="text-align:right;">
+0.0557023
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2R_13997270_SNP
+</td>
+<td style="text-align:left;">
+trans
+</td>
+<td style="text-align:left;">
+FBgn0033458
+</td>
+<td style="text-align:left;">
+uncharacterized protein
+</td>
+<td style="text-align:left;">
+FBgn0085225
+</td>
+<td style="text-align:left;">
+uncharacterized protein
+</td>
+<td style="text-align:right;">
+-0.1299065
+</td>
+<td style="text-align:right;">
+-0.1793745
+</td>
+<td style="text-align:right;">
+-0.0840465
+</td>
+<td style="text-align:right;">
+-0.0566265
+</td>
+<td style="text-align:right;">
+0.0004116
+</td>
+<td style="text-align:right;">
+0.0004148
+</td>
+<td style="text-align:right;">
+0.0235637
+</td>
+<td style="text-align:right;">
+0.0186034
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3L_21605763_SNP
+</td>
+<td style="text-align:left;">
+trans
+</td>
+<td style="text-align:left;">
+FBgn0037105
+</td>
+<td style="text-align:left;">
+S1P
+</td>
+<td style="text-align:left;">
+FBgn0261953
+</td>
+<td style="text-align:left;">
+Transcription factor AP-2
+</td>
+<td style="text-align:right;">
+0.1399953
+</td>
+<td style="text-align:right;">
+0.1942367
+</td>
+<td style="text-align:right;">
+0.0608650
+</td>
+<td style="text-align:right;">
+0.0462437
+</td>
+<td style="text-align:right;">
+0.0005357
+</td>
+<td style="text-align:right;">
+0.0005106
+</td>
+<td style="text-align:right;">
+0.0820276
+</td>
+<td style="text-align:right;">
+0.0518360
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="eqtls-that-affect-male-expression" class="section level3">
+<h3>eQTLs that affect male expression</h3>
+<pre class="r"><code>eQTL_uv_males &lt;- huang_eQTL_males %&gt;% make_eQTL_overlap_table()
+eQTL_uv_males %&gt;% kable_table()</code></pre>
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:300px; ">
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+eQTL
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+Cis- or trans- eQTL
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+Affected_FBID
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+Affected_gene
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+eQTL_location_FBID
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+eQTL_location_gene
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+beta_female_early
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+beta_female_late
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+beta_male_early
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+beta_male_late
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+LFSR_female_early
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+LFSR_female_late
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+LFSR_male_early
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+LFSR_male_late
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+2R_9134192_SNP
+</td>
+<td style="text-align:left;">
+cis
+</td>
+<td style="text-align:left;">
+FBgn0002789
+</td>
+<td style="text-align:left;">
+Muscle protein 20
+</td>
+<td style="text-align:left;">
+FBgn0002789
+</td>
+<td style="text-align:left;">
+Muscle protein 20
+</td>
+<td style="text-align:right;">
+0.1439750
+</td>
+<td style="text-align:right;">
+0.2008961
+</td>
+<td style="text-align:right;">
+0.1141324
+</td>
+<td style="text-align:right;">
+0.0756790
+</td>
+<td style="text-align:right;">
+0.0003439
+</td>
+<td style="text-align:right;">
+0.0003443
+</td>
+<td style="text-align:right;">
+0.0087368
+</td>
+<td style="text-align:right;">
+0.0066229
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X_21274093_SNP
+</td>
+<td style="text-align:left;">
+cis
+</td>
+<td style="text-align:left;">
+FBgn0031176
+</td>
+<td style="text-align:left;">
+what else
+</td>
+<td style="text-align:left;">
+FBgn0031176
+</td>
+<td style="text-align:left;">
+what else
+</td>
+<td style="text-align:right;">
+-0.1333078
+</td>
+<td style="text-align:right;">
+-0.1824160
+</td>
+<td style="text-align:right;">
+-0.0611220
+</td>
+<td style="text-align:right;">
+-0.0427285
+</td>
+<td style="text-align:right;">
+0.0004122
+</td>
+<td style="text-align:right;">
+0.0004200
+</td>
+<td style="text-align:right;">
+0.0681336
+</td>
+<td style="text-align:right;">
+0.0557023
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X_19894144_SNP
+</td>
+<td style="text-align:left;">
+trans
+</td>
+<td style="text-align:left;">
+FBgn0033697
+</td>
+<td style="text-align:left;">
+Cyp6t3
+</td>
+<td style="text-align:left;">
+FBgn0031082
+</td>
+<td style="text-align:left;">
+uncharacterized protein
+</td>
+<td style="text-align:right;">
+-0.3578681
+</td>
+<td style="text-align:right;">
+-0.4860429
+</td>
+<td style="text-align:right;">
+-0.1268685
+</td>
+<td style="text-align:right;">
+-0.0978162
+</td>
+<td style="text-align:right;">
+0.0001314
+</td>
+<td style="text-align:right;">
+0.0001304
+</td>
+<td style="text-align:right;">
+0.0701469
+</td>
+<td style="text-align:right;">
+0.0424578
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3L_21605763_SNP
+</td>
+<td style="text-align:left;">
+trans
+</td>
+<td style="text-align:left;">
+FBgn0037105
+</td>
+<td style="text-align:left;">
+S1P
+</td>
+<td style="text-align:left;">
+FBgn0261953
+</td>
+<td style="text-align:left;">
+Transcription factor AP-2
+</td>
+<td style="text-align:right;">
+0.1399953
+</td>
+<td style="text-align:right;">
+0.1942367
+</td>
+<td style="text-align:right;">
+0.0608650
+</td>
+<td style="text-align:right;">
+0.0462437
+</td>
+<td style="text-align:right;">
+0.0005357
+</td>
+<td style="text-align:right;">
+0.0005106
+</td>
+<td style="text-align:right;">
+0.0820276
+</td>
+<td style="text-align:right;">
+0.0518360
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3R_6527736_SNP
+</td>
+<td style="text-align:left;">
+trans
+</td>
+<td style="text-align:left;">
+FBgn0037822
+</td>
+<td style="text-align:left;">
+uncharacterized protein
+</td>
+<td style="text-align:left;">
+FBgn0020385
+</td>
+<td style="text-align:left;">
+pugilist
+</td>
+<td style="text-align:right;">
+-0.1281636
+</td>
+<td style="text-align:right;">
+-0.1762774
+</td>
+<td style="text-align:right;">
+-0.0759458
+</td>
+<td style="text-align:right;">
+-0.0518217
+</td>
+<td style="text-align:right;">
+0.0009473
+</td>
+<td style="text-align:right;">
+0.0009594
+</td>
+<td style="text-align:right;">
+0.0350998
+</td>
+<td style="text-align:right;">
+0.0277776
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3R_6528878_SNP
+</td>
+<td style="text-align:left;">
+trans
+</td>
+<td style="text-align:left;">
+FBgn0037822
+</td>
+<td style="text-align:left;">
+uncharacterized protein
+</td>
+<td style="text-align:left;">
+FBgn0020385
+</td>
+<td style="text-align:left;">
+pugilist
+</td>
+<td style="text-align:right;">
+0.1437165
+</td>
+<td style="text-align:right;">
+0.1984026
+</td>
+<td style="text-align:right;">
+0.0932149
+</td>
+<td style="text-align:right;">
+0.0619507
+</td>
+<td style="text-align:right;">
+0.0001868
+</td>
+<td style="text-align:right;">
+0.0001923
+</td>
+<td style="text-align:right;">
+0.0164408
+</td>
+<td style="text-align:right;">
+0.0137944
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3R_6528878_SNP
+</td>
+<td style="text-align:left;">
+trans
+</td>
+<td style="text-align:left;">
+FBgn0037822
+</td>
+<td style="text-align:left;">
+uncharacterized protein
+</td>
+<td style="text-align:left;">
+FBgn0051391
+</td>
+<td style="text-align:left;">
+uncharacterized protein
+</td>
+<td style="text-align:right;">
+0.1437165
+</td>
+<td style="text-align:right;">
+0.1984026
+</td>
+<td style="text-align:right;">
+0.0932149
+</td>
+<td style="text-align:right;">
+0.0619507
+</td>
+<td style="text-align:right;">
+0.0001868
+</td>
+<td style="text-align:right;">
+0.0001923
+</td>
+<td style="text-align:right;">
+0.0164408
+</td>
+<td style="text-align:right;">
+0.0137944
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3R_6532086_SNP
+</td>
+<td style="text-align:left;">
+trans
+</td>
+<td style="text-align:left;">
+FBgn0037822
+</td>
+<td style="text-align:left;">
+uncharacterized protein
+</td>
+<td style="text-align:left;">
+FBgn0051467
+</td>
+<td style="text-align:left;">
+uncharacterized protein
+</td>
+<td style="text-align:right;">
+-0.1297557
+</td>
+<td style="text-align:right;">
+-0.1786540
+</td>
+<td style="text-align:right;">
+-0.0561335
+</td>
+<td style="text-align:right;">
+-0.0426859
+</td>
+<td style="text-align:right;">
+0.0007140
+</td>
+<td style="text-align:right;">
+0.0006844
+</td>
+<td style="text-align:right;">
+0.0806250
+</td>
+<td style="text-align:right;">
+0.0519942
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3R_6532086_SNP
+</td>
+<td style="text-align:left;">
+trans
+</td>
+<td style="text-align:left;">
+FBgn0037822
+</td>
+<td style="text-align:left;">
+uncharacterized protein
+</td>
+<td style="text-align:left;">
+FBgn0037824
+</td>
+<td style="text-align:left;">
+uncharacterized protein
+</td>
+<td style="text-align:right;">
+-0.1297557
+</td>
+<td style="text-align:right;">
+-0.1786540
+</td>
+<td style="text-align:right;">
+-0.0561335
+</td>
+<td style="text-align:right;">
+-0.0426859
+</td>
+<td style="text-align:right;">
+0.0007140
+</td>
+<td style="text-align:right;">
+0.0006844
+</td>
+<td style="text-align:right;">
+0.0806250
+</td>
+<td style="text-align:right;">
+0.0519942
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3R_6540298_SNP
+</td>
+<td style="text-align:left;">
+trans
+</td>
+<td style="text-align:left;">
+FBgn0037822
+</td>
+<td style="text-align:left;">
+uncharacterized protein
+</td>
+<td style="text-align:left;">
+FBgn0037827
+</td>
+<td style="text-align:left;">
+uncharacterized protein
+</td>
+<td style="text-align:right;">
+-0.1397973
+</td>
+<td style="text-align:right;">
+-0.1910744
+</td>
+<td style="text-align:right;">
+-0.0533950
+</td>
+<td style="text-align:right;">
+-0.0397492
+</td>
+<td style="text-align:right;">
+0.0003836
+</td>
+<td style="text-align:right;">
+0.0003840
+</td>
+<td style="text-align:right;">
+0.0962945
+</td>
+<td style="text-align:right;">
+0.0717692
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3R_6528878_SNP
+</td>
+<td style="text-align:left;">
+trans
+</td>
+<td style="text-align:left;">
+FBgn0051344
+</td>
+<td style="text-align:left;">
+uncharacterized protein
+</td>
+<td style="text-align:left;">
+FBgn0020385
+</td>
+<td style="text-align:left;">
+pugilist
+</td>
+<td style="text-align:right;">
+0.1437165
+</td>
+<td style="text-align:right;">
+0.1984026
+</td>
+<td style="text-align:right;">
+0.0932149
+</td>
+<td style="text-align:right;">
+0.0619507
+</td>
+<td style="text-align:right;">
+0.0001868
+</td>
+<td style="text-align:right;">
+0.0001923
+</td>
+<td style="text-align:right;">
+0.0164408
+</td>
+<td style="text-align:right;">
+0.0137944
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3R_6528878_SNP
+</td>
+<td style="text-align:left;">
+trans
+</td>
+<td style="text-align:left;">
+FBgn0051344
+</td>
+<td style="text-align:left;">
+uncharacterized protein
+</td>
+<td style="text-align:left;">
+FBgn0051391
+</td>
+<td style="text-align:left;">
+uncharacterized protein
+</td>
+<td style="text-align:right;">
+0.1437165
+</td>
+<td style="text-align:right;">
+0.1984026
+</td>
+<td style="text-align:right;">
+0.0932149
+</td>
+<td style="text-align:right;">
+0.0619507
+</td>
+<td style="text-align:right;">
+0.0001868
+</td>
+<td style="text-align:right;">
+0.0001923
+</td>
+<td style="text-align:right;">
+0.0164408
+</td>
+<td style="text-align:right;">
+0.0137944
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2L_1218925_SNP
+</td>
+<td style="text-align:left;">
+trans
+</td>
+<td style="text-align:left;">
+FBgn0262944
+</td>
+<td style="text-align:left;">
+long non-coding RNA:CR43263
+</td>
+<td style="text-align:left;">
+FBgn0259229
+</td>
+<td style="text-align:left;">
+uncharacterized protein
+</td>
+<td style="text-align:right;">
+-0.1232712
+</td>
+<td style="text-align:right;">
+-0.1719202
+</td>
+<td style="text-align:right;">
+-0.0879173
+</td>
+<td style="text-align:right;">
+-0.0606464
+</td>
+<td style="text-align:right;">
+0.0008857
+</td>
+<td style="text-align:right;">
+0.0008480
+</td>
+<td style="text-align:right;">
+0.0205153
+</td>
+<td style="text-align:right;">
+0.0137868
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2L_1218927_SNP
+</td>
+<td style="text-align:left;">
+trans
+</td>
+<td style="text-align:left;">
+FBgn0262944
+</td>
+<td style="text-align:left;">
+long non-coding RNA:CR43263
+</td>
+<td style="text-align:left;">
+FBgn0259229
+</td>
+<td style="text-align:left;">
+uncharacterized protein
+</td>
+<td style="text-align:right;">
+-0.1232712
+</td>
+<td style="text-align:right;">
+-0.1719202
+</td>
+<td style="text-align:right;">
+-0.0879173
+</td>
+<td style="text-align:right;">
+-0.0606464
+</td>
+<td style="text-align:right;">
+0.0008857
+</td>
+<td style="text-align:right;">
+0.0008480
+</td>
+<td style="text-align:right;">
+0.0205153
+</td>
+<td style="text-align:right;">
+0.0137868
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3R_6858736_SNP
+</td>
+<td style="text-align:left;">
+trans
+</td>
+<td style="text-align:left;">
+XLOC_004644
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+FBgn0083950
+</td>
+<td style="text-align:left;">
+sidestep VI
+</td>
+<td style="text-align:right;">
+-0.1423042
+</td>
+<td style="text-align:right;">
+-0.1979479
+</td>
+<td style="text-align:right;">
+-0.0391265
+</td>
+<td style="text-align:right;">
+-0.0339783
+</td>
+<td style="text-align:right;">
+0.0002255
+</td>
+<td style="text-align:right;">
+0.0002115
+</td>
+<td style="text-align:right;">
+0.1824399
+</td>
+<td style="text-align:right;">
+0.1169837
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3R_6859823_SNP
+</td>
+<td style="text-align:left;">
+trans
+</td>
+<td style="text-align:left;">
+XLOC_004644
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+FBgn0083950
+</td>
+<td style="text-align:left;">
+sidestep VI
+</td>
+<td style="text-align:right;">
+-0.1309664
+</td>
+<td style="text-align:right;">
+-0.1819359
+</td>
+<td style="text-align:right;">
+-0.0173173
+</td>
+<td style="text-align:right;">
+-0.0188698
+</td>
+<td style="text-align:right;">
+0.0007034
+</td>
+<td style="text-align:right;">
+0.0006829
+</td>
+<td style="text-align:right;">
+0.3301192
+</td>
+<td style="text-align:right;">
+0.2523757
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X_4131416_SNP
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+FBgn0032521
+</td>
+<td style="text-align:left;">
+uncharacterized protein
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+0.1948985
+</td>
+<td style="text-align:right;">
+0.2700297
+</td>
+<td style="text-align:right;">
+0.1460801
+</td>
+<td style="text-align:right;">
+0.0927518
+</td>
+<td style="text-align:right;">
+0.0003243
+</td>
+<td style="text-align:right;">
+0.0003421
+</td>
+<td style="text-align:right;">
+0.0106182
+</td>
+<td style="text-align:right;">
+0.0098071
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- ### Female eQTLs and multivariate tests -->
+<!-- ```{r} -->
+<!-- make_eQTL_overlap_table_v2 <- function(huang_data){ -->
+<!--   huang_data %>% -->
+<!--     select(Affected_FBID, Affected_gene, eQTL) %>% -->
+<!--     inner_join(multivariate_lmm_results %>% -->
+<!--                  select(SNP, FBID, gene_name, female_early, female_late, male_early, male_late, p_wald, fdr) %>% -->
+<!--                  filter(SNP %in% huang_data$eQTL) %>% -->
+<!--                  filter(p_wald < 0.001) %>%     -->
+<!--                  rename(eQTL_location_FBID = FBID, -->
+<!--                         eQTL_location_gene = gene_name, -->
+<!--                         `Uncorrected p-value` = p_wald, -->
+<!--                         `FDR-corrected p-value` = fdr),  -->
+<!--                by = c("eQTL" = "SNP")) %>% -->
+<!--     arrange(`Uncorrected p-value`) %>% distinct() -->
+<!-- } -->
+<!-- eQTL_mv_females <- huang_eQTL_females %>% make_eQTL_overlap_table_v2() -->
+<!-- eQTL_mv_females %>% kable_table() -->
+<!-- ``` -->
+<!-- ### Male eQTLs and multivariate tests -->
+<!-- ```{r} -->
+<!-- eQTL_mv_males <- huang_eQTL_males %>% make_eQTL_overlap_table_v2() -->
+<!-- eQTL_mv_males %>% kable_table() -->
+<!-- ``` -->
+</div>
+</div>
+<div id="correlating-our-fitness-measures-to-transcriptome-data-from-huang-et-al.-2015" class="section level2">
+<h2>Correlating our fitness measures to transcriptome data from Huang et al. 2015</h2>
+<p>Huang et al.’s microarray data was downloaded from the <a href="http://dgrp2.gnets.ncsu.edu/data.html">DGRP website</a>.</p>
+<div id="linear-models-to-find-transcripts-that-correlate-with-fitness-across-dgrp-lines-twas" class="section level3">
+<h3>Linear models to find transcripts that correlate with fitness across DGRP lines (“TWAS”)</h3>
+<p>Here, we perform a large number of simple linear regressions, and obtain the slope (beta or <span class="math inline">\(\beta\)</span>) and its standard error from a regression of transcript <span class="math inline">\(i\)</span> on fitness trait <span class="math inline">\(j\)</span>. The number of regression run was 72,560, i.e. 4 fitness traits <span class="math inline">\(\times\)</span> 18,140 transcripts. We nickname this approach ‘TWAS’.</p>
+<pre class="r"><code>transcript_selection_analysis &lt;- function(expression_data, phenotypes){
+  
+  if(&quot;block&quot; %in% names(phenotypes)) phenotypes &lt;- phenotypes %&gt;% select(-block)
+  
+  expression_data &lt;- expression_data %&gt;% 
+    filter(line %in% phenotypes$line)
+  
+  # Find line mean expression for each gene (average across the c. 2 replicate samples per line) 
+  chunk_cols &lt;- split(2:ncol(expression_data), ceiling(seq_along(2:ncol(expression_data)) / 500))
+  
+  mean_expression_data &lt;- mclapply(1:2, function(i){  
+    expression_data[, c(1, chunk_cols[[i]])] %&gt;% 
+      group_by(line) %&gt;% 
+      summarise_all(mean) %&gt;% 
+      ungroup()
+  }) %&gt;% bind_rows()
+
+  # Scale each transcript&#39;s expression level so that mean is 0, and the variance is 1, across all the lines measured by Huang et al.
+  for(i in 2:ncol(mean_expression_data)) mean_expression_data[,i] &lt;- as.numeric(scale(mean_expression_data[,i]))
+  
+  # Join the microarray data with the phenotypes (i.e. our fitness data), and keep only the lines where we have both sets of measurements
+  expression_data &lt;- phenotypes %&gt;% left_join(expression_data, by = &quot;line&quot;)
+  expression_data &lt;- expression_data[complete.cases(expression_data), ] %&gt;% select(-line)
+  
+  print(&quot;Data ready for analysis. Starting TWAS...&quot;)
+
+  # Create chunks of transcript names, which will be used to facilitate parallel processing
+  transcripts &lt;- names(expression_data)[-c(1:4)]
+  transcripts &lt;- split(transcripts, ceiling(seq_along(transcripts) / 100))
+  
+  # Define a function to run 4 linear models, and get the beta and SE for regressions of expression level on the 4 fitness traits
+  do_one_transcript &lt;- function(transcript){
+    expression_level &lt;- expression_data %&gt;% pull(!!transcript)
+    FE &lt;- summary(lm(female.fitness.early ~ expression_level, data = expression_data))$coefficients
+    FL &lt;- summary(lm(female.fitness.late ~ expression_level, data = expression_data))$coefficients
+    ME &lt;- summary(lm(male.fitness.early ~ expression_level, data = expression_data))$coefficients
+    ML &lt;- summary(lm(male.fitness.late ~ expression_level, data = expression_data))$coefficients
+    c(FE[2,1], FL[2,1], ME[2,1], ML[2,1], FE[2,2], FL[2,2], ME[2,2], ML[2,2])
+  }
+  
+  # Runs do_one_transcript() on all the transcripts listed in the vector &#39;transcripts&#39;
+  do_chunk_of_transcripts &lt;- function(transcripts){
+    output &lt;- data.frame(transcripts, lapply(transcripts, do_one_transcript) %&gt;% do.call(&quot;rbind&quot;, .))
+    names(output) &lt;- c(&quot;gene&quot;, &quot;beta_FE&quot;, &quot;beta_FL&quot;, &quot;beta_ME&quot;, &quot;beta_ML&quot;, &quot;SE_FE&quot;, &quot;SE_FL&quot;, &quot;SE_ME&quot;, &quot;SE_ML&quot;)
+    output
+  }
+  
+  # Run it all, in parallel
+  transcripts %&gt;% 
+    mclapply(do_chunk_of_transcripts) %&gt;% 
+    do.call(&quot;rbind&quot;, .) %&gt;% as_tibble() %&gt;% mutate(gene = as.character(gene))
+}
+
+if(!file.exists(&quot;data/derived/TWAS/TWAS_result_males.csv&quot;)){
+
+  TWAS_result_females &lt;- load_expression_data(&quot;female&quot;) %&gt;% transcript_selection_analysis(predicted_line_means) 
+  TWAS_result_females %&gt;% write_csv(&quot;data/derived/TWAS/TWAS_result_females.csv&quot;)
+  TWAS_result_males &lt;- load_expression_data(&quot;male&quot;) %&gt;% transcript_selection_analysis(predicted_line_means)
+  TWAS_result_males %&gt;% write_csv(&quot;data/derived/TWAS/TWAS_result_males.csv&quot;)
+} else {
+  TWAS_result_females &lt;- read_csv(&quot;data/derived/TWAS/TWAS_result_females.csv&quot;)
+  TWAS_result_males &lt;- read_csv(&quot;data/derived/TWAS/TWAS_result_males.csv&quot;)
+}</code></pre>
+</div>
+<div id="run-mashr-to-adjust-the-twas-results" class="section level3">
+<h3>Run <code>mashr</code> to adjust the TWAS results</h3>
+<p>This section re-uses the custom function <code>run_mashr()</code>. See the earlier script (where <code>mashr</code> was applied to the GWAS data) for the function definition. Essentially, <code>run_mashr()</code> helps us to run <code>mashr</code> twice, once using canonical and once using data-driven covariance matrices.</p>
+<p>Similar to for the GWAS data, we use the canonical analysis to estimate the frequency of different types of transcripts (rather than loci), which we do for the entire transcriptome, as well as separately for each of the individual chromosome arms. We use the data-driven (“ED”) approach to derive the most accurate adjusted beta terms (i.e. the slope of the regression of transcript abundance on the phenotype of interest).</p>
+<pre class="r"><code>if(!file.exists(&quot;data/derived/TWAS/TWAS_ED.rds&quot;)){
+  
+  input_data &lt;- data.frame(TWAS_result_females[,1:3], 
+                           TWAS_result_males[,4:5], 
+                           TWAS_result_females[,6:7], 
+                           TWAS_result_males[,8:9])
+  
+  with_chrs &lt;- input_data %&gt;%
+    left_join(tbl(db, &quot;genes&quot;) %&gt;% 
+                select(FBID, chromosome) %&gt;% 
+                collect(), by = c(&quot;gene&quot; = &quot;FBID&quot;))
+  
+  TWAS_canonical &lt;- input_data %&gt;% 
+    run_mashr(mashr_mode = &quot;canonical&quot;) 
+  
+  TWAS_canonical_2L &lt;- with_chrs %&gt;% 
+    filter(chromosome == &quot;2L&quot;) %&gt;% select(-chromosome) %&gt;%
+    run_mashr(mashr_mode = &quot;canonical&quot;) 
+  
+  TWAS_canonical_2R &lt;- with_chrs %&gt;% 
+    filter(chromosome == &quot;2R&quot;) %&gt;% select(-chromosome) %&gt;%
+    run_mashr(mashr_mode = &quot;canonical&quot;) 
+  
+  TWAS_canonical_3L &lt;- with_chrs %&gt;% 
+    filter(chromosome == &quot;3L&quot;) %&gt;% select(-chromosome) %&gt;%
+    run_mashr(mashr_mode = &quot;canonical&quot;) 
+  
+  TWAS_canonical_3R &lt;- with_chrs %&gt;% 
+    filter(chromosome == &quot;3R&quot;) %&gt;% select(-chromosome) %&gt;%
+    run_mashr(mashr_mode = &quot;canonical&quot;) 
+  
+  TWAS_canonical_X &lt;- with_chrs %&gt;% 
+    filter(chromosome == &quot;X&quot;) %&gt;% select(-chromosome) %&gt;%
+    run_mashr(mashr_mode = &quot;canonical&quot;) 
+  
+  saveRDS(TWAS_canonical, &quot;data/derived/TWAS/TWAS_canonical.rds&quot;)
+  saveRDS(TWAS_canonical_2L, &quot;data/derived/TWAS/TWAS_canonical_2L.rds&quot;)
+  saveRDS(TWAS_canonical_2R, &quot;data/derived/TWAS/TWAS_canonical_2R.rds&quot;)
+  saveRDS(TWAS_canonical_3L, &quot;data/derived/TWAS/TWAS_canonical_3L.rds&quot;)
+  saveRDS(TWAS_canonical_3R, &quot;data/derived/TWAS/TWAS_canonical_3R.rds&quot;)
+  saveRDS(TWAS_canonical_X, &quot;data/derived/TWAS/TWAS_canonical_X.rds&quot;)
+  
+  TWAS_ED &lt;- input_data %&gt;% 
+    run_mashr(mashr_mode = &quot;ED&quot;, 
+              ED_p_cutoff = 0.4) 
+  saveRDS(TWAS_ED, &quot;data/derived/TWAS/TWAS_ED.rds&quot;)
+} else {
+  TWAS_canonical &lt;- readRDS(&quot;data/derived/TWAS/TWAS_canonical.rds&quot;)
+  TWAS_ED &lt;- readRDS(&quot;data/derived/TWAS/TWAS_ED.rds&quot;)
+}
+
+TWAS_mashr_results &lt;- 
+  data.frame(
+    FBID = read_delim(&quot;data/input/huang_transcriptome/dgrp.array.exp.female.txt&quot;, delim = &quot; &quot;) %&gt;% pull(gene),
+    as.data.frame(get_pm(TWAS_canonical)) %&gt;% rename_all(~str_c(&quot;canonical_&quot;, .)),
+    as.data.frame(get_lfsr(TWAS_canonical)) %&gt;% 
+      rename_all(~str_replace_all(., &quot;beta&quot;, &quot;LFSR&quot;)) %&gt;% rename_all(~str_c(&quot;canonical_&quot;, .))) %&gt;% 
+  as_tibble() %&gt;% 
+  bind_cols(
+    data.frame(
+      as.data.frame(get_pm(TWAS_ED)) %&gt;% rename_all(~str_c(&quot;ED_&quot;, .)),
+      as.data.frame(get_lfsr(TWAS_ED)) %&gt;% 
+        rename_all(~str_replace_all(., &quot;beta&quot;, &quot;LFSR&quot;)) %&gt;% rename_all(~str_c(&quot;ED_&quot;, .))) %&gt;% 
+      as_tibble()) 
+
+
+# get_innocenti_morrow_index &lt;- function(s1, s2) (s1 * s2) / sqrt((s1^2 + s2^2) / 2)
+# TWAS_ED_antagonism_effects &lt;- data.frame(
+#   FBID = read_delim(&quot;data/input/huang_transcriptome/dgrp.array.exp.female.txt&quot;, delim = &quot; &quot;) %&gt;% pull(gene),
+#   as.data.frame(get_pm(TWAS_ED)) %&gt;%
+#   mutate(SA_young  = get_innocenti_morrow_index(beta_FE, beta_ME),
+#          SA_old    = get_innocenti_morrow_index(beta_FL, beta_ML),
+#          AA_female = get_innocenti_morrow_index(beta_FE, beta_FL),
+#          AA_male   = get_innocenti_morrow_index(beta_ME, beta_ML))) %&gt;% as_tibble()</code></pre>
+</div>
+<div id="find-mixture-probabilities-for-each-transcript" class="section level3">
+<h3>Find mixture probabilities for each transcript</h3>
+<p>This uses the canonical analysis’ classifications. Each transcript gets a posterior probability that it belongs to the <span class="math inline">\(i\)</span>’th mixture component – only the mixture components that are not very rare are included. These are: <code>equal_effects</code> (i.e. the transcript is predicted to affect all 4 phenotypes equally), female-specific and male-specific (i.e. an effect on females/males only, which is concordant across age categories), sexually antagonistic (again, regardless of age), and null (note: the prior for <code>mashr</code> was that null transcripts are <span class="math inline">\(10\times\)</span> more common than any other type).</p>
+<pre class="r"><code># Get the mixture weights, as advised by mashr authors here: https://github.com/stephenslab/mashr/issues/68
+posterior_weights_cov &lt;- TWAS_canonical$posterior_weights 
+colnames(posterior_weights_cov) &lt;- sapply(
+  str_split(colnames(posterior_weights_cov), &#39;\\.&#39;), 
+  function(x) {
+    if(length(x) == 1) return(x)
+    else if(length(x) == 2) return(x[1])
+    else if(length(x) == 3) return(paste(x[1], x[2], sep = &quot;.&quot;))
+  })
+posterior_weights_cov &lt;- t(rowsum(t(posterior_weights_cov), 
+                                  colnames(posterior_weights_cov)))
+
+# Make a neat dataframe
+TWAS_mixture_assignment_probabilities &lt;- data.frame(
+  FBID = TWAS_mashr_results$FBID,
+  posterior_weights_cov,
+  stringsAsFactors = FALSE
+) %&gt;% as_tibble() %&gt;%
+  rename(P_equal_effects = equal_effects,
+         P_female_specific = Female_specific_1,
+         P_male_specific = Male_specific_1,
+         P_null = null,
+         P_sex_antag = Sex_antag_0.25)
+
+TWAS_mixture_assignment_probabilities &lt;- TWAS_mixture_assignment_probabilities %&gt;%
+  left_join(huang_heritability, by = &quot;FBID&quot;)
+
+saveRDS(TWAS_mixture_assignment_probabilities, 
+        &quot;data/derived/TWAS/TWAS_mixture_assignment_probabilities.rds&quot;)</code></pre>
+</div>
+</div>
+<div id="identify-significantly-antagonistic-and-concordant-transcripts" class="section level2">
+<h2>Identify significantly antagonistic and concordant transcripts</h2>
+<p>Here, we define significantly antagonistic transcripts as those where the relationship with fitness is significantly positive for one sex or age class and significantly negative for the other. Similarly, we define significantly concordant transcripts as those where the relationship with fitness is significantly positive for one sex or age class and also significantly positive for the other. This is quite conservative, because a transcript has to have a LFSR &lt; 0.05 for two tests, giving two chances for a ‘false negative’ error.</p>
+<pre class="r"><code>get_sig &lt;- function(TWAS_mashr){
+  FBIDs &lt;- TWAS_result_females$gene
+  significant &lt;- ifelse(get_lfsr(TWAS_mashr) &lt; 0.05, 1, 0) %&gt;% as.data.frame()
+  positive &lt;- ifelse(get_pm(TWAS_mashr) &gt; 0, 1, 0) %&gt;% as.data.frame()
+  sig_SA_early &lt;- which((positive$beta_FE != positive$beta_ME) &amp; (significant$beta_FE==1 &amp; significant$beta_ME==1))
+  sig_SA_late &lt;-  which((positive$beta_FL != positive$beta_ML) &amp; (significant$beta_FL==1 &amp; significant$beta_ML==1))
+  sig_AA_females &lt;- which((positive$beta_FE != positive$beta_FL) &amp; (significant$beta_FE==1 &amp; significant$beta_FL==1))
+  sig_AA_males &lt;-   which((positive$beta_ME != positive$beta_ML) &amp; (significant$beta_ME==1 &amp; significant$beta_ML==1))
+  
+  sig_SC_early &lt;- which((positive$beta_FE == positive$beta_ME) &amp; (significant$beta_FE==1 &amp; significant$beta_ME==1))
+  sig_SC_late &lt;-  which((positive$beta_FL == positive$beta_ML) &amp; (significant$beta_FL==1 &amp; significant$beta_ML==1))
+  sig_AC_females &lt;- which((positive$beta_FE == positive$beta_FL) &amp; (significant$beta_FE==1 &amp; significant$beta_FL==1))
+  sig_AC_males &lt;-   which((positive$beta_ME == positive$beta_ML) &amp; (significant$beta_ME==1 &amp; significant$beta_ML==1))
+  
+  helper &lt;- function(sigs){
+    x &lt;- get(sigs)
+    if(length(x) &gt; 0) x &lt;- data.frame(type = sigs, 
+                                      FBID = FBIDs[x], 
+                                      get_pm(TWAS_mashr)[x, ])
+    else x &lt;- NULL
+    x
+  }
+
+  bind_rows(
+    helper(&quot;sig_SA_early&quot;), helper(&quot;sig_SA_late&quot;), helper(&quot;sig_AA_females&quot;), helper(&quot;sig_AA_males&quot;),
+    helper(&quot;sig_SC_early&quot;), helper(&quot;sig_SC_late&quot;), helper(&quot;sig_AC_females&quot;), helper(&quot;sig_AC_males&quot;)) %&gt;%
+    mutate(type = as.character(type))
+}
+
+sig_transcripts_table &lt;- get_sig(TWAS_ED) %&gt;%
+  left_join(tbl(db, &quot;genes&quot;) %&gt;% collect(), by = &quot;FBID&quot;) %&gt;%
+  left_join(sex_bias_in_expression, by = &quot;FBID&quot;) %&gt;%
+  left_join(TWAS_mixture_assignment_probabilities, by = &quot;FBID&quot;) %&gt;%
+  mutate(across(where(is.numeric), ~ round(.x, 2))) %&gt;%
+  as_tibble() %&gt;%
+  distinct()
+
+sig_transcripts_table %&gt;%
+  write_csv(&quot;data/derived/TWAS/sig_transcripts_table.csv&quot;)</code></pre>
+<!-- # Correlation between transcript heritability and selection -->
+<!-- ```{r} -->
+<!-- TWAS_ED_antagonism_effects %>%  -->
+<!--   left_join(huang_heritability, by = "FBID") %>% -->
+<!--   ggplot(aes(abs(beta_FE), female_narrow_heritability)) +  -->
+<!--   stat_bin_hex(bins = 100) + stat_smooth(method = "gam") -->
+<!-- TWAS_ED_antagonism_effects %>%  -->
+<!--   left_join(huang_heritability, by = "FBID") %>% -->
+<!--   ggplot(aes(abs(beta_FL), female_narrow_heritability)) +  -->
+<!--   stat_bin_hex(bins = 100) + stat_smooth(method = "gam") -->
+<!-- TWAS_ED_antagonism_effects %>%  -->
+<!--   left_join(huang_heritability, by = "FBID") %>% -->
+<!--   ggplot(aes(abs(beta_ME), male_narrow_heritability)) +  -->
+<!--   stat_bin_hex(bins = 100) + stat_smooth(method = "gam") -->
+<!-- library(gridExtra) -->
+<!-- grid.arrange( -->
+<!--   TWAS_mashr_results %>%  -->
+<!--     ggplot(aes((canonical_beta_FE), female_narrow_heritability)) +  -->
+<!--     stat_bin_hex(binwidth = c(1, 1000)) + stat_smooth(method = "loess") + theme(legend.position = "none"), -->
+<!--   TWAS_mashr_results %>%  -->
+<!--     ggplot(aes((canonical_beta_ME), male_narrow_heritability)) +  -->
+<!--     stat_bin_hex(bins = 100) + stat_smooth(method = "loess") + theme(legend.position = "none"), -->
+<!--   ncol = 2) -->
+<!-- pretty_scatter <- function(data, x_col, y_col, xlim = NULL, ylim = NULL){ -->
+<!--   # Add first principal component -->
+<!--   data$pc <- predict(princomp(data %>% select(!!x_col, !!y_col)))[,1] -->
+<!--     # Add density for each point -->
+<!--   data$density <- fields::interp.surface( -->
+<!--     MASS::kde2d(data %>% pull(!!x_col),  -->
+<!--                 data %>% pull(!!y_col)), -->
+<!--     data %>% select(!!x_col, !!y_col) %>% as.matrix()) -->
+<!--   p <- data.frame(x = data %>% pull(!!x_col), -->
+<!--              y = data %>% pull(!!y_col), -->
+<!--              density = data$density, -->
+<!--              pc = data$pc) %>% -->
+<!--     ggplot(aes(x, y, color = x, alpha = 1/density)) + -->
+<!--     geom_point(shape = 16, size = 4, show.legend = FALSE) + -->
+<!--     theme_minimal() + -->
+<!--     scale_color_gradient(low = "#32aeff", high = "#f2aeff") + -->
+<!--     scale_alpha(range = c(.25, .6)) +  -->
+<!--     stat_smooth(method = "loess", span = 0.3) + theme(legend.position = "none") + xlab(NULL) + ylab(NULL) -->
+<!--   if(!is.null(xlim) & !is.null(ylim)) return(p + coord_cartesian(xlim = xlim, ylim = ylim)) -->
+<!--   if(!is.null(xlim)) return(p + coord_cartesian(xlim = xlim)) -->
+<!--   if(!is.null(ylim)) return(p + coord_cartesian(ylim = ylim)) -->
+<!--   return(p) -->
+<!-- } -->
+<!-- grid.arrange( -->
+<!--   pretty_scatter(TWAS_mashr_results, "canonical_beta_FE", "female_narrow_heritability", c(-0.22, 0.21), c(0, 1)), -->
+<!--   pretty_scatter(TWAS_mashr_results, "canonical_beta_ME", "male_narrow_heritability", c(-0.22, 0.21), c(0, 1)), -->
+<!--   ncol = 2, bottom = "Relationship between transcript abundance and fitness", left = "Heritability of transcript abundance") -->
+<!-- pretty_scatter(antagonism_evidence_ratios %>%  -->
+<!--                  left_join(huang_heritability) %>%  -->
+<!--                  mutate(xx = log2(`Cross-sex comparison (early life)`)), "xx", "male_narrow_heritability") + -->
+<!--   xlab("Evidence ratio") +  -->
+<!--   ylab("Narrow-sense heritability of transcript abundance") -->
+<!-- TWAS_mashr_results %>%  -->
+<!--   select(ED_beta_FE, ED_beta_ME, ends_with("heritability")) %>%  -->
+<!--   mutate(ED_beta_FE = abs(ED_beta_FE), -->
+<!--          ED_beta_ME = abs(ED_beta_ME)) %>% -->
+<!--   psych::corr.test(method = "spearman") -->
+<!-- ``` -->
+<!-- # Find G matrix for each transcript, and do proper Lande analysis! -->
+<!-- ```{r} -->
+<!-- library(rstanarm) -->
+<!-- library(brms) -->
+<!-- line_mean_expression <- (load_expression_data("both") %>% unname() %>%  -->
+<!--   do.call("cbind", .)) -->
+<!-- females <- which(line_mean_expression$sex == "female") -->
+<!-- males   <- which(line_mean_expression$sex == "male") -->
+<!-- for(i in 3:ncol(line_mean_expression)) { -->
+<!--   line_mean_expression[females, i] <- as.numeric(scale(line_mean_expression[females, i])) -->
+<!--   line_mean_expression[males, i]   <- as.numeric(scale(line_mean_expression[males, i])) -->
+<!-- } -->
+<!-- find_transcript_G_matrix <- function(transcript, line_mean_expression){ -->
+<!--   dat <- line_mean_expression %>% -->
+<!--     select(sex, line, !!transcript) %>% -->
+<!--     mutate(sample = 1:n()) %>% -->
+<!--     spread(sex, !!transcript) -->
+<!--   posterior_G <- stan_mvmer( -->
+<!--     list(female ~ 0 + (1 | line), male ~ 0 + (1 | line)), -->
+<!--     data = dat, chains = 4, cores = 1, iter = 3000, adapt_delta = 0.99) %>% -->
+<!--     posterior_samples() -->
+<!--   posterior_G <- posterior_G[, (ncol(posterior_G)-4):ncol(posterior_G)] # Get the relevant posterior samples -->
+<!--   names(posterior_G) <- c("residual_female", "residual_male", "line_female", "line_cov", "line_male") # give them clearer names -->
+<!--   posterior_G$correlation <- posterior_G$line_cov / (sqrt(posterior_G$line_female) * sqrt(posterior_G$line_male)) # Posterior inter-sex correlation  -->
+<!--   posterior_G$heritability_female <- posterior_G$line_female / (posterior_G$line_female + posterior_G$residual_female) -->
+<!--   posterior_G$heritability_male <- posterior_G$line_male / (posterior_G$line_male + posterior_G$residual_male) -->
+<!--   posterior_G <- posterior_G %>%  -->
+<!--     select(-residual_female, -residual_male) %>%  -->
+<!--     summarise_all(~list(posterior_summary(.))) # Summarise all the posteriors: get the Median, error, and 95% CIs -->
+<!--   lapply(1:ncol(posterior_G), function(i) unlist(posterior_G[,i])) %>% do.call("rbind", .) -->
+<!-- } -->
+<!-- find_all_transcript_G_matrices <- function(line_mean_expression){ -->
+<!--   transcript_names <- names(line_mean_expression)[-(1:2)] -->
+<!--   n_transcripts <- length(transcript_names) -->
+<!--   # n_transcripts <- 2  # Useful for testing on the first two transcripts -->
+<!--   plan("multicore") -->
+<!--   future_lapply(transcript_names[1:n_transcripts], find_transcript_G_matrix, line_mean_expression) %>% -->
+<!--     do.call("rbind", .) %>% as_tibble() %>% -->
+<!--     rename(Estimate = V1, SE = V2, Lower_95_CI = V3, Upper_95_CI = V4) %>% -->
+<!--     mutate(Parameter = rep(c("Female_variance", "Covariance", "Male_variance", "Correlation", "Heritability_female", "Heritability_male"), n_transcripts), -->
+<!--            Transcript = rep(transcript_names[1:n_transcripts], each = 6)) %>% -->
+<!--     select(Transcript, Parameter, everything()) %>% arrange(Parameter, Transcript) -->
+<!-- } -->
+<!-- transcript_quantitative_genetics <- find_all_transcript_G_matrices(line_mean_expression) -->
+<!-- db %>% copy_to(transcript_quantitative_genetics %>% rename(FBID = Transcript),  -->
+<!--                "RNA_quant_gen", temporary = FALSE, -->
+<!--                indexes = list("FBID", "Parameter")) -->
+<!-- transcript_quantitative_genetics[,1:3] %>% rename(FBID = Transcript) %>% spread(Parameter, Estimate) %>% -->
+<!--   left_join(antagonism_evidence_ratios %>% mutate(evidence_ratio = log2(evidence_ratio)) %>% spread(trait, evidence_ratio)) %>% -->
+<!--   select(-FBID) %>% cor -->
+<!-- # Almost every well-measured genetic correlation is positive; the transcriptome does not have very sex-specific genetic architecture -->
+<!-- # This is neat because there are eQTLs with opposing effects on male and female transcription - they are just a minority -->
+<!-- tbl(db, "RNA_quant_gen") %>% -->
+<!--   filter(Parameter == "Correlation") %>% -->
+<!--   mutate(Accuracy = ifelse(Upper_95_CI - Lower_95_CI < 0.5, "High", "Low")) %>% -->
+<!--   select(Estimate, Accuracy) %>% collect() %>% -->
+<!--   ggplot(aes(Estimate, fill = Accuracy)) +  -->
+<!--   geom_density(alpha = 0.5) + theme_minimal() -->
+<!-- ``` -->
+<!-- # Looking for the twin peaks: -->
+<!-- ```{r} -->
+<!-- antagonism_evidence_ratios %>%  -->
+<!--   left_join(sex_bias_in_expression, by = "FBID") %>%  -->
+<!--   ggplot(aes((male_bias_in_expression), log2(evidence_ratio))) +  -->
+<!--   geom_point() +  -->
+<!--   stat_smooth() -->
+<!-- ``` -->
+<!-- ## Network stuff -->
+<!-- ```{r} -->
+<!-- # Build a gene coexpresison network using WGCNA package -->
+<!-- build_network <- function(expression_data, max_power = 10){ -->
+<!--   # Pick the soft thresholding power that gives a model fit of R^2 > 0.9 for the scale-free topology model -->
+<!--   soft.power <- pickSoftThreshold(expression_data,  -->
+<!--                                   RsquaredCut = 0.9, verbose = 0, powerVector = 1:max_power) -->
+<!--   # Use this power to generate a gene co-expression network, mostly using the default settings -->
+<!--   blockwiseModules(expression_data,  -->
+<!--                               power = soft.power$powerEstimate, -->
+<!--                               networkType = "signed", -->
+<!--                               minModuleSize = 30, -->
+<!--                               # saveTOMs = T, -->
+<!--                               verbose = 0) -->
+<!-- } -->
+<!-- convert_module_colors_to_names <- function(network){ -->
+<!--   module.sizes <- network$colors %>% table() %>% sort() %>% rev() -->
+<!--   module.sizes <- c(module.sizes[names(module.sizes) == "grey"],  -->
+<!--                     module.sizes[names(module.sizes) != "grey"]) -->
+<!--   module.mappings <- data.frame(color = names(module.sizes),  -->
+<!--                                 new.name = paste("Module",  -->
+<!--                                                  0:(length(module.sizes) - 1)),  -->
+<!--                                 stringsAsFactors = F) -->
+<!--   network$colors <- module.mappings$new.name[match(network$colors, module.mappings$color)] -->
+<!--   names(network$MEs) <- gsub("ME", "", names(network$MEs)) -->
+<!--   names(network$MEs) <- module.mappings$new.name[match(names(network$MEs),  -->
+<!--                                                             module.mappings$color)] -->
+<!--   network -->
+<!-- } -->
+<!-- network_female <- load_expression_data("female")    %>% build_network() %>% convert_module_colors_to_names() -->
+<!-- network_male   <- load_expression_data("male")      %>% build_network() %>% convert_module_colors_to_names() -->
+<!-- network_both   <- load_expression_data("both")[[2]] %>% build_network(max_power = 20) %>% convert_module_colors_to_names() -->
+<!-- table(network_female$colors) -->
+<!-- table(network_male$colors) -->
+<!-- table(network_both$colors) -->
+<!-- # Rearrange the data in a handy format for stats and plotting, and remove the 'Module 0', the un-assigned genes -->
+<!-- rearrange_eigengene_data <- function(network, sex){ -->
+<!--   if(sex != "both") line <- load_expression_data(sex) %>% rownames() -->
+<!--   else line <- load_expression_data("both")[[1]] -->
+<!--   data.frame(line,  -->
+<!--              network$MEs, stringsAsFactors = FALSE) %>%  -->
+<!--     gather(module, eigengene, starts_with("Module")) %>%  -->
+<!--     arrange(module, line) %>% as_tibble() -->
+<!-- }  -->
+<!-- eigengenes_both <- rearrange_eigengene_data(network_both, "both") %>% mutate(early_fitness = NA, late_fitness = NA) -->
+<!-- # eigengenes_both$early_fitness[eigengenes_both$sex == "female"] <- predicted_line_means$female.fitness.early[ -->
+<!-- #   match(eigengenes_both$line[eigengenes_both$sex == "female"], predicted_line_means$line)] -->
+<!-- # eigengenes_both$early_fitness[eigengenes_both$sex == "male"] <- predicted_line_means$male.fitness.early[ -->
+<!-- #   match(eigengenes_both$line[eigengenes_both$sex == "male"], predicted_line_means$line)] -->
+<!-- # eigengenes_both$late_fitness[eigengenes_both$sex == "female"] <- predicted_line_means$female.fitness.late[ -->
+<!-- #   match(eigengenes_both$line[eigengenes_both$sex == "female"], predicted_line_means$line)] -->
+<!-- # eigengenes_both$late_fitness[eigengenes_both$sex == "male"] <- predicted_line_means$male.fitness.late[ -->
+<!-- #   match(eigengenes_both$line[eigengenes_both$sex == "male"], predicted_line_means$line)] -->
+<!-- eigengenes_both  %>% -->
+<!--   group_by(module, line, sex) %>%  -->
+<!--   summarise(eigengene = mean(eigengene)) %>% ungroup() %>% -->
+<!--   ggplot(aes(sex, eigengene, group = line)) +  -->
+<!--   geom_line() +  -->
+<!--   facet_wrap(~module, scales = "free_y") -->
+<!-- eigengenes_both %>% -->
+<!--   filter(!is.na(eigengene) & !is.na(early_fitness)) %>% -->
+<!--   ggplot(aes(eigengene, early_fitness, colour = sex)) +  -->
+<!--   geom_point() + stat_smooth(method = "lm", colour = "black") + -->
+<!--   facet_wrap(module ~ sex, scales = "free", ncol = 2) +  -->
+<!--   theme(strip.background = element_blank(), strip.text.x = element_blank()) -->
+<!-- eigengenes_for_model <- network_both$MEs -->
+<!-- names(eigengenes_for_model) <- gsub("Module ", "m", names(eigengenes_for_model)) -->
+<!-- eigengenes_for_model <- cbind(load_expression_data("both")[[1]], eigengenes_for_model) %>% as_tibble() -->
+<!-- eigengenes_for_model <- eigengenes_for_model %>% group_by(sex, line) %>% summarise_all(mean)  -->
+<!-- eigengenes_for_model <- predicted_line_means %>% select(-block) %>% left_join(eigengenes_for_model) %>% -->
+<!--   mutate(early_fitness = ifelse(sex == "female", female.fitness.early, male.fitness.early), -->
+<!--          late_fitness  = ifelse(sex == "female", female.fitness.late, male.fitness.late)) %>% -->
+<!--   select(-contains("male")) -->
+<!-- library(brms) -->
+<!-- eigen_multivariate_model <- brm(cbind(early_fitness, late_fitness) ~ sex * (m1 + m2 + m3 + m4 + m5 + m6 + m7 + m8 + m9 + m10 + m11 + m12 + m13 + m14) + (1 | line), -->
+<!--     data = eigengenes_for_model, -->
+<!--     chains = 4, cores = 2, iter = 6000, seed = 1, -->
+<!--     control = list(adapt_delta = 0.999, max_treedepth = 15) -->
+<!-- ) -->
+<!-- new_data <- eigengenes_for_model %>% select(sex, line) %>% distinct() %>% arrange(sex, line) %>% filter(!(line %in% c("line_395", "line_596"))) -->
+<!-- preds <- data.frame(new_data, fitted(eigen_multivariate_model, newdata = new_data), stringsAsFactors = FALSE) %>% as_tibble() -->
+<!-- preds %>% select(sex, starts_with("Estimate"), -Estimate.latefitness) %>% -->
+<!--   gather(module, eigengene, starts_with("Estimate.m")) %>% -->
+<!--   mutate(module = str_replace_all(module, "Estimate.m", "Module ")) %>% -->
+<!--   ggplot(aes(eigengene, Estimate.earlyfitness, colour = sex)) +  -->
+<!--   geom_point() + stat_smooth(method = "lm", colour = "black") + -->
+<!--   facet_wrap(module ~ sex, scales = "free", ncol = 2) +  -->
+<!--   theme(strip.background = element_blank(), strip.text.x = element_blank()) -->
+<!-- ``` -->
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.0.3 (2020-10-10)
+Platform: x86_64-apple-darwin17.0 (64-bit)
+Running under: macOS Catalina 10.15.7
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_GB.UTF-8/en_GB.UTF-8/en_GB.UTF-8/C/en_GB.UTF-8/en_GB.UTF-8
+
+attached base packages:
+[1] parallel  stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+ [1] mashr_0.2.38       ashr_2.2-47        DT_0.13            kableExtra_1.1.0  
+ [5] future.apply_1.5.0 future_1.17.0      glue_1.4.2         forcats_0.5.0     
+ [9] stringr_1.4.0      dplyr_1.0.0        purrr_0.3.4        readr_1.3.1       
+[13] tidyr_1.1.0        tibble_3.0.1       ggplot2_3.3.2      tidyverse_1.3.0   
+[17] edgeR_3.30.1       limma_3.44.1      
+
+loaded via a namespace (and not attached):
+ [1] nlme_3.1-149      fs_1.4.1          bit64_0.9-7       lubridate_1.7.8  
+ [5] webshot_0.5.2     httr_1.4.1        rprojroot_1.3-2   tools_4.0.3      
+ [9] backports_1.1.7   R6_2.4.1          irlba_2.3.3       rmeta_3.0        
+[13] DBI_1.1.0         colorspace_1.4-1  withr_2.2.0       tidyselect_1.1.0 
+[17] bit_1.1-15.2      compiler_4.0.3    git2r_0.27.1      cli_2.0.2        
+[21] rvest_0.3.5       xml2_1.3.2        scales_1.1.1      SQUAREM_2020.2   
+[25] mvtnorm_1.1-0     mixsqp_0.3-43     digest_0.6.25     rmarkdown_2.5    
+[29] pkgconfig_2.0.3   htmltools_0.5.0   highr_0.8         dbplyr_1.4.4     
+[33] invgamma_1.1      htmlwidgets_1.5.1 rlang_0.4.6       readxl_1.3.1     
+[37] RSQLite_2.2.0     rstudioapi_0.11   generics_0.0.2    jsonlite_1.7.0   
+[41] magrittr_2.0.1    Matrix_1.2-18     Rcpp_1.0.4.6      munsell_0.5.0    
+[45] fansi_0.4.1       abind_1.4-5       lifecycle_0.2.0   stringi_1.5.3    
+[49] whisker_0.4       yaml_2.2.1        plyr_1.8.6        grid_4.0.3       
+[53] blob_1.2.1        listenv_0.8.0     promises_1.1.0    crayon_1.3.4     
+[57] lattice_0.20-41   haven_2.3.1       hms_0.5.3         locfit_1.5-9.4   
+[61] knitr_1.30        pillar_1.4.4      codetools_0.2-16  reprex_0.3.0     
+[65] evaluate_0.14     modelr_0.1.8      vctrs_0.3.0       httpuv_1.5.3.1   
+[69] cellranger_1.1.0  gtable_0.3.0      assertthat_0.2.1  xfun_0.19        
+[73] broom_0.5.6       later_1.0.0       viridisLite_0.3.0 truncnorm_1.0-8  
+[77] memoise_1.1.0     workflowr_1.6.2   globals_0.12.5    ellipsis_0.3.1   </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

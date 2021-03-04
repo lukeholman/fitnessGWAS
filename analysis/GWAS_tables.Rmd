@@ -1,17 +1,15 @@
 ---
 title: "Tables summarising the GWAS results"
-output:
-  html_document: 
-    code_folding: hide 
-  html_notebook:
+output: 
+  workflowr::wflow_html:
     code_folding: hide 
 ---
 
+## Load and clean the GWAS results
 ```{r libraries, message=FALSE, warning=FALSE, results='hide'}
-library(dplyr)
-library(readr)
+library(tidyverse)
 library(kableExtra)
-library(tidyr)
+library(DT)
 
 kable_table <- function(df) {
   kable(df, "html") %>%
@@ -19,245 +17,209 @@ kable_table <- function(df) {
   scroll_box(height = "300px")
 }
 
-db <- DBI::dbConnect(RSQLite::SQLite(), "data/derived/annotations.sqlite3")
-```
-
-## Load and clean the data
-Modify column names, reorder columns, filter based on the p-value, etc.
-```{r load_data, message=FALSE}
-# Significant results, from the four univariate linear mixed models run in GEMMA:
-univariate_lmm_results <- read_csv("data/derived/all_univariate_GEMMA_results.csv") %>% 
-  filter(pvalue_female_early < 1e-05 | pvalue_female_late < 1e-05 | pvalue_male_early < 1e-05 | pvalue_male_late < 1e-05) 
-
-# univariate_lmm_results <- univariate_lmm_results %>%
-#   left_join(tbl(db, "genes") %>% 
-#               select(FBID, gene_name) %>% 
-#               filter(FBID %in% univariate_lmm_results$FBID) %>% 
-#               collect(), by = "FBID")
-# 
-# univariate_lmm_results <- univariate_lmm_results[,c(1:10, 16, 11:15)]
-
-# Results of one multivariate linear mixed model run in GEMMA:
-multivariate_lmm_results <- read_tsv("data/derived/output/all_four_traits.assoc.txt") %>%
-  filter(p_wald < 1e-05) %>% 
-  inner_join(tbl(db, "variants") %>% select(-chr, -position) %>% collect(), by = "SNP") %>% 
-  arrange(p_wald) %>% 
-  select(-contains("Vbeta"))
-
-multivariate_lmm_results <- multivariate_lmm_results %>%
-  left_join(tbl(db, "genes") %>% 
-              select(FBID, gene_name) %>% 
-              filter(FBID %in% multivariate_lmm_results$FBID) %>% 
-              collect(), by = "FBID")
-
-multivariate_lmm_results <- multivariate_lmm_results[,c(1:8, 14, 9:13)]
-```
-
-
-## Results of univariate association tests {.tabset}
-
-### Female early-life fitness
-```{r}
-univariate_lmm_results %>%
-  filter(Fitness_component == "female_early") %>% select(-Fitness_component) %>%
-  kable_table()
-```
-
-### Female late-life fitness
-```{r}
-univariate_lmm_results %>%
-  filter(Fitness_component == "female_late") %>% select(-Fitness_component) %>%
-  kable_table()
-```
-
-### Male early-life fitness
-```{r}
-univariate_lmm_results %>%
-  filter(Fitness_component == "male_early") %>% select(-Fitness_component) %>%
-  kable_table()
-```
-
-### Male late-life fitness
-```{r}
-univariate_lmm_results %>%
-  filter(Fitness_component == "male_late") %>% select(-Fitness_component) %>%
-  kable_table()
-```
-
-
-## Results of multivariate association tests
-```{r message=FALSE}
-multivariate_lmm_results %>%
-  kable_table()
-
-multivariate_lmm_results %>%
-  mutate(
-    female_early = cell_spec(female_early, "html", color = ifelse(female_early < 0, "tomato", "darkgreen")),
-    female_late = cell_spec(female_late, "html", color = ifelse(female_late < 0, "tomato", "darkgreen")),
-    male_early = cell_spec(male_early, "html", color = ifelse(male_early < 0, "tomato", "darkgreen")),
-    male_late = cell_spec(male_late, "html", color = ifelse(male_late < 0, "tomato", "darkgreen"))
-  ) %>%
-  kable(format = "html", escape = F) %>%
-  kable_styling("striped") %>%
-  scroll_box(height = "300px")
-```
-
-
-
-## Results of SNP clumping analysis {.tabset}
-
-### Female early-life fitness
-```{r message=FALSE}
-read_tsv("data/derived/female_early_SNP_clumps.txt") %>%
-  kable_table()
-```
-
-### Female late-life fitness
-```{r message=FALSE}
-read_tsv("data/derived/female_late_SNP_clumps.txt") %>%
-  kable_table()
-```
-
-### Male early-life fitness
-```{r message=FALSE}
-read_tsv("data/derived/male_early_SNP_clumps.txt") %>%
-  kable_table()
-```
-
-### Male late-life fitness
-```{r message=FALSE}
-read_tsv("data/derived/male_late_SNP_clumps.txt") %>%
-  kable_table()
-```
-
-### All four traits
-```{r message=FALSE}
-read_tsv("data/derived/all_four_traits_SNP_clumps.txt") %>%
-  kable_table()
-```
-
-
-
-
-```{r message=FALSE}
-get_antagonism_scores <- function(lmm_results){
-  get_innocenti_morrow_index <- function(s1, s2) (s1 * s2) / sqrt((s1^2 + s2^2) / 2)
-  tibble(SNP = lmm_results$SNP,
-         early_SA = with(lmm_results, get_innocenti_morrow_index(female_early, male_early)),
-         late_SA = with(lmm_results, get_innocenti_morrow_index(female_late, male_late)),
-         female_age = with(lmm_results, get_innocenti_morrow_index(female_early, female_late)),
-         male_age = with(lmm_results, get_innocenti_morrow_index(male_early, male_late)))
-}
-
-uv_index_snps <- c(read_tsv("data/derived/female_early_SNP_clumps.txt")$index_SNP,
-                   read_tsv("data/derived/female_late_SNP_clumps.txt")$index_SNP,
-                   read_tsv("data/derived/male_late_SNP_clumps.txt")$index_SNP,
-                   read_tsv("data/derived/male_late_SNP_clumps.txt")$index_SNP) %>% unique()
-
-prepare_upset_data <- function(df, index_snps, cutoff){
-   df %>% 
-    mutate(female_early_neg = ifelse(female_early < -cutoff, 1, 0),
-           female_early_null = ifelse(female_early > -cutoff & female_early < cutoff, 1, 0),
-           female_early_pos =  ifelse(female_early > cutoff, 1, 0),
-           female_late_neg = ifelse(female_late < -cutoff, 1, 0),
-           female_late_null = ifelse(female_late > -cutoff & female_late < cutoff, 1, 0),
-           female_late_pos =  ifelse(female_late > cutoff, 1, 0),
-           
-           male_early_neg = ifelse(male_early < -cutoff, 1, 0),
-           male_early_null = ifelse(male_early > -cutoff & male_early < cutoff, 1, 0),
-           male_early_pos =  ifelse(male_early > cutoff, 1, 0),
-           male_late_neg = ifelse(male_late < -cutoff, 1, 0),
-           male_late_null = ifelse(male_late > -cutoff & male_late < cutoff, 1, 0),
-           male_late_pos =  ifelse(male_late > cutoff, 1, 0)
+my_data_table <- function(df){ # Make html tables:
+  datatable(
+    df, rownames=FALSE,
+    autoHideNavigation = TRUE,
+    extensions = c("Scroller",  "Buttons"),
+    options = list(
+      dom = 'Bfrtip',
+      deferRender=TRUE,
+      scrollX=TRUE, scrollY=400,
+      scrollCollapse=TRUE,
+      buttons = 
+        list('pageLength', 'colvis', 'csv', list(
+          extend = 'pdf',
+          pageSize = 'A4',
+          orientation = 'landscape',
+          filename = 'GWAS_sig_loci')),
+      pageLength = 50
     )
+  )
 }
 
-upset_uv <- (read_csv("data/derived/lmm_results_ashr.csv") %>% 
-    filter(SNP %in% uv_index_snps) %>%
-    arrange(parameter) %>%
-    group_by(SNP) %>%
-    summarise(female_early = posterior.estimate[1],
-              female_late = posterior.estimate[2],
-              male_early = posterior.estimate[3],
-              male_late = posterior.estimate[4]) %>% 
-  prepare_upset_data(uv_index_snps, cutoff = 0.1))[,-(1:5)]
-
-upset_mv <- (multivariate_lmm_results %>% 
-  prepare_upset_data(read_tsv("data/derived/all_four_traits_SNP_clumps.txt")$index_SNP, cutoff = 0.1))[,-(1:14)]
+db <- DBI::dbConnect(RSQLite::SQLite(), "data/derived/annotations.sqlite3")
 
 
-# antagonism_scores_mv <- multivariate_lmm_results %>% 
-#   filter(SNP %in% read_tsv("data/derived/all_four_traits_SNP_clumps.txt")$index_SNP) %>%
-#   arrange(SNP) %>% get_antagonism_scores() 
-# 
-# antagonism_scores_uv %>% print(n = Inf)
-# antagonism_scores_mv %>% print(n = Inf)
+# Load the SNP-clumped GWAS results, created with GEMMA and clumped with PLINK
+xx <- bind_rows(
+  read_tsv("data/derived/female_early_SNP_clumps.txt"),
+  read_tsv("data/derived/female_late_SNP_clumps.txt"),
+  read_tsv("data/derived/male_early_SNP_clumps.txt"),
+  read_tsv("data/derived/male_late_SNP_clumps.txt")) %>%
+  distinct(index_SNP, .keep_all = TRUE) %>%
+  mutate(FBIDs = str_remove_all(FBIDs, ", NA"),
+         FBIDs = replace(FBIDs, is.na(FBIDs), "")) %>%
+  mutate(genes = str_remove_all(genes, ", NA"),
+         genes = replace(genes, is.na(genes), "")) %>%
+  mutate(`Index variant log10 p` = round(-1 * log10(index_SNP_p_value), 2)) %>%
+  select(index_SNP, other_snps, FBIDs, genes, `Index variant log10 p`) 
+
+# Because we clumped separately for the 4 traits, some of the "index SNPs" appear inside the ranges
+# tagged by other index SNPs, so there is some redundancy. The following ugly code sorts this out 
+# by putting index SNPs that appear inside the range of another index SNP into the 'other SNPs' 
+# column for that index SNP
+ranges <- xx$other_snps %>% 
+  str_extract_all("[_][:digit:]+") %>% 
+  map(~ as.numeric(str_remove_all(.x, "_"))) %>% 
+    map(~ c(min(.x), max(.x)))
+
+ranges <- map_df(1:nrow(xx), 
+                 ~ data.frame(index = xx$index_SNP[.x], 
+                              min =ranges[[.x]][1], 
+                              max = ranges[[.x]][2]))%>%
+  filter(!is.na(min)) %>% 
+  mutate(chr = substr(index, 1,2))
+
+to_modify <- lapply(1:nrow(xx), function(i){
+  chr <- substr(xx$index_SNP[i],1,2) # get chr and pos
+  pos <- as.numeric(str_remove_all(str_extract_all(xx$index_SNP[i], "_[:digit:]+"), "_"))
+  foc_ranges <- ranges[ranges$chr == chr & 
+                         ranges$min <= pos & 
+                         ranges$max >= pos &
+                         ranges$index != xx$index_SNP[i], ]
+  if(nrow(foc_ranges) > 0) {
+    return(data.frame(index_SNP = foc_ranges$index, 
+                      to_add = xx$index_SNP[i]))
+  }
+  return(NULL)
+}) %>% bind_rows()
+
+xx <- xx %>% 
+  filter(!(index_SNP %in% to_modify$to_add)) %>% 
+  left_join(to_modify) %>% 
+  mutate(to_add = replace(to_add, is.na(to_add), "NA"))
+
+xx <- xx %>% 
+  mutate(other_snps = str_split(str_c(xx$other_snps, to_add, sep = ", "), ", "),
+              other_snps = map_chr(other_snps, 
+                                   ~ paste0(.x[.x != "NA"], collapse = ", "))) %>%
+  select(-to_add) %>%
+  mutate(other_snps = str_replace_all(other_snps, "NA", ""))
+
+# Now get the mashr-ED adjusted effect sizes for the index SNPs, 
+# and their mixture assignment probs.
+univariate_lmm_results <- 
+  tbl(db, "univariate_lmm_results") %>%
+  filter(SNP %in% !! xx$index_SNP) %>%
+  select(-contains("canonical"), 
+         -contains("raw")) %>% 
+  inner_join(tbl(db, "variants") %>% 
+               select(-chr, -position), 
+             by = "SNP") %>%
+  left_join(
+    tbl(db, "genes") %>% 
+      select(FBID, gene_name), by = "FBID") %>%
+  collect(n=Inf) %>%
+  arrange(LFSR_female_early_mashr_ED) %>%
+  mutate_at(vars(contains("LFSR")), ~ -log10(.x)) %>%
+  mutate_if(is.numeric, ~ round(.x, 2)) %>%
+  rename_all(~ gsub("beta_", "", .x)) %>%
+  rename_all(~ gsub("_mashr_ED", "", .x)) %>%
+  arrange(-P_equal_effects) %>%
+  select(SNP, starts_with("female"), 
+         starts_with("male"), starts_with("P_")) %>%
+  distinct()
+
+GWAS_table <- xx %>%
+  left_join(univariate_lmm_results, by = c("index_SNP" = "SNP")) %>%
+  arrange(index_SNP) %>%
+  rename(`Index variant` = index_SNP,
+         `Other variants` = other_snps,
+         `Genes` = genes, 
+         `Female early` = female_early,
+         `Female late` = female_late,
+         `Male early` = male_early,
+         `Male late` = male_late) %>%
+  rename_all(~ str_replace_all(.x, "_", " "))
 ```
+
+## Table of significant groups of linked variants
+
+This table shows loci (i.e. groups of linked variants) that passed the arbitrary statistical significance threshold of $p < 10^{-5}$ for one or more of the four phenotypes (in a linear mixed model GWAS implemented in GEMMA). The loci were identified using the SNP clumping method of PLINK, and each group of variants contains one or more variants that met the significance threshold. The third and fourth columns identify the gene(s) whose exons and introns overlap the focal locus. Columns 6-9 show the estimated effect size of the index variant on the four phenotypes (corrected by `mashr` using the data-driven method), while the final columns show the mixture proportions estimated by `mashr` using the canonical method.  
 
 ```{r}
-library(VennDiagram)
-# upsetter with concordants....
-# mashr results more similar?
-make_venn <- function(){
-  
-}
-
-library(UpSetR)
-
-upset(as.data.frame(upset_uv), order.by = c("freq"), nsets = 12)
-upset(as.data.frame(upset_mv), order.by = c("freq"), nsets = 12)
-
-cutoff <- -0.1
-antagonism_scores_mv <- antagonism_scores_mv %>%
-  mutate(is_early_SC = as.numeric(early_SA > cutoff*-1),
-         is_late_SC = as.numeric(early_SA > cutoff*-1),
-         is_female_AC = as.numeric(early_SA > cutoff*-1),
-         is_male_AC = as.numeric(early_SA > cutoff*-1),
-         
-         is_early_SA = as.numeric(early_SA < cutoff),
-         is_late_SA = as.numeric(late_SA < cutoff),
-         is_female_age = as.numeric(female_age < cutoff),
-         is_male_age = as.numeric(male_age < cutoff))
-upset(as.data.frame(antagonism_scores_mv)[,6:13], order.by = c("freq"))
-
-venn.diagram(
-	x = list(
-		Early_SA = which(antagonism_scores$is_early_SA),
-		Late_SA = which(antagonism_scores$is_late_SA),
-		Female_age = which(antagonism_scores$is_female_age),
-		Male_age = which(antagonism_scores$is_male_age)),
-	imagetype = "tiff",
-	filename = "TEST_Venn.tiff") 
-
-venn.diagram(
-	x = list(
-		Early_SA = which(antagonism_scores$is_early_SA),
-		Late_SA = which(antagonism_scores$is_late_SA),
-		Female_age = which(antagonism_scores$is_female_age),
-		Male_age = which(antagonism_scores$is_male_age)),
-	imagetype = "tiff",
-	filename = "TEST_Venn.tiff") 
+GWAS_table %>%
+  my_data_table()
 ```
 
 
+<!-- # Results of one multivariate linear mixed model run in GEMMA: -->
+<!-- # multivariate_lmm_results <-  -->
+<!-- #   read_tsv("data/derived/output/all_four_traits.assoc.txt") %>% -->
+<!-- #   filter(p_fdr < 0.05) %>%  -->
+<!-- #   inner_join(tbl(db, "variants") %>%  -->
+<!-- #                select(-chr, -position) %>% -->
+<!-- #                collect(), by = "SNP") %>%  -->
+<!-- #   arrange(p_wald) %>%  -->
+<!-- #   select(-contains("Vbeta")) %>% -->
+<!-- #   left_join( -->
+<!-- #     tbl(db, "genes") %>%  -->
+<!-- #       select(FBID, gene_name) %>%  -->
+<!-- #       collect(n=Inf), by = "FBID") %>% -->
+<!-- #   mutate(gene_name = replace(gene_name, is.na(FBID), NA))  -->
+<!-- #  -->
+<!-- # multivariate_lmm_results <- multivariate_lmm_results[,c(1:8, 14, 9:13)] -->
+<!-- #  -->
+<!-- # multivariate_lmm_results <- multivariate_lmm_results %>% -->
+<!-- #   mutate_at(vars(starts_with("p_")), ~ -log10(.x)) %>% -->
+<!-- #   mutate_if(is.numeric, ~ format(round(.x, 2), nsmall = 2)) %>% -->
+<!-- #   left_join(tbl(db, "univariate_lmm_results") %>%  -->
+<!-- #               select(SNP, SNP_clump) %>%  -->
+<!-- #               collect(), -->
+<!-- #             by = "SNP") %>% -->
+<!-- #   distinct(SNP_clump, .keep_all = TRUE) %>% -->
+<!-- #   select(SNP, SNP_clump, everything()) -->
+
+<!-- ## Results of multivariate association tests -->
+<!-- ```{r message=FALSE} -->
+<!-- multivariate_lmm_results  %>% -->
+<!--   add_colour() %>% -->
+<!--   kable(format = "html", escape = FALSE) %>% -->
+<!--   kable_styling("striped") %>% -->
+<!--   scroll_box(height = "300px") -->
+<!-- ``` -->
 
 
-```{r}
-lmm_canonical <- read_rds("data/derived/lmm_canonical_mashr_results.rds")
-lmm_ED <- read_rds("data/derived/lmm_ED_mashr_results.rds")
+<!-- ### All four traits -->
+<!-- ```{r message=FALSE} -->
+<!-- read_tsv("data/derived/all_four_traits_SNP_clumps.txt") %>% -->
+<!--   kable_table() -->
+<!-- ``` -->
 
-barplot(sort(get_estimated_pi(lmm_canonical), decreasing = TRUE), las = 2)
-barplot(sort(get_estimated_pi(lmm_ED), decreasing = TRUE), las = 2)
 
+<!-- ```{r eval=F} -->
+<!-- # http://bergmanlab.genetics.uga.edu/flyreg/v2.0/Target.html -->
+<!-- TFBS <- read_csv("data/input/TF_binding_sites.csv") -->
 
-(get_lfsr(lmm_canonical)[get_significant_results(lmm_canonical), ])
+<!-- ranges <- xx$other_snps %>%  -->
+<!--   str_extract_all("[_][:digit:]+") %>%  -->
+<!--   map(~ as.numeric(str_remove_all(.x, "_"))) %>%  -->
+<!--   map(~ c(min(.x), max(.x))) -->
+<!-- ranges <- map_df(1:nrow(xx), ~ data.frame(index = xx$index_SNP[.x], min =ranges[[.x]][1], max = ranges[[.x]][2]))%>% -->
+<!--   filter(!is.na(min)) %>% mutate(chr = substr(index, 1,2)) %>% -->
+<!--   filter(!is.infinite(min)) -->
 
-print(get_pm(lmm_ED)[get_significant_results(lmm_ED), ] %>% as_tibble(), n = length(get_significant_results(lmm_ED)))
+<!-- ranges_index <- xx$index_SNP %>%  -->
+<!--   str_extract_all("[_][:digit:]+") %>%  -->
+<!--   map(~ as.numeric(str_remove_all(.x, "_"))) %>%  -->
+<!--   map(~ c(min(.x), max(.x))) -->
+<!-- ranges_index <- map_df(1:nrow(xx), ~ data.frame(index = xx$index_SNP[.x],  -->
+<!--                                                 min =ranges_index[[.x]][1],  -->
+<!--                                                 max = ranges_index[[.x]][2])) %>% -->
+<!--   filter(!is.na(min)) %>% mutate(chr = substr(index, 1,2)) %>% -->
+<!--   filter(!(index %in% ranges$index)) -->
 
-get_pm(lmm_ED) %>% cor()
+<!-- sig_ranges <- bind_rows(ranges, ranges_index) %>%  -->
+<!--   arrange(index) %>% -->
+<!--   mutate(chr = replace(chr, chr == "X_", "X")) -->
 
-get_log10bf(lmm_ED) %>% hist # Bayes factors for all the SNPs
-get_n_significant_conditions(lmm_ED) %>% table() # Number of significant traits per SNP (lfsr<0.05)
-get_pairwise_sharing(lmm_ED, factor = 0, lfsr_thresh = 0.05) # When restricting ourselves to cases where we know the sign of the effect with 95% certainty on both phenotypes, what proportion of effects affect each phenotype pair in the same direction?
-```
+<!-- for(i in 1:nrow(sig_ranges)){ -->
+<!--   hits <- TFBS %>% -->
+<!--     filter(chr == sig_ranges$chr[i]) %>% -->
+<!--     filter(start > sig_ranges$min[i]  & start < sig_ranges$max[i] | -->
+<!--              stop > sig_ranges$min[i] & stop < sig_ranges$max[i]) -->
+<!--   if(nrow(hits) > 0) print(hits) -->
+<!-- } -->
+<!-- ``` -->
 

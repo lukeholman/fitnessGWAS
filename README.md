@@ -1,5 +1,3 @@
-# fitnessGWAS
+# Forthcoming paper about male and female fitness in the DGRP
 
-A [workflowr][] project.
-
-[workflowr]: https://github.com/jdblischak/workflowr
+Go [here](https://lukeholman.github.io/fitnessGWAS/) to view the HTML report for this project

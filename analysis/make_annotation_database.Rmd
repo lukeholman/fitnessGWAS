@@ -1,8 +1,8 @@
 ---
 title: "Making a database of variant and gene annotations"
-output:
-  html_document: default
-  html_notebook: default
+output: 
+  workflowr::wflow_html:
+    code_folding: hide 
 ---
 
 ```{r message=FALSE, warning=FALSE, results="hide"}
@@ -10,12 +10,15 @@ library(dplyr)
 library(stringr)
 library(future.apply)
 library(org.Dm.eg.db) # install via source("https://bioconductor.org/biocLite.R"); biocLite("org.Dm.eg.db")
+library(GO.db)
 options(future.globals.maxSize = 2000 * 1024 ^ 2, 
         stringsAsFactors = FALSE)
-plan("multicore")
 
 # Helper function to split a vector into chunks 
 chunker <- function(x, max_chunk_size) split(x, ceiling(seq_along(x) / max_chunk_size))
+
+# database of D. mel annotations from bioconductor
+con <- dbconn(org.Dm.eg.db)
 ```
 
 ## Get the annotations for each DGRP variant
@@ -45,6 +48,7 @@ get_variant_annotations <- function(){
     }) %>% do.call("rbind", .)
   }
   
+  plan("multisession")
   variant.details <- future_lapply(chunker(1:nrow(annot), max_chunk_size = 10000), get.info) %>% 
     do.call("rbind", .) %>% as.data.frame()
   
@@ -52,45 +56,88 @@ get_variant_annotations <- function(){
   variant.details$FBID <- unlist(str_extract_all(variant.details$FBID, "FBgn[:digit:]+")) # clean up text strings for Flybase ID
   variant.details %>%
     dplyr::filter(site.class != "FBgn0003638") %>% # NB this is a bug in the DGRP's annotation file
-    mutate(chr = str_remove_all(substr(id, 1, 2), "_")) # get chromosome now for faster sorting later
+    mutate(chr = str_remove_all(substr(SNP, 1, 2), "_")) # get chromosome now for faster sorting later
 }
 ```
 
 ## Get the annotations for each _Drosophila_ gene
 
-The following function gets the annotations for the all the genes covered by DGRP variants, from the org.Dm.eg.db database object from Bioconductor. I don't like the interface to those objects (it messes up dplyr), so I save the info as a second table in the SQLite database.
+The following function gets the annotations for the all the genes covered by DGRP variants, from the `org.Dm.eg.db` database object from Bioconductor. I don't like the `select` interface to those objects (it messes with any R code that uses `dplyr`), so here I save the info into the SQLite database for later access.
 
-```{r}
-get_gene_annotations <- function(FBIDs_to_get){
-  con <- dbconn(org.Dm.eg.db)
-   tbl(con, "genes") %>%
+### Table to convert among gene IDs and names
+```{r warning=FALSE}
+get_gene_annotations <- function(){
+  tbl(con, "genes") %>%
     left_join(tbl(con, "flybase"), by = "_id") %>%
     left_join(tbl(con, "gene_info"), by = "_id") %>% 
-    dplyr::select(flybase_id, gene_name, symbol, gene_id) %>%
+    left_join(tbl(con, "chromosomes"), by = "_id") %>%
+    dplyr::select(flybase_id, gene_name, symbol, gene_id, chromosome) %>%
     dplyr::rename(FBID = flybase_id, gene_symbol = symbol, entrez_id = gene_id) %>%
-    dplyr::filter(FBID %in% FBIDs_to_get) %>%
     collect(n = Inf)
 }
 ```
 
-## Create the SQLite database and add the two tables of annotations
+### KEGG annotations
+```{r}
+get_KEGG <- function(){
+  tbl(dbconn(org.Dm.eg.db), "kegg") %>%
+    left_join(tbl(con, "flybase"), by = "_id") %>% 
+    dplyr::select(flybase_id, path_id) %>%
+    dplyr::rename(FBID = flybase_id, kegg_id = path_id) %>%
+    collect(n = Inf)
+}
+```
+
+### GO annotations
+```{r}
+get_GO <- function(){
+  tbl(dbconn(org.Dm.eg.db), "go_all") %>%
+    left_join(tbl(con, "flybase"), by = "_id") %>% 
+    dplyr::select(flybase_id, go_id, ontology) %>%
+    dplyr::rename(FBID = flybase_id) %>%
+    collect(n = Inf)
+}
+GO <- get_GO()
+```
+
+
+### GO term meanings
+```{r}
+go_meanings <- suppressMessages(
+  AnnotationDbi::select(GO.db, 
+                        GO$go_id, c("GOID", "ONTOLOGY", "TERM")))
+names(go_meanings) <- c("GO", "ontology", "term")
+go_meanings <- distinct(go_meanings)
+```
+
+
+
+## Create the SQLite database and add various tables of annotations
 
 ```{r}
 if(file.exists("data/derived/annotations.sqlite3")) unlink("data/derived/annotations.sqlite3")
 
-db <- src_sqlite("data/derived/annotations.sqlite3", create = TRUE)
+db <- DBI::dbConnect(RSQLite::SQLite(), "data/derived/annotations.sqlite3", create = TRUE)
 
 db %>% copy_to(get_variant_annotations(), 
                "variants", temporary = FALSE, 
                indexes = list("SNP", "FBID", "chr", "site.class")) 
 
-db %>% copy_to(get_gene_annotations(db %>% tbl("variants") %>% pull(FBID)), 
+db %>% copy_to(get_gene_annotations(), 
                "genes", temporary = FALSE)
+
+db %>% copy_to(GO, "GO", temporary = FALSE)
+
+db %>% copy_to(get_KEGG(), 
+               "KEGG", temporary = FALSE)
+
+db %>% copy_to(go_meanings, 
+               "go_meanings", temporary = FALSE)
 ```
 
 ### View the table of variant annotations
 
-This table is expanded upon a little in the script `perform_gwas.Rmd`, which also adds the minor allele frequencies, the alleles that were treated as the reference and alternate, etc. 
+The `variants` table is expanded upon in the script `perform_gwas.Rmd`, which also adds the minor allele frequencies, the alleles that were treated as the reference and alternate, etc. 
 ```{r}
 db %>% tbl("variants")
 ```

@@ -1,6 +1,6 @@
 %!PS-Adobe-3.0 EPSF-3.0
-%%Creator: cairo 1.14.6 (http://cairographics.org)
-%%CreationDate: Fri Sep 14 18:28:43 2018
+%%Creator: cairo 1.14.12 (http://cairographics.org)
+%%CreationDate: Thu Mar  4 10:42:31 2021
 %%Pages: 1
 %%DocumentData: Clean7Bit
 %%LanguageLevel: 2
@@ -58,6 +58,9 @@ save
 /g { setgray } bind def
 /rg { setrgbcolor } bind def
 /d1 { setcachedevice } bind def
+/cairo_flush_ascii85_file { cairo_ascii85_file status { cairo_ascii85_file flushfile } if } def
+/cairo_image { image cairo_flush_ascii85_file } def
+/cairo_imagemask { imagemask cairo_flush_ascii85_file } def
 %%EndProlog
 %%BeginSetup
 %%EndSetup

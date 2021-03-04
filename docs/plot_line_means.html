@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 
 
-<title>GWAS for fitness in Drosophila</title>
+<title>Plotting the estimated mean phenotype for each DGRP line</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -23,11 +23,30 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
-<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
-<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
+<link href="site_libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
+<script src="site_libs/anchor-sections-1.0/anchor-sections.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -75,9 +94,7 @@ h6 {
 </style>
 
 
-</head>
 
-<body>
 
 <style type = "text/css">
 .main-container {
@@ -91,7 +108,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -101,6 +117,9 @@ img {
 }
 button.code-folding-btn:focus {
   outline: none;
+}
+summary {
+  display: list-item;
 }
 </style>
 
@@ -116,7 +135,6 @@ body {
   padding-top: 56px;
   margin-top: -56px;
 }
-
 .section h2 {
   padding-top: 56px;
   margin-top: -56px;
@@ -136,6 +154,43 @@ body {
 .section h6 {
   padding-top: 56px;
   margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
 }
 </style>
 
@@ -157,47 +212,69 @@ $(document).ready(function () {
 });
 </script>
 
-
-<div class="container-fluid main-container">
-
 <!-- tabsets -->
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-</script>
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
 
 <!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
 
 
-
-
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
 
 <style type="text/css">
 
@@ -211,6 +288,12 @@ $(document).ready(function ()  {
 }
 }
 
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
 
 .toc-content {
   padding-left: 30px;
@@ -246,8 +329,6 @@ div.tocify {
 
 .tocify-subheader .tocify-item {
   font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -256,6 +337,16 @@ div.tocify {
 
 
 </style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
 
 <!-- setup 3col/9col grid for toc_float and main content  -->
 <div class="row-fluid">
@@ -285,15 +376,12 @@ div.tocify {
   <a href="index.html">Home</a>
 </li>
 <li>
-  <a href="about.html">About</a>
-</li>
-<li>
   <a href="license.html">License</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://github.com/jdblischak/workflowr">
+  <a href="https://github.com/lukeholman/fitnessGWAS">
     <span class="fa fa-github"></span>
      
   </a>
@@ -303,190 +391,310 @@ div.tocify {
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-<!-- Add a small amount of space between sections. -->
-<style type="text/css">
-div.section {
-  padding-top: 12px;
-}
-</style>
-
 <div class="fluid-row" id="header">
 
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
 
 
-<h1 class="title toc-ignore">GWAS for fitness in Drosophila</h1>
+
+<h1 class="title toc-ignore">Plotting the estimated mean phenotype for each DGRP line</h1>
 
 </div>
 
 
-<p><strong>Last updated:</strong> 2018-09-14</p>
-<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
-<ul>
-<li>
-<p><details> <summary> <strong style="color:red;">✖</strong> <strong>R Markdown file:</strong> uncommitted changes </summary> The R Markdown file has unstaged changes. To know which version of the R Markdown file created these results, you’ll want to first commit it to the Git repo. If you’re still working on the analysis, you can ignore this warning. When you’re finished, you can run <code>wflow_publish</code> to commit the R Markdown file and build the HTML.</p>
-</details>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2021-03-04
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>fitnessGWAS/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.2). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
 <p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
-</details>
-</li>
-<li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20180914)</code> </summary></p>
-<p>The command <code>set.seed(20180914)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
-</details>
-</li>
-<li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20180914code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20180914)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20180914code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20180914)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
 <p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
-</details>
-</li>
-<li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> 449a929 </summary></p>
-Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreea16e7516fb3553521a62f87d0a3e6228801d0017targetblanka16e751a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/lukeholman/fitnessGWAS/tree/a16e7516fb3553521a62f87d0a3e6228801d0017" target="_blank">a16e751</a> </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreea16e7516fb3553521a62f87d0a3e6228801d0017targetblanka16e751a" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version <a href="https://github.com/lukeholman/fitnessGWAS/tree/a16e7516fb3553521a62f87d0a3e6228801d0017" target="_blank">a16e751</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
 <pre><code>
 Ignored files:
     Ignored:    .DS_Store
+    Ignored:    .Rapp.history
+    Ignored:    .Rhistory
     Ignored:    .Rproj.user/
+    Ignored:    .httr-oauth
+    Ignored:    .pversion
     Ignored:    analysis/.DS_Store
+    Ignored:    analysis/correlations_SNP_effects_cache/
+    Ignored:    analysis/plot_models_variant_effects_cache/
     Ignored:    code/.DS_Store
+    Ignored:    code/Drosophila_GWAS.Rmd
     Ignored:    data/.DS_Store
-    Ignored:    data/derived/.DS_Store
-    Ignored:    data/derived/output/.DS_Store
+    Ignored:    data/derived/
     Ignored:    data/input/.DS_Store
+    Ignored:    data/input/.pversion
+    Ignored:    data/input/dgrp.fb557.annot.txt
+    Ignored:    data/input/dgrp2.bed
+    Ignored:    data/input/dgrp2.bim
+    Ignored:    data/input/dgrp2.fam
+    Ignored:    data/input/huang_transcriptome/
     Ignored:    figures/.DS_Store
 
 Untracked files:
-    Untracked:  code/Drosophila_GWAS.Rmd
-    Untracked:  data/derived/output/male_late_lm,.assoc.txt
-    Untracked:  data/derived/output/male_late_lm,.log.txt
-    Untracked:  data/derived/trimmed_DGRP.bk
+    Untracked:  Rplots.pdf
+    Untracked:  analysis/GO_KEGG_enrichment.Rmd
+    Untracked:  analysis/TWAS_tables.Rmd
+    Untracked:  code/GO_and_KEGG_gsea.R
+    Untracked:  code/eQTL_analysis.Rmd
+    Untracked:  code/make_sites_files_for_ARGweaver.R
+    Untracked:  code/plotting_results.Rmd
+    Untracked:  code/run_argweaver.R
+    Untracked:  code/run_mashr.R
+    Untracked:  data/argweaver/
+    Untracked:  data/input/TF_binding_sites.csv
+    Untracked:  figures/GWAS_mixture_proportions.rds
+    Untracked:  figures/GWAS_stats_figure.pdf
+    Untracked:  figures/TWAS_mixture_proportions.rds
+    Untracked:  figures/TWAS_stats_figure.pdf
+    Untracked:  figures/antagonism_ratios.pdf
+    Untracked:  figures/composite_mixture_figure.pdf
+    Untracked:  figures/eff_size_histos.pdf
+    Untracked:  figures/stats_figure.pdf
+    Untracked:  manuscript/
 
 Unstaged changes:
-    Modified:   analysis/get_predicted_line_means.Rmd
-    Modified:   analysis/index.Rmd
-    Modified:   analysis/perform_gwas.Rmd
-    Modified:   analysis/plot_line_means.Rmd
-    Modified:   data/derived/output/DGRP_GRM.log.txt
-    Modified:   data/derived/output/female_early_bslmm.bv.txt
-    Modified:   data/derived/output/female_early_bslmm.gamma.txt
-    Modified:   data/derived/output/female_early_bslmm.hyp.txt
-    Modified:   data/derived/output/female_early_bslmm.log.txt
-    Modified:   data/derived/output/female_early_bslmm.param.txt
-    Modified:   data/derived/output/female_early_female_late.log.txt
-    Modified:   data/derived/output/female_early_lm.log.txt
-    Modified:   data/derived/output/female_early_lmm.log.txt
-    Modified:   data/derived/output/female_early_male_early.log.txt
-    Modified:   data/derived/output/female_late_lm.log.txt
-    Modified:   data/derived/output/female_late_lmm.log.txt
-    Modified:   data/derived/output/female_late_male_late.log.txt
-    Modified:   data/derived/output/male_early_lm.log.txt
-    Modified:   data/derived/output/male_early_lmm.log.txt
-    Modified:   data/derived/output/male_early_male_late.log.txt
-    Modified:   data/derived/output/male_late_lmm.log.txt
+    Modified:   .gitignore
+    Modified:   README.md
+    Modified:   analysis/GWAS_tables.Rmd
+    Modified:   analysis/TWAS.Rmd
+    Modified:   analysis/_site.yml
+    Deleted:    analysis/about.Rmd
+    Deleted:    analysis/eQTL_analysis.Rmd
+    Modified:   analysis/gwas_adaptive_shrinkage.Rmd
+    Modified:   analysis/license.Rmd
+    Modified:   analysis/make_annotation_database.Rmd
+    Modified:   analysis/plotting_results.Rmd
+    Deleted:    code/gwas_adaptive_shrinkage.R
+    Modified:   data/input/female_fitness.csv
+    Modified:   data/input/female_fitness_CLEANED.csv
+    Modified:   data/input/male_fitness.csv
+    Modified:   data/input/male_fitness_CLEANED.csv
     Modified:   figures/figure1.eps
+    Deleted:    figures/figure1.png
     Modified:   figures/figure2.eps
 
 </code></pre>
-Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
-</li>
-</ul>
-<details> <summary> <small><strong>Expand here to see past versions:</strong></small> </summary>
-<ul>
-<table style="border-collapse:separate; border-spacing:5px;">
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/plot_line_means.Rmd</code>) and HTML (<code>docs/plot_line_means.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
 <thead>
 <tr>
-<th style="text-align:left;">
+<th>
 File
 </th>
-<th style="text-align:left;">
+<th>
 Version
 </th>
-<th style="text-align:left;">
+<th>
 Author
 </th>
-<th style="text-align:left;">
+<th>
 Date
 </th>
-<th style="text-align:left;">
+<th>
 Message
 </th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align:left;">
-html
-</td>
-<td style="text-align:left;">
-449a929
-</td>
-<td style="text-align:left;">
-Luke Holman
-</td>
-<td style="text-align:left;">
-2018-09-14
-</td>
-<td style="text-align:left;">
-Build site.
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-html
-</td>
-<td style="text-align:left;">
-e981b22
-</td>
-<td style="text-align:left;">
-Luke Holman
-</td>
-<td style="text-align:left;">
-2018-09-14
-</td>
-<td style="text-align:left;">
-Made GWAS page
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
+<td>
 Rmd
 </td>
-<td style="text-align:left;">
-90a30e9
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/a16e7516fb3553521a62f87d0a3e6228801d0017/analysis/plot_line_means.Rmd" target="_blank">a16e751</a>
 </td>
-<td style="text-align:left;">
-Luke Holman
+<td>
+lukeholman
 </td>
-<td style="text-align:left;">
-2018-09-14
+<td>
+2021-03-04
 </td>
-<td style="text-align:left;">
-Made figures Rmd
+<td>
+big first commit 2021
 </td>
 </tr>
 <tr>
-<td style="text-align:left;">
-html
+<td>
+Rmd
 </td>
-<td style="text-align:left;">
-90a30e9
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/8d54ea56db332d3ac2d391c232936a4dc8106cc1/analysis/plot_line_means.Rmd" target="_blank">8d54ea5</a>
 </td>
-<td style="text-align:left;">
+<td>
 Luke Holman
 </td>
-<td style="text-align:left;">
-2018-09-14
+<td>
+2018-12-23
 </td>
-<td style="text-align:left;">
-Made figures Rmd
+<td>
+Initial commit
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/8d54ea56db332d3ac2d391c232936a4dc8106cc1/docs/plot_line_means.html" target="_blank">8d54ea5</a>
+</td>
+<td>
+Luke Holman
+</td>
+<td>
+2018-12-23
+</td>
+<td>
+Initial commit
 </td>
 </tr>
 </tbody>
 </table>
-</ul>
-<p></details></p>
-<hr />
+</div>
+<hr>
+</div>
+</div>
+</div>
 <pre class="r"><code>library(ggplot2)
 library(ggExtra)
 library(dplyr)
@@ -528,8 +736,8 @@ make_figure_1 &lt;- function(){
     
     pp &lt;- df %&gt;% 
       ggplot(aes_string(x = v1, y = v2)) + 
-      annotate(&quot;text&quot;, x=min(lims)+0.1, y=max(lims), label = text1, parse = TRUE, hjust= 0) +
-      annotate(&quot;text&quot;, x=min(lims)+0.1, y=max(lims)-0.4, label = text2, hjust= 0) +
+      annotate(&quot;text&quot;, x=min(lims) + 0.1, y=max(lims), label = text1, parse = TRUE, hjust= 0) +
+      annotate(&quot;text&quot;, x=min(lims) + 0.1, y=max(lims)-0.4, label = text2, hjust= 0) +
       geom_point(alpha = 0.7) + 
       stat_smooth(method = &quot;lm&quot;, level = 0, colour = &quot;tomato&quot;) + 
       xlab(fix.title(v1)) + ylab(fix.title(v2)) + 
@@ -558,36 +766,43 @@ make_figure_1 &lt;- function(){
 }
 make_figure_1()</code></pre>
 <p><img src="figure/plot_line_means.Rmd/unnamed-chunk-2-1.png" width="864" style="display: block; margin: auto;" /></p>
-<details> <summary><em>Expand here to see past versions of unnamed-chunk-2-1.png:</em></summary>
-<table style="border-collapse:separate; border-spacing:5px;">
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-2-1">
+Past versions of unnamed-chunk-2-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-2-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
 <thead>
 <tr>
-<th style="text-align:left;">
+<th>
 Version
 </th>
-<th style="text-align:left;">
+<th>
 Author
 </th>
-<th style="text-align:left;">
+<th>
 Date
 </th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align:left;">
-90a30e9
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/8d54ea56db332d3ac2d391c232936a4dc8106cc1/docs/figure/plot_line_means.Rmd/unnamed-chunk-2-1.png" target="_blank">8d54ea5</a>
 </td>
-<td style="text-align:left;">
+<td>
 Luke Holman
 </td>
-<td style="text-align:left;">
-2018-09-14
+<td>
+2018-12-23
 </td>
 </tr>
 </tbody>
 </table>
-<p></details></p>
+</div>
+</div>
 <p><br></br> <strong>Figure 1</strong>: Correlations among estimated line means for the four fitness components. The line means were estimated from Bayesian mixed models that account for block effects, and the non-independence of our early- and late-life fitness measurements.</p>
 </div>
 <div id="interaction-plot-showing-trait-covariance-across-lines" class="section level2">
@@ -636,6 +851,10 @@ Luke Holman
   invisible(dev.off())
 }
 make_figure_2()</code></pre>
+<pre><code>Warning: `select_()` is deprecated as of dplyr 0.7.0.
+Please use `select()` instead.
+This warning is displayed once every 8 hours.
+Call `lifecycle::last_warnings()` to see where this warning was generated.</code></pre>
 <p><br></br> <strong>Figure 2</strong>: The relative fitness ranks for each line, for four pairs of fitness traits. The y-axis was calculated by taking the adjusted line mean fitnesses, ranking them, and then dividing by the number of lines. The intensity and hue of the colour helps highlight genotypes that rank highly for one fitness component but not the other.</p>
 </div>
 <div id="relating-fitness-data-to-genotype" class="section level1">
@@ -657,91 +876,90 @@ for(i in 1:ncol(inv.data)) inv.data[,i] &lt;- inv.data[,i] %&gt;% as.numeric()
 inversion.cors &lt;- cor(inv.data, use = &quot;pairwise.complete.obs&quot;)
 heatmap(inversion.cors[!is.na(inversion.cors[,1]), !is.na(inversion.cors[,1])])</code></pre>
 <p><img src="figure/plot_line_means.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
-<details> <summary><em>Expand here to see past versions of unnamed-chunk-4-1.png:</em></summary>
-<table style="border-collapse:separate; border-spacing:5px;">
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-4-1">
+Past versions of unnamed-chunk-4-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-4-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
 <thead>
 <tr>
-<th style="text-align:left;">
+<th>
 Version
 </th>
-<th style="text-align:left;">
+<th>
 Author
 </th>
-<th style="text-align:left;">
+<th>
 Date
 </th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align:left;">
-e981b22
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/8d54ea56db332d3ac2d391c232936a4dc8106cc1/docs/figure/plot_line_means.Rmd/unnamed-chunk-4-1.png" target="_blank">8d54ea5</a>
 </td>
-<td style="text-align:left;">
+<td>
 Luke Holman
 </td>
-<td style="text-align:left;">
-2018-09-14
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-90a30e9
-</td>
-<td style="text-align:left;">
-Luke Holman
-</td>
-<td style="text-align:left;">
-2018-09-14
+<td>
+2018-12-23
 </td>
 </tr>
 </tbody>
 </table>
-<p></details></p>
 </div>
-<div id="session-information" class="section level2">
-<h2>Session information</h2>
+</div>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
 <pre class="r"><code>sessionInfo()</code></pre>
-<pre><code>R version 3.5.1 (2018-07-02)
-Platform: x86_64-apple-darwin15.6.0 (64-bit)
-Running under: macOS Sierra 10.12.6
+<pre><code>R version 4.0.3 (2020-10-10)
+Platform: x86_64-apple-darwin17.0 (64-bit)
+Running under: macOS Catalina 10.15.7
 
 Matrix products: default
-BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib
-LAPACK: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRlapack.dylib
+BLAS:   /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
 
 locale:
-[1] en_AU.UTF-8/en_AU.UTF-8/en_AU.UTF-8/C/en_AU.UTF-8/en_AU.UTF-8
+[1] en_GB.UTF-8/en_GB.UTF-8/en_GB.UTF-8/C/en_GB.UTF-8/en_GB.UTF-8
 
 attached base packages:
 [1] grid      stats     graphics  grDevices utils     datasets  methods  
 [8] base     
 
 other attached packages:
- [1] bindrcpp_0.2.2     showtext_0.5-1     showtextdb_2.0    
- [4] sysfonts_0.7.2     RColorBrewer_1.1-2 gridExtra_2.3     
- [7] tidyr_0.8.1        dplyr_0.7.6        ggExtra_0.8       
-[10] ggplot2_3.0.0     
+ [1] showtext_0.9-1     showtextdb_3.0     sysfonts_0.8.2     RColorBrewer_1.1-2
+ [5] gridExtra_2.3      tidyr_1.1.0        dplyr_1.0.0        ggExtra_0.9       
+ [9] ggplot2_3.3.2      workflowr_1.6.2   
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.18      later_0.7.3       compiler_3.5.1   
- [4] pillar_1.3.0      git2r_0.23.0      plyr_1.8.4       
- [7] workflowr_1.1.1   bindr_0.1.1       R.methodsS3_1.7.1
-[10] R.utils_2.7.0     tools_3.5.1       digest_0.6.15    
-[13] jsonlite_1.5      evaluate_0.11     tibble_1.4.2     
-[16] gtable_0.2.0      pkgconfig_2.0.1   rlang_0.2.1      
-[19] shiny_1.1.0       curl_3.2          yaml_2.2.0       
-[22] withr_2.1.2       stringr_1.3.1     knitr_1.20       
-[25] rprojroot_1.3-2   tidyselect_0.2.4  glue_1.3.0       
-[28] R6_2.2.2          rmarkdown_1.10    purrr_0.2.5      
-[31] magrittr_1.5      whisker_0.3-2     promises_1.0.1   
-[34] backports_1.1.2   scales_1.0.0      htmltools_0.3.6  
-[37] assertthat_0.2.0  xtable_1.8-2      mime_0.5         
-[40] colorspace_1.3-2  httpuv_1.4.5      labeling_0.3     
-[43] miniUI_0.1.1.1    stringi_1.2.4     lazyeval_0.2.1   
-[46] munsell_0.5.0     crayon_1.3.4      R.oo_1.22.0      </code></pre>
+ [1] tidyselect_1.1.0 xfun_0.19        purrr_0.3.4      splines_4.0.3   
+ [5] lattice_0.20-41  colorspace_1.4-1 vctrs_0.3.0      generics_0.0.2  
+ [9] miniUI_0.1.1.1   htmltools_0.5.0  yaml_2.2.1       mgcv_1.8-33     
+[13] rlang_0.4.6      later_1.0.0      pillar_1.4.4     glue_1.4.2      
+[17] withr_2.2.0      lifecycle_0.2.0  stringr_1.4.0    munsell_0.5.0   
+[21] gtable_0.3.0     evaluate_0.14    labeling_0.3     knitr_1.30      
+[25] fastmap_1.0.1    httpuv_1.5.3.1   curl_4.3         Rcpp_1.0.4.6    
+[29] xtable_1.8-4     promises_1.1.0   scales_1.1.1     backports_1.1.7 
+[33] jsonlite_1.7.0   farver_2.0.3     mime_0.9         fs_1.4.1        
+[37] digest_0.6.25    stringi_1.5.3    shiny_1.4.0.2    rprojroot_1.3-2 
+[41] tools_4.0.3      magrittr_2.0.1   tibble_3.0.1     crayon_1.3.4    
+[45] whisker_0.4      pkgconfig_2.0.3  ellipsis_0.3.1   Matrix_1.2-18   
+[49] rmarkdown_2.5    R6_2.4.1         nlme_3.1-149     git2r_0.27.1    
+[53] compiler_4.0.3  </code></pre>
 </div>
 </div>
+</div>
+
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
 TeX fonts only; see
@@ -755,14 +973,6 @@ footer is added to webpages before the MathJax javascript. -->
   });
 </script>
 
-<hr>
-<p>
-  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
-  analysis was created with
-  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.1.1
-</p>
-<hr>
-
 
 </div>
 </div>
@@ -773,13 +983,61 @@ footer is added to webpages before the MathJax javascript. -->
 
 // add bootstrap table styles to pandoc tables
 function bootstrapStylePandocTables() {
-  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
 }
 $(document).ready(function () {
   bootstrapStylePandocTables();
 });
 
 
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
 </script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

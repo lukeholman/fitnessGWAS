@@ -6,7 +6,7 @@ output:
     toc: false
 ---
 
-## Running the analysis
+## Running quantitative genetic analyses
 
 ### [1. Setting up a database to hold variant/gene annotations and GWAS results](make_annotation_database.html)
 
@@ -24,18 +24,15 @@ Using linear mixed models implemented in the R package `sommer` to estimate the 
 
 The script first performs quality control and imputation on the dataset of SNPs and indels for the DGRP. Second, it runs association tests on our four phenotypes using the software command-line software [GEMMA](http://www.xzlab.org/software/GEMMAmanual.pdf). Third, it uses PLINK to identify groups of loci that are in complete linkage disequilibrium ('SNP clumps'). 
 
-
-### 5. Applying adaptive shrinkage to the GWAS results
-
-#### [5a. Applying adaptive shrinkage to the GWAS results](gwas_adaptive_shrinkage.html)
+### [5. Applying adaptive shrinkage to the GWAS results](gwas_adaptive_shrinkage.html)
 
 Here, we use the R package `mashr` to perform multivariate adaptive shrinkage on the results of the GWAS. We ran `mashr` using both possible modes: canonical, and data-driven. The canonical approach is useful for testing hypotheses about the relative abundance of different types of fitness-affecting SNPs, e.g. sexually antagonistic, sexually concordant, sex-limited, or null. The data-driven approach adjusts the GWAS estimates most accurately, as it estimates the patterns of covariances in the SNPs' effects on the 4 traits from the data; this is useful for deriving shrinked estimates of all the SNPs' effect sizes.
 
-#### [5b. Plots illustrating how adaptive shrinkage affected the results](checking_mashr_results.html)
+### [6. Plots illustrating how adaptive shrinkage affected the results](checking_mashr_results.html)
 
 This script generates some plots of the SNP effect sizes under the two forms of shrinkage (canonical and data-driven) to check that `mashr` is performing as expected.
 
-### [6. Running the GWAS, identifying eQTLs, and applying mashr to the TWAS results](TWAS.html)
+### [7. Running the TWAS, identifying eQTLs, and applying mashr to the TWAS results](TWAS.html)
 
 This script uses the transcriptomic data from Huang et al. 2015 _PNAS_ on the DGRP. In this script, we
 
@@ -45,53 +42,50 @@ This script uses the transcriptomic data from Huang et al. 2015 _PNAS_ on the DG
 - Adjust the results of the TWAS linear models using `mashr` in canonical and data-driven modes.
 
 
-________________
-
-
 ## Results of the analysis
 
-### [1. Plots showing line mean fitness](plot_line_means.html)
+### [8. Plots showing line mean fitness](plot_line_means.html)
 
 Text here
 
-### [2. Quantitative genetic parameters](XXXX.html)
+### [9. Quantitative genetic parameters](XXXX.html)
 
 Text here
 
-### [3. Tables of GWAS results](GWAS_tables.html)
+### [10. Tables of GWAS results](GWAS_tables.html)
 
 Text here
 
-### [4. Tables of TWAS results](TWAS_tables.html)
+### [11. Tables of TWAS results](TWAS_tables.html)
 
 Text here
 
-### [5. Plot and model the variant effect sizes](plot_models_variant_effects.html)
+### [12. Plot and model the variant effect sizes](plot_models_variant_effects.html)
 
 Here, we plot the correlations in the estimated effects of each variant (or group of variants in perfect linkage disequilibrium with one another). For the GWAS results, we run linear models to test whether variants differ in their effect on fitness according to chromosome, site class, and minor allele frequency. For the TWAS results, we run linear models to test whether transcripts differ in their effect on fitness according to chromosome, average expression level, and the sex bias in expression.
 
-### [6. GO and KEGG enrichment analyses](GO_KEGG_enrichment.html)
+### [13. GO and KEGG enrichment analyses](GO_KEGG_enrichment.html)
 
 Text here
 
 
-Heritability
- - Correlated with selection experienced by the gene? Angatonism?
- - Correlated with sex-specificity in expression?
+<!-- Heritability -->
+<!--  - Correlated with selection experienced by the gene? Angatonism? -->
+<!--  - Correlated with sex-specificity in expression? -->
 
-eQTLs
- - Are there eQTLs with matching, independent, and opposite-sex effects? YES TO ALL. NEED TO RE-DO eQTL ANALYSIS 
- - Are there more overlaps between the eQTLs and fitness QTLs than expected by chance? Correlation in p-vals?
+<!-- eQTLs -->
+<!--  - Are there eQTLs with matching, independent, and opposite-sex effects? YES TO ALL. NEED TO RE-DO eQTL ANALYSIS  -->
+<!--  - Are there more overlaps between the eQTLs and fitness QTLs than expected by chance? Correlation in p-vals? -->
 
 
-Predictions
- - eQTLs that affect transciption the same way in both sexes will have SA fitness effects for transcripts under SA selection (or concordant for concordant) We need:
-   - Effect size for the eQTL on the transcript, in both sexes (re-run eQTL)
-   - Effect size for the eQTL on fitness, in both sexes (done)
-   - Effect size for the transcript on fitness (done)
-   - "Allele 1 made the transcript increase in both sexes, good for males and bad for females"
- - eQTLs that only affect transciption in one sex will have a more sex-specific fitness effect as well (not concordant, not antag)
- - eQTLs where the + and - alleles are swapped between sexes will be antagonistic or concordant, depending on sex-specific selection on that transcript
- - Transcripts will show the twin peaks relationship between sex bias in expression and SA selection
- - Genes targetted by dsx will be extra antagonistic
+<!-- Predictions -->
+<!--  - eQTLs that affect transciption the same way in both sexes will have SA fitness effects for transcripts under SA selection (or concordant for concordant) We need: -->
+<!--    - Effect size for the eQTL on the transcript, in both sexes (re-run eQTL) -->
+<!--    - Effect size for the eQTL on fitness, in both sexes (done) -->
+<!--    - Effect size for the transcript on fitness (done) -->
+<!--    - "Allele 1 made the transcript increase in both sexes, good for males and bad for females" -->
+<!--  - eQTLs that only affect transciption in one sex will have a more sex-specific fitness effect as well (not concordant, not antag) -->
+<!--  - eQTLs where the + and - alleles are swapped between sexes will be antagonistic or concordant, depending on sex-specific selection on that transcript -->
+<!--  - Transcripts will show the twin peaks relationship between sex bias in expression and SA selection -->
+<!--  - Genes targetted by dsx will be extra antagonistic -->
 

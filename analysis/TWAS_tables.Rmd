@@ -62,6 +62,7 @@ big_table <- sig_transcripts_table %>%
          `Male late` = beta_ML,
          `Male bias in expression (logFC)` = male_bias_in_expression,
          `Average expression level` = AveExpr) %>%
+  rename_all(~ str_remove_all(.x, "ED[_]")) %>%
   distinct() 
 ```
 

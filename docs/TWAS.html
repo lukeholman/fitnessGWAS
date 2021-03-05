@@ -519,16 +519,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree382f3a321944b25e83ca9516df8973032eae79f6targetblank382f3a3a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/lukeholman/fitnessGWAS/tree/382f3a321944b25e83ca9516df8973032eae79f6" target="_blank">382f3a3</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree6704dc8c17aeed88ef381f57849d09a6a4f40ec4targetblank6704dc8a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/lukeholman/fitnessGWAS/tree/6704dc8c17aeed88ef381f57849d09a6a4f40ec4" target="_blank">6704dc8</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree382f3a321944b25e83ca9516df8973032eae79f6targetblank382f3a3a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree6704dc8c17aeed88ef381f57849d09a6a4f40ec4targetblank6704dc8a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/lukeholman/fitnessGWAS/tree/382f3a321944b25e83ca9516df8973032eae79f6" target="_blank">382f3a3</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/lukeholman/fitnessGWAS/tree/6704dc8c17aeed88ef381f57849d09a6a4f40ec4" target="_blank">6704dc8</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -543,7 +543,6 @@ Ignored files:
     Ignored:    .pversion
     Ignored:    analysis/.DS_Store
     Ignored:    analysis/correlations_SNP_effects_cache/
-    Ignored:    analysis/figure/
     Ignored:    analysis/plot_models_variant_effects_cache/
     Ignored:    code/.DS_Store
     Ignored:    code/Drosophila_GWAS.Rmd
@@ -618,6 +617,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/6704dc8c17aeed88ef381f57849d09a6a4f40ec4/analysis/TWAS.Rmd" target="_blank">6704dc8</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2021-03-05
+</td>
+<td>
+wflow_publish(“analysis/TWAS.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/c18c92523fef9ce3a10d717544b9cb3f9e8a0818/docs/TWAS.html" target="_blank">c18c925</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2021-03-05
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1115,8 +1148,9 @@ saveRDS(TWAS_mixture_assignment_probabilities,
 }
 
 sig_transcripts_table &lt;- get_sig(TWAS_ED) %&gt;%
-  left_join(tbl(db, &quot;genes&quot;) %&gt;% collect(), by = &quot;FBID&quot;) %&gt;%
-  left_join(sex_bias_in_expression, by = &quot;FBID&quot;) %&gt;%
+  left_join(TWAS_mashr_results %&gt;% select(FBID, contains(&quot;ED_LFSR&quot;)), by = &quot;FBID&quot;) %&gt;% # LFSR for each trait (like p-value)
+  left_join(tbl(db, &quot;genes&quot;) %&gt;% collect(), by = &quot;FBID&quot;) %&gt;% # gene info for each
+  left_join(sex_bias_in_expression, by = &quot;FBID&quot;) %&gt;% 
   left_join(TWAS_mixture_assignment_probabilities, by = &quot;FBID&quot;) %&gt;%
   mutate(across(where(is.numeric), ~ round(.x, 2))) %&gt;%
   as_tibble() %&gt;%

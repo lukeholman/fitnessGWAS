@@ -155,36 +155,51 @@ rm(expression_data_both_sexes)
 
 
 
-## Overlap between our significant SNPs and known eQTls {.tabset}
+<!-- ## Overlap between significant SNPs from our GWAS and known eQTls {.tabset} -->
 
-### eQTLs that affect female expression
-```{r}
-make_eQTL_overlap_table <- function(huang_data){
-  huang_data %>%
-    select(Affected_FBID, Affected_gene, eQTL) %>%
-    inner_join(univariate_lmm_results %>%
-                 select(SNP, FBID, gene_name, contains("mashr_ED")) %>%
-                 filter(SNP %in% !!huang_data$eQTL) %>%
-                 collect(n = Inf) %>%
-                 filter_at(vars(contains("LFSR")), any_vars(. < 0.001)) %>%    
-                 rename(eQTL_location_FBID = FBID,
-                        eQTL_location_gene = gene_name), 
-               by = c("eQTL" = "SNP")) %>%
-    mutate(`Cis- or trans- eQTL` = ifelse(eQTL_location_FBID == Affected_FBID, "cis", "trans")) %>%
-    arrange(`Cis- or trans- eQTL`, Affected_FBID, eQTL) %>% as_tibble() %>%
-    select(eQTL, `Cis- or trans- eQTL`, everything()) %>%
-    rename_all(~ str_remove_all(.x, "_mashr_ED"))
-}
+<!-- Here, we define a significant SNP from the GWAS as one with  -->
 
-eQTL_uv_females <- huang_eQTL_females %>% make_eQTL_overlap_table() 
-eQTL_uv_females %>% kable_table()
-```
+<!-- ### eQTLs that affect female expression -->
+<!-- ```{r} -->
+<!-- # GWAS_significant_snps <- read_csv("data/derived/GWAS_significant_snps.csv") -->
+<!-- #  -->
+<!-- # GWAS_significant_snps <- unique(c(GWAS_significant_snps$`Index variant`, -->
+<!-- #                            na.omit(GWAS_significant_snps$`Other variants`) %>% str_split(", ") %>% unlist())) -->
 
-### eQTLs that affect male expression
-```{r}
-eQTL_uv_males <- huang_eQTL_males %>% make_eQTL_overlap_table()
-eQTL_uv_males %>% kable_table()
-```
+<!-- xx <- huang_eQTL_females %>% -->
+<!--     inner_join(univariate_lmm_results %>% -->
+<!--                  filter(SNP %in% !!huang_eQTL_females$eQTL) %>% -->
+<!--                  collect(n=Inf),  -->
+<!--                by = c("eQTL" = "SNP")) -->
+
+<!-- make_eQTL_overlap_table <- function(huang_data){ -->
+<!--   huang_data %>% -->
+<!--     select(Affected_FBID, Affected_gene, eQTL) %>% -->
+<!--     inner_join(univariate_lmm_results %>% -->
+<!--                  select(SNP, FBID, gene_name, contains("mashr_ED")) %>% -->
+<!--                  filter(SNP %in% !!huang_data$eQTL) %>%  # & SNP %in% GWAS_significant_snps -->
+<!--                  collect(n = Inf) %>% -->
+<!--                   filter_at(vars(contains("LFSR")), any_vars(. < 0.01)) %>%     -->
+<!--                  rename(eQTL_location_FBID = FBID, -->
+<!--                         eQTL_location_gene = gene_name),  -->
+<!--                by = c("eQTL" = "SNP")) %>% -->
+<!--     mutate(`Cis- or trans- eQTL` = ifelse(eQTL_location_FBID == Affected_FBID, "cis", "trans")) %>% -->
+<!--     arrange(`Cis- or trans- eQTL`, Affected_FBID, eQTL) %>% as_tibble() %>% -->
+<!--     select(eQTL, `Cis- or trans- eQTL`, everything()) %>% -->
+<!--     rename_all(~ str_remove_all(.x, "_mashr_ED")) -->
+<!-- } -->
+
+
+
+<!-- eQTL_uv_females <- huang_eQTL_females %>% make_eQTL_overlap_table()  -->
+<!-- eQTL_uv_females %>% kable_table() -->
+<!-- ``` -->
+
+<!-- ### eQTLs that affect male expression -->
+<!-- ```{r} -->
+<!-- eQTL_uv_males <- huang_eQTL_males %>% make_eQTL_overlap_table() -->
+<!-- eQTL_uv_males %>% kable_table() -->
+<!-- ``` -->
 
 <!-- ### Female eQTLs and multivariate tests -->
 <!-- ```{r} -->

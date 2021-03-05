@@ -577,8 +577,9 @@ get_sig <- function(TWAS_mashr){
 }
 
 sig_transcripts_table <- get_sig(TWAS_ED) %>%
-  left_join(tbl(db, "genes") %>% collect(), by = "FBID") %>%
-  left_join(sex_bias_in_expression, by = "FBID") %>%
+  left_join(TWAS_mashr_results %>% select(FBID, contains("ED_LFSR")), by = "FBID") %>% # LFSR for each trait (like p-value)
+  left_join(tbl(db, "genes") %>% collect(), by = "FBID") %>% # gene info for each
+  left_join(sex_bias_in_expression, by = "FBID") %>% 
   left_join(TWAS_mixture_assignment_probabilities, by = "FBID") %>%
   mutate(across(where(is.numeric), ~ round(.x, 2))) %>%
   as_tibble() %>%

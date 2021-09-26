@@ -428,7 +428,7 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2021-03-04
+<strong>Last updated:</strong> 2021-09-26
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -519,16 +519,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree3855d3359649c74f955042725d07276742cb649atargetblank3855d33a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/lukeholman/fitnessGWAS/tree/3855d3359649c74f955042725d07276742cb649a" target="_blank">3855d33</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreeaf15dd63a476b2499f2be7f3002df3ec72c28522targetblankaf15dd6a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/lukeholman/fitnessGWAS/tree/af15dd63a476b2499f2be7f3002df3ec72c28522" target="_blank">af15dd6</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree3855d3359649c74f955042725d07276742cb649atargetblank3855d33a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreeaf15dd63a476b2499f2be7f3002df3ec72c28522targetblankaf15dd6a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/lukeholman/fitnessGWAS/tree/3855d3359649c74f955042725d07276742cb649a" target="_blank">3855d33</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/lukeholman/fitnessGWAS/tree/af15dd63a476b2499f2be7f3002df3ec72c28522" target="_blank">af15dd6</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -543,7 +543,6 @@ Ignored files:
     Ignored:    .pversion
     Ignored:    analysis/.DS_Store
     Ignored:    analysis/correlations_SNP_effects_cache/
-    Ignored:    analysis/plot_models_variant_effects_cache/
     Ignored:    code/.DS_Store
     Ignored:    code/Drosophila_GWAS.Rmd
     Ignored:    data/.DS_Store
@@ -556,10 +555,43 @@ Ignored files:
     Ignored:    data/input/dgrp2.fam
     Ignored:    data/input/huang_transcriptome/
     Ignored:    figures/.DS_Store
+    Ignored:    figures/fig1_inkscape.svg
+    Ignored:    figures/figure1a.pdf
+    Ignored:    figures/figure1b.pdf
 
 Untracked files:
-    Untracked:  data/argweaver/
-    Untracked:  data/input/TF_binding_sites.csv
+    Untracked:  big_model.rds
+    Untracked:  code/gcta64
+    Untracked:  code/plink
+    Untracked:  code/quant_gen_1.R
+    Untracked:  data/input/genomic_relatedness_matrix.rds
+    Untracked:  figures/SNP_effect_ED.pdf
+    Untracked:  figures/boyle_plot.pdf
+    Untracked:  figures/fig1.pdf
+    Untracked:  manuscript/GWAS_manuscript.log
+    Untracked:  old_analyses/
+
+Unstaged changes:
+    Modified:   .gitignore
+    Deleted:    Rplots.pdf
+    Deleted:    analysis/GO_KEGG_enrichment.Rmd
+    Deleted:    analysis/plotting_results.Rmd
+    Deleted:    code/GO_and_KEGG_gsea.R
+    Deleted:    code/make_sites_files_for_ARGweaver.R
+    Deleted:    code/plotting_results.Rmd
+    Deleted:    code/run_argweaver.R
+    Modified:   code/run_mashr.R
+    Deleted:    data/input/clough_2014_dsx_targets.csv
+    Modified:   figures/GWAS_stats_figure.pdf
+    Modified:   figures/TWAS_stats_figure.pdf
+    Modified:   figures/antagonism_ratios.pdf
+    Modified:   figures/composite_mixture_figure.pdf
+    Modified:   figures/eff_size_histos.pdf
+    Deleted:    figures/figure1.eps
+    Deleted:    figures/figure2.eps
+    Modified:   manuscript/GWAS_manuscript.Rmd
+    Modified:   manuscript/GWAS_manuscript.pdf
+    Modified:   manuscript/GWAS_manuscript.tex
 
 </code></pre>
 <p>
@@ -598,6 +630,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/af15dd63a476b2499f2be7f3002df3ec72c28522/analysis/perform_gwas.Rmd" target="_blank">af15dd6</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2021-09-26
+</td>
+<td>
+Commit Sept 2021
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/410fb733e98fda42c7872a829607b7ff926ff6ac/docs/perform_gwas.html" target="_blank">410fb73</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2021-03-04
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 html
@@ -770,6 +836,7 @@ library(future.apply) # for parallel code
 
 # Load the predicted line means, as calculated by get_predicted_line_means
 predicted_line_means &lt;- read_csv(&quot;data/derived/predicted_line_means.csv&quot;)
+plink &lt;- paste(getwd(), &quot;code/plink&quot;, sep = &quot;/&quot;)
 
 # # Load the wolbachia infection status data from the DGRP website
 # wolbachia &lt;- read_csv(&quot;data/input/wolbachia.csv&quot;) %&gt;% 
@@ -795,8 +862,7 @@ run_command &lt;- function(shell_command, wd = getwd(), path = &quot;&quot;){
 <li>Remove SNPs with a minor allele frequency of less than 5%</li>
 </ol>
 <p>Note that in the PLINK-formatted genotype files, lines fixed for the major allele are coded as 2, and lines fixed for the minor allele as 0. This means that in the association tests we calculate, negative effect sizes mean that the minor allele is associated with lower fitness, while positive effect sizes means that the minor allele is associated with higher fitness.</p>
-<pre class="r"><code>plink  &lt;- bigsnpr::download_plink()
-beagle &lt;- bigsnpr::download_beagle()
+<pre class="r"><code>beagle &lt;- bigsnpr::download_beagle()
 
 perform_SNP_QC_and_imputation &lt;- function(phenotypes){
   
@@ -855,7 +921,8 @@ perform_SNP_QC_and_imputation &lt;- function(phenotypes){
   # The file created is called data/derived/plink.frq
   run_command(&quot;{plink} --bfile dgrp2_QC_all_lines_imputed_correct --freq&quot;, path = &quot;/data/derived&quot;)
 
-  # Now cull the PLINK files to just the lines that we measured, and re-apply the MAF cut-off of 0.05 for the new smaller sample of DGRP lines
+  # Now cull the PLINK files to just the lines that we measured, and re-apply the 
+  # MAF cut-off of 0.05 for the new smaller sample of DGRP lines
   run_command(glue(&quot;{plink} --bfile dgrp2_QC_all_lines_imputed_correct&quot;,
                    &quot; --keep-allele-order&quot;, # force PLINK to retain the major/minor allele designations that apply to the DGRP as a whole
                    &quot; --keep lines_to_keep.txt --geno 0.1 --maf 0.05&quot;, 
@@ -870,7 +937,11 @@ perform_SNP_QC_and_imputation &lt;- function(phenotypes){
            &quot;data/derived/dgrp2_QC_all_lines_imputed.bed&quot;,
            &quot;data/derived/dgrp2_QC_all_lines_imputed.bim&quot;,
            &quot;data/derived/dgrp2_QC_all_lines_imputed.fam&quot;,
-           &quot;data/derived/dgrp2_QC_all_lines_imputed.log&quot;))
+           &quot;data/derived/dgrp2_QC_all_lines_imputed.log&quot;,
+           &quot;data/derived/dgrp2_QC_all_lines_imputed_correct.bed&quot;,
+           &quot;data/derived/dgrp2_QC_all_lines_imputed_correct.bim&quot;,
+           &quot;data/derived/dgrp2_QC_all_lines_imputed_correct.fam&quot;,
+           &quot;data/derived/dgrp2_QC_all_lines_imputed_correct.log&quot;))
 }
 
 perform_SNP_QC_and_imputation(phenotypes = predicted_line_means)</code></pre>
@@ -948,7 +1019,7 @@ c(&quot;gemma -bfile {bed} {GRM_female} {opts} -n 1 -o female_early_lmm&quot;,
 <div id="inspect-the-gemma-log-files-from-the-association-tests" class="section level3 tabset">
 <h3>Inspect the GEMMA log files from the association tests</h3>
 <p>According to the manual, GEMMA calculates the relatedness matrix from the SNP data, then “extracts the matrix elements corresponding to the analyzed individuals (which may be smaller than the number of total individuals), centers the matrix, and then performs an eigendecomposition”. The aim is to better estimate the effects of each SNP independently of the rest of the genome.</p>
-<p>The metric <code>pve</code> in the outputs below is “the proportion of variance in the phenotype explained by typed genotypes”, also called SNP heritability. Next, <code>vg</code> is <span class="math inline">\(V_g\)</span>, the variance in phenotype due to variance in genotype, while <code>ve</code> is <span class="math inline">\(V_e\)</span>, the variance in phenotype due to variance in environment.</p>
+<p>The metric <code>pve</code> in the outputs below is “the proportion of variance in the phenotype explained by typed genotypes”, also called SNP heritability. Next, <code>vg</code> is <span class="math inline">\(V_g\)</span>, the variance in phenotype due to variance in genotype, while <code>ve</code> is <span class="math inline">\(V_e\)</span>, the variance in phenotype due to variance in environment. Note that we present alternative estimates from gcta64 for the heritabilities in the manuscript, though these estimates from GEMMA are qualitatively very similar.</p>
 <div id="female-early-life-fitness" class="section level4">
 <h4>Female early-life fitness</h4>
 <pre class="r"><code>cat(readLines(&quot;data/derived/output/female_early_lmm.log.txt&quot;), sep = &quot;\n&quot;)</code></pre>
@@ -965,7 +1036,7 @@ c(&quot;gemma -bfile {bed} {GRM_female} {opts} -n 1 -o female_early_lmm&quot;,
 ##
 ## Command Line Input = gemma -bfile dgrp2_QC_focal_lines -maf 0.05 -d ./output/eigen_decomp.eigenD_female.txt -u ./output/eigen_decomp.eigenU_female.txt -lmm 1 -n 1 -o female_early_lmm 
 ##
-## Date = Thu Feb  4 12:44:33 2021
+## Date = Sun Sep 26 14:17:19 2021
 ##
 ## Summary Statistics:
 ## number of total individuals = 125
@@ -984,11 +1055,11 @@ c(&quot;gemma -bfile {bed} {GRM_female} {opts} -n 1 -o female_early_lmm&quot;,
 ## se(beta) =   0.0655014
 ##
 ## Computation Time:
-## total computation time = 4.63298 min 
+## total computation time = 4.27932 min 
 ## computation time break down: 
 ##      time on eigen-decomposition = 0 min 
-##      time on calculating UtX = 0.0351418 min 
-##      time on optimization = 3.96721 min 
+##      time on calculating UtX = 0.0306952 min 
+##      time on optimization = 3.69425 min 
 ##</code></pre>
 </div>
 <div id="male-early-life-fitness" class="section level4">
@@ -1007,7 +1078,7 @@ c(&quot;gemma -bfile {bed} {GRM_female} {opts} -n 1 -o female_early_lmm&quot;,
 ##
 ## Command Line Input = gemma -bfile dgrp2_QC_focal_lines -maf 0.05 -d ./output/eigen_decomp.eigenD_male.txt -u ./output/eigen_decomp.eigenU_male.txt -lmm 1 -n 3 -o male_early_lmm 
 ##
-## Date = Thu Feb  4 12:52:47 2021
+## Date = Sun Sep 26 14:25:08 2021
 ##
 ## Summary Statistics:
 ## number of total individuals = 125
@@ -1026,11 +1097,11 @@ c(&quot;gemma -bfile {bed} {GRM_female} {opts} -n 1 -o female_early_lmm&quot;,
 ## se(beta) =   0.0698685
 ##
 ## Computation Time:
-## total computation time = 4.10824 min 
+## total computation time = 3.97587 min 
 ## computation time break down: 
 ##      time on eigen-decomposition = 0 min 
-##      time on calculating UtX = 0.0335848 min 
-##      time on optimization = 3.48421 min 
+##      time on calculating UtX = 0.0290053 min 
+##      time on optimization = 3.39846 min 
 ##</code></pre>
 </div>
 <div id="female-late-life-fitness" class="section level4">
@@ -1049,7 +1120,7 @@ c(&quot;gemma -bfile {bed} {GRM_female} {opts} -n 1 -o female_early_lmm&quot;,
 ##
 ## Command Line Input = gemma -bfile dgrp2_QC_focal_lines -maf 0.05 -d ./output/eigen_decomp.eigenD_female.txt -u ./output/eigen_decomp.eigenU_female.txt -lmm 1 -n 2 -o female_late_lmm 
 ##
-## Date = Thu Feb  4 12:48:49 2021
+## Date = Sun Sep 26 14:21:20 2021
 ##
 ## Summary Statistics:
 ## number of total individuals = 125
@@ -1068,11 +1139,11 @@ c(&quot;gemma -bfile {bed} {GRM_female} {opts} -n 1 -o female_early_lmm&quot;,
 ## se(beta) =   0.0432828
 ##
 ## Computation Time:
-## total computation time = 4.40687 min 
+## total computation time = 4.20916 min 
 ## computation time break down: 
 ##      time on eigen-decomposition = 0 min 
-##      time on calculating UtX = 0.0330177 min 
-##      time on optimization = 3.77512 min 
+##      time on calculating UtX = 0.0305406 min 
+##      time on optimization = 3.62856 min 
 ##</code></pre>
 </div>
 <div id="male-late-life-fitness" class="section level4">
@@ -1091,7 +1162,7 @@ c(&quot;gemma -bfile {bed} {GRM_female} {opts} -n 1 -o female_early_lmm&quot;,
 ##
 ## Command Line Input = gemma -bfile dgrp2_QC_focal_lines -maf 0.05 -d ./output/eigen_decomp.eigenD_male.txt -u ./output/eigen_decomp.eigenU_male.txt -lmm 1 -n 4 -o male_late_lmm 
 ##
-## Date = Thu Feb  4 12:55:33 2021
+## Date = Sun Sep 26 14:27:50 2021
 ##
 ## Summary Statistics:
 ## number of total individuals = 125
@@ -1110,16 +1181,12 @@ c(&quot;gemma -bfile {bed} {GRM_female} {opts} -n 1 -o female_early_lmm&quot;,
 ## se(beta) =   0.0885159
 ##
 ## Computation Time:
-## total computation time = 2.9527 min 
+## total computation time = 2.88016 min 
 ## computation time break down: 
 ##      time on eigen-decomposition = 0 min 
-##      time on calculating UtX = 0.0321058 min 
-##      time on optimization = 2.33507 min 
+##      time on calculating UtX = 0.029713 min 
+##      time on optimization = 2.30159 min 
 ##</code></pre>
-<!-- #### All four traits in MV model -->
-<!-- ```{r} -->
-<!-- cat(readLines("data/derived/output/all_four_traits.log.txt"), sep = "\n") -->
-<!-- ``` -->
 </div>
 </div>
 <div id="add-the-allele-ids-and-minor-allele-frequencies-mafs-to-variant-annotation-database" class="section level3">
@@ -1160,35 +1227,11 @@ c(&quot;data/derived/output/female_early_lmm.assoc.txt&quot;,
     names(df)[names(df) == &quot;rs&quot;] &lt;- &quot;SNP&quot;
     df %&gt;% select(SNP, beta, se, p_wald) %&gt;% 
       write_tsv(filename)
-  })
-
-# The multivariate file:
-# all_four &lt;- read_tsv(&quot;data/derived/output/all_four_traits.assoc.txt&quot;) %&gt;% 
-#   rename(SNP = rs,
-#          female_early = beta_1, 
-#          female_late  = beta_2,
-#          male_early   = beta_3, 
-#          male_late    = beta_4) %&gt;%
-#   select(-chr, -ps, -n_miss, -allele1, -allele0, -af) %&gt;%
-#   arrange(p_wald) 
-
-# Perform FDR on p-vals, assuming we only run one test on groups of SNPs in perfect LD with each other
-# p_vals &lt;- all_four %&gt;%
-#   select(female_early, female_late, male_early, male_late, p_wald) %&gt;% 
-#   distinct() %&gt;% 
-#   select(p_wald) %&gt;%
-#   mutate(p_fdr = p.adjust(p_wald, method = &quot;BH&quot;))
-
-# all_four %&gt;%
-#   left_join(p_vals, by = &quot;p_wald&quot;) %&gt;% 
-#   write_tsv(&quot;data/derived/output/all_four_traits.assoc.txt&quot;)
-# 
-# rm(all_four)</code></pre>
+  })</code></pre>
 </div>
 <div id="perform-snp-clumping-using-plink" class="section level3">
 <h3>Perform SNP clumping using PLINK</h3>
-<pre class="r"><code>if(!exists(&quot;plink&quot;)) plink  &lt;- bigsnpr::download_plink()
-# Use the un-manipulated DGRP bed/bim/fam files, since they don&#39;t throw an error from plink
+<pre class="r"><code># Use the un-manipulated DGRP bed/bim/fam files, since they don&#39;t throw an error from plink
 bed &lt;- &quot;../input/dgrp2&quot;
 
 # Remind plink to only use the SNPs that passed QC
@@ -1200,7 +1243,6 @@ do_snp_clumping &lt;- function(trait){
 
   run_command(glue(&quot;plink --bfile {bed}&quot;, 
                    &quot; --clump output/{trait}.assoc.txt&quot;,
-                   &quot; --noweb&quot;,
                    &quot; --clump-field p_wald --clump-p1 0.00001&quot;), # Each clump must contain one snp with p &lt; 10 ^ -5
               path = &quot;/data/derived&quot;)
   trait &lt;- gsub(&quot;_lmm&quot;, &quot;&quot;, trait)
@@ -1301,11 +1343,697 @@ SNPs_to_remove &lt;- all_univariate_lmm_results$SNPs[!complete.cases(all_univari
 all_univariate_lmm_results &lt;- all_univariate_lmm_results %&gt;% 
   filter(!(SNPs %in% SNPs_to_remove))
 
-write_csv(all_univariate_lmm_results, path = &quot;data/derived/all_univariate_GEMMA_results.csv&quot;)
+write_csv(all_univariate_lmm_results, file = &quot;data/derived/all_univariate_GEMMA_results.csv&quot;)
 unlink(&quot;data/derived/output/female_early_lmm.assoc.txt&quot;)
 unlink(&quot;data/derived/output/female_late_lmm.assoc.txt&quot;)
 unlink(&quot;data/derived/output/male_early_lmm.assoc.txt&quot;)
 unlink(&quot;data/derived/output/male_late_lmm.assoc.txt&quot;)</code></pre>
+</div>
+<div id="create-a-reduced-list-of-ld-pruned-snps-with-plink" class="section level2">
+<h2>Create a reduced list of LD-pruned SNPs with PLINK</h2>
+<p>To keep the computation time and memory usage for <code>mashr</code> manageable, we did not analyse every SNP analysed in the GWAS (i.e. 1207357 SNPs), but rather a subset of them that were approximately in linkage disequilibrium. We identified this LD-pruned set of SNPs using the PLINK arguments <code>--indep-pairwise 100 10 0.2</code>, i.e. pruning within 100kB sliding windows, sliding 10 variants along with each step, and allowing a maximum pairwise <span class="math inline">\(r^2\)</span> threshold of 0.2 between loci. With these parameters, 1420071 SNPs were removed, leaving 2.2658110^{5} for downstream analysis.</p>
+<pre class="r"><code># indep-pairwise arguments are: 
+# 100kB window size, 
+# variant count to shift the window by 10 variants at the end of each step, 
+# pairwise r^2 threshold of 0.2
+run_command(glue(&quot;{plink} --bfile dgrp2_QC_focal_lines&quot;,
+                 &quot; --indep-pairwise 100 10 0.2&quot;), path = &quot;/data/derived/&quot;)</code></pre>
+<pre><code>PLINK v1.90b6.24 64-bit (6 Jun 2021)           www.cog-genomics.org/plink/1.9/
+(C) 2005-2021 Shaun Purcell, Christopher Chang   GNU General Public License v3
+Logging to plink.log.
+Options in effect:
+  --bfile dgrp2_QC_focal_lines
+  --indep-pairwise 100 10 0.2
+
+32768 MB RAM detected; reserving 16384 MB for main workspace.
+1609590 variants loaded from .bim file.
+125 people (0 males, 125 females) loaded from .fam.
+125 phenotype values loaded from .fam.
+Using 1 thread (no multithreaded calculations invoked).
+Before main variant filters, 125 founders and 0 nonfounders present.
+Calculating allele frequencies... 0%1%2%3%4%5%6%7%8%9%10%11%12%13%14%15%16%17%18%19%20%21%22%23%24%25%26%27%28%29%30%31%32%33%34%35%36%37%38%39%40%41%42%43%44%45%46%47%48%49%50%51%52%53%54%55%56%57%58%59%60%61%62%63%64%65%66%67%68%69%70%71%72%73%74%75%76%77%78%79%80%81%82%83%84%85%86%87%88%89%90%91%92%93%94%95%96%97%98%99% done.
+Total genotyping rate is exactly 1.
+1609590 variants and 125 people pass filters and QC.
+Phenotype data is quantitative.
+
+1%
+2%
+3%
+4%
+5%
+6%
+7%
+8%
+9%
+10%
+11%
+12%
+13%
+14%
+15%
+16%
+17%
+18%
+19%
+20%
+21%
+22%
+23%
+24%
+25%
+26%
+27%
+28%
+29%
+30%
+31%
+32%
+33%
+34%
+35%
+36%
+37%
+38%
+39%
+40%
+41%
+42%
+43%
+44%
+45%
+46%
+47%
+48%
+49%
+50%
+51%
+52%
+53%
+54%
+55%
+56%
+57%
+58%
+59%
+60%
+61%
+62%
+63%
+64%
+65%
+66%
+67%
+68%
+69%
+70%
+71%
+72%
+73%
+74%
+75%
+76%
+77%
+78%
+79%
+80%
+81%
+82%
+83%
+84%
+85%
+86%
+87%
+88%
+89%
+90%
+91%
+92%
+93%
+94%
+95%
+96%
+97%
+98%
+99%
+Pruned 304959 variants from chromosome 1, leaving 45707.
+
+1%
+2%
+2%
+3%
+4%
+5%
+5%
+6%
+7%
+8%
+8%
+9%
+10%
+11%
+11%
+12%
+13%
+14%
+14%
+15%
+16%
+17%
+17%
+18%
+19%
+20%
+20%
+21%
+22%
+23%
+23%
+24%
+25%
+26%
+26%
+27%
+28%
+29%
+30%
+31%
+32%
+33%
+34%
+35%
+36%
+37%
+38%
+39%
+40%
+41%
+42%
+43%
+44%
+45%
+46%
+47%
+48%
+49%
+50%
+51%
+52%
+53%
+54%
+55%
+56%
+57%
+58%
+59%
+60%
+61%
+62%
+63%
+64%
+65%
+66%
+67%
+68%
+69%
+70%
+71%
+72%
+73%
+74%
+75%
+76%
+77%
+78%
+79%
+80%
+81%
+82%
+83%
+84%
+85%
+86%
+87%
+88%
+89%
+90%
+91%
+92%
+93%
+94%
+95%
+96%
+97%
+98%
+99%
+Pruned 275365 variants from chromosome 2, leaving 42305.
+
+1%
+2%
+3%
+4%
+5%
+6%
+7%
+8%
+9%
+10%
+11%
+12%
+13%
+14%
+15%
+16%
+17%
+18%
+19%
+20%
+21%
+22%
+23%
+24%
+25%
+26%
+27%
+28%
+29%
+30%
+31%
+32%
+33%
+34%
+35%
+36%
+37%
+38%
+39%
+40%
+41%
+42%
+43%
+44%
+45%
+46%
+47%
+48%
+49%
+50%
+51%
+52%
+53%
+54%
+55%
+56%
+56%
+57%
+57%
+58%
+58%
+59%
+59%
+60%
+60%
+61%
+61%
+62%
+63%
+64%
+65%
+66%
+67%
+68%
+69%
+70%
+71%
+72%
+73%
+74%
+75%
+76%
+77%
+78%
+79%
+80%
+81%
+82%
+83%
+84%
+85%
+86%
+87%
+88%
+89%
+90%
+91%
+92%
+93%
+94%
+95%
+96%
+97%
+98%
+99%
+Pruned 335169 variants from chromosome 3, leaving 47815.
+
+1%
+2%
+2%
+3%
+4%
+5%
+6%
+7%
+8%
+9%
+10%
+10%
+11%
+12%
+13%
+13%
+14%
+15%
+16%
+17%
+18%
+19%
+20%
+21%
+21%
+22%
+23%
+24%
+25%
+26%
+27%
+28%
+29%
+30%
+31%
+32%
+32%
+33%
+34%
+35%
+36%
+37%
+38%
+39%
+40%
+41%
+42%
+43%
+43%
+44%
+45%
+46%
+47%
+48%
+49%
+50%
+51%
+52%
+53%
+54%
+54%
+55%
+56%
+57%
+58%
+59%
+60%
+61%
+62%
+63%
+64%
+65%
+65%
+66%
+67%
+68%
+69%
+70%
+71%
+72%
+73%
+74%
+75%
+76%
+76%
+77%
+78%
+79%
+80%
+81%
+82%
+83%
+84%
+85%
+86%
+87%
+87%
+88%
+89%
+90%
+91%
+92%
+93%
+94%
+95%
+96%
+97%
+98%
+98%
+99%
+Pruned 280320 variants from chromosome 4, leaving 40044.
+
+1%
+2%
+3%
+4%
+5%
+6%
+6%
+7%
+8%
+9%
+10%
+11%
+12%
+13%
+13%
+14%
+15%
+16%
+17%
+18%
+19%
+20%
+21%
+22%
+22%
+23%
+24%
+25%
+26%
+27%
+28%
+29%
+29%
+30%
+31%
+32%
+33%
+34%
+35%
+36%
+36%
+37%
+38%
+39%
+40%
+41%
+42%
+43%
+44%
+45%
+45%
+46%
+47%
+48%
+49%
+50%
+51%
+52%
+52%
+53%
+54%
+55%
+56%
+57%
+58%
+59%
+60%
+61%
+62%
+63%
+64%
+65%
+66%
+67%
+68%
+68%
+69%
+70%
+71%
+72%
+73%
+74%
+75%
+75%
+76%
+77%
+78%
+79%
+80%
+81%
+82%
+83%
+84%
+85%
+86%
+87%
+88%
+89%
+90%
+91%
+91%
+92%
+93%
+94%
+95%
+96%
+97%
+98%
+98%
+99%
+Pruned 200786 variants from chromosome 5, leaving 34649.
+
+1%
+2%
+3%
+4%
+5%
+6%
+7%
+8%
+9%
+10%
+11%
+12%
+13%
+14%
+14%
+15%
+16%
+16%
+17%
+18%
+19%
+20%
+21%
+22%
+23%
+24%
+25%
+26%
+27%
+28%
+29%
+30%
+31%
+31%
+32%
+33%
+33%
+34%
+35%
+36%
+37%
+38%
+39%
+40%
+41%
+42%
+43%
+44%
+45%
+46%
+47%
+48%
+48%
+49%
+50%
+50%
+51%
+52%
+53%
+54%
+55%
+56%
+57%
+58%
+59%
+60%
+61%
+62%
+63%
+64%
+65%
+65%
+66%
+67%
+67%
+68%
+69%
+70%
+71%
+72%
+73%
+74%
+75%
+76%
+77%
+78%
+79%
+80%
+81%
+82%
+82%
+83%
+84%
+84%
+85%
+86%
+87%
+88%
+89%
+90%
+91%
+92%
+93%
+94%
+95%
+96%
+97%
+98%
+99%
+Pruned 2384 variants from chromosome 6, leaving 87.
+Pruning complete.  1398983 of 1609590 variants removed.
+Writing...
+Marker lists written to plink.prune.in and plink.prune.out .</code></pre>
+<pre class="r"><code>file.rename(&quot;data/derived/plink.prune.in&quot;, &quot;data/derived/SNPs_in_LD&quot;)</code></pre>
+<pre><code>[1] TRUE</code></pre>
+<pre class="r"><code>unlink(&quot;gwas_data/derived/plink.prune.out&quot;)</code></pre>
 <!-- ## Run Bayesian Sparse Linear Mixed Models -->
 <!-- Here is a screenshot from the relevant part of the GEMMA manual, explaining how the BSLMMs work, and the key parameters that are estimated: -->
 <!-- !["Screenshot from the GEMMA manual"](data/input/GEMMA_manual_screenshot.png) -->
@@ -1457,24 +2185,26 @@ attached base packages:
 
 other attached packages:
  [1] future.apply_1.5.0 future_1.17.0      purrr_0.3.4        pander_0.6.3      
- [5] readr_1.3.1        bigsnpr_1.3.0      bigstatsr_1.2.3    glue_1.4.2        
+ [5] readr_2.0.0        bigsnpr_1.3.0      bigstatsr_1.2.3    glue_1.4.2        
  [9] ggdendro_0.1-20    ggplot2_3.3.2      dplyr_1.0.0        workflowr_1.6.2   
 
 loaded via a namespace (and not attached):
- [1] tidyselect_1.1.0   xfun_0.19          listenv_0.8.0      lattice_0.20-41   
+ [1] tidyselect_1.1.0   xfun_0.22          listenv_0.8.0      lattice_0.20-41   
  [5] bigassertr_0.1.3   colorspace_1.4-1   vctrs_0.3.0        generics_0.0.2    
  [9] htmltools_0.5.0    yaml_2.2.1         rlang_0.4.6        later_1.0.0       
-[13] pillar_1.4.4       withr_2.2.0        foreach_1.5.0      lifecycle_0.2.0   
-[17] stringr_1.4.0      munsell_0.5.0      gtable_0.3.0       codetools_0.2-16  
-[21] evaluate_0.14      knitr_1.30         doParallel_1.0.15  httpuv_1.5.3.1    
-[25] parallel_4.0.3     Rcpp_1.0.4.6       promises_1.1.0     scales_1.1.1      
-[29] backports_1.1.7    fs_1.4.1           hms_0.5.3          digest_0.6.25     
-[33] stringi_1.5.3      bigparallelr_0.2.3 grid_4.0.3         rprojroot_1.3-2   
-[37] cowplot_1.0.0      tools_4.0.3        magrittr_2.0.1     tibble_3.0.1      
-[41] crayon_1.3.4       whisker_0.4        pkgconfig_2.0.3    MASS_7.3-53       
-[45] ellipsis_0.3.1     Matrix_1.2-18      data.table_1.12.8  rmarkdown_2.5     
-[49] iterators_1.0.12   R6_2.4.1           globals_0.12.5     flock_0.7         
-[53] git2r_0.27.1       compiler_4.0.3    </code></pre>
+[13] pillar_1.4.4       withr_2.2.0        bit64_0.9-7        foreach_1.5.0     
+[17] lifecycle_0.2.0    stringr_1.4.0      munsell_0.5.0      gtable_0.3.0      
+[21] codetools_0.2-16   evaluate_0.14      knitr_1.32         tzdb_0.1.2        
+[25] doParallel_1.0.15  httpuv_1.5.3.1     parallel_4.0.3     fansi_0.4.1       
+[29] Rcpp_1.0.4.6       promises_1.1.0     scales_1.1.1       backports_1.1.7   
+[33] vroom_1.5.3        bit_1.1-15.2       fs_1.4.1           hms_0.5.3         
+[37] digest_0.6.25      stringi_1.5.3      bigparallelr_0.2.3 grid_4.0.3        
+[41] rprojroot_1.3-2    cowplot_1.0.0      cli_2.0.2          tools_4.0.3       
+[45] magrittr_2.0.1     tibble_3.0.1       crayon_1.3.4       whisker_0.4       
+[49] pkgconfig_2.0.3    MASS_7.3-53        ellipsis_0.3.1     Matrix_1.2-18     
+[53] data.table_1.12.8  rstudioapi_0.11    assertthat_0.2.1   rmarkdown_2.5     
+[57] iterators_1.0.12   globals_0.12.5     R6_2.4.1           flock_0.7         
+[61] git2r_0.27.1       compiler_4.0.3    </code></pre>
 </div>
 </div>
 

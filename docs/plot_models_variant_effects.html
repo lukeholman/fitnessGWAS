@@ -29,6 +29,7 @@
 <link href="site_libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
 <script src="site_libs/anchor-sections-1.0/anchor-sections.js"></script>
 <script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
 
@@ -411,7 +412,7 @@ div.tocify {
 
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
-<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span>
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 </button>
 </p>
 <div id="workflowr-report" class="collapse">
@@ -420,7 +421,7 @@ div.tocify {
 <a data-toggle="tab" href="#summary">Summary</a>
 </li>
 <li>
-<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> </a>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
 </li>
 <li>
 <a data-toggle="tab" href="#versions">Past versions</a>
@@ -429,10 +430,10 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2021-03-04
+<strong>Last updated:</strong> 2021-09-26
 </p>
 <p>
-<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 1
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
 </p>
 <p>
 <strong>Knit directory:</strong> <code>fitnessGWAS/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
@@ -496,27 +497,12 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongdetected"> <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> <strong>Cache:</strong> detected </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
 </p>
 </div>
-<div id="strongCachestrongdetected" class="panel-collapse collapse">
+<div id="strongCachestrongnone" class="panel-collapse collapse">
 <div class="panel-body">
-The following chunks had caches available:
-<ul>
-<li>
-qqplot1
-</li>
-<li>
-qqplot2
-</li>
-<li>
-qqplot3
-</li>
-<li>
-qqplot4
-</li>
-</ul>
-<p>To ensure reproducibility of the results, delete the cache directory <code>plot_models_variant_effects_cache</code> and re-run the analysis. To have workflowr automatically delete the cache directory prior to building the file, set <code>delete_cache = TRUE</code> when running <code>wflow_build()</code> or <code>wflow_publish()</code>.</p>
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
 </div>
 </div>
 </div>
@@ -535,16 +521,16 @@ qqplot4
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreea16e7516fb3553521a62f87d0a3e6228801d0017targetblanka16e751a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/lukeholman/fitnessGWAS/tree/a16e7516fb3553521a62f87d0a3e6228801d0017" target="_blank">a16e751</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreeaf15dd63a476b2499f2be7f3002df3ec72c28522targetblankaf15dd6a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/lukeholman/fitnessGWAS/tree/af15dd63a476b2499f2be7f3002df3ec72c28522" target="_blank">af15dd6</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreea16e7516fb3553521a62f87d0a3e6228801d0017targetblanka16e751a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreeaf15dd63a476b2499f2be7f3002df3ec72c28522targetblankaf15dd6a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/lukeholman/fitnessGWAS/tree/a16e7516fb3553521a62f87d0a3e6228801d0017" target="_blank">a16e751</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/lukeholman/fitnessGWAS/tree/af15dd63a476b2499f2be7f3002df3ec72c28522" target="_blank">af15dd6</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -559,7 +545,6 @@ Ignored files:
     Ignored:    .pversion
     Ignored:    analysis/.DS_Store
     Ignored:    analysis/correlations_SNP_effects_cache/
-    Ignored:    analysis/plot_models_variant_effects_cache/
     Ignored:    code/.DS_Store
     Ignored:    code/Drosophila_GWAS.Rmd
     Ignored:    data/.DS_Store
@@ -572,49 +557,43 @@ Ignored files:
     Ignored:    data/input/dgrp2.fam
     Ignored:    data/input/huang_transcriptome/
     Ignored:    figures/.DS_Store
+    Ignored:    figures/fig1_inkscape.svg
+    Ignored:    figures/figure1a.pdf
+    Ignored:    figures/figure1b.pdf
 
 Untracked files:
-    Untracked:  Rplots.pdf
-    Untracked:  analysis/GO_KEGG_enrichment.Rmd
-    Untracked:  analysis/TWAS_tables.Rmd
-    Untracked:  code/GO_and_KEGG_gsea.R
-    Untracked:  code/eQTL_analysis.Rmd
-    Untracked:  code/make_sites_files_for_ARGweaver.R
-    Untracked:  code/plotting_results.Rmd
-    Untracked:  code/run_argweaver.R
-    Untracked:  code/run_mashr.R
-    Untracked:  data/argweaver/
-    Untracked:  data/input/TF_binding_sites.csv
-    Untracked:  figures/GWAS_mixture_proportions.rds
-    Untracked:  figures/GWAS_stats_figure.pdf
-    Untracked:  figures/TWAS_mixture_proportions.rds
-    Untracked:  figures/TWAS_stats_figure.pdf
-    Untracked:  figures/antagonism_ratios.pdf
-    Untracked:  figures/composite_mixture_figure.pdf
-    Untracked:  figures/eff_size_histos.pdf
-    Untracked:  figures/stats_figure.pdf
-    Untracked:  manuscript/
+    Untracked:  big_model.rds
+    Untracked:  code/gcta64
+    Untracked:  code/plink
+    Untracked:  code/quant_gen_1.R
+    Untracked:  data/input/genomic_relatedness_matrix.rds
+    Untracked:  figures/SNP_effect_ED.pdf
+    Untracked:  figures/boyle_plot.pdf
+    Untracked:  figures/fig1.pdf
+    Untracked:  manuscript/GWAS_manuscript.log
+    Untracked:  old_analyses/
 
 Unstaged changes:
     Modified:   .gitignore
-    Modified:   README.md
-    Modified:   analysis/GWAS_tables.Rmd
-    Modified:   analysis/TWAS.Rmd
-    Modified:   analysis/_site.yml
-    Deleted:    analysis/about.Rmd
-    Deleted:    analysis/eQTL_analysis.Rmd
-    Modified:   analysis/gwas_adaptive_shrinkage.Rmd
-    Modified:   analysis/license.Rmd
-    Modified:   analysis/make_annotation_database.Rmd
-    Modified:   analysis/plotting_results.Rmd
-    Deleted:    code/gwas_adaptive_shrinkage.R
-    Modified:   data/input/female_fitness.csv
-    Modified:   data/input/female_fitness_CLEANED.csv
-    Modified:   data/input/male_fitness.csv
-    Modified:   data/input/male_fitness_CLEANED.csv
-    Modified:   figures/figure1.eps
-    Deleted:    figures/figure1.png
-    Modified:   figures/figure2.eps
+    Deleted:    Rplots.pdf
+    Deleted:    analysis/GO_KEGG_enrichment.Rmd
+    Deleted:    analysis/plotting_results.Rmd
+    Deleted:    code/GO_and_KEGG_gsea.R
+    Deleted:    code/make_sites_files_for_ARGweaver.R
+    Deleted:    code/plotting_results.Rmd
+    Deleted:    code/run_argweaver.R
+    Modified:   code/run_mashr.R
+    Deleted:    data/input/clough_2014_dsx_targets.csv
+    Modified:   figures/GWAS_stats_figure.pdf
+    Modified:   figures/TWAS_stats_figure.pdf
+    Modified:   figures/antagonism_ratios.pdf
+    Modified:   figures/composite_mixture_figure.pdf
+    Modified:   figures/eff_size_histos.pdf
+    Deleted:    figures/figure1.eps
+    Deleted:    figures/figure2.eps
+    Modified:   manuscript/GWAS_manuscript.Rmd
+    Modified:   manuscript/GWAS_manuscript.pdf
+    Modified:   manuscript/GWAS_manuscript.tex
 
 </code></pre>
 <p>
@@ -653,6 +632,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/af15dd63a476b2499f2be7f3002df3ec72c28522/analysis/plot_models_variant_effects.Rmd" target="_blank">af15dd6</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2021-09-26
+</td>
+<td>
+Commit Sept 2021
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/871ae81fa56175675b53d22ca29bf9323c3ed50a/docs/plot_models_variant_effects.html" target="_blank">871ae81</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2021-03-04
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 html
@@ -703,6 +716,7 @@ library(showtext) # For fancy Google font in figures
 library(mashr)
 library(kableExtra)
 library(cowplot)
+library(grid)
 font_add_google(name = &quot;Raleway&quot;, family = &quot;Raleway&quot;, regular.wt = 400, bold.wt = 700) # Install font from Google Fonts
 showtext_auto()
 
@@ -713,7 +727,10 @@ db &lt;- DBI::dbConnect(RSQLite::SQLite(),
 all_snps &lt;- tbl(db, &quot;univariate_lmm_results&quot;)
 
 # All SNPs and SNP groups that are in &lt;100% LD with one another (n = 1,207,357)
-SNP_clumps &lt;- all_snps %&gt;% select(-SNP) %&gt;% distinct() %&gt;% collect(n = Inf)</code></pre>
+SNP_clumps &lt;- all_snps %&gt;% select(-SNP) %&gt;% distinct() %&gt;% collect(n = Inf)
+
+# Subsetting variable to get the approx-LD subset of SNPs
+LD_subset &lt;- !is.na(SNP_clumps$LFSR_female_early_mashr_ED)</code></pre>
 <div id="load-and-clean-the-variant-effect-sizes" class="section level2">
 <h2>Load and clean the variant effect sizes</h2>
 <p>Modify column names, reorder columns, filter based on the p-value, etc.</p>
@@ -769,59 +786,35 @@ univariate_lmm_results &lt;- univariate_lmm_results %&gt;%
 </div>
 <div id="q-q-plots" class="section level2 tabset">
 <h2>Q-Q plots</h2>
-<p>Here are some quantile-quantile plots, which are commonly used to check GWAS results, and to test the hypothesis that there are more SNPs than expected showing large effects on the trait of interest.</p>
+<p>Here are some quantile-quantile plots, which are commonly used to check GWAS results, and to test the hypothesis that there are more SNPs than expected showing large effects on the trait of interest. There is an excess of loci with effects on female fitness, but not much of a visible excess for males.</p>
 <div id="female-early-life-fitness" class="section level3">
 <h3>Female early-life fitness</h3>
 <pre class="r"><code># univariate_lmm_pvals &lt;- tbl(db, &quot;univariate_lmm_results&quot;) %&gt;%
 #   select(contains(&quot;LFSR&quot;)) %&gt;% select(contains(&quot;ED&quot;)) %&gt;% collect(n=Inf) %&gt;% as.data.frame()
 # qqman::qq(univariate_lmm_results$LFSR_female_early_mashr_ED)
 
-univariate_lmm_pvals &lt;- tbl(db, &quot;univariate_lmm_results&quot;) %&gt;%
-  select(contains(&quot;pvalue&quot;)) %&gt;% collect(n=Inf) %&gt;% as.data.frame()
+univariate_lmm_pvals &lt;- SNP_clumps %&gt;%
+  select(contains(&quot;pvalue&quot;)) %&gt;% filter(LD_subset) %&gt;% as.data.frame()
 qqman::qq(univariate_lmm_pvals$pvalue_female_early_raw)</code></pre>
-<img src="figure/plot_models_variant_effects.Rmd/qqplot1-1.png" width="672" style="display: block; margin: auto;" />
-<div class="alert alert-warning">
-<p>
-<strong>Warning:</strong> The above code chunk cached its results, but it won’t be re-run if previous chunks it depends on are updated. If you need to use caching, it is highly recommended to also set <code>knitr::opts_chunk$set(autodep = TRUE)</code> at the top of the file (in a chunk that is not cached). Alternatively, you can customize the option <code>dependson</code> for each individual chunk that is cached. Using either <code>autodep</code> or <code>dependson</code> will remove this warning. See the <a href="https://yihui.name/knitr/options/#cache"
->knitr cache options</a> for more details.
-</p>
-</div>
+<p><img src="figure/plot_models_variant_effects.Rmd/qqplot1-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="female-late-life-fitness" class="section level3">
 <h3>Female late-life fitness</h3>
 <pre class="r"><code>#qqman::qq(univariate_lmm_results$LFSR_female_late_mashr_ED)
 qqman::qq(univariate_lmm_pvals$pvalue_female_late_raw)</code></pre>
-<img src="figure/plot_models_variant_effects.Rmd/qqplot2-1.png" width="672" style="display: block; margin: auto;" />
-<div class="alert alert-warning">
-<p>
-<strong>Warning:</strong> The above code chunk cached its results, but it won’t be re-run if previous chunks it depends on are updated. If you need to use caching, it is highly recommended to also set <code>knitr::opts_chunk$set(autodep = TRUE)</code> at the top of the file (in a chunk that is not cached). Alternatively, you can customize the option <code>dependson</code> for each individual chunk that is cached. Using either <code>autodep</code> or <code>dependson</code> will remove this warning. See the <a href="https://yihui.name/knitr/options/#cache"
->knitr cache options</a> for more details.
-</p>
-</div>
+<p><img src="figure/plot_models_variant_effects.Rmd/qqplot2-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="male-early-life-fitness" class="section level3">
 <h3>Male early-life fitness</h3>
 <pre class="r"><code># qqman::qq(univariate_lmm_results$LFSR_male_early_mashr_ED)
 qqman::qq(univariate_lmm_pvals$pvalue_male_early_raw)</code></pre>
-<img src="figure/plot_models_variant_effects.Rmd/qqplot3-1.png" width="672" style="display: block; margin: auto;" />
-<div class="alert alert-warning">
-<p>
-<strong>Warning:</strong> The above code chunk cached its results, but it won’t be re-run if previous chunks it depends on are updated. If you need to use caching, it is highly recommended to also set <code>knitr::opts_chunk$set(autodep = TRUE)</code> at the top of the file (in a chunk that is not cached). Alternatively, you can customize the option <code>dependson</code> for each individual chunk that is cached. Using either <code>autodep</code> or <code>dependson</code> will remove this warning. See the <a href="https://yihui.name/knitr/options/#cache"
->knitr cache options</a> for more details.
-</p>
-</div>
+<p><img src="figure/plot_models_variant_effects.Rmd/qqplot3-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="male-late-life-fitness" class="section level3">
 <h3>Male late-life fitness</h3>
 <pre class="r"><code># qqman::qq(univariate_lmm_results$LFSR_male_late_mashr_ED)
 qqman::qq(univariate_lmm_pvals$pvalue_male_late_raw)</code></pre>
-<img src="figure/plot_models_variant_effects.Rmd/qqplot4-1.png" width="672" style="display: block; margin: auto;" />
-<div class="alert alert-warning">
-<p>
-<strong>Warning:</strong> The above code chunk cached its results, but it won’t be re-run if previous chunks it depends on are updated. If you need to use caching, it is highly recommended to also set <code>knitr::opts_chunk$set(autodep = TRUE)</code> at the top of the file (in a chunk that is not cached). Alternatively, you can customize the option <code>dependson</code> for each individual chunk that is cached. Using either <code>autodep</code> or <code>dependson</code> will remove this warning. See the <a href="https://yihui.name/knitr/options/#cache"
->knitr cache options</a> for more details.
-</p>
-</div>
+<p><img src="figure/plot_models_variant_effects.Rmd/qqplot4-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 </div>
 <div id="hex-bin-plots-and-correlations-in-variant-effect-sizes" class="section level2">
@@ -831,11 +824,12 @@ qqman::qq(univariate_lmm_pvals$pvalue_male_late_raw)</code></pre>
 <div id="plot" class="section level4">
 <h4>Plot</h4>
 <pre class="r"><code>hex_plot &lt;- function(x, y, xlab, ylab, title,
-                     xlim = c(-0.6, 0.45),
-                     ylim = c(-0.3, 0.41)
+                     xlim = c(-0.5, 0.5),
+                     ylim = c(-0.3, 0.3)
                      ){
   dat &lt;- SNP_clumps %&gt;%
-    mutate(facet = title)
+    mutate(facet = title) %&gt;% 
+    filter(LD_subset) # ensure only the LD SNPs from mashr are plotted
   ggplot(dat, aes_string(x, y)) + 
     geom_abline(linetype = 2) + 
     geom_vline(xintercept = 0, linetype = 3) +
@@ -853,18 +847,19 @@ qqman::qq(univariate_lmm_pvals$pvalue_male_late_raw)</code></pre>
 
 }
 
-grid.arrange(
-  hex_plot(&quot;beta_female_early_mashr_ED&quot;, 
-           &quot;beta_male_early_mashr_ED&quot;, 
-           &quot;Effect on female fitness&quot;, 
-           NULL,
-           &quot;A. Early life fitness&quot;),
-  hex_plot(&quot;beta_female_late_mashr_ED&quot;, 
-           &quot;beta_male_late_mashr_ED&quot;, 
-           &quot;Effect on female fitness&quot;, 
-           NULL,
-           &quot;B. Late life fitness&quot;),
-  ncol = 2, left = &quot;Effect on male fitness&quot;)</code></pre>
+p1 &lt;- hex_plot(&quot;beta_female_early_mashr_ED&quot;, 
+               &quot;beta_male_early_mashr_ED&quot;, 
+               &quot;Effect on female fitness&quot;, 
+               NULL,
+               &quot;A. Early life fitness&quot;)
+
+p2 &lt;- hex_plot(&quot;beta_female_late_mashr_ED&quot;, 
+               &quot;beta_male_late_mashr_ED&quot;, 
+               &quot;Effect on female fitness&quot;, 
+               NULL,
+               &quot;B. Late life fitness&quot;)
+
+grid.arrange(p1, p2, ncol = 2, left = &quot;Effect on male fitness&quot;)</code></pre>
 <p><img src="figure/plot_models_variant_effects.Rmd/hex1-1.png" width="864" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-hex1-1">
@@ -903,15 +898,16 @@ lukeholman
 </table>
 </div>
 </div>
+<p><strong>Figure 2</strong>: Effect sizes of 1207357 loci (i.e. groups of one or more polymorphic sites in complete linkage disequilibrium) on male and female fitness, plotted separately for the early-life and late-life estimates. The effect sizes estimated using GEMMA have been corrected using mashr, using the data-driven method to apply shrinkage (Figure SX shows the raw estimates). The data have been binned into hexagons, with the colour and contour lines indicating the number of loci. The diagonal line represents <span class="math inline">\(y=x\)</span>. Positive effect sizes indicate that the minor allele is associated with higher fitness.</p>
 </div>
-<div id="spearman-correlation" class="section level4">
-<h4>Spearman correlation</h4>
+<div id="pearson-correlation" class="section level4">
+<h4>Pearson correlation</h4>
 <pre class="r"><code>SNP_clumps %&gt;%
   select(contains(&quot;mashr_ED&quot;)) %&gt;%
   select(contains(&quot;beta&quot;)) %&gt;%
   rename_all(~ paste(ifelse(str_detect(.x, &quot;female&quot;), &quot;Female&quot;, &quot;Male&quot;), 
                      ifelse(str_detect(.x, &quot;early&quot;), &quot;early&quot;, &quot;late&quot;))) %&gt;%
-  cor(method = &quot;spearman&quot;) %&gt;% 
+  cor(use = &quot;pairwise.complete.obs&quot;) %&gt;% 
   kable(digits = 3) %&gt;% kable_styling(full_width = FALSE)</code></pre>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
@@ -941,13 +937,13 @@ Female early
 1.000
 </td>
 <td style="text-align:right;">
-1.000
+0.998
 </td>
 <td style="text-align:right;">
-0.690
+0.911
 </td>
 <td style="text-align:right;">
-0.754
+0.950
 </td>
 </tr>
 <tr>
@@ -955,16 +951,16 @@ Female early
 Female late
 </td>
 <td style="text-align:right;">
-1.000
+0.998
 </td>
 <td style="text-align:right;">
 1.000
 </td>
 <td style="text-align:right;">
-0.686
+0.880
 </td>
 <td style="text-align:right;">
-0.751
+0.927
 </td>
 </tr>
 <tr>
@@ -972,16 +968,16 @@ Female late
 Male early
 </td>
 <td style="text-align:right;">
-0.690
+0.911
 </td>
 <td style="text-align:right;">
-0.686
+0.880
 </td>
 <td style="text-align:right;">
 1.000
 </td>
 <td style="text-align:right;">
-0.991
+0.994
 </td>
 </tr>
 <tr>
@@ -989,13 +985,13 @@ Male early
 Male late
 </td>
 <td style="text-align:right;">
-0.754
+0.950
 </td>
 <td style="text-align:right;">
-0.751
+0.927
 </td>
 <td style="text-align:right;">
-0.991
+0.994
 </td>
 <td style="text-align:right;">
 1.000
@@ -1010,18 +1006,19 @@ Male late
 <div id="plot-1" class="section level4">
 <h4>Plot</h4>
 <p>The unusual distribution here reflects the fact that this analysis imposed constraints on the effects of each locus. For example, loci assigned to the ‘Female-specific’ category with high probability necessarily have an effect size close to zero in males. The figure should be interpreted cautiously - the main purpose of the canonical analysis is to inference the mixture proportions, and to assign mixture probabilities to each locus, not to accurately estimate the true effect size of each variant.</p>
-<pre class="r"><code>grid.arrange(
-  hex_plot(&quot;beta_female_early_mashr_canonical&quot;, 
+<pre class="r"><code>p1 &lt;- hex_plot(&quot;beta_female_early_mashr_canonical&quot;, 
            &quot;beta_male_early_mashr_canonical&quot;, 
            &quot;Effect on female fitness&quot;, 
            NULL,
-           &quot;A. Early life fitness&quot;),
-  hex_plot(&quot;beta_female_late_mashr_canonical&quot;, 
+           &quot;A. Early life fitness&quot;)
+
+p2 &lt;- hex_plot(&quot;beta_female_late_mashr_canonical&quot;, 
            &quot;beta_male_late_mashr_canonical&quot;, 
            &quot;Effect on female fitness&quot;, 
            NULL,
-           &quot;B. Late life fitness&quot;),
-  ncol = 2, left = &quot;Effect on male fitness&quot;)</code></pre>
+           &quot;B. Late life fitness&quot;)
+
+grid.arrange(p1, p2, ncol = 2, left = &quot;Effect on male fitness&quot;)</code></pre>
 <p><img src="figure/plot_models_variant_effects.Rmd/hex2-1.png" width="864" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-hex2-1">
@@ -1061,14 +1058,14 @@ lukeholman
 </div>
 </div>
 </div>
-<div id="spearman-correlation-1" class="section level4">
-<h4>Spearman correlation</h4>
+<div id="pearson-correlation-1" class="section level4">
+<h4>Pearson correlation</h4>
 <pre class="r"><code>SNP_clumps %&gt;%
   select(contains(&quot;mashr_canonical&quot;)) %&gt;%
   select(contains(&quot;beta&quot;)) %&gt;%
   rename_all(~ paste(ifelse(str_detect(.x, &quot;female&quot;), &quot;Female&quot;, &quot;Male&quot;), 
                      ifelse(str_detect(.x, &quot;early&quot;), &quot;early&quot;, &quot;late&quot;))) %&gt;%
-  cor(method = &quot;spearman&quot;) %&gt;% 
+  cor(use = &quot;pairwise.complete.obs&quot;) %&gt;% 
   kable(digits = 3) %&gt;% kable_styling(full_width = FALSE)</code></pre>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
@@ -1101,10 +1098,10 @@ Female early
 1.000
 </td>
 <td style="text-align:right;">
-0.862
+0.855
 </td>
 <td style="text-align:right;">
-0.862
+0.855
 </td>
 </tr>
 <tr>
@@ -1118,10 +1115,10 @@ Female late
 1.000
 </td>
 <td style="text-align:right;">
-0.862
+0.855
 </td>
 <td style="text-align:right;">
-0.862
+0.855
 </td>
 </tr>
 <tr>
@@ -1129,10 +1126,10 @@ Female late
 Male early
 </td>
 <td style="text-align:right;">
-0.862
+0.855
 </td>
 <td style="text-align:right;">
-0.862
+0.855
 </td>
 <td style="text-align:right;">
 1.000
@@ -1146,10 +1143,10 @@ Male early
 Male late
 </td>
 <td style="text-align:right;">
-0.862
+0.855
 </td>
 <td style="text-align:right;">
-0.862
+0.855
 </td>
 <td style="text-align:right;">
 1.000
@@ -1167,22 +1164,23 @@ Male late
 <div id="plot-2" class="section level4">
 <h4>Plot</h4>
 <p>Uses the variant effect sizes output by GEMMA, without applying any shrinkage (i.e. this is the data that was adjusted using <code>mashr</code>).</p>
-<pre class="r"><code>grid.arrange(
-  hex_plot(&quot;beta_female_early_raw&quot;, 
+<pre class="r"><code>p1 &lt;- hex_plot(&quot;beta_female_early_raw&quot;, 
            &quot;beta_male_early_raw&quot;, 
            &quot;Effect on female fitness&quot;, 
            NULL,
            &quot;A. Early life fitness&quot;,
            xlim = c(-1, 1),
-           ylim = c(-1, 1)),
-  hex_plot(&quot;beta_female_late_raw&quot;, 
+           ylim = c(-1, 1))
+
+p2 &lt;- hex_plot(&quot;beta_female_late_raw&quot;, 
            &quot;beta_male_late_raw&quot;, 
            &quot;Effect on female fitness&quot;, 
            NULL,
            &quot;B. Late life fitness&quot;,
            xlim = c(-1, 1),
-           ylim = c(-1, 1)),
-  ncol = 2, left = &quot;Effect on male fitness&quot;)</code></pre>
+           ylim = c(-1, 1))
+
+grid.arrange(p1, p2, ncol = 2, left = &quot;Effect on male fitness&quot;)</code></pre>
 <p><img src="figure/plot_models_variant_effects.Rmd/hex3-1.png" width="864" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-hex3-1">
@@ -1222,14 +1220,14 @@ lukeholman
 </div>
 </div>
 </div>
-<div id="spearman-correlation-2" class="section level4">
-<h4>Spearman correlation</h4>
+<div id="pearson-correlation-2" class="section level4">
+<h4>Pearson correlation</h4>
 <pre class="r"><code>SNP_clumps %&gt;%
   select(contains(&quot;raw&quot;)) %&gt;%
   select(contains(&quot;beta&quot;)) %&gt;%
   rename_all(~ paste(ifelse(str_detect(.x, &quot;female&quot;), &quot;Female&quot;, &quot;Male&quot;), 
                      ifelse(str_detect(.x, &quot;early&quot;), &quot;early&quot;, &quot;late&quot;))) %&gt;%
-  cor(method = &quot;spearman&quot;) %&gt;% 
+  cor(use = &quot;pairwise.complete.obs&quot;) %&gt;% 
   kable(digits = 3) %&gt;% kable_styling(full_width = FALSE)</code></pre>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
@@ -1259,13 +1257,13 @@ Female early
 1.000
 </td>
 <td style="text-align:right;">
-0.547
+0.567
 </td>
 <td style="text-align:right;">
-0.209
+0.220
 </td>
 <td style="text-align:right;">
-0.111
+0.118
 </td>
 </tr>
 <tr>
@@ -1273,16 +1271,16 @@ Female early
 Female late
 </td>
 <td style="text-align:right;">
-0.547
+0.567
 </td>
 <td style="text-align:right;">
 1.000
 </td>
 <td style="text-align:right;">
-0.204
+0.215
 </td>
 <td style="text-align:right;">
-0.157
+0.167
 </td>
 </tr>
 <tr>
@@ -1290,16 +1288,16 @@ Female late
 Male early
 </td>
 <td style="text-align:right;">
-0.209
+0.220
 </td>
 <td style="text-align:right;">
-0.204
+0.215
 </td>
 <td style="text-align:right;">
 1.000
 </td>
 <td style="text-align:right;">
-0.412
+0.434
 </td>
 </tr>
 <tr>
@@ -1307,13 +1305,13 @@ Male early
 Male late
 </td>
 <td style="text-align:right;">
-0.111
+0.118
 </td>
 <td style="text-align:right;">
-0.157
+0.167
 </td>
 <td style="text-align:right;">
-0.412
+0.434
 </td>
 <td style="text-align:right;">
 1.000
@@ -1323,6 +1321,148 @@ Male late
 </table>
 </div>
 </div>
+</div>
+<div id="average-effect-sizes-are-negative" class="section level2 tabset">
+<h2>Average effect sizes are negative</h2>
+<p>Each of the following four tests is an intercept-only linear model, weighted by the inverse of the standard error for the focal variant’s effect size (so, loci where the effect effect size was measured with more precision are weighted more heavily). The tests are run on the LD-pruned subset of SNPs, minimising pseudoreplication. A non-zero intercept term indicates that major (or minor) alleles tend to have consistently positive or negative associations with the focal fitness trait.</p>
+<p>These results indicate that the minor allele tends to <em>reduce</em> fitness, relative to the major allele. It’s a weak effect (note the small value in the Estimate column), this may reflect the large uncertainty with which the effect sizes are measured, in addition to a true biological result that most loci have little or no relationship with the fitness traits we measured.</p>
+<div id="female-early-life" class="section level3">
+<h3>Female early-life</h3>
+<pre class="r"><code>summary(lm(beta_female_early_raw ~ 1, 
+           data = SNP_clumps %&gt;% filter(LD_subset), 
+           weights = 1 / SE_female_early_raw))</code></pre>
+<pre><code>
+Call:
+lm(formula = beta_female_early_raw ~ 1, data = SNP_clumps %&gt;% 
+    filter(LD_subset), weights = 1/SE_female_early_raw)
+
+Weighted Residuals:
+     Min       1Q   Median       3Q      Max 
+-1.98458 -0.22630  0.00919  0.23696  1.48781 
+
+Coefficients:
+              Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) -0.0016820  0.0002555  -6.584 4.58e-11 ***
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+
+Residual standard error: 0.3497 on 208986 degrees of freedom</code></pre>
+</div>
+<div id="female-late-life" class="section level3">
+<h3>Female late-life</h3>
+<pre class="r"><code>summary(lm(beta_female_late_raw ~ 1, 
+           data = SNP_clumps %&gt;% filter(LD_subset), 
+           weights = 1 / SE_female_late_raw))</code></pre>
+<pre><code>
+Call:
+lm(formula = beta_female_late_raw ~ 1, data = SNP_clumps %&gt;% 
+    filter(LD_subset), weights = 1/SE_female_late_raw)
+
+Weighted Residuals:
+     Min       1Q   Median       3Q      Max 
+-1.94128 -0.23405  0.00409  0.23909  1.47335 
+
+Coefficients:
+              Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) -0.0025016  0.0002598   -9.63   &lt;2e-16 ***
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+
+Residual standard error: 0.3549 on 208986 degrees of freedom</code></pre>
+</div>
+<div id="male-early-life" class="section level3">
+<h3>Male early-life</h3>
+<pre class="r"><code>summary(lm(beta_male_early_raw ~ 1, 
+           data = SNP_clumps %&gt;% filter(LD_subset), 
+           weights = 1 / SE_male_early_raw))</code></pre>
+<pre><code>
+Call:
+lm(formula = beta_male_early_raw ~ 1, data = SNP_clumps %&gt;% filter(LD_subset), 
+    weights = 1/SE_male_early_raw)
+
+Weighted Residuals:
+     Min       1Q   Median       3Q      Max 
+-1.58868 -0.23295 -0.00219  0.23114  1.76956 
+
+Coefficients:
+              Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) -0.0016140  0.0002542   -6.35 2.15e-10 ***
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+
+Residual standard error: 0.3503 on 208986 degrees of freedom</code></pre>
+</div>
+<div id="male-late-life" class="section level3">
+<h3>Male late-life</h3>
+<pre class="r"><code>summary(lm(beta_male_late_raw ~ 1, 
+           data = SNP_clumps %&gt;% filter(LD_subset), 
+           weights = 1 / SE_male_late_raw))</code></pre>
+<pre><code>
+Call:
+lm(formula = beta_male_late_raw ~ 1, data = SNP_clumps %&gt;% filter(LD_subset), 
+    weights = 1/SE_male_late_raw)
+
+Weighted Residuals:
+     Min       1Q   Median       3Q      Max 
+-1.89125 -0.22874  0.00114  0.23182  1.59205 
+
+Coefficients:
+             Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) -0.001943   0.000251  -7.739    1e-14 ***
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+
+Residual standard error: 0.3479 on 208986 degrees of freedom</code></pre>
+</div>
+</div>
+<div id="test-boyle-idea" class="section level2">
+<h2>Test boyle idea</h2>
+<p>Inspired by Boyle et al. (Cell), we sorted all of the variants by their fitness effects, placed them in bins of 1000, and then calculated the average fitness effect for each bin. Figure 4 shows that there was a very tight correlation between the average effects of the variants in each bin on male and female fitness. This is what would predict if variants that affect male fitness tend to also affect female fitness in the same direction, and if a very large number of loci have small (and concordant) effects on the fitness of both sexes.</p>
+<pre class="r"><code>p1 &lt;- SNP_clumps %&gt;%
+  filter(LD_subset) %&gt;% # The figure looks the same whether or not the data are thinned to the LD set of SNPs
+  arrange(beta_female_early_raw) %&gt;%
+  mutate(bin = c(rep(1:floor(n()/1000), each = 1000), 
+                 rep(floor(n()/1000) + 1, each = n() %% 1000)),
+         age = &quot;A. Early life&quot;) %&gt;%
+  group_by(bin, age) %&gt;%
+  summarise(females = mean(beta_female_early_raw), males = mean(beta_male_early_raw)) %&gt;%
+  ggplot(aes(females, males)) +
+  geom_hline(yintercept = 0, linetype = 2) +
+  geom_vline(xintercept = 0, linetype = 2) +
+  geom_point() +
+  stat_smooth(method = &quot;lm&quot;, formula = y ~ x + I(x^2), size = 0.6) +
+  facet_wrap(~ age) +
+  scale_y_continuous(limits = c(-0.1, 0.27)) +
+  xlab(NULL) + ylab(NULL) + 
+  theme_bw() +
+  theme(strip.background = element_blank(),
+        strip.text = element_text(hjust=0))   + 
+  theme(text = element_text(family = &quot;Raleway&quot;, size = 12))
+
+p2 &lt;- SNP_clumps %&gt;%
+  filter(LD_subset) %&gt;% 
+  arrange(beta_female_late_raw) %&gt;%
+  mutate(bin = c(rep(1:floor(n()/1000), each = 1000), 
+                 rep(floor(n()/1000) + 1, each = n() %% 1000)),
+         age = &quot;B. Late life&quot;) %&gt;%
+  group_by(bin, age) %&gt;%
+  summarise(females = mean(beta_female_late_raw), males = mean(beta_male_late_raw)) %&gt;%
+  ggplot(aes(females, males)) +
+  geom_hline(yintercept = 0, linetype = 2) +
+  geom_vline(xintercept = 0, linetype = 2) +
+  geom_point() +
+  stat_smooth(method = &quot;lm&quot;, formula = y ~ x + I(x^2), size = 0.6) +
+  facet_wrap(~ age) +
+  scale_y_continuous(limits = c(-0.1, 0.27)) +
+  xlab(NULL) + ylab(NULL) + 
+  theme_bw() +
+  theme(strip.background = element_blank(),
+        strip.text = element_text(hjust=0))   + 
+  theme(text = element_text(family = &quot;Raleway&quot;, size = 12))
+
+grid.arrange(p1, p2, nrow = 1, bottom = &quot;Mean effect size on female fitness&quot;, 
+  left = &quot;Mean effect size on male fitness&quot;)</code></pre>
+<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="plot-the-estimated-mixture-proportions-from-mashr" class="section level2">
 <h2>Plot the estimated mixture proportions from <code>mashr</code></h2>
@@ -1386,7 +1526,7 @@ p1 &lt;- mix %&gt;%
   scale_fill_brewer(palette = &quot;Spectral&quot;, direction = -1) + 
   coord_flip() + 
   theme_bw() + 
-  scale_y_continuous(expand = c(0,0), limits = c(0, 65)) + 
+  scale_y_continuous(expand = c(0,0), limits = c(0, 70)) + 
   scale_x_discrete(expand = c(0.14, 0.14)) + 
   theme(axis.ticks.y = element_blank(),
         legend.position = &quot;none&quot;,
@@ -1656,7 +1796,7 @@ compare_mods &lt;- function(MAF_and_Chromosome_and_site_class){
            delta = round(delta, 2)) %&gt;%
     kable(digits = 2) %&gt;% kable_styling(full_width = FALSE)
 }</code></pre>
-<p>In each of the following analyses, the response variable is the mixture assignment probability to type <span class="math inline">\(i\)</span> for each of the 68,655 loci that affected at least one of the phenotypes significantly (defined as LFSR &lt; 0.05), where <span class="math inline">\(i\)</span> is one of the four variant types shown in the above figure. In cases where multiple SNP or indel loci were in 100% linkage with one another, we picked a single locus at random and discarded the others.</p>
+<p>In each of the following analyses, the response variable is the mixture assignment probability to type <span class="math inline">\(i\)</span> for each of the 11,475 loci that affected at least one of the phenotypes significantly (defined as LFSR &lt; 0.05), where <span class="math inline">\(i\)</span> is one of the four variant types shown in the above figure. In cases where multiple SNP or indel loci were in 100% linkage with one another, we picked a single locus at random and discarded the others.</p>
 <p>Three predictors were available for each locus: the minor allele frequency (MAF) in the overall DGRP, the site class of the variant, and chromosome. Loci that were annotated with more than one site class (e.g. intron as well as exon, due to an overlap of genes) were assigned one of these site classes at random.</p>
 <p>To evaluate the effects of three predictors on the response variable, we fit 8 nested models and compared them using AICc. We also present the <code>summary()</code> output for the top-ranked model according to AICc.</p>
 <div id="probability-of-sexual-antagonism" class="section level4 tabset">
@@ -1688,13 +1828,13 @@ Weight
 <tbody>
 <tr>
 <td style="text-align:left;">
-MAF + Chromosome + site_class
+MAF + Chromosome
 </td>
 <td style="text-align:right;">
-15
+7
 </td>
 <td style="text-align:right;">
--241307.6
+-42350.03
 </td>
 <td style="text-align:right;">
 0.00
@@ -1705,16 +1845,33 @@ MAF + Chromosome + site_class
 </tr>
 <tr>
 <td style="text-align:left;">
-MAF + Chromosome
+MAF
 </td>
 <td style="text-align:right;">
-7
+3
 </td>
 <td style="text-align:right;">
--241296.6
+-42338.90
 </td>
 <td style="text-align:right;">
-10.98
+11.13
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MAF + Chromosome + site_class
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+-42336.98
+</td>
+<td style="text-align:right;">
+13.05
 </td>
 <td style="text-align:right;">
 0
@@ -1728,10 +1885,10 @@ MAF + siteclass
 11
 </td>
 <td style="text-align:right;">
--241134.7
+-42326.30
 </td>
 <td style="text-align:right;">
-172.89
+23.73
 </td>
 <td style="text-align:right;">
 0
@@ -1745,27 +1902,10 @@ Chromosome + siteclass
 11
 </td>
 <td style="text-align:right;">
--241134.7
+-42326.30
 </td>
 <td style="text-align:right;">
-172.89
-</td>
-<td style="text-align:right;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-MAF
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
--241122.7
-</td>
-<td style="text-align:right;">
-184.92
+23.73
 </td>
 <td style="text-align:right;">
 0
@@ -1779,27 +1919,10 @@ Chromosome
 6
 </td>
 <td style="text-align:right;">
--239763.5
+-42034.26
 </td>
 <td style="text-align:right;">
-1544.12
-</td>
-<td style="text-align:right;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-siteclass
-</td>
-<td style="text-align:right;">
-10
-</td>
-<td style="text-align:right;">
--239576.6
-</td>
-<td style="text-align:right;">
-1731.02
+315.77
 </td>
 <td style="text-align:right;">
 0
@@ -1813,10 +1936,27 @@ Null_model
 2
 </td>
 <td style="text-align:right;">
--239566.2
+-42023.09
 </td>
 <td style="text-align:right;">
-1741.41
+326.94
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+siteclass
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+-42011.10
+</td>
+<td style="text-align:right;">
+338.92
 </td>
 <td style="text-align:right;">
 0
@@ -1835,35 +1975,35 @@ betareg(formula = P_sex_antag ~ MAF + chr + site.class, data = dat)
 
 Deviance residuals:
     Min      1Q  Median      3Q     Max 
--3.7291 -0.3614 -0.2404  0.5699  9.5453 
+-3.9735 -0.3399 -0.2389  0.4247  7.3555 
 
 Coefficients (mean model with logit link):
-                                 Estimate Std. Error  z value Pr(&gt;|z|)    
-(Intercept)                     -2.798139   0.010795 -259.199  &lt; 2e-16 ***
-MAF                              0.775745   0.019949   38.887  &lt; 2e-16 ***
-chr2R                            0.069455   0.007259    9.568  &lt; 2e-16 ***
-chr3L                            0.048502   0.007160    6.774 1.25e-11 ***
-chr3R                            0.084534   0.007546   11.202  &lt; 2e-16 ***
-chrX                             0.086050   0.008029   10.718  &lt; 2e-16 ***
-site.classDownstream            -0.001505   0.011094   -0.136   0.8921    
-site.classExon                  -0.014302   0.024914   -0.574   0.5659    
-site.classIntergenic             0.023060   0.009426    2.447   0.0144 *  
-site.classIntron                 0.017865   0.008451    2.114   0.0345 *  
-site.classNon-synonymous coding -0.018356   0.017827   -1.030   0.3032    
-site.classUpstream               0.005090   0.011299    0.450   0.6524    
-site.classUTR 3-prime           -0.010520   0.018416   -0.571   0.5678    
-site.classUTR 5-prime           -0.051042   0.024760   -2.062   0.0393 *  
+                                  Estimate Std. Error  z value Pr(&gt;|z|)    
+(Intercept)                     -2.844e+00  2.707e-02 -105.062  &lt; 2e-16 ***
+MAF                              7.738e-01  4.413e-02   17.536  &lt; 2e-16 ***
+chr2R                           -2.767e-02  1.706e-02   -1.622  0.10482    
+chr3L                            1.040e-02  1.653e-02    0.629  0.52931    
+chr3R                            4.901e-02  1.743e-02    2.812  0.00492 ** 
+chrX                             2.284e-02  1.816e-02    1.258  0.20843    
+site.classDownstream            -4.649e-03  2.766e-02   -0.168  0.86651    
+site.classExon                  -1.381e-03  5.883e-02   -0.023  0.98127    
+site.classIntergenic             1.544e-02  2.323e-02    0.664  0.50638    
+site.classIntron                 5.904e-05  2.118e-02    0.003  0.99778    
+site.classNon-synonymous coding -1.724e-02  4.448e-02   -0.388  0.69836    
+site.classUpstream               1.938e-03  2.911e-02    0.067  0.94691    
+site.classUTR 3-prime            1.483e-02  4.439e-02    0.334  0.73826    
+site.classUTR 5-prime           -6.213e-02  6.034e-02   -1.030  0.30319    
 
 Phi coefficients (precision model with identity link):
       Estimate Std. Error z value Pr(&gt;|z|)    
-(phi)  29.3662     0.1622   181.1   &lt;2e-16 ***
+(phi)   34.025      0.459   74.12   &lt;2e-16 ***
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1 
 
 Type of estimator: ML (maximum likelihood)
-Log-likelihood: 1.207e+05 on 15 Df
-Pseudo R-squared: 0.02869
-Number of iterations: 23 (BFGS) + 2 (Fisher scoring) </code></pre>
+Log-likelihood: 2.118e+04 on 15 Df
+Pseudo R-squared: 0.03202
+Number of iterations: 24 (BFGS) + 2 (Fisher scoring) </code></pre>
 </div>
 </div>
 <div id="probability-of-being-female-specific" class="section level4 tabset">
@@ -1895,19 +2035,19 @@ Weight
 <tbody>
 <tr>
 <td style="text-align:left;">
-MAF + Chromosome + site_class
+Chromosome
 </td>
 <td style="text-align:right;">
-15
+6
 </td>
 <td style="text-align:right;">
--81289.74
+-27490.01
 </td>
 <td style="text-align:right;">
 0.00
 </td>
 <td style="text-align:right;">
-1
+0.71
 </td>
 </tr>
 <tr>
@@ -1918,98 +2058,30 @@ MAF + Chromosome
 7
 </td>
 <td style="text-align:right;">
--81271.61
+-27488.09
 </td>
 <td style="text-align:right;">
-18.13
+1.92
 </td>
 <td style="text-align:right;">
-0
+0.27
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-Chromosome
+MAF + Chromosome + site_class
 </td>
 <td style="text-align:right;">
-6
+15
 </td>
 <td style="text-align:right;">
--81253.26
+-27482.64
 </td>
 <td style="text-align:right;">
-36.48
+7.37
 </td>
 <td style="text-align:right;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-MAF + siteclass
-</td>
-<td style="text-align:right;">
-11
-</td>
-<td style="text-align:right;">
--80724.88
-</td>
-<td style="text-align:right;">
-564.86
-</td>
-<td style="text-align:right;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Chromosome + siteclass
-</td>
-<td style="text-align:right;">
-11
-</td>
-<td style="text-align:right;">
--80724.88
-</td>
-<td style="text-align:right;">
-564.86
-</td>
-<td style="text-align:right;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-MAF
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
--80712.02
-</td>
-<td style="text-align:right;">
-577.72
-</td>
-<td style="text-align:right;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-siteclass
-</td>
-<td style="text-align:right;">
-10
-</td>
-<td style="text-align:right;">
--80712.01
-</td>
-<td style="text-align:right;">
-577.74
-</td>
-<td style="text-align:right;">
-0
+0.02
 </td>
 </tr>
 <tr>
@@ -2020,13 +2092,81 @@ Null_model
 2
 </td>
 <td style="text-align:right;">
--80698.62
+-27469.40
 </td>
 <td style="text-align:right;">
-591.12
+20.61
 </td>
 <td style="text-align:right;">
-0
+0.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MAF
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+-27467.44
+</td>
+<td style="text-align:right;">
+22.57
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+siteclass
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+-27463.48
+</td>
+<td style="text-align:right;">
+26.53
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MAF + siteclass
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+-27461.51
+</td>
+<td style="text-align:right;">
+28.50
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Chromosome + siteclass
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+-27461.51
+</td>
+<td style="text-align:right;">
+28.50
+</td>
+<td style="text-align:right;">
+0.00
 </td>
 </tr>
 </tbody>
@@ -2042,35 +2182,35 @@ betareg(formula = P_female_specific ~ MAF + chr + site.class, data = dat)
 
 Deviance residuals:
     Min      1Q  Median      3Q     Max 
--1.7683 -0.5677 -0.3655  0.8111  5.3896 
+-1.6434 -0.7521 -0.6668 -0.2227  6.8125 
 
 Coefficients (mean model with logit link):
                                  Estimate Std. Error z value Pr(&gt;|z|)    
-(Intercept)                     -1.458023   0.016079 -90.679  &lt; 2e-16 ***
-MAF                             -0.132799   0.029881  -4.444 8.82e-06 ***
-chr2R                            0.239335   0.010850  22.058  &lt; 2e-16 ***
-chr3L                            0.123513   0.010722  11.520  &lt; 2e-16 ***
-chr3R                            0.193970   0.011316  17.141  &lt; 2e-16 ***
-chrX                             0.179009   0.012085  14.813  &lt; 2e-16 ***
-site.classDownstream             0.018385   0.016622   1.106   0.2687    
-site.classExon                  -0.002719   0.037132  -0.073   0.9416    
-site.classIntergenic             0.055367   0.014154   3.912 9.16e-05 ***
-site.classIntron                 0.024304   0.012698   1.914   0.0556 .  
-site.classNon-synonymous coding -0.031334   0.026626  -1.177   0.2393    
-site.classUpstream               0.018190   0.016945   1.073   0.2831    
-site.classUTR 3-prime           -0.018787   0.027549  -0.682   0.4953    
-site.classUTR 5-prime           -0.059117   0.036726  -1.610   0.1075    
+(Intercept)                     -2.116722   0.039510 -53.575  &lt; 2e-16 ***
+MAF                             -0.017111   0.063606  -0.269  0.78792    
+chr2R                            0.128853   0.024763   5.203 1.96e-07 ***
+chr3L                            0.041026   0.024355   1.684  0.09209 .  
+chr3R                            0.073953   0.025778   2.869  0.00412 ** 
+chrX                             0.075132   0.026673   2.817  0.00485 ** 
+site.classDownstream            -0.015492   0.040613  -0.381  0.70287    
+site.classExon                  -0.034502   0.086555  -0.399  0.69018    
+site.classIntergenic             0.021466   0.034162   0.628  0.52976    
+site.classIntron                -0.020124   0.031169  -0.646  0.51851    
+site.classNon-synonymous coding -0.004216   0.064645  -0.065  0.94800    
+site.classUpstream              -0.011601   0.042774  -0.271  0.78623    
+site.classUTR 3-prime            0.115638   0.064138   1.803  0.07140 .  
+site.classUTR 5-prime           -0.129561   0.088245  -1.468  0.14205    
 
 Phi coefficients (precision model with identity link):
       Estimate Std. Error z value Pr(&gt;|z|)    
-(phi)  4.17855    0.02205   189.5   &lt;2e-16 ***
+(phi)   7.4541     0.1042   71.54   &lt;2e-16 ***
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1 
 
 Type of estimator: ML (maximum likelihood)
-Log-likelihood: 4.066e+04 on 15 Df
-Pseudo R-squared: 0.009817
-Number of iterations: 23 (BFGS) + 2 (Fisher scoring) </code></pre>
+Log-likelihood: 1.376e+04 on 15 Df
+Pseudo R-squared: 0.005271
+Number of iterations: 25 (BFGS) + 2 (Fisher scoring) </code></pre>
 </div>
 </div>
 <div id="probability-of-being-male-specific" class="section level4 tabset">
@@ -2108,30 +2248,13 @@ MAF + Chromosome
 7
 </td>
 <td style="text-align:right;">
--381128.0
+-51665.18
 </td>
 <td style="text-align:right;">
 0.00
 </td>
 <td style="text-align:right;">
-0.98
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-MAF + Chromosome + site_class
-</td>
-<td style="text-align:right;">
-15
-</td>
-<td style="text-align:right;">
--381120.2
-</td>
-<td style="text-align:right;">
-7.77
-</td>
-<td style="text-align:right;">
-0.02
+0.86
 </td>
 </tr>
 <tr>
@@ -2142,10 +2265,27 @@ Chromosome
 6
 </td>
 <td style="text-align:right;">
--381055.3
+-51661.58
 </td>
 <td style="text-align:right;">
-72.69
+3.60
+</td>
+<td style="text-align:right;">
+0.14
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MAF + Chromosome + site_class
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+-51651.42
+</td>
+<td style="text-align:right;">
+13.76
 </td>
 <td style="text-align:right;">
 0.00
@@ -2159,44 +2299,10 @@ MAF
 3
 </td>
 <td style="text-align:right;">
--380995.0
+-51640.45
 </td>
 <td style="text-align:right;">
-132.99
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-MAF + siteclass
-</td>
-<td style="text-align:right;">
-11
-</td>
-<td style="text-align:right;">
--380984.5
-</td>
-<td style="text-align:right;">
-143.55
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Chromosome + siteclass
-</td>
-<td style="text-align:right;">
-11
-</td>
-<td style="text-align:right;">
--380984.5
-</td>
-<td style="text-align:right;">
-143.55
+24.73
 </td>
 <td style="text-align:right;">
 0.00
@@ -2210,10 +2316,44 @@ Null_model
 2
 </td>
 <td style="text-align:right;">
--380928.0
+-51637.32
 </td>
 <td style="text-align:right;">
-199.97
+27.86
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MAF + siteclass
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+-51626.08
+</td>
+<td style="text-align:right;">
+39.10
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Chromosome + siteclass
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+-51626.08
+</td>
+<td style="text-align:right;">
+39.10
 </td>
 <td style="text-align:right;">
 0.00
@@ -2227,10 +2367,10 @@ siteclass
 10
 </td>
 <td style="text-align:right;">
--380918.0
+-51623.04
 </td>
 <td style="text-align:right;">
-209.97
+42.14
 </td>
 <td style="text-align:right;">
 0.00
@@ -2249,35 +2389,35 @@ betareg(formula = P_male_specific ~ MAF + chr + site.class, data = dat)
 
 Deviance residuals:
     Min      1Q  Median      3Q     Max 
--2.1176 -0.8374 -0.7227 -0.5800  9.2003 
+-2.5524 -0.9656 -0.7707  0.3988  6.0893 
 
 Coefficients (mean model with logit link):
-                                 Estimate Std. Error  z value Pr(&gt;|z|)    
-(Intercept)                     -3.747522   0.014364 -260.905  &lt; 2e-16 ***
-MAF                              0.227406   0.026558    8.563  &lt; 2e-16 ***
-chr2R                           -0.114192   0.009635  -11.851  &lt; 2e-16 ***
-chr3L                           -0.041503   0.009396   -4.417 1.00e-05 ***
-chr3R                           -0.052498   0.009978   -5.261 1.43e-07 ***
-chrX                            -0.056485   0.010663   -5.297 1.18e-07 ***
-site.classDownstream            -0.014242   0.014758   -0.965    0.335    
-site.classExon                  -0.011391   0.032946   -0.346    0.730    
-site.classIntergenic            -0.018763   0.012568   -1.493    0.135    
-site.classIntron                 0.002749   0.011250    0.244    0.807    
-site.classNon-synonymous coding  0.012947   0.023487    0.551    0.581    
-site.classUpstream              -0.002264   0.015030   -0.151    0.880    
-site.classUTR 3-prime            0.002971   0.024382    0.122    0.903    
-site.classUTR 5-prime           -0.014438   0.032531   -0.444    0.657    
+                                 Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)                     -3.201306   0.038712 -82.695  &lt; 2e-16 ***
+MAF                              0.145243   0.062118   2.338   0.0194 *  
+chr2R                           -0.121882   0.024354  -5.005  5.6e-07 ***
+chr3L                           -0.009954   0.023508  -0.423   0.6720    
+chr3R                            0.002648   0.024929   0.106   0.9154    
+chrX                            -0.032578   0.025907  -1.257   0.2086    
+site.classDownstream             0.004844   0.039552   0.122   0.9025    
+site.classExon                   0.025183   0.083734   0.301   0.7636    
+site.classIntergenic            -0.012609   0.033375  -0.378   0.7056    
+site.classIntron                 0.009136   0.030390   0.301   0.7637    
+site.classNon-synonymous coding -0.014042   0.063202  -0.222   0.8242    
+site.classUpstream              -0.003028   0.041727  -0.073   0.9422    
+site.classUTR 3-prime           -0.052903   0.063983  -0.827   0.4083    
+site.classUTR 5-prime            0.024058   0.084393   0.285   0.7756    
 
 Phi coefficients (precision model with identity link):
       Estimate Std. Error z value Pr(&gt;|z|)    
-(phi)  34.7149     0.2147   161.7   &lt;2e-16 ***
+(phi)  18.5736     0.2807   66.18   &lt;2e-16 ***
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1 
 
 Type of estimator: ML (maximum likelihood)
-Log-likelihood: 1.906e+05 on 15 Df
-Pseudo R-squared: 0.006034
-Number of iterations: 29 (BFGS) + 2 (Fisher scoring) </code></pre>
+Log-likelihood: 2.584e+04 on 15 Df
+Pseudo R-squared: 0.004862
+Number of iterations: 25 (BFGS) + 2 (Fisher scoring) </code></pre>
 </div>
 </div>
 <div id="probability-of-equal-effects" class="section level4 tabset">
@@ -2309,87 +2449,36 @@ Weight
 <tbody>
 <tr>
 <td style="text-align:left;">
-MAF + Chromosome + site_class
-</td>
-<td style="text-align:right;">
-15
-</td>
-<td style="text-align:right;">
--37638.22
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-1
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
 MAF + Chromosome
 </td>
 <td style="text-align:right;">
 7
 </td>
 <td style="text-align:right;">
--37620.58
+-14326.50
 </td>
 <td style="text-align:right;">
-17.63
+0.00
 </td>
 <td style="text-align:right;">
-0
+0.76
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-Chromosome
+MAF + Chromosome + site_class
 </td>
 <td style="text-align:right;">
-6
+15
 </td>
 <td style="text-align:right;">
--37419.94
+-14322.90
 </td>
 <td style="text-align:right;">
-218.28
+3.59
 </td>
 <td style="text-align:right;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-MAF + siteclass
-</td>
-<td style="text-align:right;">
-11
-</td>
-<td style="text-align:right;">
--37318.73
-</td>
-<td style="text-align:right;">
-319.49
-</td>
-<td style="text-align:right;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Chromosome + siteclass
-</td>
-<td style="text-align:right;">
-11
-</td>
-<td style="text-align:right;">
--37318.73
-</td>
-<td style="text-align:right;">
-319.49
-</td>
-<td style="text-align:right;">
-0
+0.13
 </td>
 </tr>
 <tr>
@@ -2400,30 +2489,64 @@ MAF
 3
 </td>
 <td style="text-align:right;">
--37301.67
+-14322.01
 </td>
 <td style="text-align:right;">
-336.54
+4.49
 </td>
 <td style="text-align:right;">
-0
+0.08
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-siteclass
+MAF + siteclass
 </td>
 <td style="text-align:right;">
-10
+11
 </td>
 <td style="text-align:right;">
--37105.80
+-14318.59
 </td>
 <td style="text-align:right;">
-532.42
+7.91
 </td>
 <td style="text-align:right;">
-0
+0.01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Chromosome + siteclass
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+-14318.59
+</td>
+<td style="text-align:right;">
+7.91
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Chromosome
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+-14248.91
+</td>
+<td style="text-align:right;">
+77.58
+</td>
+<td style="text-align:right;">
+0.00
 </td>
 </tr>
 <tr>
@@ -2434,13 +2557,30 @@ Null_model
 2
 </td>
 <td style="text-align:right;">
--37090.34
+-14243.28
 </td>
 <td style="text-align:right;">
-547.87
+83.22
 </td>
 <td style="text-align:right;">
-0
+0.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+siteclass
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+-14238.96
+</td>
+<td style="text-align:right;">
+87.54
+</td>
+<td style="text-align:right;">
+0.00
 </td>
 </tr>
 </tbody>
@@ -2456,35 +2596,35 @@ betareg(formula = P_equal_effects ~ MAF + chr + site.class, data = dat)
 
 Deviance residuals:
     Min      1Q  Median      3Q     Max 
--5.1450 -0.6580  0.1940  0.3527  2.0818 
+-6.9330 -0.3277  0.2487  0.3315  2.5336 
 
 Coefficients (mean model with logit link):
                                  Estimate Std. Error z value Pr(&gt;|z|)    
-(Intercept)                      1.022064   0.015466  66.083  &lt; 2e-16 ***
-MAF                             -0.412143   0.028894 -14.264  &lt; 2e-16 ***
-chr2R                           -0.154896   0.010488 -14.769  &lt; 2e-16 ***
-chr3L                           -0.094204   0.010334  -9.116  &lt; 2e-16 ***
-chr3R                           -0.157356   0.010922 -14.407  &lt; 2e-16 ***
-chrX                            -0.156126   0.011655 -13.396  &lt; 2e-16 ***
-site.classDownstream            -0.008109   0.016067  -0.505 0.613774    
-site.classExon                   0.017694   0.035920   0.493 0.622298    
-site.classIntergenic            -0.045783   0.013680  -3.347 0.000817 ***
-site.classIntron                -0.031409   0.012266  -2.561 0.010446 *  
-site.classNon-synonymous coding  0.031656   0.025722   1.231 0.218448    
-site.classUpstream              -0.011775   0.016378  -0.719 0.472181    
-site.classUTR 3-prime            0.004774   0.026596   0.179 0.857551    
-site.classUTR 5-prime            0.068546   0.035500   1.931 0.053496 .  
+(Intercept)                      1.457076   0.034863  41.794  &lt; 2e-16 ***
+MAF                             -0.503862   0.056604  -8.902  &lt; 2e-16 ***
+chr2R                           -0.041474   0.021996  -1.885  0.05937 .  
+chr3L                           -0.021499   0.021512  -0.999  0.31760    
+chr3R                           -0.074726   0.022726  -3.288  0.00101 ** 
+chrX                            -0.048768   0.023589  -2.067  0.03870 *  
+site.classDownstream             0.002297   0.035983   0.064  0.94909    
+site.classExon                   0.039400   0.076890   0.512  0.60835    
+site.classIntergenic            -0.040796   0.030255  -1.348  0.17753    
+site.classIntron                -0.005126   0.027611  -0.186  0.85272    
+site.classNon-synonymous coding  0.002345   0.057433   0.041  0.96742    
+site.classUpstream              -0.012272   0.037863  -0.324  0.74586    
+site.classUTR 3-prime           -0.113999   0.056976  -2.001  0.04541 *  
+site.classUTR 5-prime            0.130571   0.078503   1.663  0.09626 .  
 
 Phi coefficients (precision model with identity link):
       Estimate Std. Error z value Pr(&gt;|z|)    
-(phi)  3.99001    0.01987   200.8   &lt;2e-16 ***
+(phi)  7.13163    0.09138   78.05   &lt;2e-16 ***
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1 
 
 Type of estimator: ML (maximum likelihood)
-Log-likelihood: 1.883e+04 on 15 Df
-Pseudo R-squared: 0.009275
-Number of iterations: 23 (BFGS) + 2 (Fisher scoring) </code></pre>
+Log-likelihood:  7176 on 15 Df
+Pseudo R-squared: 0.01076
+Number of iterations: 24 (BFGS) + 2 (Fisher scoring) </code></pre>
 </div>
 </div>
 </div>
@@ -2553,29 +2693,29 @@ compare_mods &lt;- function(Sex_bias_and_Chromosome_and_Expression_level_and_Her
 <pre class="r"><code>betareg(P_sex_antag ~ male_bias_in_expression + chromosome + AveExpr + h2, 
         data = twas) %&gt;% compare_mods()</code></pre>
 <pre><code>                                                     Model df      AICc delta
-1                              Sex_bias + Expression_level  4 -30441.41  0.00
-2                 Sex_bias + Chromosome + Expression_level  8 -30441.06  0.34
-3               Sex_bias + Expression_level + Heritability  5 -30439.52  1.89
-4  Sex_bias + Chromosome + Expression_level + Heritability  9 -30439.15  2.26
-5                                         Expression_level  3 -30422.02 19.38
-6                            Chromosome + Expression_level  7 -30421.95 19.46
-7                          Heritability + Expression_level  4 -30421.12 20.28
-8             Chromosome + Expression_level + Heritability  8 -30420.90 20.51
-9                     Sex_bias + Chromosome + Heritability  8 -30392.54 48.86
-10                                 Heritability + Sex_bias  4 -30392.47 48.94
-11                                                Sex_bias  3 -30388.94 52.46
-12                                   Sex_bias + Chromosome  7 -30388.74 52.67
-13                               Heritability + Chromosome  7 -30359.08 82.33
-14                                            Heritability  3 -30358.16 83.25
-15                                              Chromosome  6 -30357.43 83.98
-16                                              Null_model  2 -30356.87 84.54
+1                              Sex_bias + Expression_level  4 -34589.62  0.00
+2                 Sex_bias + Chromosome + Expression_level  8 -34588.66  0.96
+3               Sex_bias + Expression_level + Heritability  5 -34587.64  1.98
+4  Sex_bias + Chromosome + Expression_level + Heritability  9 -34586.68  2.94
+5                                         Expression_level  3 -34577.47 12.16
+6                            Chromosome + Expression_level  7 -34576.37 13.25
+7                          Heritability + Expression_level  4 -34575.65 13.97
+8             Chromosome + Expression_level + Heritability  8 -34574.53 15.09
+9                                  Heritability + Sex_bias  4 -34554.36 35.26
+10                    Sex_bias + Chromosome + Heritability  8 -34553.42 36.21
+11                                                Sex_bias  3 -34550.29 39.33
+12                                   Sex_bias + Chromosome  7 -34549.20 40.42
+13                                            Heritability  3 -34531.14 58.48
+14                               Heritability + Chromosome  7 -34530.40 59.23
+15                                              Null_model  2 -34529.07 60.55
+16                                              Chromosome  6 -34528.10 61.52
    Weight
-1   0.391
-2   0.330
-3   0.152
-4   0.127
-5   0.000
-6   0.000
+1   0.450
+2   0.278
+3   0.167
+4   0.103
+5   0.001
+6   0.001
 7   0.000
 8   0.000
 9   0.000
@@ -2598,28 +2738,28 @@ betareg(formula = P_sex_antag ~ male_bias_in_expression + AveExpr + chromosome +
 
 Deviance residuals:
     Min      1Q  Median      3Q     Max 
--8.4438 -0.3042  0.0289  0.2959  9.1754 
+-9.1747 -0.2995  0.0292  0.2848 10.3049 
 
 Coefficients (mean model with logit link):
-                         Estimate Std. Error z value Pr(&gt;|z|)    
-(Intercept)              0.296825   0.036808   8.064 7.37e-16 ***
-male_bias_in_expression  0.029206   0.006488   4.502 6.74e-06 ***
-AveExpr                 -0.044069   0.006316  -6.977 3.02e-12 ***
-chromosome2R             0.011626   0.008820   1.318    0.187    
-chromosome3L             0.002737   0.008925   0.307    0.759    
-chromosome3R            -0.010594   0.008469  -1.251    0.211    
-chromosomeX             -0.003335   0.009569  -0.349    0.727    
-h2                       0.007332   0.024456   0.300    0.764    
+                          Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)             -0.0067608  0.0333946  -0.202 0.839564    
+male_bias_in_expression  0.0212796  0.0056547   3.763 0.000168 ***
+AveExpr                 -0.0327572  0.0055128  -5.942 2.82e-09 ***
+chromosome2R             0.0105978  0.0076951   1.377 0.168444    
+chromosome3L             0.0050394  0.0077886   0.647 0.517612    
+chromosome3R            -0.0077820  0.0073929  -1.053 0.292508    
+chromosomeX              0.0009761  0.0083528   0.117 0.906975    
+h2                      -0.0033264  0.0213525  -0.156 0.876203    
 
 Phi coefficients (precision model with identity link):
       Estimate Std. Error z value Pr(&gt;|z|)    
-(phi)  35.4527     0.4151   85.41   &lt;2e-16 ***
+(phi)  47.3331     0.5561   85.11   &lt;2e-16 ***
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1 
 
 Type of estimator: ML (maximum likelihood)
-Log-likelihood: 1.523e+04 on 9 Df
-Pseudo R-squared: 0.006467
+Log-likelihood: 1.73e+04 on 9 Df
+Pseudo R-squared: 0.004863
 Number of iterations: 14 (BFGS) + 2 (Fisher scoring) </code></pre>
 </div>
 </div>
@@ -2630,26 +2770,26 @@ Number of iterations: 14 (BFGS) + 2 (Fisher scoring) </code></pre>
 <pre class="r"><code>betareg(P_female_specific ~ male_bias_in_expression + chromosome + AveExpr + h2, 
         data = twas) %&gt;% compare_mods()</code></pre>
 <pre><code>                                                     Model df      AICc  delta
-1  Sex_bias + Chromosome + Expression_level + Heritability  9 -49193.02   0.00
-2               Sex_bias + Expression_level + Heritability  5 -49183.00  10.02
-3             Chromosome + Expression_level + Heritability  8 -49180.74  12.28
-4                          Heritability + Expression_level  4 -49172.53  20.49
-5                     Sex_bias + Chromosome + Heritability  8 -49140.68  52.34
-6                                Heritability + Chromosome  7 -49136.83  56.19
-7                                  Heritability + Sex_bias  4 -49126.38  66.64
-8                                             Heritability  3 -49124.07  68.95
-9                 Sex_bias + Chromosome + Expression_level  8 -49098.44  94.58
-10                           Chromosome + Expression_level  7 -49094.93  98.09
-11                                   Sex_bias + Chromosome  7 -49084.10 108.92
-12                                              Chromosome  6 -49082.96 110.06
-13                             Sex_bias + Expression_level  4 -49081.44 111.58
-14                                        Expression_level  3 -49079.47 113.55
-15                                              Null_model  2 -49065.62 127.40
-16                                                Sex_bias  3 -49065.52 127.50
+1  Sex_bias + Chromosome + Expression_level + Heritability  9 -47773.64   0.00
+2               Sex_bias + Expression_level + Heritability  5 -47763.96   9.68
+3             Chromosome + Expression_level + Heritability  8 -47758.25  15.38
+4                          Heritability + Expression_level  4 -47750.58  23.06
+5                     Sex_bias + Chromosome + Heritability  8 -47727.93  45.70
+6                                Heritability + Chromosome  7 -47721.51  52.13
+7                                  Heritability + Sex_bias  4 -47714.28  59.35
+8                                             Heritability  3 -47709.71  63.92
+9                 Sex_bias + Chromosome + Expression_level  8 -47677.94  95.70
+10                           Chromosome + Expression_level  7 -47672.49 101.14
+11                                   Sex_bias + Chromosome  7 -47667.51 106.12
+12                                              Chromosome  6 -47664.52 109.11
+13                             Sex_bias + Expression_level  4 -47661.38 112.25
+14                                        Expression_level  3 -47657.74 115.90
+15                                                Sex_bias  3 -47649.57 124.07
+16                                              Null_model  2 -47648.19 125.45
    Weight
-1   0.991
-2   0.007
-3   0.002
+1   0.992
+2   0.008
+3   0.000
 4   0.000
 5   0.000
 6   0.000
@@ -2675,28 +2815,28 @@ betareg(formula = P_female_specific ~ male_bias_in_expression + AveExpr +
 
 Deviance residuals:
     Min      1Q  Median      3Q     Max 
--5.8656 -0.2861 -0.2321  0.3132  9.7894 
+-5.9987 -0.2762 -0.2203  0.3220  9.7146 
 
 Coefficients (mean model with logit link):
                         Estimate Std. Error z value Pr(&gt;|z|)    
-(Intercept)             -2.83425    0.06386 -44.384  &lt; 2e-16 ***
-male_bias_in_expression  0.04314    0.01121   3.848 0.000119 ***
-AveExpr                  0.08013    0.01094   7.327 2.34e-13 ***
-chromosome2R             0.01133    0.01535   0.738 0.460479    
-chromosome3L             0.02644    0.01550   1.706 0.088002 .  
-chromosome3R             0.01641    0.01474   1.114 0.265364    
-chromosomeX              0.06539    0.01646   3.972 7.14e-05 ***
-h2                      -0.40886    0.04342  -9.417  &lt; 2e-16 ***
+(Intercept)             -2.74270    0.06550 -41.871  &lt; 2e-16 ***
+male_bias_in_expression  0.04691    0.01105   4.246 2.17e-05 ***
+AveExpr                  0.07410    0.01079   6.866 6.62e-12 ***
+chromosome2R             0.01296    0.01515   0.856   0.3921    
+chromosome3L             0.02633    0.01529   1.722   0.0851 .  
+chromosome3R             0.01513    0.01454   1.041   0.2981    
+chromosomeX              0.06422    0.01625   3.952 7.77e-05 ***
+h2                      -0.40654    0.04285  -9.487  &lt; 2e-16 ***
 
 Phi coefficients (precision model with identity link):
       Estimate Std. Error z value Pr(&gt;|z|)    
-(phi)  33.4005     0.4021   83.06   &lt;2e-16 ***
+(phi)  32.5062     0.3905   83.25   &lt;2e-16 ***
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1 
 
 Type of estimator: ML (maximum likelihood)
-Log-likelihood: 2.461e+04 on 9 Df
-Pseudo R-squared: 0.008763
+Log-likelihood: 2.39e+04 on 9 Df
+Pseudo R-squared: 0.008403
 Number of iterations: 17 (BFGS) + 2 (Fisher scoring) </code></pre>
 </div>
 </div>
@@ -2707,25 +2847,25 @@ Number of iterations: 17 (BFGS) + 2 (Fisher scoring) </code></pre>
 <pre class="r"><code>betareg(P_male_specific ~ male_bias_in_expression + chromosome + AveExpr + h2,
         data = twas) %&gt;% compare_mods()</code></pre>
 <pre><code>                                                     Model df      AICc delta
-1               Sex_bias + Expression_level + Heritability  5 -47455.26  0.00
-2  Sex_bias + Chromosome + Expression_level + Heritability  9 -47450.05  5.21
-3                          Heritability + Expression_level  4 -47444.90 10.36
-4             Chromosome + Expression_level + Heritability  8 -47439.34 15.91
-5                              Sex_bias + Expression_level  4 -47439.03 16.23
-6                 Sex_bias + Chromosome + Expression_level  8 -47433.74 21.52
-7                                         Expression_level  3 -47423.39 31.87
-8                            Chromosome + Expression_level  7 -47417.98 37.27
-9                                  Heritability + Sex_bias  4 -47414.16 41.10
-10                                                Sex_bias  3 -47412.03 43.23
-11                    Sex_bias + Chromosome + Heritability  8 -47408.91 46.34
-12                                   Sex_bias + Chromosome  7 -47406.82 48.44
-13                                            Heritability  3 -47392.28 62.98
-14                                              Null_model  2 -47388.24 67.02
-15                               Heritability + Chromosome  7 -47387.03 68.22
-16                                              Chromosome  6 -47383.19 72.07
+1               Sex_bias + Expression_level + Heritability  5 -48541.57  0.00
+2  Sex_bias + Chromosome + Expression_level + Heritability  9 -48536.30  5.27
+3                          Heritability + Expression_level  4 -48531.28 10.29
+4             Chromosome + Expression_level + Heritability  8 -48525.64 15.93
+5                              Sex_bias + Expression_level  4 -48525.47 16.10
+6                 Sex_bias + Chromosome + Expression_level  8 -48520.08 21.49
+7                                         Expression_level  3 -48509.93 31.64
+8                            Chromosome + Expression_level  7 -48504.39 37.18
+9                                  Heritability + Sex_bias  4 -48501.00 40.57
+10                                                Sex_bias  3 -48498.88 42.69
+11                    Sex_bias + Chromosome + Heritability  8 -48495.65 45.92
+12                                   Sex_bias + Chromosome  7 -48493.54 48.03
+13                                            Heritability  3 -48479.33 62.25
+14                                              Null_model  2 -48475.30 66.28
+15                               Heritability + Chromosome  7 -48473.93 67.65
+16                                              Chromosome  6 -48470.07 71.50
    Weight
-1   0.926
-2   0.068
+1   0.928
+2   0.066
 3   0.005
 4   0.000
 5   0.000
@@ -2752,28 +2892,28 @@ betareg(formula = P_male_specific ~ male_bias_in_expression + AveExpr +
 
 Deviance residuals:
     Min      1Q  Median      3Q     Max 
--4.6317 -0.3338 -0.2835  0.2417  7.8801 
+-4.5503 -0.3445 -0.2935  0.2302  7.7542 
 
 Coefficients (mean model with logit link):
                          Estimate Std. Error z value Pr(&gt;|z|)    
-(Intercept)             -2.845465   0.070036 -40.629  &lt; 2e-16 ***
-male_bias_in_expression -0.043538   0.012423  -3.505 0.000457 ***
-AveExpr                  0.078981   0.011989   6.588 4.46e-11 ***
-chromosome2R            -0.020552   0.016788  -1.224 0.220868    
-chromosome3L            -0.012103   0.016969  -0.713 0.475699    
-chromosome3R             0.003115   0.016070   0.194 0.846299    
-chromosomeX             -0.008758   0.018145  -0.483 0.629336    
-h2                      -0.193851   0.046887  -4.134 3.56e-05 ***
+(Intercept)             -2.923866   0.073749 -39.646  &lt; 2e-16 ***
+male_bias_in_expression -0.043979   0.012576  -3.497  0.00047 ***
+AveExpr                  0.079554   0.012143   6.552 5.69e-11 ***
+chromosome2R            -0.020737   0.017004  -1.220  0.22264    
+chromosome3L            -0.012236   0.017187  -0.712  0.47653    
+chromosome3R             0.002803   0.016277   0.172  0.86327    
+chromosomeX             -0.009666   0.018381  -0.526  0.59900    
+h2                      -0.195834   0.047498  -4.123 3.74e-05 ***
 
 Phi coefficients (precision model with identity link):
       Estimate Std. Error z value Pr(&gt;|z|)    
-(phi)  27.0203     0.3273   82.54   &lt;2e-16 ***
+(phi)  27.3715     0.3325   82.33   &lt;2e-16 ***
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1 
 
 Type of estimator: ML (maximum likelihood)
-Log-likelihood: 2.373e+04 on 9 Df
-Pseudo R-squared: 0.005672
+Log-likelihood: 2.428e+04 on 9 Df
+Pseudo R-squared: 0.005682
 Number of iterations: 16 (BFGS) + 2 (Fisher scoring) </code></pre>
 </div>
 </div>
@@ -2784,28 +2924,28 @@ Number of iterations: 16 (BFGS) + 2 (Fisher scoring) </code></pre>
 <pre class="r"><code>betareg(P_equal_effects ~ male_bias_in_expression + chromosome + AveExpr + chromosome + h2, 
         data = twas) %&gt;% compare_mods()</code></pre>
 <pre><code>                                                     Model df      AICc  delta
-1  Sex_bias + Chromosome + Expression_level + Heritability  9 -28799.43   0.00
-2               Sex_bias + Expression_level + Heritability  5 -28794.12   5.30
-3             Chromosome + Expression_level + Heritability  8 -28789.58   9.85
-4                 Sex_bias + Chromosome + Expression_level  8 -28783.96  15.47
-5                          Heritability + Expression_level  4 -28783.81  15.62
-6                              Sex_bias + Expression_level  4 -28777.46  21.97
-7                            Chromosome + Expression_level  7 -28769.30  30.13
-8                                         Expression_level  3 -28761.81  37.62
-9                                    Sex_bias + Chromosome  7 -28689.41 110.02
-10                    Sex_bias + Chromosome + Heritability  8 -28687.47 111.96
-11                                                Sex_bias  3 -28682.03 117.39
-12                                 Heritability + Sex_bias  4 -28680.19 119.24
-13                                              Chromosome  6 -28660.46 138.97
-14                               Heritability + Chromosome  7 -28658.93 140.50
-15                                              Null_model  2 -28651.16 148.27
-16                                            Heritability  3 -28649.93 149.49
+1  Sex_bias + Chromosome + Expression_level + Heritability  9 -27223.43   0.00
+2               Sex_bias + Expression_level + Heritability  5 -27218.69   4.74
+3             Chromosome + Expression_level + Heritability  8 -27215.11   8.33
+4                          Heritability + Expression_level  4 -27209.96  13.48
+5                 Sex_bias + Chromosome + Expression_level  8 -27208.79  14.65
+6                              Sex_bias + Expression_level  4 -27202.92  20.51
+7                            Chromosome + Expression_level  7 -27196.06  27.38
+8                                         Expression_level  3 -27189.30  34.13
+9                                    Sex_bias + Chromosome  7 -27119.08 104.36
+10                    Sex_bias + Chromosome + Heritability  8 -27117.14 106.29
+11                                                Sex_bias  3 -27112.39 111.04
+12                                 Heritability + Sex_bias  4 -27110.55 112.89
+13                                              Chromosome  6 -27093.17 130.27
+14                               Heritability + Chromosome  7 -27091.62 131.81
+15                                              Null_model  2 -27084.72 138.71
+16                                            Heritability  3 -27083.46 139.97
    Weight
-1   0.927
-2   0.065
-3   0.007
-4   0.000
-5   0.000
+1   0.900
+2   0.084
+3   0.014
+4   0.001
+5   0.001
 6   0.000
 7   0.000
 8   0.000
@@ -2829,29 +2969,29 @@ betareg(formula = P_equal_effects ~ male_bias_in_expression + AveExpr +
 
 Deviance residuals:
     Min      1Q  Median      3Q     Max 
--4.7139 -0.2446 -0.1877  0.2974  7.6173 
+-4.8118 -0.2348 -0.1783  0.3070  7.5082 
 
 Coefficients (mean model with logit link):
                          Estimate Std. Error z value Pr(&gt;|z|)    
-(Intercept)             -2.209333   0.067199 -32.877  &lt; 2e-16 ***
-male_bias_in_expression -0.040995   0.011892  -3.447 0.000566 ***
-AveExpr                  0.122788   0.011499  10.678  &lt; 2e-16 ***
-chromosome2R            -0.024335   0.016146  -1.507 0.131758    
-chromosome3L            -0.001919   0.016297  -0.118 0.906247    
-chromosome3R             0.026460   0.015421   1.716 0.086181 .  
-chromosomeX              0.020194   0.017384   1.162 0.245382    
-h2                      -0.183550   0.044779  -4.099 4.15e-05 ***
+(Intercept)             -2.126579   0.069649 -30.533  &lt; 2e-16 ***
+male_bias_in_expression -0.038117   0.011843  -3.219  0.00129 ** 
+AveExpr                  0.119363   0.011467  10.409  &lt; 2e-16 ***
+chromosome2R            -0.023619   0.016095  -1.468  0.14223    
+chromosome3L            -0.002435   0.016249  -0.150  0.88088    
+chromosome3R             0.025941   0.015377   1.687  0.09161 .  
+chromosomeX              0.019449   0.017339   1.122  0.26199    
+h2                      -0.178916   0.044641  -4.008 6.13e-05 ***
 
 Phi coefficients (precision model with identity link):
       Estimate Std. Error z value Pr(&gt;|z|)    
-(phi)  15.8446     0.1861   85.16   &lt;2e-16 ***
+(phi)  15.1428     0.1773   85.43   &lt;2e-16 ***
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1 
 
 Type of estimator: ML (maximum likelihood)
-Log-likelihood: 1.441e+04 on 9 Df
-Pseudo R-squared: 0.01127
-Number of iterations: 16 (BFGS) + 2 (Fisher scoring) </code></pre>
+Log-likelihood: 1.362e+04 on 9 Df
+Pseudo R-squared: 0.01041
+Number of iterations: 16 (BFGS) + 1 (Fisher scoring) </code></pre>
 </div>
 </div>
 <div id="probability-of-null-effect" class="section level4 tabset">
@@ -2861,25 +3001,25 @@ Number of iterations: 16 (BFGS) + 2 (Fisher scoring) </code></pre>
 <pre class="r"><code>betareg(P_null ~ male_bias_in_expression + chromosome + AveExpr + chromosome + h2,
         data = twas) %&gt;% compare_mods()</code></pre>
 <pre><code>                                                     Model df      AICc  delta
-1                     Sex_bias + Chromosome + Heritability  8 -34144.13   0.00
-2  Sex_bias + Chromosome + Expression_level + Heritability  9 -34144.06   0.07
-3               Sex_bias + Expression_level + Heritability  5 -34131.89  12.24
-4                                  Heritability + Sex_bias  4 -34131.37  12.76
-5                                Heritability + Chromosome  7 -34046.97  97.16
-6             Chromosome + Expression_level + Heritability  8 -34045.38  98.75
-7                                             Heritability  3 -34040.36 103.77
-8                          Heritability + Expression_level  4 -34038.56 105.57
-9                 Sex_bias + Chromosome + Expression_level  8 -33977.32 166.82
-10                                   Sex_bias + Chromosome  7 -33967.50 176.63
-11                             Sex_bias + Expression_level  4 -33960.34 183.79
-12                                                Sex_bias  3 -33951.77 192.36
-13                           Chromosome + Expression_level  7 -33913.19 230.94
-14                                        Expression_level  3 -33902.16 241.97
-15                                              Chromosome  6 -33892.38 251.75
-16                                              Null_model  2 -33883.30 260.83
+1                     Sex_bias + Chromosome + Heritability  8 -35661.32   0.00
+2  Sex_bias + Chromosome + Expression_level + Heritability  9 -35660.68   0.64
+3                                  Heritability + Sex_bias  4 -35648.78  12.53
+4               Sex_bias + Expression_level + Heritability  5 -35648.64  12.68
+5                                Heritability + Chromosome  7 -35558.74 102.58
+6             Chromosome + Expression_level + Heritability  8 -35557.57 103.74
+7                                             Heritability  3 -35552.40 108.92
+8                          Heritability + Expression_level  4 -35550.92 110.40
+9                 Sex_bias + Chromosome + Expression_level  8 -35492.75 168.57
+10                                   Sex_bias + Chromosome  7 -35481.17 180.15
+11                             Sex_bias + Expression_level  4 -35476.03 185.29
+12                                                Sex_bias  3 -35465.76 195.55
+13                           Chromosome + Expression_level  7 -35425.13 236.18
+14                                        Expression_level  3 -35414.44 246.88
+15                                              Chromosome  6 -35401.55 259.77
+16                                              Null_model  2 -35392.88 268.44
    Weight
-1   0.508
-2   0.490
+1   0.578
+2   0.420
 3   0.001
 4   0.001
 5   0.000
@@ -2906,28 +3046,28 @@ betareg(formula = P_null ~ male_bias_in_expression + AveExpr + chromosome +
 
 Deviance residuals:
     Min      1Q  Median      3Q     Max 
--5.7312 -0.2524  0.2238  0.5991  4.1395 
+-5.7613 -0.2551  0.2343  0.6056  4.0831 
 
 Coefficients (mean model with logit link):
                         Estimate Std. Error z value Pr(&gt;|z|)    
-(Intercept)             -1.83405    0.06705 -27.352  &lt; 2e-16 ***
-male_bias_in_expression  0.11931    0.01170  10.200  &lt; 2e-16 ***
-AveExpr                  0.01597    0.01151   1.388 0.165237    
-chromosome2R             0.05831    0.01607   3.630 0.000284 ***
-chromosome3L             0.02796    0.01632   1.713 0.086675 .  
-chromosome3R             0.02435    0.01550   1.571 0.116190    
-chromosomeX              0.06474    0.01739   3.723 0.000197 ***
-h2                      -0.58302    0.04607 -12.656  &lt; 2e-16 ***
+(Intercept)             -1.88870    0.06935 -27.235  &lt; 2e-16 ***
+male_bias_in_expression  0.12119    0.01162  10.429  &lt; 2e-16 ***
+AveExpr                  0.01336    0.01145   1.166 0.243430    
+chromosome2R             0.05820    0.01598   3.642 0.000271 ***
+chromosome3L             0.02774    0.01623   1.708 0.087544 .  
+chromosome3R             0.02367    0.01542   1.535 0.124697    
+chromosomeX              0.06355    0.01730   3.674 0.000239 ***
+h2                      -0.58221    0.04586 -12.694  &lt; 2e-16 ***
 
 Phi coefficients (precision model with identity link):
       Estimate Std. Error z value Pr(&gt;|z|)    
-(phi)  18.8218     0.2231   84.36   &lt;2e-16 ***
+(phi)  19.9272     0.2367   84.18   &lt;2e-16 ***
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1 
 
 Type of estimator: ML (maximum likelihood)
-Log-likelihood: 1.708e+04 on 9 Df
-Pseudo R-squared: 0.01273
+Log-likelihood: 1.784e+04 on 9 Df
+Pseudo R-squared: 0.01282
 Number of iterations: 19 (BFGS) + 2 (Fisher scoring) </code></pre>
 </div>
 </div>
@@ -3017,117 +3157,47 @@ ggsave(&quot;figures/TWAS_stats_figure.pdf&quot;, twas_stats_fig, width = 7, hei
 <div id="effect-sizes-for-the-gwas-analysis" class="section level4">
 <h4>Effect sizes for the GWAS analysis</h4>
 <pre class="r"><code>gwas_stats_fig</code></pre>
-<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-25-1.png" width="576" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-25-1">
-Past versions of unnamed-chunk-25-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-25-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/e112260eb7edb940edc701a4180d2cf98f9d1145/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-25-1.png" target="_blank">e112260</a>
-</td>
-<td>
-lukeholman
-</td>
-<td>
-2021-03-04
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-33-1.png" width="576" style="display: block; margin: auto;" /></p>
 <p><strong>Figure XX</strong>: The figure shows estimated parameters from four separate beta regression models seeking predictors of the mixture assignment probabilities calculated using <code>mashr</code> on the GWAS results. Positive values indicate that the predictor is associated with an elevated probability across loci; estimates that are non-zero with 95% confidence are shown in red. The clearest result is the strong, positive relationship between minor allele frequency (MAF) and the probability that the locus was assigned to the ‘sexually antagonistic’ mixture component. There was also a strong, negative relationship between MAF and the chance that the locus was assigned to the ‘equal effects’ mixture component (i.e. that the locus had concordant effects on male and female fitness). Loci with a relatively high probability of being female-specific tended to have <em>lower</em> MAF, while loci with a relatively high probability of being male-specific tended to have <em>higher</em> MAF. Chromosome 2L seems to be enriched for loci with male-specific effects, and de-enriched for loci that affect females relative to the other chromosomes. Finally, there were some associations between site class and mixture assignment probability, which (though sometimes statistically significant) were small and subtle.</p>
 </div>
 <div id="effect-sizes-for-the-twas-analysis" class="section level4">
 <h4>Effect sizes for the TWAS analysis</h4>
 <pre class="r"><code>twas_stats_fig</code></pre>
-<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-26-1.png" width="576" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-26-1">
-Past versions of unnamed-chunk-26-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-26-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/e112260eb7edb940edc701a4180d2cf98f9d1145/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-26-1.png" target="_blank">e112260</a>
-</td>
-<td>
-lukeholman
-</td>
-<td>
-2021-03-04
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<p><strong>Figure XX</strong>: The figure shows estimated parameters from five separate beta regression models seeking predictors of the mixture assignment probabilities calculated using <code>mashr</code> on the TWAS results. Positive values indicate that the predictor is associated with an elevated probability across transcripts; estimates that are non-zero with 95% confidence are shown in red. The clearest result is the strong, negative relationship between the heritability of the transcript’s expression level (calculated by Huang et al. 2015) and the probability that the locus was assigned to any mixture component other than ‘sexually antagonistic’. Transcripts with strongly male-biased expression were more likely to have no relationship with fitness (i.e. to be assigned to the ‘null’ mixture component); sex bias was a significant but weak predictor for the other mixture components. Transcripts with high expression levels were more likely to have a sexually concordant relationship with fitness, and less likely to be sexually antagonistic. Transcripts from genes located on the X chromosome were slightly more likely to have a female-specific correlation with fitness, or no correlation.</p>
+<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-34-1.png" width="576" style="display: block; margin: auto;" /></p>
+<p><strong>Figure XX</strong>: The figure shows estimated parameters from five separate beta regression models seeking predictors of the mixture assignment probabilities calculated using <code>mashr</code> on the TWAS results. Positive values indicate that the predictor is associated with an elevated probability across transcripts; estimates that are non-zero with 95% confidence are shown in red. The clearest result is the strong, negative relationship between the heritability of the transcript’s expression level (calculated by Huang et al. 2015) and the probability that the transcript was assigned to any mixture component other than ‘sexually antagonistic’. Transcripts with strongly male-biased expression were more likely to have no relationship with fitness (i.e. to be assigned to the ‘null’ mixture component); sex bias was a significant but weak predictor for the other mixture components. Transcripts with high expression levels were more likely to have a sexually concordant relationship with fitness, and less likely to be sexually antagonistic. Transcripts from genes located on the X chromosome were slightly more likely to have a female-specific correlation with fitness, or no correlation.</p>
 </div>
 </div>
 </div>
 <div id="effect-of-the-minor-allele" class="section level2">
 <h2>Effect of the minor allele</h2>
 <p>Evolutionary theory makes various testable predictions about the effects of the major and minor alleles on phenotypes, especially phenotypes that are closely correlated with fitness. For example, the minor allele should generally be associated with the lower-fitness phenotype (and the major allele with the higher-fitness phenotype), due to selection removing the lower-fitness allele. Furthermore, it is interesting to ask whether the female-beneficial allele or the male-beneficial allele tends to be the major allele at sexually-antagonistic loci? Lastly, we might expect different results at loci where the minor allele is quite rare vs loci where the minor allele is only slightly rarer than the major allele; loci with comparatively low MAF are more likely to reflect new polymorphisms (since most mutations are neutral or deleterious, and it takes time for the minor allele to drift towards high frequencies), and are more likely to be under selection (since selection against the minor allele keeps it rare).</p>
-<p>To address these questions graphically, we here plot the effects on male and female early-life fitness of each allele, that was assigned to the female-specific, male-specific, or sexually antagonistic mixture component by <code>mashr</code>, with an assignment probability in the highest 0.1% across all the loci analysed. Since there were 1,602,873 loci, each column plots the male and female effect sizes for 1,602 loci.</p>
-<p>Among loci with female-specific effects on fitness (first column), the minor allele was usually associated with reduced female fitness, especially among loci where the minor allele frequency was below 0.2, as expected if alleles that harm female fitness are removed by selection. There was no similar finding for loci with <em>male</em>-specific effects (second column): the minor allele was equally likely to increase or reduce fitness, regardless of MAF. For loci with sexually-antagonistic effects on fitness (third column), the minor allele tended to be the one that reduced female fitness and elevated male fitness; this pattern was clearest among loci with a MAF &lt; 0.2. Finally, among loci inferred to be under sexually concordant selection, the effect sizes were strongest among loci with MAF &lt; 0.2, as expected if selection prevents alleles with strong, detrimental effects on the fitness of both sexes from becoming common.</p>
+<p>To address these questions graphically, we here plot the effects on male and female early-life fitness of each allele, that was assigned to the female-specific, male-specific, or sexually antagonistic mixture component by <code>mashr</code>, with an assignment probability in the highest 0.1% across all the loci analysed. Since there were 1,665,770 loci, each column plots the male and female effect sizes for 1,665 loci.</p>
+<p>Among the top 0.1% of loci with female-specific effects on fitness (first column), the minor allele was usually associated with reduced female fitness among loci where the minor allele frequency was below 0.2, as expected if alleles that harm female fitness are removed by selection. Among loci with MAF &gt; 0.2, the minor allele beneficial to female fitness almost as often as the major allele was.</p>
+<p>There was no similar finding for the top 0.1% of loci with loci with <em>male</em>-specific effects (second column): the minor allele was equally likely to increase or reduce fitness, regardless of MAF. Also, most of these top male-specific loci had quite high minor allele frequencies, perhaps suggesting their effects on fitness were weaker than for the loci with female-specific fitness effects.</p>
+<p>For the top 0.1% of loci with sexually-antagonistic effects on fitness (third column), the minor allele frequencies again tended to be high (above 0.2), suggesting either weak overall purifying selection (due to counteracting effects of selection on males and females), or even balancing selection. The minor allele tended to be the one that reduced female fitness and elevated male fitness, though alleles with the reverse effect were present as well.</p>
+<p>Finally, among loci inferred to be under sexually concordant selection, the effect sizes were strongest among loci with MAF &lt; 0.2, as expected if selection prevents alleles with strong, detrimental effects on the fitness of both sexes from becoming common.</p>
 <pre class="r"><code>histo_data &lt;- tbl(db, &quot;univariate_lmm_results&quot;) %&gt;% 
-  inner_join(tbl(db, &quot;variants&quot;) %&gt;% 
-               select(-chr, -position), 
+  left_join(tbl(db, &quot;variants&quot;) %&gt;% 
+               select(SNP, MAF, site.class), 
              by = &quot;SNP&quot;) %&gt;%
-  collect(n=Inf) %&gt;%
-    mutate(class = 
-             case_when(
-               P_sex_antag &gt; quantile(P_sex_antag, probs=0.999)  ~ &quot;Top 0.1%\nsexually antagonistic loci&quot;,
-               P_equal_effects &gt; quantile(P_equal_effects, probs=0.999)  ~ &quot;Top 0.1%\nsexually concordant loci&quot;,
-               P_female_specific &gt; quantile(P_female_specific, probs=0.999)  ~ &quot;Top 0.1%\nfemale-specific loci&quot;,
-               P_male_specific &gt; quantile(P_male_specific, probs=0.999)  ~ &quot;Top 0.1%\nmale-specific loci&quot;,
-             )) %&gt;%
-    mutate(MAF = ifelse(MAF &lt; 0.2, &quot;0.05 &lt; MAF &lt; 0.2&quot;, &quot;0.2 &lt; MAF &lt; 0.5&quot;)) %&gt;%
-    filter(!is.na(class)) %&gt;%
+  filter(!is.na(LFSR_female_early_mashr_ED)) %&gt;% 
+  collect(n = Inf) %&gt;% 
+  mutate(class = 
+           case_when(
+             P_sex_antag &gt; quantile(P_sex_antag, probs = 0.999)  ~ &quot;Top 0.1%\nsexually antagonistic loci&quot;,
+             P_equal_effects &gt; quantile(P_equal_effects, probs = 0.999)  ~ &quot;Top 0.1%\nsexually concordant loci&quot;,
+             P_female_specific &gt; quantile(P_female_specific, probs = 0.999)  ~ &quot;Top 0.1%\nfemale-specific loci&quot;,
+             P_male_specific &gt; quantile(P_male_specific, probs = 0.999)  ~ &quot;Top 0.1%\nmale-specific loci&quot;,
+           )) %&gt;%
+  mutate(MAF = ifelse(MAF &lt; 0.2, &quot;0.05 &lt; MAF &lt; 0.2&quot;, &quot;0.2 &lt; MAF &lt; 0.5&quot;)) %&gt;%
+  filter(!is.na(class)) %&gt;%
   select(beta_female_early_mashr_ED, beta_male_early_mashr_ED, class, MAF)
 
 eff_size_histos &lt;- ggplot(histo_data, aes(beta_female_early_mashr_ED)) + 
   geom_vline(xintercept = 0, linetype = 2) +
-  geom_histogram(bins=30,fill=&quot;tomato&quot;,colour=NA, alpha = 0.5) + 
-  geom_histogram(aes(beta_male_early_mashr_ED), bins=30,fill=&quot;steelblue&quot;,colour=NA, alpha = 0.5) + 
-  geom_histogram(bins=30,fill=NA,colour=&quot;black&quot;) + 
+  geom_histogram(bins=30, fill=&quot;tomato&quot;, colour=NA, alpha = 0.5) + 
+  geom_histogram(aes(beta_male_early_mashr_ED), bins=30, fill=&quot;steelblue&quot;, colour=NA, alpha = 0.5) + 
+  geom_histogram(bins=30, fill=NA, colour=&quot;black&quot;) + 
   geom_histogram(aes(beta_male_early_mashr_ED), bins=30,fill=NA,colour=&quot;black&quot;) + 
   facet_grid(MAF ~ class, scales = &quot;free_y&quot;) +
   xlab(&quot;Effect of the minor allele on early-life fitness\n(females:red, males:blue)&quot;) + 
@@ -3139,69 +3209,22 @@ eff_size_histos &lt;- ggplot(histo_data, aes(beta_female_early_mashr_ED)) +
 
 ggsave(&quot;figures/eff_size_histos.pdf&quot;, width = 8, height = 5)
 eff_size_histos</code></pre>
-<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-28-1.png" width="768" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-28-1">
-Past versions of unnamed-chunk-28-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-28-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/e112260eb7edb940edc701a4180d2cf98f9d1145/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-28-1.png" target="_blank">e112260</a>
-</td>
-<td>
-lukeholman
-</td>
-<td>
-2021-03-04
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-36-1.png" width="768" style="display: block; margin: auto;" /></p>
 </div>
 <div id="manhattan-plot" class="section level2">
 <h2>Manhattan plot</h2>
+<p><strong>Figure legend</strong>: Manhattan plot showing the p-values (-log_{10} transformed) for each variant, from mixed model GWAS of female (top) and male (bottom) early-life fitness testing the null hypothesis that the two alleles are associated with equal fitness values.</p>
 <pre class="r"><code>manhattan_data &lt;- tbl(db, &quot;univariate_lmm_results&quot;) %&gt;% 
   select(SNP, starts_with(&quot;P_&quot;),
-         beta_female_early_mashr_ED, beta_male_early_mashr_ED) %&gt;%
+         pvalue_female_early_raw, pvalue_male_early_raw) %&gt;%
   distinct() %&gt;%
   collect(n=Inf) %&gt;%
   mutate(position = str_split(SNP, &quot;_&quot;),
          chr = map_chr(position, ~ .x[1]),
-         position = as.numeric(map_chr(position, ~ .x[2])),
-         P_pleiotropy = 1 - P_null - P_female_specific - P_male_specific,
-         SA_not_concord = P_sex_antag &gt; P_equal_effects,
-         top_SA = P_sex_antag &gt;= quantile(P_sex_antag, probs=0.9999)) %&gt;%
-  mutate(beta_female_early_mashr_ED = abs(beta_female_early_mashr_ED),
-         beta_male_early_mashr_ED = abs(beta_male_early_mashr_ED)) %&gt;%
-  # mutate(beta_male_early_mashr_ED = replace(
-  #   beta_male_early_mashr_ED, 
-  #   beta_female_early_mashr_ED &lt; 0, 
-  #   beta_male_early_mashr_ED[beta_female_early_mashr_ED &lt; 0] * -1),
-  #   beta_female_early_mashr_ED = replace(
-  #   beta_female_early_mashr_ED, 
-  #   beta_female_early_mashr_ED &lt; 0, 
-  #   beta_female_early_mashr_ED[beta_female_early_mashr_ED &lt; 0] * -1),
-  #   ) %&gt;%
+         position = as.numeric(map_chr(position, ~ .x[2]))) %&gt;% 
+         # P_pleiotropy = 1 - P_null - P_female_specific - P_male_specific,
+         # SA_not_concord = P_sex_antag &gt; P_equal_effects,
+         # top_SA = P_sex_antag &gt;= quantile(P_sex_antag, probs=0.9999)) %&gt;% 
   filter(chr != &quot;4&quot;) 
 
 max_pos &lt;- manhattan_data %&gt;%
@@ -3214,29 +3237,15 @@ manhattan_data &lt;- manhattan_data %&gt;%
     left_join(max_pos, by = &quot;chr&quot;) %&gt;%
     mutate(position = position + max_pos) 
 
-# cols &lt;- c(&quot;blue&quot;, &quot;skyblue&quot;, &quot;red&quot;, &quot;pink&quot;, &quot;orange&quot;, &quot;yellow&quot;,
-#           &quot;purple&quot;, &quot;steelblue&quot;, &quot;green&quot;, &quot;tomato&quot;)
-# manhattan_data %&gt;%
-#   filter(P_pleiotropy &gt; 0.7485376) %&gt;%
-#   sample_n(100000) %&gt;%
-#   ggplot(aes(position, -1 * log10(1 - P_pleiotropy), colour = chr, stroke = 0.2)) +
-#   geom_point(size = 0.5, pch = 1) +
-#  # scale_color_manual(values = cols) +
-#   # scale_fill_brewer(palette = &quot;Paired&quot;, name = &quot;Chromosome&quot;) + 
-#   scale_colour_brewer(palette = &quot;Paired&quot;, name = &quot;Chromosome&quot;) + 
-#   ylab(&quot;-log10(Posterior probability of null effect)&quot;) +
-#   theme_bw() +
-#   theme(axis.text.x = element_blank(),
-#         axis.ticks.x = element_blank())
-
 
 p1 &lt;- manhattan_data %&gt;%
-  ggplot(aes(position, beta_female_early_mashr_ED, group = chr, colour = chr, stroke = 0.2)) + 
+  ggplot(aes(position, -1 * log10(pvalue_female_early_raw), group = chr, colour = chr, stroke = 0.2)) + 
   geom_point(size = 0.5) +
-  geom_point(data = manhattan_data %&gt;% filter(top_SA),
-             aes(y = 0.43), size = 3, pch = 6) +
+  # geom_point(data = manhattan_data %&gt;% filter(top_SA), 
+  #            aes(y = 8), size = 3, pch = 6) +
   scale_colour_brewer(palette = &quot;Paired&quot;, name = &quot;Chromosome&quot;) + 
-  ylab(&quot;Effect on female fitness&quot;) + 
+  scale_y_continuous(limits = c(0,8)) +
+  ylab(expression(paste(&quot;Effect on female early-life fitness (-&quot;, Log[10], &quot; p)&quot;))) + 
   xlab(&quot;&quot;) +
   theme_bw() + 
   theme(axis.text.x = element_blank(),
@@ -3244,56 +3253,114 @@ p1 &lt;- manhattan_data %&gt;%
         axis.ticks.x = element_blank())
 
 p2 &lt;- manhattan_data %&gt;%
-  ggplot(aes(position, beta_male_early_mashr_ED, group = chr, colour = chr, stroke = 0.2)) + 
+  ggplot(aes(position, -1 * log10(pvalue_male_early_raw), group = chr, colour = chr, stroke = 0.2)) + 
   geom_point(size = 0.5) +
   scale_colour_brewer(palette = &quot;Paired&quot;, name = &quot;Chromosome&quot;) + 
-  ylab(&quot;Effect on male fitness&quot;) + 
+  ylab(expression(paste(&quot;Effect on male early-life fitness (-&quot;, Log[10], &quot; p)&quot;))) + 
   xlab(&quot;Position&quot;) +
-  scale_y_reverse() +
+  scale_y_reverse(limits = c(8,0)) +
   theme_bw() + 
   theme(axis.text.x = element_blank(),
         panel.border = element_blank(),
         axis.ticks.x = element_blank())
 
-grid.arrange(p1, p2)</code></pre>
-<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-29-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-29-1">
-Past versions of unnamed-chunk-29-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-29-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/e112260eb7edb940edc701a4180d2cf98f9d1145/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-29-1.png" target="_blank">e112260</a>
-</td>
-<td>
-lukeholman
-</td>
-<td>
-2021-03-04
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+grid_arrange_shared_legend &lt;- function(..., ncol = length(list(...)), nrow = 1) {
+
+  plots &lt;- list(...)
+  # position &lt;- match.arg(position)
+  g &lt;- ggplotGrob(plots[[1]] + theme(legend.position = &quot;right&quot;))$grobs
+  legend &lt;- g[[which(sapply(g, function(x) x$name) == &quot;guide-box&quot;)]]
+  lheight &lt;- sum(legend$height)
+  lwidth &lt;- sum(legend$width)
+  gl &lt;- lapply(plots, function(x) x + theme(legend.position=&quot;none&quot;))
+  gl &lt;- c(gl, ncol = ncol, nrow = nrow)
+  
+  combined &lt;- arrangeGrob(arrangeGrob(gl[[1]], gl[[2]], nrow = 2),
+                          legend,
+                          ncol = 2,
+                          widths = unit.c(unit(1, &quot;npc&quot;) - lwidth, lwidth))
+  
+  grid.newpage()
+  grid.draw(combined)
+
+  # return gtable invisibly
+  invisible(combined)
+
+}
+
+grid_arrange_shared_legend(p1, p2)</code></pre>
+<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-37-1.png" width="672" style="display: block; margin: auto;" /></p>
+<!-- ```{r} -->
+<!-- manhattan_data <- tbl(db, "univariate_lmm_results") %>%  -->
+<!--   select(SNP, starts_with("P_"), -->
+<!--          beta_female_early_mashr_ED, beta_male_early_mashr_ED) %>% -->
+<!--   distinct() %>% -->
+<!--   collect(n=Inf) %>% -->
+<!--   mutate(position = str_split(SNP, "_"), -->
+<!--          chr = map_chr(position, ~ .x[1]), -->
+<!--          position = as.numeric(map_chr(position, ~ .x[2])), -->
+<!--          P_pleiotropy = 1 - P_null - P_female_specific - P_male_specific, -->
+<!--          SA_not_concord = P_sex_antag > P_equal_effects, -->
+<!--          top_SA = P_sex_antag >= quantile(P_sex_antag, probs=0.9999)) %>% -->
+<!--   mutate(beta_female_early_mashr_ED = abs(beta_female_early_mashr_ED), -->
+<!--          beta_male_early_mashr_ED = abs(beta_male_early_mashr_ED)) %>% -->
+<!--   # mutate(beta_male_early_mashr_ED = replace( -->
+<!--   #   beta_male_early_mashr_ED,  -->
+<!--   #   beta_female_early_mashr_ED < 0,  -->
+<!--   #   beta_male_early_mashr_ED[beta_female_early_mashr_ED < 0] * -1), -->
+<!--   #   beta_female_early_mashr_ED = replace( -->
+<!--   #   beta_female_early_mashr_ED,  -->
+<!--   #   beta_female_early_mashr_ED < 0,  -->
+<!--   #   beta_female_early_mashr_ED[beta_female_early_mashr_ED < 0] * -1), -->
+<!--   #   ) %>% -->
+<!--   filter(chr != "4")  -->
+<!-- max_pos <- manhattan_data %>% -->
+<!--   group_by(chr) %>% -->
+<!--   summarise(max_pos = max(position), .groups = "drop") %>% -->
+<!--   as.data.frame() -->
+<!-- max_pos$max_pos <- c(0, cumsum(max_pos$max_pos[1:4])) -->
+<!-- manhattan_data <- manhattan_data %>% -->
+<!--     left_join(max_pos, by = "chr") %>% -->
+<!--     mutate(position = position + max_pos)  -->
+<!-- # cols <- c("blue", "skyblue", "red", "pink", "orange", "yellow", -->
+<!-- #           "purple", "steelblue", "green", "tomato") -->
+<!-- # manhattan_data %>% -->
+<!-- #   filter(P_pleiotropy > 0.7485376) %>% -->
+<!-- #   sample_n(100000) %>% -->
+<!-- #   ggplot(aes(position, -1 * log10(1 - P_pleiotropy), colour = chr, stroke = 0.2)) + -->
+<!-- #   geom_point(size = 0.5, pch = 1) + -->
+<!-- #  # scale_color_manual(values = cols) + -->
+<!-- #   # scale_fill_brewer(palette = "Paired", name = "Chromosome") +  -->
+<!-- #   scale_colour_brewer(palette = "Paired", name = "Chromosome") +  -->
+<!-- #   ylab("-log10(Posterior probability of null effect)") + -->
+<!-- #   theme_bw() + -->
+<!-- #   theme(axis.text.x = element_blank(), -->
+<!-- #         axis.ticks.x = element_blank()) -->
+<!-- p1 <- manhattan_data %>% -->
+<!--   ggplot(aes(position, beta_female_early_mashr_ED, group = chr, colour = chr, stroke = 0.2)) +  -->
+<!--   geom_point(size = 0.5) + -->
+<!--   geom_point(data = manhattan_data %>% filter(top_SA), -->
+<!--              aes(y = 0.43), size = 3, pch = 6) + -->
+<!--   scale_colour_brewer(palette = "Paired", name = "Chromosome") +  -->
+<!--   ylab("Effect on female fitness") +  -->
+<!--   xlab("") + -->
+<!--   theme_bw() +  -->
+<!--   theme(axis.text.x = element_blank(), -->
+<!--         panel.border = element_blank(), -->
+<!--         axis.ticks.x = element_blank()) -->
+<!-- p2 <- manhattan_data %>% -->
+<!--   ggplot(aes(position, beta_male_early_mashr_ED, group = chr, colour = chr, stroke = 0.2)) +  -->
+<!--   geom_point(size = 0.5) + -->
+<!--   scale_colour_brewer(palette = "Paired", name = "Chromosome") +  -->
+<!--   ylab("Effect on male fitness") +  -->
+<!--   xlab("Position") + -->
+<!--   scale_y_reverse() + -->
+<!--   theme_bw() +  -->
+<!--   theme(axis.text.x = element_blank(), -->
+<!--         panel.border = element_blank(), -->
+<!--         axis.ticks.x = element_blank()) -->
+<!-- grid.arrange(p1, p2) -->
+<!-- ``` -->
 </div>
 <div id="antagonism-ratios-figure" class="section level2">
 <h2>Antagonism ratios figure</h2>
@@ -3339,7 +3406,7 @@ lukeholman
                                    &quot;Inter-sex (late life)&quot;,
                                    &quot;Inter-age (females)&quot;,
                                    &quot;Inter-age (males)&quot;)))
-  
+  print(antagonism_evidence_ratios %&gt;% arrange(evidence_ratio))
   antagonism_evidence_ratios %&gt;%
     ggplot(aes(log2(evidence_ratio))) + 
     geom_histogram(data=subset(antagonism_evidence_ratios, evidence_ratio &lt; 1), 
@@ -3363,19 +3430,33 @@ GWAS_ratios_plot &lt;- SNP_clumps %&gt;%
          pheno2 = beta_female_late_mashr_ED, 
          pheno3 = beta_male_early_mashr_ED, 
          pheno4 = beta_male_late_mashr_ED,
-         LFSR1 = LFSR_female_early_mashr_canonical, 
-         LFSR2 = LFSR_female_late_mashr_canonical, 
-         LFSR3 = LFSR_male_early_mashr_canonical, 
-         LFSR4 = LFSR_male_late_mashr_canonical,
+         LFSR1 = LFSR_female_early_mashr_ED, 
+         LFSR2 = LFSR_female_late_mashr_ED, 
+         LFSR3 = LFSR_male_early_mashr_ED, 
+         LFSR4 = LFSR_male_late_mashr_ED,
          identifier = SNP_clump) %&gt;%
-  make_evidence_ratio_plot(ymax = 10000, ylab = &quot;Number of loci&quot;)
-
-TWAS_ED &lt;- readRDS(&quot;data/derived/TWAS/TWAS_ED.rds&quot;)
+  make_evidence_ratio_plot(ymax = 10000, ylab = &quot;Number of loci&quot;)</code></pre>
+<pre><code># A tibble: 4,829,428 x 3
+   identifier                     trait                  evidence_ratio
+   &lt;chr&gt;                          &lt;fct&gt;                           &lt;dbl&gt;
+ 1 3L_18098299_SNP                Inter-sex (early life)          0.127
+ 2 2L_4378111_SNP, 2L_4378127_SNP Inter-sex (early life)          0.275
+ 3 2R_12475593_SNP                Inter-sex (early life)          0.306
+ 4 2R_12475593_SNP                Inter-sex (late life)           0.323
+ 5 X_15519378_SNP                 Inter-sex (early life)          0.327
+ 6 X_6233582_SNP                  Inter-sex (early life)          0.335
+ 7 3L_18098299_SNP                Inter-sex (late life)           0.347
+ 8 3R_23687589_SNP                Inter-sex (early life)          0.360
+ 9 2L_4378050_SNP                 Inter-sex (early life)          0.364
+10 2L_4674413_SNP                 Inter-sex (early life)          0.367
+# … with 4,829,418 more rows</code></pre>
+<pre class="r"><code>TWAS_ED &lt;- readRDS(&quot;data/derived/TWAS/TWAS_ED.rds&quot;)
 TWAS_canonical &lt;- readRDS(&quot;data/derived/TWAS/TWAS_canonical.rds&quot;)
+
 
 TWAS_mashr_results &lt;- 
   data.frame(
-    FBID = read_delim(&quot;data/input/huang_transcriptome/dgrp.array.exp.female.txt&quot;, delim = &quot; &quot;) %&gt;% pull(gene),
+    FBID = read_csv(&quot;data/derived/TWAS/TWAS_results.csv&quot;)$FBID,
     as.data.frame(get_pm(TWAS_canonical)) %&gt;% rename_all(~str_c(&quot;canonical_&quot;, .)),
     as.data.frame(get_lfsr(TWAS_canonical)) %&gt;% 
       rename_all(~str_replace_all(., &quot;beta&quot;, &quot;LFSR&quot;)) %&gt;% rename_all(~str_c(&quot;canonical_&quot;, .))) %&gt;% 
@@ -3397,10 +3478,22 @@ TWAS_ratios_plot &lt;- TWAS_mashr_results %&gt;%
          LFSR3 = ED_LFSR_ME, 
          LFSR4 = ED_LFSR_ML,
          identifier = FBID) %&gt;%
-  make_evidence_ratio_plot(ymax = 500, ylab = &quot;Number of transcripts&quot;)
-
-
-pp &lt;- plot_grid(GWAS_ratios_plot, TWAS_ratios_plot, 
+  make_evidence_ratio_plot(ymax = 500, ylab = &quot;Number of transcripts&quot;)</code></pre>
+<pre><code># A tibble: 57,144 x 3
+   identifier  trait                  evidence_ratio
+   &lt;chr&gt;       &lt;fct&gt;                           &lt;dbl&gt;
+ 1 FBgn0013275 Inter-sex (early life)        0.00849
+ 2 FBgn0013275 Inter-sex (late life)         0.00950
+ 3 FBgn0263092 Inter-sex (early life)        0.00991
+ 4 FBgn0263092 Inter-sex (late life)         0.0109 
+ 5 FBgn0261615 Inter-sex (early life)        0.0118 
+ 6 FBgn0261615 Inter-sex (late life)         0.0144 
+ 7 FBgn0000022 Inter-sex (late life)         0.0154 
+ 8 FBgn0000022 Inter-sex (early life)        0.0168 
+ 9 FBgn0027330 Inter-sex (late life)         0.0191 
+10 FBgn0027330 Inter-sex (early life)        0.0193 
+# … with 57,134 more rows</code></pre>
+<pre class="r"><code>pp &lt;- plot_grid(GWAS_ratios_plot, TWAS_ratios_plot, 
                    labels = c(&#39;A&#39;, &#39;B&#39;), label_size = 12)
 # ggdraw(add_sub(pp, &quot;Evidence ratio (log scale)&quot;, 
 #                vpadding=grid::unit(0,&quot;lines&quot;), 
@@ -3466,15 +3559,16 @@ locale:
 [1] en_GB.UTF-8/en_GB.UTF-8/en_GB.UTF-8/C/en_GB.UTF-8/en_GB.UTF-8
 
 attached base packages:
-[1] stats     graphics  grDevices utils     datasets  methods   base     
+[1] grid      stats     graphics  grDevices utils     datasets  methods  
+[8] base     
 
 other attached packages:
  [1] lmtest_0.9-37    zoo_1.8-8        MuMIn_1.43.17    betareg_3.1-4   
- [5] cowplot_1.0.0    kableExtra_1.1.0 mashr_0.2.38     ashr_2.2-47     
- [9] showtext_0.9-1   showtextdb_3.0   sysfonts_0.8.2   Hmisc_4.4-0     
+ [5] cowplot_1.0.0    kableExtra_1.3.4 mashr_0.2.38     ashr_2.2-47     
+ [9] showtext_0.9-2   showtextdb_3.0   sysfonts_0.8.3   Hmisc_4.4-0     
 [13] Formula_1.2-3    survival_3.2-7   lattice_0.20-41  ggbeeswarm_0.6.0
 [17] qqman_0.1.4      gridExtra_2.3    forcats_0.5.0    stringr_1.4.0   
-[21] dplyr_1.0.0      purrr_0.3.4      readr_1.3.1      tidyr_1.1.0     
+[21] dplyr_1.0.0      purrr_0.3.4      readr_2.0.0      tidyr_1.1.0     
 [25] tibble_3.0.1     ggplot2_3.3.2    tidyverse_1.3.0  workflowr_1.6.2 
 
 loaded via a namespace (and not attached):
@@ -3482,36 +3576,39 @@ loaded via a namespace (and not attached):
   [4] rprojroot_1.3-2     htmlTable_1.13.3    base64enc_0.1-3    
   [7] fs_1.4.1            rstudioapi_0.11     hexbin_1.28.1      
  [10] farver_2.0.3        flexmix_2.3-15      bit64_0.9-7        
- [13] fansi_0.4.1         mvtnorm_1.1-0       lubridate_1.7.8    
- [16] xml2_1.3.2          splines_4.0.3       knitr_1.30         
+ [13] fansi_0.4.1         mvtnorm_1.1-0       lubridate_1.7.10   
+ [16] xml2_1.3.2          splines_4.0.3       knitr_1.32         
  [19] jsonlite_1.7.0      broom_0.5.6         cluster_2.1.0      
  [22] dbplyr_1.4.4        png_0.1-7           compiler_4.0.3     
  [25] httr_1.4.1          backports_1.1.7     assertthat_0.2.1   
  [28] Matrix_1.2-18       cli_2.0.2           later_1.0.0        
  [31] acepack_1.4.1       htmltools_0.5.0     tools_4.0.3        
  [34] gtable_0.3.0        glue_1.4.2          Rcpp_1.0.4.6       
- [37] cellranger_1.1.0    vctrs_0.3.0         nlme_3.1-149       
- [40] xfun_0.19           rvest_0.3.5         lifecycle_0.2.0    
- [43] irlba_2.3.3         MASS_7.3-53         scales_1.1.1       
- [46] hms_0.5.3           promises_1.1.0      sandwich_2.5-1     
- [49] RColorBrewer_1.1-2  yaml_2.2.1          curl_4.3           
- [52] memoise_1.1.0       rpart_4.1-15        latticeExtra_0.6-29
- [55] calibrate_1.7.7     stringi_1.5.3       RSQLite_2.2.0      
- [58] SQUAREM_2020.2      rmeta_3.0           highr_0.8          
- [61] checkmate_2.0.0     truncnorm_1.0-8     rlang_0.4.6        
- [64] pkgconfig_2.0.3     evaluate_0.14       invgamma_1.1       
- [67] labeling_0.3        htmlwidgets_1.5.1   bit_1.1-15.2       
- [70] tidyselect_1.1.0    plyr_1.8.6          magrittr_2.0.1     
- [73] R6_2.4.1            generics_0.0.2      DBI_1.1.0          
- [76] pillar_1.4.4        haven_2.3.1         whisker_0.4        
- [79] foreign_0.8-80      withr_2.2.0         abind_1.4-5        
- [82] mixsqp_0.3-43       nnet_7.3-14         modelr_0.1.8       
- [85] crayon_1.3.4        rmarkdown_2.5       jpeg_0.1-8.1       
- [88] isoband_0.2.1       grid_4.0.3          readxl_1.3.1       
- [91] data.table_1.12.8   blob_1.2.1          git2r_0.27.1       
- [94] reprex_0.3.0        digest_0.6.25       webshot_0.5.2      
- [97] httpuv_1.5.3.1      stats4_4.0.3        munsell_0.5.0      
-[100] beeswarm_0.2.3      viridisLite_0.3.0   vipor_0.4.5        </code></pre>
+ [37] cellranger_1.1.0    vctrs_0.3.0         svglite_1.2.3      
+ [40] nlme_3.1-149        xfun_0.22           rvest_0.3.5        
+ [43] lifecycle_0.2.0     irlba_2.3.3         MASS_7.3-53        
+ [46] scales_1.1.1        vroom_1.5.3         hms_0.5.3          
+ [49] promises_1.1.0      parallel_4.0.3      sandwich_2.5-1     
+ [52] RColorBrewer_1.1-2  curl_4.3            yaml_2.2.1         
+ [55] memoise_1.1.0       gdtools_0.2.2       rpart_4.1-15       
+ [58] RSQLite_2.2.0       latticeExtra_0.6-29 calibrate_1.7.7    
+ [61] stringi_1.5.3       SQUAREM_2020.2      rmeta_3.0          
+ [64] highr_0.8           checkmate_2.0.0     truncnorm_1.0-8    
+ [67] rlang_0.4.6         pkgconfig_2.0.3     systemfonts_0.2.2  
+ [70] evaluate_0.14       invgamma_1.1        labeling_0.3       
+ [73] htmlwidgets_1.5.1   bit_1.1-15.2        tidyselect_1.1.0   
+ [76] plyr_1.8.6          magrittr_2.0.1      R6_2.4.1           
+ [79] generics_0.0.2      DBI_1.1.0           mgcv_1.8-33        
+ [82] pillar_1.4.4        haven_2.3.1         whisker_0.4        
+ [85] foreign_0.8-80      withr_2.2.0         abind_1.4-5        
+ [88] mixsqp_0.3-43       nnet_7.3-14         modelr_0.1.8       
+ [91] crayon_1.3.4        utf8_1.1.4          tzdb_0.1.2         
+ [94] rmarkdown_2.5       jpeg_0.1-8.1        isoband_0.2.1      
+ [97] readxl_1.3.1        data.table_1.12.8   blob_1.2.1         
+[100] git2r_0.27.1        webshot_0.5.2       reprex_0.3.0       
+[103] digest_0.6.25       httpuv_1.5.3.1      stats4_4.0.3       
+[106] munsell_0.5.0       viridisLite_0.3.0   beeswarm_0.4.0     
+[109] vipor_0.4.5        </code></pre>
 </div>
 </div>
 

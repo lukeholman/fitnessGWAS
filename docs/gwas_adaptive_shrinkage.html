@@ -29,6 +29,7 @@
 <link href="site_libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
 <script src="site_libs/anchor-sections-1.0/anchor-sections.js"></script>
 <script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
 
@@ -377,15 +378,12 @@ div.tocify {
   <a href="index.html">Home</a>
 </li>
 <li>
-  <a href="about.html">About</a>
-</li>
-<li>
   <a href="license.html">License</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://github.com/jdblischak/workflowr">
+  <a href="https://github.com/lukeholman/fitnessGWAS">
     <span class="fa fa-github"></span>
      
   </a>
@@ -432,10 +430,10 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2021-02-14
+<strong>Last updated:</strong> 2021-09-26
 </p>
 <p>
-<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 5 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 2
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 1
 </p>
 <p>
 <strong>Knit directory:</strong> <code>fitnessGWAS/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
@@ -451,12 +449,12 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges"> <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted changes </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
 </p>
 </div>
-<div id="strongRMarkdownfilestronguncommittedchanges" class="panel-collapse collapse">
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
 <div class="panel-body">
-<p>The R Markdown file has unstaged changes. To know which version of the R Markdown file created these results, you’ll want to first commit it to the Git repo. If you’re still working on the analysis, you can ignore this warning. When you’re finished, you can run <code>wflow_publish</code> to commit the R Markdown file and build the HTML.</p>
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
 </div>
 </div>
 </div>
@@ -547,16 +545,16 @@ relative
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreec386787073d6bc80f7be30ea346adfbae7746636targetblankc386787a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/lukeholman/fitnessGWAS/tree/c386787073d6bc80f7be30ea346adfbae7746636" target="_blank">c386787</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreeaf15dd63a476b2499f2be7f3002df3ec72c28522targetblankaf15dd6a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/lukeholman/fitnessGWAS/tree/af15dd63a476b2499f2be7f3002df3ec72c28522" target="_blank">af15dd6</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreec386787073d6bc80f7be30ea346adfbae7746636targetblankc386787a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreeaf15dd63a476b2499f2be7f3002df3ec72c28522targetblankaf15dd6a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/lukeholman/fitnessGWAS/tree/c386787073d6bc80f7be30ea346adfbae7746636" target="_blank">c386787</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/lukeholman/fitnessGWAS/tree/af15dd63a476b2499f2be7f3002df3ec72c28522" target="_blank">af15dd6</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -564,6 +562,7 @@ Note that you need to be careful to ensure that all relevant files for the analy
 <pre><code>
 Ignored files:
     Ignored:    .DS_Store
+    Ignored:    .Rapp.history
     Ignored:    .Rhistory
     Ignored:    .Rproj.user/
     Ignored:    .httr-oauth
@@ -582,39 +581,43 @@ Ignored files:
     Ignored:    data/input/dgrp2.fam
     Ignored:    data/input/huang_transcriptome/
     Ignored:    figures/.DS_Store
+    Ignored:    figures/fig1_inkscape.svg
+    Ignored:    figures/figure1a.pdf
+    Ignored:    figures/figure1b.pdf
 
 Untracked files:
-    Untracked:  Rplots.pdf
-    Untracked:  analysis/GO_KEGG_enrichment.Rmd
-    Untracked:  analysis/correlations_SNP_effects.Rmd
-    Untracked:  code/GO_and_KEGG_gsea.R
-    Untracked:  code/make_sites_files_for_ARGweaver.R
-    Untracked:  code/run_argweaver.R
-    Untracked:  code/run_mashr.R
-    Untracked:  data/argweaver/
-    Untracked:  figures/mixture_proportions.pdf
-    Untracked:  manuscript/
+    Untracked:  big_model.rds
+    Untracked:  code/gcta64
+    Untracked:  code/plink
+    Untracked:  code/quant_gen_1.R
+    Untracked:  data/input/genomic_relatedness_matrix.rds
+    Untracked:  figures/SNP_effect_ED.pdf
+    Untracked:  figures/boyle_plot.pdf
+    Untracked:  figures/fig1.pdf
+    Untracked:  manuscript/GWAS_manuscript.log
+    Untracked:  old_analyses/
 
 Unstaged changes:
     Modified:   .gitignore
-    Modified:   analysis/GWAS_tables.Rmd
-    Modified:   analysis/TWAS.Rmd
-    Modified:   analysis/checking_mashr_results.Rmd
-    Modified:   analysis/eQTL_analysis.Rmd
-    Modified:   analysis/get_predicted_line_means.Rmd
-    Modified:   analysis/gwas_adaptive_shrinkage.Rmd
-    Modified:   analysis/index.Rmd
-    Modified:   analysis/make_annotation_database.Rmd
-    Modified:   analysis/perform_gwas.Rmd
-    Modified:   analysis/plot_line_means.Rmd
-    Modified:   analysis/plotting_results.Rmd
-    Deleted:    code/gwas_adaptive_shrinkage.R
-    Modified:   data/input/female_fitness.csv
-    Modified:   data/input/female_fitness_CLEANED.csv
-    Modified:   data/input/male_fitness.csv
-    Modified:   data/input/male_fitness_CLEANED.csv
-    Modified:   figures/figure1.eps
-    Modified:   figures/figure2.eps
+    Deleted:    Rplots.pdf
+    Deleted:    analysis/GO_KEGG_enrichment.Rmd
+    Deleted:    analysis/plotting_results.Rmd
+    Deleted:    code/GO_and_KEGG_gsea.R
+    Deleted:    code/make_sites_files_for_ARGweaver.R
+    Deleted:    code/plotting_results.Rmd
+    Deleted:    code/run_argweaver.R
+    Modified:   code/run_mashr.R
+    Deleted:    data/input/clough_2014_dsx_targets.csv
+    Modified:   figures/GWAS_stats_figure.pdf
+    Modified:   figures/TWAS_stats_figure.pdf
+    Modified:   figures/antagonism_ratios.pdf
+    Modified:   figures/composite_mixture_figure.pdf
+    Modified:   figures/eff_size_histos.pdf
+    Deleted:    figures/figure1.eps
+    Deleted:    figures/figure2.eps
+    Modified:   manuscript/GWAS_manuscript.Rmd
+    Modified:   manuscript/GWAS_manuscript.pdf
+    Modified:   manuscript/GWAS_manuscript.tex
 
 </code></pre>
 <p>
@@ -658,6 +661,57 @@ Message
 Rmd
 </td>
 <td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/af15dd63a476b2499f2be7f3002df3ec72c28522/analysis/gwas_adaptive_shrinkage.Rmd" target="_blank">af15dd6</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2021-09-26
+</td>
+<td>
+Commit Sept 2021
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/3855d3359649c74f955042725d07276742cb649a/analysis/gwas_adaptive_shrinkage.Rmd" target="_blank">3855d33</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2021-03-04
+</td>
+<td>
+big fist commit 2021
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/3855d3359649c74f955042725d07276742cb649a/docs/gwas_adaptive_shrinkage.html" target="_blank">3855d33</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2021-03-04
+</td>
+<td>
+big fist commit 2021
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
 <a href="https://github.com/lukeholman/fitnessGWAS/blob/8d54ea56db332d3ac2d391c232936a4dc8106cc1/analysis/gwas_adaptive_shrinkage.Rmd" target="_blank">8d54ea5</a>
 </td>
 <td>
@@ -694,39 +748,62 @@ Initial commit
 </div>
 </div>
 </div>
-<p>Note: <code>mashr</code> requires a large amount of RAM, and so to get this script to run on the full SNP dataset, I had to launch R from the Terminal with extra memory allocation. I used <code>knitr::purl(input = "analysis/gwas_adaptive_shrinkage.Rmd", output = "code/run_mashr.R")</code> to generate an R script from this R Markdown document, then <code>env R_MAX_VSIZE=700Gb Rscript code/run_mashr.R</code>. Successfully ran on a late 2015 iMac with 32GB RAM over a few days.</p>
+<!-- Note: `mashr` requires a large amount of RAM, and so to get this script to run on the full SNP dataset, I had to launch R from the Terminal with extra memory allocation. I used `knitr::purl(input = "analysis/gwas_adaptive_shrinkage.Rmd", output = "code/run_mashr.R")` to generate an R script from this R Markdown document, then `env R_MAX_VSIZE=700Gb Rscript code/run_mashr.R`. I upload the script to Spartan with scp ~/Rprojects/fitnessGWAS/code/run_mashr.R lukeholman@spartan:/data/projects/punim0243/DGRP_mashr. -->
 <pre class="r"><code>library(tidyverse)
 library(ashr) # Also requires installation of RMosek, which needs a (free) licence. See the ashr Github page for help
 library(mashr) # NB: This has multiple dependencies and was tricky to install. Read the Github page, and good luck!
 library(glue)
-library(kableExtra)</code></pre>
+library(kableExtra)
+library(gridExtra)
+
+
+# Get the list of SNPs (or chunks of 100% SNP clumps) that are in approx. LD with one another
+get_mashr_data &lt;- function(){
+  
+  SNPs_in_LD &lt;- read.table(&quot;data/derived/SNPs_in_LD&quot;, header = FALSE)
+  
+  data_for_mashr &lt;- read_csv(&quot;data/derived/all_univariate_GEMMA_results.csv&quot;) %&gt;% 
+    filter(str_detect(SNPs, &quot;,&quot;) | SNPs %in% SNPs_in_LD$V1) %&gt;% 
+    select(SNPs, starts_with(&quot;beta&quot;), starts_with(&quot;SE&quot;)) 
+  
+  single_snps &lt;- data_for_mashr %&gt;% filter(!str_detect(SNPs, &quot;,&quot;))
+  multiple_snps &lt;- data_for_mashr %&gt;% filter(str_detect(SNPs, &quot;,&quot;))
+  multiple_snps &lt;- multiple_snps[enframe(strsplit(multiple_snps$SNPs, split = &quot;, &quot;)) %&gt;% 
+                                   unnest(value) %&gt;% 
+                                   filter(value %in% SNPs_in_LD$V1) %&gt;% 
+                                   pull(name), ]
+  bind_rows(single_snps, multiple_snps) %&gt;% arrange(SNPs)
+}</code></pre>
 <div id="run-multivariate-adaptive-shrinkage-using-mashr" class="section level2">
 <h2>Run multivariate adaptive shrinkage using <code>mashr</code></h2>
-<p>The following code runs the R package <code>mashr</code>, which attempts to infer the true estimates of the SNP effects (the <span class="math inline">\(\beta\)</span>s) based on the multivariate structure of the data. <code>mashr</code> accepts a matrix of <span class="math inline">\(\beta\)</span>s and their standard errors, and uses mixture models to infer the true <span class="math inline">\(\beta\)</span>s, the local false sign rate, the proportion of SNPs that belong to each mixture component, and other useful things. For more information on <code>mashr</code>, see the <a href="https://stephenslab.github.io/mashr/index.html">package website</a>, and the associated paper by Urbut, Wang, and Stephens (<a href="doi:10.1101/096552" class="uri">doi:10.1101/096552</a>).</p>
-<p>Importantly, there are two ways to run <code>mashr</code>: using “canonical” covariance matrices that are defined <em>a priori</em> by the user, or using covariance matrices that are selected by algorithmically investigating the structure of the data. The following code runs both approaches, since they provide contain complementary information.</p>
-<p>The canonical method is helpful for testing specific hypotheses about how the effect sizes are correlated across the multiple phenotypes being analysed; in our case, we are interested in identifying and counting SNPs with sex-specific and/or age-specific effects.</p>
-<p>By contrast, the data-driven approach uses the software <code>Extreme Deconvolution</code> to infer the true covariance structure in the data (using a subset of the most accurately-measured effects), and then selects a small number of covariance matrices (six, including the null) that provide a good approximation of the true mixture of covariance structures in the data.</p>
-<p>The data-driven approach provides “shrinked” estimates of <span class="math inline">\(\beta\)</span> that are likely to be closer to the true value than does the canonical approach, since the matrices used in the mixture model are expected to be more realistic. However the mixture proportions produced by the canonical approach are easier to interpret; e.g. we can use them to draw conclusions like “variants whose effects were inferred to female-specific were more common than male-specific ones” or “There are twice as many sexually-concordant variants as sexually-antagonistic variants”.</p>
+<div id="whole-genome-analyses" class="section level3">
+<h3>Whole-genome analyses</h3>
+<p>This section analyses variants from all chromosomes for which data were available (2L, 2R, 3L, 3R, 4, and X).</p>
+<p>The following code runs the package <code>mashr</code>, which attempts to infer more accurate estimates of the true SNP effect sizes (denoted <span class="math inline">\(\beta\)</span>) by applying shrinkage based on the multivariate structure of the data. <code>mashr</code> accepts a matrix of four <span class="math inline">\(\beta\)</span> terms for each locus (for the four fitness measures) as well as the four associated standard errors. <code>mashr</code> then uses Bayesian mixture models to estimate the true (i.e. shrinked) <span class="math inline">\(\beta\)</span> terms, the local false sign rate, the proportion of SNPs that belong to each mixture component, and other useful things. For more information on <code>mashr</code>, see the <a href="https://stephenslab.github.io/mashr/index.html">package website</a>, and the associated paper by Urbut, Wang, and Stephens (<a href="doi:10.1101/096552" class="uri">doi:10.1101/096552</a>).</p>
+<p>Importantly, there are two ways to run <code>mashr</code>: fitting a mixture model that uses “canonical” covariance matrices which are defined <em>a priori</em> by the user, or using covariance matrices that are selected by an algorithm based on the multivariate structure of the raw data. The following code runs both approaches, since they provide complementary information (see Methods in our paper).</p>
 <p>In the ‘canonical’ analysis, we were <em>a priori</em> interested in determining the relative abundances of variants that affect fitness in the following list of possible ways:</p>
 <ul>
 <li>null (no effect on fitness)</li>
 <li>uniform effect (the fitness effect of the allele is identical on all sexes and age classes; termed <code>equal_effects</code> in <code>mashr</code>)</li>
-<li>same sign, variable magnitude (the fitness effect of the allele has the same sign for all sexes and age classes, though its magnitude is allowed to vary; termed <code>simple_het</code> in <code>mashr</code>)</li>
+<li>same sign, variable magnitude (the fitness effect of the allele has the same sign for all sexes and age classes, though its magnitude is variable; termed <code>simple_het</code> in <code>mashr</code>)</li>
 <li>sexually antagonistic (one allele is good for one sex and bad for the other, though this effect is the same in young and old individuals)</li>
 <li>age antagonistic (one allele is good for one age class and bad for the other, though this effect is the same in males and females)</li>
 <li>female-specific (there is an effect in females but no effect in males; same sign of effect across age classes)</li>
 <li>male-specific (there is an effect in males but no effect in females; same sign of effect across age classes)</li>
-<li>early-life-specific (the locus affects the fitness of young flies, but has no effect on old flies)</li>
-<li>late-life-specific (the locus affects the fitness of old flies, but has no effect on young flies)</li>
+<li>early-life-specific (the locus affects the fitness of young flies of both sexes, but has no effect on old flies)</li>
+<li>late-life-specific (the locus affects the fitness of old flies of both sexes, but has no effect on young flies)</li>
 <li>female-specific effect, with a variable effect across age classes</li>
 <li>male-specific effect, with an effect magnitude and/or sign that changes with age</li>
 <li>female-specific effect, with an effect magnitude and/or sign that changes with age</li>
 <li>early-life-specific effect, with an effect magnitude and/or sign that differs between sexes</li>
 <li>late-life-specific effect, with an effect magnitude and/or sign that differs between sexes</li>
 </ul>
-<p>These categories were chosen because our <em>a priori</em> hypothesis is that different loci conceiveably affect fitness in a manner that depends on age, sex, and the age-sex interaction. There were 46 covariances matrices, including the null.</p>
-<p>Both <code>mashr</code> analyses use the default ‘null-biased’ prior, which means that loci with no effect on any of the fitness components are 10-fold more common than any of the other possibilities.</p>
+<p>These categories were chosen because our <em>a priori</em> hypothesis is that different loci conceivably affect fitness in a manner that depends on age, sex, and the age-sex interaction. There were 46 covariance matrices, including the null, though most of these are inferred to be absent or very rare and thus have essentially no influence on the results of the mixture model.</p>
+<p>Both <code>mashr</code> analyses use the default ‘null-biased’ prior, which means that loci with no effect on any of the fitness components are 10-fold more common than any of the other possibilities (reflecting our expectation that genetic polymorphisms with strong effects on fitness are probably rare).</p>
+<p>Because <code>mashr</code> models are computationally intensive, and to avoid issues of pseudoreplication in downstream analyses, we ran <code>mashr</code> on a subset of the 1,207,357 loci that were analysed using GEMMA. We pruned this list to a subset of 209,053 loci that were in approximate linkage disequilibrium with one another.</p>
 <pre class="r"><code>run_mashr &lt;- function(beta_and_se, mashr_mode, ED_p_cutoff = NULL){
+  
+  print(str(beta_and_se))
   
   mashr_setup &lt;- function(beta_and_se){
     betas &lt;- beta_and_se %&gt;% select(starts_with(&quot;beta&quot;)) %&gt;% as.matrix()
@@ -808,7 +885,7 @@ library(kableExtra)</code></pre>
     U &lt;- make_age_antag_matrix(0.5) %&gt;% make_sex_specific(&quot;M&quot;) %&gt;% add_matrix(U, &quot;Male_specific_0.5&quot;)
     U &lt;- make_age_antag_matrix(0.75) %&gt;% make_sex_specific(&quot;M&quot;) %&gt;% add_matrix(U, &quot;Male_specific_0.75&quot;)
     
-    # Nwegatively correlated across ages, and also sex-specific
+    # Negatively correlated across ages, and also sex-specific
     U &lt;- make_age_antag_matrix(-0.25) %&gt;% make_sex_specific(&quot;F&quot;) %&gt;% add_matrix(U, &quot;Female_specific_age_antag_0.25&quot;)
     U &lt;- make_age_antag_matrix(-0.5) %&gt;% make_sex_specific(&quot;F&quot;) %&gt;% add_matrix(U, &quot;Female_specific_age_antag_0.5&quot;)
     U &lt;- make_age_antag_matrix(-0.75) %&gt;% make_sex_specific(&quot;F&quot;) %&gt;% add_matrix(U, &quot;Female_specific_age_antag_0.75&quot;)
@@ -836,37 +913,47 @@ library(kableExtra)</code></pre>
   return(mash(data = mash_data, Ulist = U)) # Run mashr
 }
 
-data_for_mashr &lt;- read_csv(&quot;data/derived/all_univariate_GEMMA_results.csv&quot;) %&gt;% 
-  select(starts_with(&quot;beta&quot;), starts_with(&quot;SE&quot;))
 
 if(!file.exists(&quot;data/derived/mashr_results_canonical.rds&quot;)){
-  run_mashr(data_for_mashr, mashr_mode = &quot;ED&quot;, ED_p_cutoff = 0.2) %&gt;%
-    write_rds(path = &quot;data/derived/mashr_results_ED.rds&quot;)
   
+  data_for_mashr &lt;- get_mashr_data()
+  
+  print(&quot;Starting the data-driven analysis&quot;)
+  run_mashr(data_for_mashr, mashr_mode = &quot;ED&quot;, ED_p_cutoff = 0.2) %&gt;%
+    saveRDS(file = &quot;data/derived/mashr_results_ED.rds&quot;)
+  
+  print(&quot;Starting the canonical analysis&quot;)
   run_mashr(data_for_mashr, mashr_mode = &quot;canonical&quot;) %&gt;%
-    write_rds(path = &quot;data/derived/mashr_results_canonical.rds&quot;)
+    saveRDS(file = &quot;data/derived/mashr_results_canonical.rds&quot;)
+  
+  mashr_results_ED &lt;- read_rds(&quot;data/derived/mashr_results_ED.rds&quot;)
+  mashr_results_canonical &lt;- read_rds(&quot;data/derived/mashr_results_canonical.rds&quot;)
+  
 } else {
   mashr_results_ED &lt;- read_rds(&quot;data/derived/mashr_results_ED.rds&quot;)
   mashr_results_canonical &lt;- read_rds(&quot;data/derived/mashr_results_canonical.rds&quot;)
 }</code></pre>
+</div>
+<div id="chromosome-specific-analyses" class="section level3">
+<h3>Chromosome-specific analyses</h3>
+<p>This section runs a single canonical analysis for each of the major chromosomes (2L, 2R, 3L, 3R, and X; chromosome 4 was ommited because it carries only a few polymorphisms not in strong LD). The purpose of this analysis is to copare the inferred frequencies of different types of variants on each chromosome, e.g. to test whether the X chromosome is enriched for sexually antagonistic loci as predicted by some theoretical models.</p>
 <pre class="r"><code>mashr_one_chromosome &lt;- function(chr){
-  focal_data &lt;- read_csv(&quot;data/derived/all_univariate_GEMMA_results.csv&quot;) %&gt;% 
+  
+  data_for_mashr &lt;- get_mashr_data()
+  
+  focal_data &lt;- data_for_mashr %&gt;% 
     filter(grepl(glue(&quot;{chr}_&quot;), SNPs)) %&gt;%
     select(starts_with(&quot;beta&quot;), starts_with(&quot;SE&quot;))
   
   run_mashr(focal_data, mashr_mode = &quot;canonical&quot;) %&gt;%
-    write_rds(path = glue(&quot;data/derived/mashr_results_canonical_chr{chr}.rds&quot;))
+    saveRDS(file = glue(&quot;data/derived/mashr_results_canonical_chr{chr}.rds&quot;))
 }
 
 if(!file.exists(&quot;data/derived/mashr_results_canonical_chrX.rds&quot;)){
+  print(&quot;Starting the chromosome-specific analysis&quot;)
   lapply(c(&quot;2L&quot;, &quot;2R&quot;, &quot;3L&quot;, &quot;3R&quot;, &quot;X&quot;), mashr_one_chromosome)
-} else{
-  mashr_2L &lt;- readRDS(&quot;data/derived/mashr_results_canonical_chr2L.rds&quot;)
-  mashr_2R &lt;- readRDS(&quot;data/derived/mashr_results_canonical_chr2R.rds&quot;)
-  mashr_3L &lt;- readRDS(&quot;data/derived/mashr_results_canonical_chr3L.rds&quot;)
-  mashr_3R &lt;- readRDS(&quot;data/derived/mashr_results_canonical_chr3R.rds&quot;)
-  mashr_X &lt;- readRDS(&quot;data/derived/mashr_results_canonical_chrX.rds&quot;)
-}</code></pre>
+} </code></pre>
+</div>
 </div>
 <div id="find-mixture-probabilities-for-each-snp" class="section level2">
 <h2>Find mixture probabilities for each SNP</h2>
@@ -883,9 +970,11 @@ colnames(posterior_weights_cov) &lt;- sapply(
 posterior_weights_cov &lt;- t(rowsum(t(posterior_weights_cov), 
                                   colnames(posterior_weights_cov)))
 
+data_for_mashr &lt;- get_mashr_data()
+
 # Make a neat dataframe
 mixture_assignment_probabilities &lt;- data.frame(
-  SNP_clump = read_csv(&quot;data/derived/all_univariate_GEMMA_results.csv&quot;)$SNPs,
+  SNP_clump = data_for_mashr$SNPs,
   posterior_weights_cov,
   stringsAsFactors = FALSE
 ) %&gt;% as_tibble() %&gt;%
@@ -900,6 +989,8 @@ mixture_assignment_probabilities &lt;- data.frame(
 <p>Here, we make a single large dataframe holding all of the ‘raw’ results from the univariate GEMMA analysis, and the corresponding “shrinked” results from <code>mashr</code> (for both the canonical and data-driven <code>mashr</code> analyses). Because it is so large, we add this sheet of results to the database, allowing memory-efficient searching, joins, etc.</p>
 <pre class="r"><code>all_univariate_lmm_results &lt;- read_csv(&quot;data/derived/all_univariate_GEMMA_results.csv&quot;) %&gt;% 
   rename_at(vars(-SNPs), ~ str_c(., &quot;_raw&quot;))
+
+mashr_snps &lt;- data_for_mashr$SNPs
 
 canonical_estimates &lt;- get_pm(mashr_results_canonical) %&gt;% 
   as_tibble() %&gt;% 
@@ -920,12 +1011,14 @@ lfsr_ED &lt;- get_lfsr(mashr_results_ED) %&gt;%
   rename_all(~str_c(., &quot;_mashr_ED&quot;))
 
 
-all_univariate_lmm_results &lt;- bind_cols(
-  all_univariate_lmm_results, 
+all_mashr_results &lt;- bind_cols(
+  tibble(SNPs = mashr_snps), 
   canonical_estimates, 
   ED_estimates, 
   lfsr_canonical, 
   lfsr_ED)
+
+all_univariate_lmm_results &lt;- left_join(all_univariate_lmm_results, all_mashr_results, by = &quot;SNPs&quot;)
 
 nested &lt;- all_univariate_lmm_results %&gt;% filter(str_detect(SNPs, &quot;, &quot;))
 split_snps &lt;- strsplit(nested$SNPs, split = &quot;, &quot;)
@@ -984,7 +1077,7 @@ Log likelihood
 A. Data-driven covariance matrices
 </td>
 <td style="text-align:right;">
-3.482416e+06
+6.316979e+05
 </td>
 </tr>
 <tr>
@@ -992,7 +1085,7 @@ A. Data-driven covariance matrices
 B. Cononical covariance matrices
 </td>
 <td style="text-align:right;">
-3.510870e+06
+6.377258e+05
 </td>
 </tr>
 <tr>
@@ -1000,143 +1093,158 @@ B. Cononical covariance matrices
 Likelihood ratio (A / B)
 </td>
 <td style="text-align:right;">
-9.918955e-01
+9.905478e-01
 </td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<div id="mixture-proportions-from-canonical-mashr-analysis" class="section level2">
-<h2>Mixture proportions from canonical <code>mashr</code> analysis</h2>
-<pre class="r"><code>library(gridExtra)
-library(showtext) # For fancy Google font in figures
-font_add_google(name = &quot;Raleway&quot;, family = &quot;Raleway&quot;, regular.wt = 400, bold.wt = 700) # Install font from Google Fonts
-showtext_auto()
-
-mix &lt;- bind_rows(
-  enframe(sort(get_estimated_pi(mashr_results_canonical))) %&gt;%
-    mutate(Chromosome = &quot;All&quot;),
-  enframe(sort(get_estimated_pi(mashr_2L))) %&gt;%
-    mutate(Chromosome = &quot;2L&quot;),
-  enframe(sort(get_estimated_pi(mashr_2R))) %&gt;%
-    mutate(Chromosome = &quot;2R&quot;),
-  enframe(sort(get_estimated_pi(mashr_3L))) %&gt;%
-    mutate(Chromosome = &quot;3L&quot;),
-  enframe(sort(get_estimated_pi(mashr_3R))) %&gt;%
-    mutate(Chromosome = &quot;3R&quot;),
-  enframe(sort(get_estimated_pi(mashr_X))) %&gt;%
-    mutate(Chromosome = &quot;X&quot;)) %&gt;% 
-  rename(Mixture_component = name) 
-
-to_keep &lt;- mix %&gt;%
-  group_by(Mixture_component) %&gt;%
-  summarise(value = max(value), .groups = &quot;drop&quot;) %&gt;%
-  filter(value &gt; 0.01) %&gt;%
-  pull(Mixture_component)
-
-mix &lt;- mix %&gt;%
-  filter(Mixture_component %in% to_keep) %&gt;%
-  spread(Mixture_component, value) %&gt;%
-  rename(`Equal effects on all phenotypes` = equal_effects,
-         `Female-specific effect` = Female_specific_1,
-         `Male-specific effect` = Male_specific_1,
-         `Sexually-antagonistic effect` = Sex_antag_0.25) %&gt;%
-  gather(Mixture_component, value, -Chromosome) %&gt;%
-  arrange(-value) 
-
-chr_levels &lt;- mix %&gt;% 
-  filter(Mixture_component == &quot;Sexually-antagonistic effect&quot;) %&gt;%
-  arrange(value) %&gt;% pull(Chromosome)
-
-mix &lt;- mix %&gt;%
-  mutate(Chromosome = factor(Chromosome, chr_levels),
-         Mixture_component = factor(Mixture_component, 
-                                    c(&quot;Sexually-antagonistic effect&quot;,
-                                      &quot;Equal effects on all phenotypes&quot;,
-                                      &quot;Female-specific effect&quot;,
-                                      &quot;Male-specific effect&quot;,
-                                      &quot;null&quot;))) 
-
-
-p1 &lt;- mix %&gt;%
-  filter(Mixture_component %in% c(&quot;Sexually-antagonistic effect&quot;,
-                                  &quot;Female-specific effect&quot;,
-                                  &quot;Male-specific effect&quot;)) %&gt;%
-  ggplot(aes(Chromosome, 100 * value)) + 
-  geom_bar(stat = &quot;identity&quot;,aes(fill = Chromosome), colour = &quot;grey10&quot;,  size = 0.3) + 
-  scale_fill_brewer(palette = &quot;Spectral&quot;, direction = -1) + 
-  coord_flip() + 
-  theme_bw() + 
-  scale_y_continuous(expand = c(0,0), limits = c(0, 29)) + 
-  scale_x_discrete(expand = c(0.14, 0.14)) + 
-  theme(axis.ticks.y = element_blank(),
-        legend.position = &quot;none&quot;,
-        panel.border = element_rect(size = 0.8),
-        text = element_text(family = &quot;Raleway&quot;, size = 12),
-        strip.background = element_blank(),
-        panel.grid.major.y = element_blank()) +
-  ylab(&quot; &quot;) +
-  xlab(NULL) + 
-  facet_wrap(~ Mixture_component, ncol = 1)
-
-p2 &lt;- mix %&gt;%
-  filter(Mixture_component %in% c(&quot;Equal effects on all phenotypes&quot;)) %&gt;%
-  ggplot(aes(Chromosome, 100 * value)) + 
-  geom_bar(stat = &quot;identity&quot;,aes(fill = Chromosome), colour = &quot;grey10&quot;,  size = 0.3) + 
-  scale_fill_brewer(palette = &quot;Spectral&quot;, direction = -1) + 
-  coord_flip() + 
-  theme_bw() + 
-  scale_y_continuous(expand = c(0,0), limits = c(0, 72)) + 
-  scale_x_discrete(expand = c(0.14, 0.14)) + 
-  theme(axis.ticks.y = element_blank(),
-        text = element_text(family = &quot;Raleway&quot;, size = 12),
-        panel.border = element_rect(size = 0.8),
-        legend.position = &quot;none&quot;,
-        strip.background = element_blank(),
-        panel.grid.major.y = element_blank()) +
-  ylab(&quot;Estimated % of all loci&quot;) +
-  xlab(NULL) + 
-  facet_wrap(~ Mixture_component, ncol = 1)
-
-
-blankPlot &lt;- ggplot() + geom_blank(aes(1, 1)) +
-  theme(plot.background = element_blank(), 
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(), 
-        panel.border = element_blank(),
-        panel.background = element_blank(),
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        axis.text.x = element_blank(), 
-        axis.text.y = element_blank(),
-        axis.ticks = element_blank(),
-        axis.line = element_blank())
-
-ggsave(&quot;figures/mixture_proportions.pdf&quot;, grid.arrange(rbind(ggplotGrob(p1), ggplotGrob(p2)), left = &quot;Chromosome&quot;), height = 6, width = 2.8)
-
-grid.arrange(rbind(ggplotGrob(p1), ggplotGrob(p2)), left = &quot;Chromosome&quot;)</code></pre>
-<p><img src="figure/gwas_adaptive_shrinkage.Rmd/plot_mixture_props-1.png" width="268.8" style="display: block; margin: auto;" /> <br></br> <strong>Figure X</strong>: Proportions of each type of locus, as estimated using the mixture model computed by <code>mashr</code> in the analysis using canonical covariance matrices. This analysis involved a number of pre-specified covariance matrices, each corresponding to a type of locus that we hypothesised to exist (shown in panel headings). The analysis fit some other matrix types not shown here, because the corresponding locus type was inferred to be rare/absent (these included neutral loci, estimated to comprise 0.5-1% of those tested, and age-antagonistic loci, none of which were detected). The analysis was run either using all 1,207,357 loci for which data were available (labeled ‘All’) or for all loci on each of the chromosomes (chromosomes 4 and Y had insufficient data). Notably, sexually-antagonistic loci were inferred to be especially common on the X chromosome, and loci that affected males only were inferred to be rarer than those affecting females only.</p>
-</div>
 <div id="proportion-of-significant-effect-sizes-which-share-the-same-sign-for-each-pair-of-phenotypes" class="section level2">
 <h2>Proportion of ‘significant’ effect sizes which share the same sign for each pair of phenotypes</h2>
-<p>To find the proportion of sex or age-antagonistic SNPs among the 1,207,357 that were tested, we simply take 1 minus this matrix, e.g. <span class="math inline">\(100\times(1 - 0.976) = 2.4\%\)</span> of the loci that significantly (i.e. LFSR &lt; 0.05) affected both male and female early-life fitness had an <em>opposite</em> effect on each sex (as opposed to a same-sign effect).</p>
+<p>To find the proportion of sex or age-antagonistic SNPs among the 209,053 that were tested using <code>mashr</code>, we simply take 1 minus this matrix, e.g. <span class="math inline">\(100\times(1 - 0.976) = 2.4\%\)</span> of the loci that significantly (i.e. LFSR &lt; 0.05) affected both male and female early-life fitness had an <em>opposite</em> effect on each sex (as opposed to a same-sign effect).</p>
 <p>Note that this approach is a very conservative way of measuring the % sexually antagonistic (or age antagonistic) loci in the genome, because the LFSR needs to be &lt; 0.05 for <em>both</em> traits (meaning there are 2 chances to make a ‘false negative’, which matters because the power is low for any individual locus). Also note that this matrix was calculated using the data-driven (not canonical) covariance matrices, which are expected to more accurately estimate effect size of each SNP.</p>
 <p>The matrix highlights that there are zero loci where one allele significantly improves early-life fitness and lower late-life fitness with a sex (they might exist, but none were detected using this conservative test and our data). However, some sexually antagonistic loci were detected: about 2.4% of loci were sexually antagonistic in the early-life assay, and 1.2% in the late-life assay.</p>
-<pre class="r"><code>get_pairwise_sharing(mashr_results_ED, 
+<pre class="r"><code>library(kableExtra)
+get_pairwise_sharing(mashr_results_ED, 
                      factor = 0, 
                      lfsr_thresh = 0.05) %&gt;% 
-  round(3)</code></pre>
-<pre><code>                  beta_female_early beta_female_late beta_male_early
-beta_female_early             1.000            1.000           0.976
-beta_female_late              1.000            1.000           0.975
-beta_male_early               0.976            0.975           1.000
-beta_male_late                0.988            0.988           1.000
-                  beta_male_late
-beta_female_early          0.988
-beta_female_late           0.988
-beta_male_early            1.000
-beta_male_late             1.000</code></pre>
+  round(3) %&gt;% kable() %&gt;% kable_styling()</code></pre>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+beta_female_early
+</th>
+<th style="text-align:right;">
+beta_female_late
+</th>
+<th style="text-align:right;">
+beta_male_early
+</th>
+<th style="text-align:right;">
+beta_male_late
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+beta_female_early
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.998
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+beta_female_late
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.997
+</td>
+<td style="text-align:right;">
+0.999
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+beta_male_early
+</td>
+<td style="text-align:right;">
+0.998
+</td>
+<td style="text-align:right;">
+0.997
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+beta_male_late
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.999
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="inspecting-the-effect-of-adaptive-shrinkage-on-the-snp-effect-size-estimates" class="section level2">
+<h2>Inspecting the effect of adaptive shrinkage on the SNP effect size estimates</h2>
+<p>The plots below reveal that <code>mashr</code> did indeed shrinking the effect size estimates towards zero. The amount of shrinkage applied was very similar when applying <code>mashr</code> using either the data-driven or canonical covariance matrices.</p>
+<pre class="r"><code>db &lt;- DBI::dbConnect(RSQLite::SQLite(), 
+                     &quot;data/derived/annotations.sqlite3&quot;)
+
+# Results for all 1,613,615 SNPs, even those that are in 100% LD with others (these are grouped up by the SNP_clump column)
+all_snps &lt;- tbl(db, &quot;univariate_lmm_results&quot;)
+
+# All SNPs and SNP groups that are in &lt;100% LD with one another (n = 1,207,357)
+SNP_clumps &lt;- all_snps %&gt;% select(-SNP) %&gt;% distinct() %&gt;% collect(n=Inf)
+
+# Subsetting variable to get the approx-LD subset of SNPs
+LD_subset &lt;- !is.na(SNP_clumps$LFSR_female_early_mashr_ED)
+
+
+hex_plot &lt;- function(x, y, xlab, ylab){
+  filter(SNP_clumps,LD_subset) %&gt;% 
+    ggplot(aes_string(x, y)) + 
+    geom_abline(linetype = 2) + 
+    geom_vline(xintercept = 0, linetype = 3) +
+    geom_hline(yintercept = 0, linetype = 3) +
+    stat_binhex(bins = 200, colour = &quot;#FFFFFF00&quot;) + 
+    scale_fill_distiller(palette = &quot;Purples&quot;) + 
+    coord_cartesian(xlim = c(-1,1), ylim = c(-0.55, 0.3)) + 
+    theme_minimal() + xlab(xlab) + ylab(ylab) +
+    theme(legend.position = &quot;none&quot;)
+}
+grid.arrange(
+  hex_plot(&quot;beta_female_early_raw&quot;, 
+           &quot;beta_female_early_mashr_canonical&quot;, 
+           &quot;Raw estimate of SNP\neffect size from LMM&quot;, 
+           &quot;Corrected estimate from\nmashr (canonical)&quot;),
+  hex_plot(&quot;beta_female_early_raw&quot;, 
+           &quot;beta_female_early_mashr_ED&quot;, 
+           &quot;Raw estimate of SNP\neffect size from LMM&quot;, 
+           &quot;Corrected estimate from\nmashr (data-driven)&quot;),
+  hex_plot(&quot;beta_female_early_mashr_canonical&quot;, 
+         &quot;beta_female_early_mashr_ED&quot;, 
+         &quot;Corrected estimate from\nmashr (canonical)&quot;, 
+         &quot;Corrected estimate from\nmashr (data-driven)&quot;),
+  ncol = 3)</code></pre>
+<p><img src="figure/gwas_adaptive_shrinkage.Rmd/mashr_check_plot-1.png" width="700.8" style="display: block; margin: auto;" /></p>
+<p><strong>Figure SX</strong>: Plots comparing the raw effect sizes for each locus (calculated by linear mixed models implemented in GEMMA, LMM) with the effect sizes obtained using adaptive shrinkage implemented in mashr (either in ‘data-driven’ or ‘canonical’ methods). The dashed line shows <span class="math inline">\(y = x\)</span>, such that the first two plots illustrate that both forms of shrinkage moved both negative and positive effects towards zero. The third plot illustrates that very similar effect sizes were obtained whether we used the data-driven or canonical method.</p>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -1160,32 +1268,33 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
- [1] showtext_0.9-1   showtextdb_3.0   sysfonts_0.8.2   gridExtra_2.3   
- [5] kableExtra_1.1.0 glue_1.4.2       mashr_0.2.38     ashr_2.2-47     
- [9] forcats_0.5.0    stringr_1.4.0    dplyr_1.0.0      purrr_0.3.4     
-[13] readr_1.3.1      tidyr_1.1.0      tibble_3.0.1     ggplot2_3.3.2   
-[17] tidyverse_1.3.0 
+ [1] gridExtra_2.3    kableExtra_1.3.4 glue_1.4.2       mashr_0.2.38    
+ [5] ashr_2.2-47      forcats_0.5.0    stringr_1.4.0    dplyr_1.0.0     
+ [9] purrr_0.3.4      readr_2.0.0      tidyr_1.1.0      tibble_3.0.1    
+[13] ggplot2_3.3.2    tidyverse_1.3.0  workflowr_1.6.2 
 
 loaded via a namespace (and not attached):
- [1] nlme_3.1-149       fs_1.4.1           lubridate_1.7.8    webshot_0.5.2     
- [5] RColorBrewer_1.1-2 httr_1.4.1         rprojroot_1.3-2    tools_4.0.3       
- [9] backports_1.1.7    R6_2.4.1           irlba_2.3.3        DBI_1.1.0         
-[13] colorspace_1.4-1   rmeta_3.0          withr_2.2.0        tidyselect_1.1.0  
-[17] curl_4.3           compiler_4.0.3     git2r_0.27.1       cli_2.0.2         
-[21] rvest_0.3.5        xml2_1.3.2         labeling_0.3       scales_1.1.1      
-[25] SQUAREM_2020.2     mvtnorm_1.1-0      mixsqp_0.3-43      digest_0.6.25     
-[29] rmarkdown_2.5      pkgconfig_2.0.3    htmltools_0.5.0    dbplyr_1.4.4      
-[33] invgamma_1.1       highr_0.8          rlang_0.4.6        readxl_1.3.1      
-[37] rstudioapi_0.11    farver_2.0.3       generics_0.0.2     jsonlite_1.7.0    
-[41] magrittr_2.0.1     Matrix_1.2-18      Rcpp_1.0.4.6       munsell_0.5.0     
-[45] fansi_0.4.1        abind_1.4-5        lifecycle_0.2.0    stringi_1.5.3     
-[49] whisker_0.4        yaml_2.2.1         plyr_1.8.6         grid_4.0.3        
-[53] blob_1.2.1         promises_1.1.0     crayon_1.3.4       lattice_0.20-41   
-[57] haven_2.3.1        hms_0.5.3          knitr_1.30         pillar_1.4.4      
-[61] reprex_0.3.0       evaluate_0.14      modelr_0.1.8       vctrs_0.3.0       
-[65] httpuv_1.5.3.1     cellranger_1.1.0   gtable_0.3.0       assertthat_0.2.1  
-[69] xfun_0.19          broom_0.5.6        later_1.0.0        viridisLite_0.3.0 
-[73] truncnorm_1.0-8    workflowr_1.6.2    ellipsis_0.3.1    </code></pre>
+ [1] nlme_3.1-149       fs_1.4.1           bit64_0.9-7        lubridate_1.7.10  
+ [5] RColorBrewer_1.1-2 webshot_0.5.2      httr_1.4.1         rprojroot_1.3-2   
+ [9] tools_4.0.3        backports_1.1.7    R6_2.4.1           irlba_2.3.3       
+[13] DBI_1.1.0          colorspace_1.4-1   rmeta_3.0          withr_2.2.0       
+[17] tidyselect_1.1.0   bit_1.1-15.2       compiler_4.0.3     git2r_0.27.1      
+[21] cli_2.0.2          rvest_0.3.5        xml2_1.3.2         labeling_0.3      
+[25] scales_1.1.1       hexbin_1.28.1      SQUAREM_2020.2     mvtnorm_1.1-0     
+[29] mixsqp_0.3-43      systemfonts_0.2.2  digest_0.6.25      rmarkdown_2.5     
+[33] svglite_1.2.3      pkgconfig_2.0.3    htmltools_0.5.0    dbplyr_1.4.4      
+[37] invgamma_1.1       highr_0.8          rlang_0.4.6        readxl_1.3.1      
+[41] RSQLite_2.2.0      rstudioapi_0.11    farver_2.0.3       generics_0.0.2    
+[45] jsonlite_1.7.0     vroom_1.5.3        magrittr_2.0.1     Matrix_1.2-18     
+[49] Rcpp_1.0.4.6       munsell_0.5.0      fansi_0.4.1        abind_1.4-5       
+[53] gdtools_0.2.2      lifecycle_0.2.0    stringi_1.5.3      whisker_0.4       
+[57] yaml_2.2.1         plyr_1.8.6         grid_4.0.3         blob_1.2.1        
+[61] parallel_4.0.3     promises_1.1.0     crayon_1.3.4       lattice_0.20-41   
+[65] haven_2.3.1        hms_0.5.3          knitr_1.32         pillar_1.4.4      
+[69] reprex_0.3.0       evaluate_0.14      modelr_0.1.8       vctrs_0.3.0       
+[73] tzdb_0.1.2         httpuv_1.5.3.1     cellranger_1.1.0   gtable_0.3.0      
+[77] assertthat_0.2.1   xfun_0.22          broom_0.5.6        later_1.0.0       
+[81] viridisLite_0.3.0  truncnorm_1.0-8    memoise_1.1.0      ellipsis_0.3.1    </code></pre>
 </div>
 </div>
 

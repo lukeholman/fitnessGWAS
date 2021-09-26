@@ -340,7 +340,7 @@ $(document).ready(function () {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2021-03-04
+<strong>Last updated:</strong> 2021-09-26
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 2 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -371,16 +371,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree0e0fe729cf90d0d702fae8f8837c858ea3e1796ftargetblank0e0fe72a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/lukeholman/fitnessGWAS/tree/0e0fe729cf90d0d702fae8f8837c858ea3e1796f" target="_blank">0e0fe72</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreeaf15dd63a476b2499f2be7f3002df3ec72c28522targetblankaf15dd6a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/lukeholman/fitnessGWAS/tree/af15dd63a476b2499f2be7f3002df3ec72c28522" target="_blank">af15dd6</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree0e0fe729cf90d0d702fae8f8837c858ea3e1796ftargetblank0e0fe72a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreeaf15dd63a476b2499f2be7f3002df3ec72c28522targetblankaf15dd6a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/lukeholman/fitnessGWAS/tree/0e0fe729cf90d0d702fae8f8837c858ea3e1796f" target="_blank">0e0fe72</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/lukeholman/fitnessGWAS/tree/af15dd63a476b2499f2be7f3002df3ec72c28522" target="_blank">af15dd6</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -395,7 +395,6 @@ Ignored files:
     Ignored:    .pversion
     Ignored:    analysis/.DS_Store
     Ignored:    analysis/correlations_SNP_effects_cache/
-    Ignored:    analysis/plot_models_variant_effects_cache/
     Ignored:    code/.DS_Store
     Ignored:    code/Drosophila_GWAS.Rmd
     Ignored:    data/.DS_Store
@@ -408,48 +407,43 @@ Ignored files:
     Ignored:    data/input/dgrp2.fam
     Ignored:    data/input/huang_transcriptome/
     Ignored:    figures/.DS_Store
+    Ignored:    figures/fig1_inkscape.svg
+    Ignored:    figures/figure1a.pdf
+    Ignored:    figures/figure1b.pdf
 
 Untracked files:
-    Untracked:  Rplots.pdf
-    Untracked:  analysis/GO_KEGG_enrichment.Rmd
-    Untracked:  analysis/TWAS_tables.Rmd
-    Untracked:  code/GO_and_KEGG_gsea.R
-    Untracked:  code/eQTL_analysis.Rmd
-    Untracked:  code/make_sites_files_for_ARGweaver.R
-    Untracked:  code/plotting_results.Rmd
-    Untracked:  code/run_argweaver.R
-    Untracked:  code/run_mashr.R
-    Untracked:  data/argweaver/
-    Untracked:  data/input/TF_binding_sites.csv
-    Untracked:  figures/GWAS_mixture_proportions.rds
-    Untracked:  figures/GWAS_stats_figure.pdf
-    Untracked:  figures/TWAS_mixture_proportions.rds
-    Untracked:  figures/TWAS_stats_figure.pdf
-    Untracked:  figures/antagonism_ratios.pdf
-    Untracked:  figures/composite_mixture_figure.pdf
-    Untracked:  figures/eff_size_histos.pdf
-    Untracked:  figures/stats_figure.pdf
-    Untracked:  manuscript/
+    Untracked:  big_model.rds
+    Untracked:  code/gcta64
+    Untracked:  code/plink
+    Untracked:  code/quant_gen_1.R
+    Untracked:  data/input/genomic_relatedness_matrix.rds
+    Untracked:  figures/SNP_effect_ED.pdf
+    Untracked:  figures/boyle_plot.pdf
+    Untracked:  figures/fig1.pdf
+    Untracked:  manuscript/GWAS_manuscript.log
+    Untracked:  old_analyses/
 
 Unstaged changes:
     Modified:   .gitignore
-    Modified:   README.md
-    Modified:   analysis/GWAS_tables.Rmd
-    Modified:   analysis/TWAS.Rmd
-    Modified:   analysis/_site.yml
-    Deleted:    analysis/about.Rmd
-    Deleted:    analysis/eQTL_analysis.Rmd
-    Modified:   analysis/gwas_adaptive_shrinkage.Rmd
-    Modified:   analysis/make_annotation_database.Rmd
-    Modified:   analysis/plotting_results.Rmd
-    Deleted:    code/gwas_adaptive_shrinkage.R
-    Modified:   data/input/female_fitness.csv
-    Modified:   data/input/female_fitness_CLEANED.csv
-    Modified:   data/input/male_fitness.csv
-    Modified:   data/input/male_fitness_CLEANED.csv
-    Modified:   figures/figure1.eps
-    Deleted:    figures/figure1.png
-    Modified:   figures/figure2.eps
+    Deleted:    Rplots.pdf
+    Deleted:    analysis/GO_KEGG_enrichment.Rmd
+    Deleted:    analysis/plotting_results.Rmd
+    Deleted:    code/GO_and_KEGG_gsea.R
+    Deleted:    code/make_sites_files_for_ARGweaver.R
+    Deleted:    code/plotting_results.Rmd
+    Deleted:    code/run_argweaver.R
+    Modified:   code/run_mashr.R
+    Deleted:    data/input/clough_2014_dsx_targets.csv
+    Modified:   figures/GWAS_stats_figure.pdf
+    Modified:   figures/TWAS_stats_figure.pdf
+    Modified:   figures/antagonism_ratios.pdf
+    Modified:   figures/composite_mixture_figure.pdf
+    Modified:   figures/eff_size_histos.pdf
+    Deleted:    figures/figure1.eps
+    Deleted:    figures/figure2.eps
+    Modified:   manuscript/GWAS_manuscript.Rmd
+    Modified:   manuscript/GWAS_manuscript.pdf
+    Modified:   manuscript/GWAS_manuscript.tex
 
 </code></pre>
 <p>
@@ -488,6 +482,23 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/00a4f7472c467fd04aa3cddf40a80bd2d6169756/docs/license.html" target="_blank">00a4f74</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2021-03-04
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd

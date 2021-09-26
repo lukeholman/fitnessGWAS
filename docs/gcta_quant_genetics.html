@@ -1,0 +1,2505 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Estimating genetic (co)variance and heritability</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
+<script src="site_libs/anchor-sections-1.0/anchor-sections.js"></script>
+<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fitnessGWAS</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/lukeholman/fitnessGWAS">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Estimating genetic (co)variance and heritability</h1>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2021-09-26
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>fitnessGWAS/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.2). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20180914code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20180914)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20180914code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20180914)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreeaf15dd63a476b2499f2be7f3002df3ec72c28522targetblankaf15dd6a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/lukeholman/fitnessGWAS/tree/af15dd63a476b2499f2be7f3002df3ec72c28522" target="_blank">af15dd6</a> </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreeaf15dd63a476b2499f2be7f3002df3ec72c28522targetblankaf15dd6a" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version <a href="https://github.com/lukeholman/fitnessGWAS/tree/af15dd63a476b2499f2be7f3002df3ec72c28522" target="_blank">af15dd6</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rapp.history
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    .httr-oauth
+    Ignored:    .pversion
+    Ignored:    analysis/.DS_Store
+    Ignored:    analysis/correlations_SNP_effects_cache/
+    Ignored:    code/.DS_Store
+    Ignored:    code/Drosophila_GWAS.Rmd
+    Ignored:    data/.DS_Store
+    Ignored:    data/derived/
+    Ignored:    data/input/.DS_Store
+    Ignored:    data/input/.pversion
+    Ignored:    data/input/dgrp.fb557.annot.txt
+    Ignored:    data/input/dgrp2.bed
+    Ignored:    data/input/dgrp2.bim
+    Ignored:    data/input/dgrp2.fam
+    Ignored:    data/input/huang_transcriptome/
+    Ignored:    figures/.DS_Store
+    Ignored:    figures/fig1_inkscape.svg
+    Ignored:    figures/figure1a.pdf
+    Ignored:    figures/figure1b.pdf
+
+Untracked files:
+    Untracked:  big_model.rds
+    Untracked:  code/gcta64
+    Untracked:  code/plink
+    Untracked:  code/quant_gen_1.R
+    Untracked:  data/input/genomic_relatedness_matrix.rds
+    Untracked:  figures/SNP_effect_ED.pdf
+    Untracked:  figures/boyle_plot.pdf
+    Untracked:  figures/fig1.pdf
+    Untracked:  manuscript/GWAS_manuscript.log
+    Untracked:  old_analyses/
+
+Unstaged changes:
+    Modified:   .gitignore
+    Deleted:    Rplots.pdf
+    Deleted:    analysis/GO_KEGG_enrichment.Rmd
+    Deleted:    analysis/plotting_results.Rmd
+    Deleted:    code/GO_and_KEGG_gsea.R
+    Deleted:    code/make_sites_files_for_ARGweaver.R
+    Deleted:    code/plotting_results.Rmd
+    Deleted:    code/run_argweaver.R
+    Modified:   code/run_mashr.R
+    Deleted:    data/input/clough_2014_dsx_targets.csv
+    Modified:   figures/GWAS_stats_figure.pdf
+    Modified:   figures/TWAS_stats_figure.pdf
+    Modified:   figures/antagonism_ratios.pdf
+    Modified:   figures/composite_mixture_figure.pdf
+    Modified:   figures/eff_size_histos.pdf
+    Deleted:    figures/figure1.eps
+    Deleted:    figures/figure2.eps
+    Modified:   manuscript/GWAS_manuscript.Rmd
+    Modified:   manuscript/GWAS_manuscript.pdf
+    Modified:   manuscript/GWAS_manuscript.tex
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/gcta_quant_genetics.Rmd</code>) and HTML (<code>docs/gcta_quant_genetics.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/af15dd63a476b2499f2be7f3002df3ec72c28522/analysis/gcta_quant_genetics.Rmd" target="_blank">af15dd6</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2021-09-26
+</td>
+<td>
+Commit Sept 2021
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<pre class="r"><code>library(tidyverse)
+library(glue)
+library(kableExtra)
+library(brms)
+gcta &lt;- file.path(getwd(), &quot;code/gcta64&quot;)
+options(readr.show_col_types = FALSE)
+
+
+# helper function to pass commands to the terminal
+# Note that we set `intern = TRUE`, and pass the result of `system()` to `cat()`,
+# ensuring that the Terminal output will be printed in this knitr report.
+run_command &lt;- function(shell_command, wd = getwd(), path = &quot;&quot;){
+  cat(system(glue(&quot;cd &quot;, wd, path, &quot;\n&quot;, shell_command), intern = TRUE), sep = &#39;\n&#39;)
+}
+
+# Load the line mean fitness values calculated by brms
+line_means &lt;- read_csv(&quot;data/derived/predicted_line_means.csv&quot;) %&gt;% 
+  mutate(line = factor(str_remove_all(line, &quot;_&quot;))) %&gt;%
+  filter(!is.na(male.fitness.early)) %&gt;%
+  mutate(`Female fitness early` = female.fitness.early,
+         `Female fitness late` = female.fitness.late,
+         `Male fitness early` = male.fitness.early,
+         `Male fitness late` = male.fitness.late) %&gt;%
+  rename(female_fitness_early = female.fitness.early,
+         female_fitness_late = female.fitness.late,
+         male_fitness_early = male.fitness.early,
+         male_fitness_late = male.fitness.late)</code></pre>
+<div id="proportion-of-variance-in-fitness-explained-by-dgrp-line" class="section level2">
+<h2>Proportion of variance in fitness explained by ‘DGRP line’:</h2>
+<p>The table shows the posterior estimate of the intra-class correlation coefficient (ICC, which measures the proportion of variance within and between lines), using the models in the script <code>get_predicted_line_means.Rmd</code> to adjust for block effects (and one covariate in the male late-life fitness analysis). ICC was calculated using <code>ICC::ICCbare</code>. This value approximates the broad-sense heritability; fitness appears highly heritable, except for male late-life fitness.</p>
+<pre class="r"><code>read.csv(&#39;data/derived/ICC.csv&#39;) %&gt;% 
+  select(Fitness_trait, Estimate, Est.Error, Q2.5, Q97.5) %&gt;%
+  rename(`Fitness trait` = Fitness_trait, `Est. Error` = Est.Error, `Lower 95% CI` = Q2.5, `Upper 95% CI` = Q97.5) %&gt;% 
+  kable(digits = 2) %&gt;% kable_styling(full_width = FALSE)</code></pre>
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Fitness trait
+</th>
+<th style="text-align:right;">
+Estimate
+</th>
+<th style="text-align:right;">
+Est. Error
+</th>
+<th style="text-align:right;">
+Lower 95% CI
+</th>
+<th style="text-align:right;">
+Upper 95% CI
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Female early-life fitness
+</td>
+<td style="text-align:right;">
+0.63
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+<td style="text-align:right;">
+0.61
+</td>
+<td style="text-align:right;">
+0.64
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female late-life fitness
+</td>
+<td style="text-align:right;">
+0.56
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+<td style="text-align:right;">
+0.54
+</td>
+<td style="text-align:right;">
+0.58
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Male early-life fitness
+</td>
+<td style="text-align:right;">
+0.45
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+<td style="text-align:right;">
+0.43
+</td>
+<td style="text-align:right;">
+0.46
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Male late-life fitness
+</td>
+<td style="text-align:right;">
+0.14
+</td>
+<td style="text-align:right;">
+0.01
+</td>
+<td style="text-align:right;">
+0.12
+</td>
+<td style="text-align:right;">
+0.15
+</td>
+</tr>
+</tbody>
+</table>
+<div id="correlations-in-the-line-means" class="section level3">
+<h3>Correlations in the line means</h3>
+<pre class="r"><code>line_means %&gt;% select(contains(&quot; &quot;)) %&gt;% cor() %&gt;% kable(digits =3) %&gt;% kable_styling()</code></pre>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+Female fitness early
+</th>
+<th style="text-align:right;">
+Female fitness late
+</th>
+<th style="text-align:right;">
+Male fitness early
+</th>
+<th style="text-align:right;">
+Male fitness late
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.766
+</td>
+<td style="text-align:right;">
+0.228
+</td>
+<td style="text-align:right;">
+0.172
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:right;">
+0.766
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.317
+</td>
+<td style="text-align:right;">
+0.317
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:right;">
+0.228
+</td>
+<td style="text-align:right;">
+0.317
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.864
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:right;">
+0.172
+</td>
+<td style="text-align:right;">
+0.317
+</td>
+<td style="text-align:right;">
+0.864
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+</tr>
+</tbody>
+</table>
+<!-- ```{r} -->
+<!-- relatedness_matrix <- read_tsv("../DGRP_sexual_conflict/gwas_data/input/relatedness_matrix.txt") -->
+<!-- rownam <- relatedness_matrix %>% pull(var) -->
+<!-- relatedness_matrix <- as.matrix(relatedness_matrix[,-1]) -->
+<!-- rownames(relatedness_matrix) <- str_extract(rownam, "line_[:digit:]*") -->
+<!-- colnames(relatedness_matrix) <- str_extract(colnames(relatedness_matrix), "line_[:digit:]*") -->
+<!-- relatedness_matrix[lower.tri(relatedness_matrix)] <- NA -->
+<!-- relatedness_matrix <- relatedness_matrix %>%  -->
+<!--   as.data.frame() %>%  -->
+<!--   rownames_to_column("line1") %>%  -->
+<!--   gather(line2, relatedness, -line1) %>%  -->
+<!--   filter(!is.na(relatedness) & line1 != line2) %>% as_tibble() -->
+<!-- list_lines_to_prune <- function(relatedness_matrix){ -->
+<!--   set.seed(1) -->
+<!--   line_set_to_prune_df <- relatedness_matrix %>%  -->
+<!--     filter(relatedness > 0.2) %>%  -->
+<!--     arrange(-relatedness) %>% as.data.frame() -->
+<!--   line_set_to_prune <- line_set_to_prune_df$line1 -->
+<!--   counter <- 1 -->
+<!--   while(nrow(line_set_to_prune_df) > 0){ -->
+<!--     line_set_to_prune[counter] <- line_set_to_prune_df[1, sample(2,1)] -->
+<!--     counter <- counter + 1 -->
+<!--     line_set_to_prune_df <- line_set_to_prune_df[-1, ] -->
+<!--   } -->
+<!--   line_set_to_prune -->
+<!-- } -->
+<!-- lines_to_prune <- list_lines_to_prune(relatedness_matrix) -->
+<!-- ``` -->
+</div>
+</div>
+<div id="use-gcta64-to-estimate-the-genetic-variances-and-heritabilities-for-each-fitness-trait" class="section level2">
+<h2>Use <code>gcta64</code> to estimate the genetic variances and heritabilities for each fitness trait</h2>
+<div id="make-a-genomic-relatedness-matrix-for-all-the-lines" class="section level3">
+<h3>Make a genomic relatedness matrix for all the lines</h3>
+<p>This uses the <code>gcta64</code> command <code>--make-grm</code> to make a genomic relatedness matrix (GRM) for the DGRP SNP data. This matrix is needed to run the GREML models below.</p>
+<pre class="r"><code>run_command(glue(&quot;{gcta} --bfile dgrp2_QC_all_lines&quot;,
+                 &quot; --make-grm&quot;,
+                 &quot; --out gcta_GRM&quot;), path = &quot;/data/derived/&quot;)</code></pre>
+<pre><code>*******************************************************************
+* Genome-wide Complex Trait Analysis (GCTA)
+* version 1.93.2 beta Mac
+* (C) 2010-present, Jian Yang, The University of Queensland
+* Please report bugs to Jian Yang &lt;jian.yang.qt@gmail.com&gt;
+*******************************************************************
+Analysis started at 21:09:06 BST on Sun Sep 26 2021.
+Hostname: 6300D-132190-M.local
+
+Options: 
+ 
+--bfile dgrp2_QC_all_lines 
+--make-grm 
+--out gcta_GRM 
+
+Note: GRM is computed using the SNPs on the autosome.
+Reading PLINK FAM file from [dgrp2_QC_all_lines.fam]...
+205 individuals to be included from FAM file.
+205 individuals to be included. 0 males, 205 females, 0 unknown.
+Reading PLINK BIM file from [dgrp2_QC_all_lines.bim]...
+1648723 SNPs to be included from BIM file(s).
+Computing the genetic relationship matrix (GRM) v2 ...
+Subset 1/1, no. subject 1-205
+  205 samples, 1648723 markers, 21115 GRM elements
+IDs for the GRM file has been saved in the file [gcta_GRM.grm.id]
+Computing GRM...
+  100% finished in 3.1 sec
+1648723 SNPs have been processed.
+  Used 1648723 valid SNPs.
+The GRM computation is completed.
+Saving GRM...
+GRM has been saved in the file [gcta_GRM.grm.bin]
+Number of SNPs in each pair of individuals has been saved in the file [gcta_GRM.grm.N.bin]
+
+Analysis finished at 21:09:12 BST on Sun Sep 26 2021
+Overall computational time: 5.56 sec.</code></pre>
+</div>
+<div id="run-4-univariate-greml-models-to-find-genetic-variances-and-heritabilities" class="section level3">
+<h3>Run 4 univariate GREML models to find genetic variances and heritabilities</h3>
+<p>The below uses the <code>gcta64</code> command <code>--reml</code> to estimate the genetic variance (<code>V(G)</code>), i.e. the variance explained by the GRM), environmental variance (<code>V(e)</code>), their sum (<code>Vp</code>), and the so-called “SNP heritability” (<code>V(G)/Vp</code>). Note that the genetic variance is very low for male late-life fitness. This is a bit puzzling because the same is not true for male early-life fitness, which is strongly correlated across lines with male late-life fitness.</p>
+<pre class="r"><code>do_univariate_greml &lt;- function(trait1){
+
+  # First make &#39;focal_data&#39;, a 2-column data frame with the line and the focal phenotype value
+  focal_data &lt;- line_means %&gt;%
+    select(line, !! trait1)
+  names(focal_data)[2] &lt;- c(&quot;focal_pheno&quot;)
+  
+  # Write a file with the line and phenotype data called phenotype.txt, for gcta64
+  pheno_data &lt;- focal_data %&gt;%
+    # filter(!(line %in% lines_to_prune)) %&gt;% 
+    mutate(line_copy = line) %&gt;%
+    select(line, line_copy, focal_pheno) %&gt;%
+    as.matrix()
+  
+  pheno_data %&gt;%
+    write.table(row.names = FALSE, col.names = FALSE,
+                file = &quot;data/derived/phenotype.txt&quot;, quote = FALSE)
+  
+  console_output &lt;- suppressWarnings(capture.output(
+    run_command(glue(&quot;{gcta}  --reml --reml-maxit 10000 --grm gcta_GRM  --pheno phenotype.txt  --out delete_me&quot;), 
+                path = &quot;/data/derived/&quot;)))
+  
+  errors &lt;- console_output[str_detect(console_output, &quot;[Ee]rror&quot;)]
+  if(length(errors) == 0) errors &lt;- NA
+  if(length(errors) &gt; 1) errors &lt;- paste(errors, sep = &quot;; &quot;)
+
+  rbind(read.delim(&quot;data/derived/delete_me.hsq&quot;, sep = &quot;\t&quot;) , 
+        data.frame(Source = &quot;Errors&quot;, Variance = errors, SE = NA)) %&gt;% 
+    mutate(Trait = trait1) %&gt;% select(Trait, everything())
+}
+
+bind_rows(do_univariate_greml(&quot;Female fitness early&quot;),
+          do_univariate_greml(&quot;Female fitness late&quot;),
+          do_univariate_greml(&quot;Male fitness early&quot;),
+          do_univariate_greml(&quot;Male fitness late&quot;)) %&gt;% 
+  filter(Source %in% c(&quot;V(G)&quot;, &quot;V(e)&quot;, &quot;Vp&quot;, &quot;V(G)/Vp&quot;)) %&gt;% 
+  mutate(Variance = as.numeric(Variance)) %&gt;% 
+  rename(Parameter = Source) %&gt;% 
+  kable(digits = 3) %&gt;% 
+  kable_styling(full_width = FALSE)</code></pre>
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Trait
+</th>
+<th style="text-align:left;">
+Parameter
+</th>
+<th style="text-align:right;">
+Variance
+</th>
+<th style="text-align:right;">
+SE
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+V(G)
+</td>
+<td style="text-align:right;">
+0.121
+</td>
+<td style="text-align:right;">
+0.221
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+V(e)
+</td>
+<td style="text-align:right;">
+0.765
+</td>
+<td style="text-align:right;">
+0.443
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+Vp
+</td>
+<td style="text-align:right;">
+0.886
+</td>
+<td style="text-align:right;">
+0.240
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+V(G)/Vp
+</td>
+<td style="text-align:right;">
+0.137
+</td>
+<td style="text-align:right;">
+0.281
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+V(G)
+</td>
+<td style="text-align:right;">
+0.388
+</td>
+<td style="text-align:right;">
+0.202
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+V(e)
+</td>
+<td style="text-align:right;">
+0.226
+</td>
+<td style="text-align:right;">
+0.362
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+Vp
+</td>
+<td style="text-align:right;">
+0.614
+</td>
+<td style="text-align:right;">
+0.183
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+V(G)/Vp
+</td>
+<td style="text-align:right;">
+0.632
+</td>
+<td style="text-align:right;">
+0.489
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+V(G)
+</td>
+<td style="text-align:right;">
+0.192
+</td>
+<td style="text-align:right;">
+0.194
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+V(e)
+</td>
+<td style="text-align:right;">
+0.613
+</td>
+<td style="text-align:right;">
+0.381
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+Vp
+</td>
+<td style="text-align:right;">
+0.805
+</td>
+<td style="text-align:right;">
+0.207
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+V(G)/Vp
+</td>
+<td style="text-align:right;">
+0.238
+</td>
+<td style="text-align:right;">
+0.293
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+V(G)
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.233
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+V(e)
+</td>
+<td style="text-align:right;">
+1.019
+</td>
+<td style="text-align:right;">
+0.485
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+Vp
+</td>
+<td style="text-align:right;">
+1.019
+</td>
+<td style="text-align:right;">
+0.268
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+V(G)/Vp
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.229
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="run-6-bivariate-greml-models-to-find-the-genetic-covariancescorrelations" class="section level3">
+<h3>Run 6 bivariate GREML models to find the genetic covariances/correlations</h3>
+<p>The below uses the <code>gcta64</code> command <code>--reml-bivar</code> to estimate the genetic covariances (<code>C(G)_tr12</code>), i.e. the co-variance explained by the GRM), and the genetic correlation (<code>rG</code>), in addition to the univariate parameters for trait 1 and trait 2 mentioned above. Note that because the genetic variance is low for male late-life fitness, the model cannot reliably estimate genetic covariance or correlations for pairs of traits that involve male late-life fitness.</p>
+<pre class="r"><code>do_bivar_greml &lt;- function(trait1, trait2){
+
+  # First make &#39;focal_data&#39;, a 2-column data frame with the line and the focal phenotype value
+  focal_data &lt;- line_means %&gt;%
+    select(line, !! trait1, !! trait2)
+  names(focal_data)[2:3] &lt;- c(&quot;focal_pheno1&quot;, &quot;focal_pheno2&quot;)
+  
+  # Write a file with the line and phenotype data called phenotype.txt, for gcta64
+  pheno_data &lt;- focal_data %&gt;%
+    # filter(!(line %in% lines_to_prune)) %&gt;% 
+    mutate(line_copy = line) %&gt;%
+    select(line, line_copy, focal_pheno1, focal_pheno2) %&gt;%
+    as.matrix()
+  
+  pheno_data %&gt;%
+    write.table(row.names = FALSE, col.names = FALSE,
+                file = &quot;data/derived/phenotype_pair.txt&quot;, quote = FALSE)
+  
+  # Note that the warnings come when gcta could not fit the model properly. I save these errors especially, so no need to print them.
+  console_output &lt;- suppressWarnings(capture.output(
+    run_command(glue(&quot;{gcta}  --reml-bivar --reml-bivar-lrt-rg 0 --reml-maxit 10000 --grm gcta_GRM  --pheno phenotype_pair.txt  --out delete_me&quot;), 
+                path = &quot;/data/derived/&quot;)))
+  
+  errors &lt;- console_output[str_detect(console_output, &quot;[Ee]rror&quot;)]
+  if(length(errors) == 0) errors &lt;- NA
+  if(length(errors) &gt; 1) errors &lt;- paste(errors, sep = &quot;; &quot;)
+  traits &lt;- sort(c(trait1, trait2))
+  
+  rbind(read.delim(&quot;data/derived/delete_me.hsq&quot;, sep = &quot;\t&quot;) , 
+        data.frame(Source = &quot;Errors&quot;, Variance = errors, SE = NA)) %&gt;% 
+    mutate(`Trait 1` = traits[1], `Trait 2` = traits[2]) %&gt;% select(`Trait 1`, `Trait 2`, everything())
+}
+
+results &lt;- bind_rows(do_bivar_greml(&quot;Female fitness early&quot;, &quot;Female fitness late&quot;),
+          do_bivar_greml(&quot;Male fitness early&quot;, &quot;Male fitness late&quot;),
+          do_bivar_greml(&quot;Female fitness early&quot;, &quot;Male fitness early&quot;),
+          do_bivar_greml(&quot;Female fitness late&quot;, &quot;Male fitness late&quot;),
+          do_bivar_greml(&quot;Female fitness early&quot;, &quot;Male fitness late&quot;),
+          do_bivar_greml(&quot;Female fitness late&quot;, &quot;Male fitness early&quot;))
+
+unlink(c(&quot;data/derived/delete_me.log&quot;, &quot;data/derived/phenotype_pair.txt&quot;, &quot;data/derived/delete_me.hsq&quot;))
+unlink(list.files(&quot;data/derived/&quot;, pattern = &quot;gcta_GRM&quot;, full.names = TRUE))
+
+results %&gt;% 
+  filter(Source %in% c(&quot;V(G)_tr1&quot;, &quot;V(e)_tr1&quot;, &quot;Vp_tr1&quot;, &quot;V(G)/Vp_tr1&quot;,
+                       &quot;V(G)_tr2&quot;, &quot;V(e)_tr2&quot;, &quot;Vp_tr2&quot;, &quot;V(G)/Vp_tr2&quot;,
+                       &quot;C(G)_tr12&quot;, &quot;rG&quot;)) %&gt;% 
+  mutate(Variance = as.numeric(Variance)) %&gt;% 
+  rename(Parameter = Source) %&gt;% 
+  kable(digit = 3) %&gt;% 
+  kable_styling(full_width = FALSE)</code></pre>
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Trait 1
+</th>
+<th style="text-align:left;">
+Trait 2
+</th>
+<th style="text-align:left;">
+Parameter
+</th>
+<th style="text-align:right;">
+Variance
+</th>
+<th style="text-align:right;">
+SE
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+V(G)_tr1
+</td>
+<td style="text-align:right;">
+0.167
+</td>
+<td style="text-align:right;">
+0.208
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+V(G)_tr2
+</td>
+<td style="text-align:right;">
+0.433
+</td>
+<td style="text-align:right;">
+0.170
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+C(G)_tr12
+</td>
+<td style="text-align:right;">
+0.223
+</td>
+<td style="text-align:right;">
+0.173
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+V(e)_tr1
+</td>
+<td style="text-align:right;">
+0.668
+</td>
+<td style="text-align:right;">
+0.410
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+V(e)_tr2
+</td>
+<td style="text-align:right;">
+0.153
+</td>
+<td style="text-align:right;">
+0.292
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+Vp_tr1
+</td>
+<td style="text-align:right;">
+0.836
+</td>
+<td style="text-align:right;">
+0.221
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+Vp_tr2
+</td>
+<td style="text-align:right;">
+0.586
+</td>
+<td style="text-align:right;">
+0.151
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+V(G)/Vp_tr1
+</td>
+<td style="text-align:right;">
+0.200
+</td>
+<td style="text-align:right;">
+0.294
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+V(G)/Vp_tr2
+</td>
+<td style="text-align:right;">
+0.739
+</td>
+<td style="text-align:right;">
+0.439
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+rG
+</td>
+<td style="text-align:right;">
+0.827
+</td>
+<td style="text-align:right;">
+0.230
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+V(G)_tr1
+</td>
+<td style="text-align:right;">
+0.110
+</td>
+<td style="text-align:right;">
+0.186
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+V(G)_tr2
+</td>
+<td style="text-align:right;">
+0.001
+</td>
+<td style="text-align:right;">
+0.234
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+C(G)_tr12
+</td>
+<td style="text-align:right;">
+-0.010
+</td>
+<td style="text-align:right;">
+0.197
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+V(e)_tr1
+</td>
+<td style="text-align:right;">
+0.781
+</td>
+<td style="text-align:right;">
+0.383
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+V(e)_tr2
+</td>
+<td style="text-align:right;">
+1.001
+</td>
+<td style="text-align:right;">
+0.486
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+Vp_tr1
+</td>
+<td style="text-align:right;">
+0.891
+</td>
+<td style="text-align:right;">
+0.216
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+Vp_tr2
+</td>
+<td style="text-align:right;">
+1.002
+</td>
+<td style="text-align:right;">
+0.268
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+V(G)/Vp_tr1
+</td>
+<td style="text-align:right;">
+0.124
+</td>
+<td style="text-align:right;">
+0.234
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+V(G)/Vp_tr2
+</td>
+<td style="text-align:right;">
+0.001
+</td>
+<td style="text-align:right;">
+0.234
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+rG
+</td>
+<td style="text-align:right;">
+-1.000
+</td>
+<td style="text-align:right;">
+147.954
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+V(G)_tr1
+</td>
+<td style="text-align:right;">
+0.123
+</td>
+<td style="text-align:right;">
+0.222
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+V(G)_tr2
+</td>
+<td style="text-align:right;">
+0.192
+</td>
+<td style="text-align:right;">
+0.195
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+C(G)_tr12
+</td>
+<td style="text-align:right;">
+0.047
+</td>
+<td style="text-align:right;">
+0.153
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+V(e)_tr1
+</td>
+<td style="text-align:right;">
+0.760
+</td>
+<td style="text-align:right;">
+0.445
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+V(e)_tr2
+</td>
+<td style="text-align:right;">
+0.612
+</td>
+<td style="text-align:right;">
+0.382
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+Vp_tr1
+</td>
+<td style="text-align:right;">
+0.883
+</td>
+<td style="text-align:right;">
+0.241
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+Vp_tr2
+</td>
+<td style="text-align:right;">
+0.805
+</td>
+<td style="text-align:right;">
+0.208
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+V(G)/Vp_tr1
+</td>
+<td style="text-align:right;">
+0.139
+</td>
+<td style="text-align:right;">
+0.284
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+V(G)/Vp_tr2
+</td>
+<td style="text-align:right;">
+0.239
+</td>
+<td style="text-align:right;">
+0.294
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+rG
+</td>
+<td style="text-align:right;">
+0.306
+</td>
+<td style="text-align:right;">
+0.888
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+V(G)_tr1
+</td>
+<td style="text-align:right;">
+0.351
+</td>
+<td style="text-align:right;">
+0.140
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+V(G)_tr2
+</td>
+<td style="text-align:right;">
+0.071
+</td>
+<td style="text-align:right;">
+0.282
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+C(G)_tr12
+</td>
+<td style="text-align:right;">
+0.158
+</td>
+<td style="text-align:right;">
+0.139
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+V(e)_tr1
+</td>
+<td style="text-align:right;">
+0.119
+</td>
+<td style="text-align:right;">
+0.244
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+V(e)_tr2
+</td>
+<td style="text-align:right;">
+0.963
+</td>
+<td style="text-align:right;">
+0.570
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+Vp_tr1
+</td>
+<td style="text-align:right;">
+0.470
+</td>
+<td style="text-align:right;">
+0.122
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+Vp_tr2
+</td>
+<td style="text-align:right;">
+1.034
+</td>
+<td style="text-align:right;">
+0.306
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+V(G)/Vp_tr1
+</td>
+<td style="text-align:right;">
+0.747
+</td>
+<td style="text-align:right;">
+0.459
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+V(G)/Vp_tr2
+</td>
+<td style="text-align:right;">
+0.069
+</td>
+<td style="text-align:right;">
+0.291
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+rG
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+2.158
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+V(G)_tr1
+</td>
+<td style="text-align:right;">
+0.124
+</td>
+<td style="text-align:right;">
+0.218
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+V(G)_tr2
+</td>
+<td style="text-align:right;">
+0.001
+</td>
+<td style="text-align:right;">
+0.233
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+C(G)_tr12
+</td>
+<td style="text-align:right;">
+-0.012
+</td>
+<td style="text-align:right;">
+0.159
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+V(e)_tr1
+</td>
+<td style="text-align:right;">
+0.756
+</td>
+<td style="text-align:right;">
+0.437
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+V(e)_tr2
+</td>
+<td style="text-align:right;">
+1.016
+</td>
+<td style="text-align:right;">
+0.484
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+Vp_tr1
+</td>
+<td style="text-align:right;">
+0.880
+</td>
+<td style="text-align:right;">
+0.237
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+Vp_tr2
+</td>
+<td style="text-align:right;">
+1.017
+</td>
+<td style="text-align:right;">
+0.267
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+V(G)/Vp_tr1
+</td>
+<td style="text-align:right;">
+0.141
+</td>
+<td style="text-align:right;">
+0.281
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+V(G)/Vp_tr2
+</td>
+<td style="text-align:right;">
+0.001
+</td>
+<td style="text-align:right;">
+0.229
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+rG
+</td>
+<td style="text-align:right;">
+-1.000
+</td>
+<td style="text-align:right;">
+95.966
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+V(G)_tr1
+</td>
+<td style="text-align:right;">
+0.495
+</td>
+<td style="text-align:right;">
+0.186
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+V(G)_tr2
+</td>
+<td style="text-align:right;">
+0.241
+</td>
+<td style="text-align:right;">
+0.164
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+C(G)_tr12
+</td>
+<td style="text-align:right;">
+0.266
+</td>
+<td style="text-align:right;">
+0.122
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+V(e)_tr1
+</td>
+<td style="text-align:right;">
+0.062
+</td>
+<td style="text-align:right;">
+0.311
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+V(e)_tr2
+</td>
+<td style="text-align:right;">
+0.490
+</td>
+<td style="text-align:right;">
+0.311
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+Vp_tr1
+</td>
+<td style="text-align:right;">
+0.557
+</td>
+<td style="text-align:right;">
+0.154
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+Vp_tr2
+</td>
+<td style="text-align:right;">
+0.731
+</td>
+<td style="text-align:right;">
+0.170
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+V(G)/Vp_tr1
+</td>
+<td style="text-align:right;">
+0.889
+</td>
+<td style="text-align:right;">
+0.531
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+V(G)/Vp_tr2
+</td>
+<td style="text-align:right;">
+0.329
+</td>
+<td style="text-align:right;">
+0.285
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+rG
+</td>
+<td style="text-align:right;">
+0.770
+</td>
+<td style="text-align:right;">
+0.353
+</td>
+</tr>
+</tbody>
+</table>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.0.3 (2020-10-10)
+Platform: x86_64-apple-darwin17.0 (64-bit)
+Running under: macOS Catalina 10.15.7
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_GB.UTF-8/en_GB.UTF-8/en_GB.UTF-8/C/en_GB.UTF-8/en_GB.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] brms_2.14.4      Rcpp_1.0.4.6     kableExtra_1.3.4 glue_1.4.2      
+ [5] forcats_0.5.0    stringr_1.4.0    dplyr_1.0.0      purrr_0.3.4     
+ [9] readr_2.0.0      tidyr_1.1.0      tibble_3.0.1     ggplot2_3.3.2   
+[13] tidyverse_1.3.0  workflowr_1.6.2 
+
+loaded via a namespace (and not attached):
+  [1] readxl_1.3.1         backports_1.1.7      systemfonts_0.2.2   
+  [4] plyr_1.8.6           igraph_1.2.5         splines_4.0.3       
+  [7] crosstalk_1.1.0.1    TH.data_1.0-10       rstantools_2.1.1    
+ [10] inline_0.3.15        digest_0.6.25        htmltools_0.5.0     
+ [13] rsconnect_0.8.16     fansi_0.4.1          magrittr_2.0.1      
+ [16] tzdb_0.1.2           modelr_0.1.8         RcppParallel_5.0.1  
+ [19] matrixStats_0.56.0   vroom_1.5.3          xts_0.12-0          
+ [22] sandwich_2.5-1       svglite_1.2.3        prettyunits_1.1.1   
+ [25] colorspace_1.4-1     blob_1.2.1           rvest_0.3.5         
+ [28] haven_2.3.1          xfun_0.22            callr_3.4.3         
+ [31] crayon_1.3.4         jsonlite_1.7.0       lme4_1.1-23         
+ [34] survival_3.2-7       zoo_1.8-8            gtable_0.3.0        
+ [37] emmeans_1.4.7        webshot_0.5.2        V8_3.4.0            
+ [40] pkgbuild_1.0.8       rstan_2.21.2         abind_1.4-5         
+ [43] scales_1.1.1         mvtnorm_1.1-0        DBI_1.1.0           
+ [46] miniUI_0.1.1.1       viridisLite_0.3.0    xtable_1.8-4        
+ [49] bit_1.1-15.2         stats4_4.0.3         StanHeaders_2.21.0-3
+ [52] DT_0.13              htmlwidgets_1.5.1    httr_1.4.1          
+ [55] threejs_0.3.3        ellipsis_0.3.1       pkgconfig_2.0.3     
+ [58] loo_2.3.1            dbplyr_1.4.4         tidyselect_1.1.0    
+ [61] rlang_0.4.6          reshape2_1.4.4       later_1.0.0         
+ [64] munsell_0.5.0        cellranger_1.1.0     tools_4.0.3         
+ [67] cli_2.0.2            generics_0.0.2       broom_0.5.6         
+ [70] ggridges_0.5.2       evaluate_0.14        fastmap_1.0.1       
+ [73] yaml_2.2.1           bit64_0.9-7          processx_3.4.2      
+ [76] knitr_1.32           fs_1.4.1             nlme_3.1-149        
+ [79] whisker_0.4          mime_0.9             projpred_2.0.2      
+ [82] xml2_1.3.2           compiler_4.0.3       bayesplot_1.7.2     
+ [85] shinythemes_1.1.2    rstudioapi_0.11      gamm4_0.2-6         
+ [88] curl_4.3             reprex_0.3.0         statmod_1.4.34      
+ [91] stringi_1.5.3        highr_0.8            ps_1.3.3            
+ [94] Brobdingnag_1.2-6    gdtools_0.2.2        lattice_0.20-41     
+ [97] Matrix_1.2-18        nloptr_1.2.2.1       markdown_1.1        
+[100] shinyjs_1.1          vctrs_0.3.0          pillar_1.4.4        
+[103] lifecycle_0.2.0      bridgesampling_1.0-0 estimability_1.3    
+[106] httpuv_1.5.3.1       R6_2.4.1             promises_1.1.0      
+[109] gridExtra_2.3        codetools_0.2-16     boot_1.3-25         
+[112] colourpicker_1.0     MASS_7.3-53          gtools_3.8.2        
+[115] assertthat_0.2.1     rprojroot_1.3-2      withr_2.2.0         
+[118] shinystan_2.5.0      multcomp_1.4-13      mgcv_1.8-33         
+[121] parallel_4.0.3       hms_0.5.3            grid_4.0.3          
+[124] coda_0.19-3          minqa_1.2.4          rmarkdown_2.5       
+[127] git2r_0.27.1         shiny_1.4.0.2        lubridate_1.7.10    
+[130] base64enc_0.1-3      dygraphs_1.1.1.6    </code></pre>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

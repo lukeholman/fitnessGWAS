@@ -428,7 +428,7 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2021-03-04
+<strong>Last updated:</strong> 2021-09-26
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -519,16 +519,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreea16e7516fb3553521a62f87d0a3e6228801d0017targetblanka16e751a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/lukeholman/fitnessGWAS/tree/a16e7516fb3553521a62f87d0a3e6228801d0017" target="_blank">a16e751</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreeaf15dd63a476b2499f2be7f3002df3ec72c28522targetblankaf15dd6a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/lukeholman/fitnessGWAS/tree/af15dd63a476b2499f2be7f3002df3ec72c28522" target="_blank">af15dd6</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreea16e7516fb3553521a62f87d0a3e6228801d0017targetblanka16e751a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreeaf15dd63a476b2499f2be7f3002df3ec72c28522targetblankaf15dd6a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/lukeholman/fitnessGWAS/tree/a16e7516fb3553521a62f87d0a3e6228801d0017" target="_blank">a16e751</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/lukeholman/fitnessGWAS/tree/af15dd63a476b2499f2be7f3002df3ec72c28522" target="_blank">af15dd6</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -543,7 +543,6 @@ Ignored files:
     Ignored:    .pversion
     Ignored:    analysis/.DS_Store
     Ignored:    analysis/correlations_SNP_effects_cache/
-    Ignored:    analysis/plot_models_variant_effects_cache/
     Ignored:    code/.DS_Store
     Ignored:    code/Drosophila_GWAS.Rmd
     Ignored:    data/.DS_Store
@@ -556,49 +555,43 @@ Ignored files:
     Ignored:    data/input/dgrp2.fam
     Ignored:    data/input/huang_transcriptome/
     Ignored:    figures/.DS_Store
+    Ignored:    figures/fig1_inkscape.svg
+    Ignored:    figures/figure1a.pdf
+    Ignored:    figures/figure1b.pdf
 
 Untracked files:
-    Untracked:  Rplots.pdf
-    Untracked:  analysis/GO_KEGG_enrichment.Rmd
-    Untracked:  analysis/TWAS_tables.Rmd
-    Untracked:  code/GO_and_KEGG_gsea.R
-    Untracked:  code/eQTL_analysis.Rmd
-    Untracked:  code/make_sites_files_for_ARGweaver.R
-    Untracked:  code/plotting_results.Rmd
-    Untracked:  code/run_argweaver.R
-    Untracked:  code/run_mashr.R
-    Untracked:  data/argweaver/
-    Untracked:  data/input/TF_binding_sites.csv
-    Untracked:  figures/GWAS_mixture_proportions.rds
-    Untracked:  figures/GWAS_stats_figure.pdf
-    Untracked:  figures/TWAS_mixture_proportions.rds
-    Untracked:  figures/TWAS_stats_figure.pdf
-    Untracked:  figures/antagonism_ratios.pdf
-    Untracked:  figures/composite_mixture_figure.pdf
-    Untracked:  figures/eff_size_histos.pdf
-    Untracked:  figures/stats_figure.pdf
-    Untracked:  manuscript/
+    Untracked:  big_model.rds
+    Untracked:  code/gcta64
+    Untracked:  code/plink
+    Untracked:  code/quant_gen_1.R
+    Untracked:  data/input/genomic_relatedness_matrix.rds
+    Untracked:  figures/SNP_effect_ED.pdf
+    Untracked:  figures/boyle_plot.pdf
+    Untracked:  figures/fig1.pdf
+    Untracked:  manuscript/GWAS_manuscript.log
+    Untracked:  old_analyses/
 
 Unstaged changes:
     Modified:   .gitignore
-    Modified:   README.md
-    Modified:   analysis/GWAS_tables.Rmd
-    Modified:   analysis/TWAS.Rmd
-    Modified:   analysis/_site.yml
-    Deleted:    analysis/about.Rmd
-    Deleted:    analysis/eQTL_analysis.Rmd
-    Modified:   analysis/gwas_adaptive_shrinkage.Rmd
-    Modified:   analysis/license.Rmd
-    Modified:   analysis/make_annotation_database.Rmd
-    Modified:   analysis/plotting_results.Rmd
-    Deleted:    code/gwas_adaptive_shrinkage.R
-    Modified:   data/input/female_fitness.csv
-    Modified:   data/input/female_fitness_CLEANED.csv
-    Modified:   data/input/male_fitness.csv
-    Modified:   data/input/male_fitness_CLEANED.csv
-    Modified:   figures/figure1.eps
-    Deleted:    figures/figure1.png
-    Modified:   figures/figure2.eps
+    Deleted:    Rplots.pdf
+    Deleted:    analysis/GO_KEGG_enrichment.Rmd
+    Deleted:    analysis/plotting_results.Rmd
+    Deleted:    code/GO_and_KEGG_gsea.R
+    Deleted:    code/make_sites_files_for_ARGweaver.R
+    Deleted:    code/plotting_results.Rmd
+    Deleted:    code/run_argweaver.R
+    Modified:   code/run_mashr.R
+    Deleted:    data/input/clough_2014_dsx_targets.csv
+    Modified:   figures/GWAS_stats_figure.pdf
+    Modified:   figures/TWAS_stats_figure.pdf
+    Modified:   figures/antagonism_ratios.pdf
+    Modified:   figures/composite_mixture_figure.pdf
+    Modified:   figures/eff_size_histos.pdf
+    Deleted:    figures/figure1.eps
+    Deleted:    figures/figure2.eps
+    Modified:   manuscript/GWAS_manuscript.Rmd
+    Modified:   manuscript/GWAS_manuscript.pdf
+    Modified:   manuscript/GWAS_manuscript.tex
 
 </code></pre>
 <p>
@@ -637,6 +630,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/af15dd63a476b2499f2be7f3002df3ec72c28522/analysis/plot_line_means.Rmd" target="_blank">af15dd6</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2021-09-26
+</td>
+<td>
+Commit Sept 2021
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/871ae81fa56175675b53d22ca29bf9323c3ed50a/docs/plot_line_means.html" target="_blank">871ae81</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2021-03-04
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -695,18 +722,17 @@ Initial commit
 </div>
 </div>
 </div>
-<pre class="r"><code>library(ggplot2)
+<pre class="r"><code>library(tidyverse)
 library(ggExtra)
-library(dplyr)
-library(tidyr)
 library(grid)
 library(gridExtra)
 library(RColorBrewer)
 library(showtext) # For fancy Google font in figures
 font_add_google(name = &quot;Raleway&quot;, family = &quot;Raleway&quot;, regular.wt = 400, bold.wt = 700) # Install font from Google Fonts
+showtext::showtext.auto()
 
 # Load the predicted line means, as calculated by get_predicted_line_means
-predicted_line_means &lt;- read.csv(&quot;data/derived/predicted_line_means.csv&quot;, stringsAsFactors = FALSE)</code></pre>
+predicted_line_means &lt;- read_csv(&quot;data/derived/predicted_line_means.csv&quot;)</code></pre>
 <div id="variance-and-covariance-in-line-mean-phenotypes" class="section level2">
 <h2>Variance and covariance in line mean phenotypes</h2>
 <p>Generally there is positive covariance between line means for different traits, and all 4 measures of fitness exhibit considerable phenotypic variance across lines.</p>
@@ -760,12 +786,13 @@ make_figure_1 &lt;- function(){
   p4 &lt;- nice.plot(predicted_line_means, &quot;female.fitness.early&quot;, &quot;female.fitness.late&quot;)
   full_plot &lt;- grid.arrange(p1, p2, p3, p4)
   
-  cairo_ps(&quot;figures/figure1.eps&quot;, height = 9, width = 9)
-  full_plot
-  invisible(dev.off())
+  # Saving does not work (ggmarginal + showtext issue?), so get it from the HTML output
+  # svg(&quot;figures/figure1.svg&quot;, height = 9, width = 9)
+  # full_plot
+  # invisible(dev.off())
 }
 make_figure_1()</code></pre>
-<p><img src="figure/plot_line_means.Rmd/unnamed-chunk-2-1.png" width="864" style="display: block; margin: auto;" /></p>
+<p><img src="figure/plot_line_means.Rmd/unnamed-chunk-2-1.png" width="576" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-2-1">
 Past versions of unnamed-chunk-2-1.png
@@ -790,6 +817,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/871ae81fa56175675b53d22ca29bf9323c3ed50a/docs/figure/plot_line_means.Rmd/unnamed-chunk-2-1.png" target="_blank">871ae81</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2021-03-04
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/lukeholman/fitnessGWAS/blob/8d54ea56db332d3ac2d391c232936a4dc8106cc1/docs/figure/plot_line_means.Rmd/unnamed-chunk-2-1.png" target="_blank">8d54ea5</a>
 </td>
 <td>
@@ -809,18 +847,17 @@ Luke Holman
 <h2>Interaction plot showing trait covariance across lines</h2>
 <p>All possible types of lines were observed: some lines are uniformly bad, or uniformly good, or good in one sex or age class but bad in the other.</p>
 <pre class="r"><code>make_figure_2 &lt;- function(){
-  out.file &lt;- &quot;figures/figure2.eps&quot;
-  
+
   interaction.plot &lt;- function(predicted_line_means, x1, x2, title, sex.or.age){
     if(sex.or.age == &quot;sex&quot;){
       x.labs &lt;-  c(&quot;Female&quot;, &quot;Male&quot;) 
-      cols &lt;- c(&quot;red&quot;, &quot;darkgrey&quot;, &quot;blue&quot;)
+      cols &lt;- c(&quot;steelblue&quot;, &quot;darkgrey&quot;, &quot;deeppink2&quot;)
     } else {
-      x.labs &lt;- c(&quot;Young&quot;, &quot;Old&quot;)
+      x.labs &lt;- c(&quot;Early life&quot;, &quot;Late life&quot;)
       cols &lt;- c(&quot;green&quot;, &quot;darkgrey&quot;, &quot;purple&quot;)
     }
     
-    df &lt;- predicted_line_means %&gt;% select_(x1, x2) 
+    df &lt;- predicted_line_means %&gt;% select(!!x1, !!x2) 
     df$rank.x1 &lt;- rank(df[,1]) / max(abs(rank(df[,1])))
     df$rank.x2 &lt;- rank(df[,2]) / max(abs(rank(df[,2])))
     df %&gt;% mutate(slope = rank.x1 - rank.x2,
@@ -829,90 +866,56 @@ Luke Holman
       mutate(fitness = fitness / max(fitness),
              title = title) %&gt;%  
       ggplot(aes(x = sex_or_age, y = fitness, group = line, colour = slope)) + 
-      geom_line(size=0.8, alpha=.7) + 
+      geom_line(size = 0.4, alpha = 0.7) + 
       scale_color_gradient2(low = cols[1], mid = cols[2], high = cols[3]) + 
       scale_x_discrete(expand = c(0.1,0.1), labels = x.labs) + 
       theme_classic(15) + 
       theme(strip.background = element_blank(),
-            strip.text = element_text(hjust =0.1, face = &quot;bold&quot;)) +
+            text = element_text(family = &quot;Raleway&quot;)) +
       xlab(NULL) + ylab(NULL) + 
       facet_wrap(~title) + 
       theme(legend.position = &quot;none&quot;)
   }
   
-  cairo_ps(&quot;figures/figure2.eps&quot;, height = 9, width = 9)
-  grid.arrange(
+  full_plot &lt;- grid.arrange(
     interaction.plot(predicted_line_means, &quot;female.fitness.early&quot;, &quot;male.fitness.early&quot;, &quot;Early-life fitness&quot;, &quot;sex&quot;),
     interaction.plot(predicted_line_means, &quot;female.fitness.late&quot;, &quot;male.fitness.late&quot;, &quot;Late-life fitness&quot;, &quot;sex&quot;),
     interaction.plot(predicted_line_means, &quot;female.fitness.early&quot;, &quot;female.fitness.late&quot;, &quot;Females&quot;, &quot;age&quot;),
     interaction.plot(predicted_line_means, &quot;male.fitness.early&quot;, &quot;male.fitness.late&quot;, &quot;Males&quot;, &quot;age&quot;),
-    ncol = 2, left = &quot;Fitness rank among the 115 lines (0 is worst, 1 is best)&quot;, bottom = &quot;Sex or age category&quot;
+    ncol = 2, left = &quot;Fitness rank among the 125 lines&quot;, bottom = &quot;Sex or age category&quot;
   )
-  invisible(dev.off())
 }
 make_figure_2()</code></pre>
-<pre><code>Warning: `select_()` is deprecated as of dplyr 0.7.0.
-Please use `select()` instead.
-This warning is displayed once every 8 hours.
-Call `lifecycle::last_warnings()` to see where this warning was generated.</code></pre>
-<p><br></br> <strong>Figure 2</strong>: The relative fitness ranks for each line, for four pairs of fitness traits. The y-axis was calculated by taking the adjusted line mean fitnesses, ranking them, and then dividing by the number of lines. The intensity and hue of the colour helps highlight genotypes that rank highly for one fitness component but not the other.</p>
-</div>
-<div id="relating-fitness-data-to-genotype" class="section level1">
-<h1>Relating fitness data to genotype</h1>
-<div id="check-for-effects-of-wolbachia-and-inversions" class="section level2">
-<h2>Check for effects of wolbachia and inversions</h2>
-<p>The Mackay lab have collected data on the Wolbachia infection status of each line, and recorded which chromosomal inversions each line carries. It is possible to statistically account for these variables when doing GWAS, but it makes the analysis more complex. Our fitness data are not correlated with the <em>Wolbachia</em> or inversion data, and in light of this we elected not to include them as predictors when writing our GWAS functions below. Additional analyses (not shown) suggest that the results are essentially identical if we run the models with these predictors included. However, including these parameters as random effects slows down the Bayesian GWAS a lot (and it already takes months of CPU time), so we elected to leave them out.</p>
-<pre class="r"><code>inv.data &lt;- predicted_line_means %&gt;% 
-  left_join(read.csv(&quot;data/input/inversion genotypes.csv&quot;, stringsAsFactors = FALSE) %&gt;% 
-              mutate(line = paste(&quot;line_&quot;, line, sep = &quot;&quot;)), by = &quot;line&quot;) %&gt;% 
-  left_join(read.csv(&quot;data/input/wolbachia.csv&quot;, stringsAsFactors = FALSE) %&gt;% 
-              mutate(line = paste(&quot;line_&quot;, line, sep = &quot;&quot;)), by = &quot;line&quot;) %&gt;% select(-line, -block)
-inv.data[inv.data == &quot;homozygous&quot;] &lt;- NA
-inv.data[inv.data == &quot;ST&quot;] &lt;- 0
-inv.data[inv.data == &quot;INV&quot;] &lt;- 1
-inv.data[inv.data == &quot;n&quot;] &lt;- 0
-inv.data[inv.data == &quot;y&quot;] &lt;- 1
-for(i in 1:ncol(inv.data)) inv.data[,i] &lt;- inv.data[,i] %&gt;% as.numeric()
-inversion.cors &lt;- cor(inv.data, use = &quot;pairwise.complete.obs&quot;)
-heatmap(inversion.cors[!is.na(inversion.cors[,1]), !is.na(inversion.cors[,1])])</code></pre>
-<p><img src="figure/plot_line_means.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-4-1">
-Past versions of unnamed-chunk-4-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-4-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/8d54ea56db332d3ac2d391c232936a4dc8106cc1/docs/figure/plot_line_means.Rmd/unnamed-chunk-4-1.png" target="_blank">8d54ea5</a>
-</td>
-<td>
-Luke Holman
-</td>
-<td>
-2018-12-23
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<pre><code>Warning: attributes are not identical across measure variables;
+they will be dropped
+
+Warning: attributes are not identical across measure variables;
+they will be dropped
+
+Warning: attributes are not identical across measure variables;
+they will be dropped
+
+Warning: attributes are not identical across measure variables;
+they will be dropped</code></pre>
+<p><img src="figure/plot_line_means.Rmd/unnamed-chunk-3-1.png" width="576" style="display: block; margin: auto;" /> <br></br> <strong>Figure 2</strong>: The relative fitness ranks for each line, for four pairs of fitness traits. The y-axis was calculated by taking the adjusted line mean fitnesses, ranking them, and then dividing by the number of lines. The intensity and hue of the colour helps highlight genotypes that rank highly for one fitness component but not the other.</p>
+<!-- # Relating fitness data to genotype -->
+<!-- ## Check for effects of wolbachia and inversions -->
+<!-- The Mackay lab have collected data on the Wolbachia infection status of each line, and recorded which chromosomal inversions each line carries. It is possible to statistically account for these variables when doing GWAS, but it makes the analysis more complex. Our fitness data are not correlated with the _Wolbachia_ or inversion data, and in light of this we elected not to include them as predictors when writing our GWAS functions below. Additional analyses (not shown) suggest that the results are essentially identical if we run the models with these predictors included. However, including these parameters as random effects slows down the Bayesian GWAS a lot (and it already takes months of CPU time), so we elected to leave them out. -->
+<!-- ```{r message=FALSE, warning=FALSE} -->
+<!-- inv.data <- predicted_line_means %>%  -->
+<!--   left_join(read.csv("data/input/inversion genotypes.csv", stringsAsFactors = FALSE) %>%  -->
+<!--               mutate(line = paste("line_", line, sep = "")), by = "line") %>%  -->
+<!--   left_join(read.csv("data/input/wolbachia.csv", stringsAsFactors = FALSE) %>%  -->
+<!--               mutate(line = paste("line_", line, sep = "")), by = "line") %>% select(-line, -block) -->
+<!-- inv.data[inv.data == "homozygous"] <- NA -->
+<!-- inv.data[inv.data == "ST"] <- 0 -->
+<!-- inv.data[inv.data == "INV"] <- 1 -->
+<!-- inv.data[inv.data == "n"] <- 0 -->
+<!-- inv.data[inv.data == "y"] <- 1 -->
+<!-- for(i in 1:ncol(inv.data)) inv.data[,i] <- inv.data[,i] %>% as.numeric() -->
+<!-- inversion.cors <- cor(inv.data, use = "pairwise.complete.obs") -->
+<!-- heatmap(inversion.cors[!is.na(inversion.cors[,1]), !is.na(inversion.cors[,1])]) -->
+<!-- ``` -->
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -937,26 +940,31 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] showtext_0.9-1     showtextdb_3.0     sysfonts_0.8.2     RColorBrewer_1.1-2
- [5] gridExtra_2.3      tidyr_1.1.0        dplyr_1.0.0        ggExtra_0.9       
- [9] ggplot2_3.3.2      workflowr_1.6.2   
+ [1] showtext_0.9-2     showtextdb_3.0     sysfonts_0.8.3     RColorBrewer_1.1-2
+ [5] gridExtra_2.3      ggExtra_0.9        forcats_0.5.0      stringr_1.4.0     
+ [9] dplyr_1.0.0        purrr_0.3.4        readr_2.0.0        tidyr_1.1.0       
+[13] tibble_3.0.1       ggplot2_3.3.2      tidyverse_1.3.0    workflowr_1.6.2   
 
 loaded via a namespace (and not attached):
- [1] tidyselect_1.1.0 xfun_0.19        purrr_0.3.4      splines_4.0.3   
- [5] lattice_0.20-41  colorspace_1.4-1 vctrs_0.3.0      generics_0.0.2  
- [9] miniUI_0.1.1.1   htmltools_0.5.0  yaml_2.2.1       mgcv_1.8-33     
-[13] rlang_0.4.6      later_1.0.0      pillar_1.4.4     glue_1.4.2      
-[17] withr_2.2.0      lifecycle_0.2.0  stringr_1.4.0    munsell_0.5.0   
-[21] gtable_0.3.0     evaluate_0.14    labeling_0.3     knitr_1.30      
-[25] fastmap_1.0.1    httpuv_1.5.3.1   curl_4.3         Rcpp_1.0.4.6    
-[29] xtable_1.8-4     promises_1.1.0   scales_1.1.1     backports_1.1.7 
-[33] jsonlite_1.7.0   farver_2.0.3     mime_0.9         fs_1.4.1        
-[37] digest_0.6.25    stringi_1.5.3    shiny_1.4.0.2    rprojroot_1.3-2 
-[41] tools_4.0.3      magrittr_2.0.1   tibble_3.0.1     crayon_1.3.4    
-[45] whisker_0.4      pkgconfig_2.0.3  ellipsis_0.3.1   Matrix_1.2-18   
-[49] rmarkdown_2.5    R6_2.4.1         nlme_3.1-149     git2r_0.27.1    
-[53] compiler_4.0.3  </code></pre>
-</div>
+ [1] nlme_3.1-149     fs_1.4.1         lubridate_1.7.10 bit64_0.9-7     
+ [5] httr_1.4.1       rprojroot_1.3-2  tools_4.0.3      backports_1.1.7 
+ [9] R6_2.4.1         DBI_1.1.0        mgcv_1.8-33      colorspace_1.4-1
+[13] withr_2.2.0      tidyselect_1.1.0 bit_1.1-15.2     curl_4.3        
+[17] compiler_4.0.3   git2r_0.27.1     cli_2.0.2        rvest_0.3.5     
+[21] xml2_1.3.2       labeling_0.3     scales_1.1.1     digest_0.6.25   
+[25] rmarkdown_2.5    pkgconfig_2.0.3  htmltools_0.5.0  dbplyr_1.4.4    
+[29] fastmap_1.0.1    highr_0.8        rlang_0.4.6      readxl_1.3.1    
+[33] rstudioapi_0.11  shiny_1.4.0.2    generics_0.0.2   farver_2.0.3    
+[37] jsonlite_1.7.0   vroom_1.5.3      magrittr_2.0.1   Matrix_1.2-18   
+[41] Rcpp_1.0.4.6     munsell_0.5.0    fansi_0.4.1      lifecycle_0.2.0 
+[45] stringi_1.5.3    whisker_0.4      yaml_2.2.1       blob_1.2.1      
+[49] parallel_4.0.3   promises_1.1.0   crayon_1.3.4     miniUI_0.1.1.1  
+[53] lattice_0.20-41  haven_2.3.1      splines_4.0.3    hms_0.5.3       
+[57] knitr_1.32       pillar_1.4.4     reprex_0.3.0     glue_1.4.2      
+[61] evaluate_0.14    modelr_0.1.8     vctrs_0.3.0      tzdb_0.1.2      
+[65] httpuv_1.5.3.1   cellranger_1.1.0 gtable_0.3.0     assertthat_0.2.1
+[69] xfun_0.22        mime_0.9         xtable_1.8-4     broom_0.5.6     
+[73] later_1.0.0      ellipsis_0.3.1  </code></pre>
 </div>
 </div>
 

@@ -1053,7 +1053,7 @@ eff_size_histos
 
 **Figure legend**: Manhattan plot showing the p-values (-log_{10} transformed) for each variant, from mixed model GWAS of female (top) and male (bottom) early-life fitness testing the null hypothesis that the two alleles are associated with equal fitness values.  
 
-```{r}
+```{r fig.height=12}
 manhattan_data <- tbl(db, "univariate_lmm_results") %>% 
   select(SNP, starts_with("P_"),
          pvalue_female_early_raw, pvalue_male_early_raw) %>%

@@ -1,19 +1,48 @@
-## ----message=FALSE, warning=FALSE, results="hide"--------------------------------------------------------------------------------------------------------------------------------
+## ----message=FALSE, warning=FALSE, results="hide"-------------------------------------------------------------------------------------------------------------------
 library(tidyverse)
 library(ashr) # Also requires installation of RMosek, which needs a (free) licence. See the ashr Github page for help
 library(mashr) # NB: This has multiple dependencies and was tricky to install. Read the Github page, and good luck!
+library(glue)
+library(kableExtra)
+library(gridExtra)
 
-# library(pander)
-# library(reshape2)
+
+# Get the list of SNPs (or chunks of 100% SNP clumps) that are in approx. LD with one another
+get_mashr_data <- function(){
+  
+  SNPs_in_LD <- read.table("data/derived/SNPs_in_LD", header = FALSE)
+  
+  data_for_mashr <- read_csv("data/derived/all_univariate_GEMMA_results.csv") %>% 
+    filter(str_detect(SNPs, ",") | SNPs %in% SNPs_in_LD$V1) %>% 
+    select(SNPs, starts_with("beta"), starts_with("SE")) 
+  
+  single_snps <- data_for_mashr %>% filter(!str_detect(SNPs, ","))
+  multiple_snps <- data_for_mashr %>% filter(str_detect(SNPs, ","))
+  multiple_snps <- multiple_snps[enframe(strsplit(multiple_snps$SNPs, split = ", ")) %>% 
+                                   unnest(value) %>% 
+                                   filter(value %in% SNPs_in_LD$V1) %>% 
+                                   pull(name), ]
+  bind_rows(single_snps, multiple_snps) %>% arrange(SNPs)
+}
 
 
-## ----echo=FALSE------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----echo=FALSE-----------------------------------------------------------------------------------------------------------------------------------------------------
 # setwd("/Users/lholman/Rprojects/fitnessGWAS")
-setwd("/data/projects/punim0243/DGRP_mashr")
+# setwd("/data/projects/punim0243/DGRP_mashr")
 
 
-## --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----echo = FALSE---------------------------------------------------------------------------------------------------------------------------------------------------
+n_snps <- nrow(read_csv("data/derived/all_univariate_GEMMA_results.csv"))
+n_snps <- prettyNum(n_snps, big.mark=",", scientific=FALSE)
+
+loci_tested <- nrow(get_mashr_data())
+loci_tested <- prettyNum(loci_tested, big.mark=",", scientific=FALSE)
+
+
+## -------------------------------------------------------------------------------------------------------------------------------------------------------------------
 run_mashr <- function(beta_and_se, mashr_mode, ED_p_cutoff = NULL){
+  
+  print(str(beta_and_se))
   
   mashr_setup <- function(beta_and_se){
     betas <- beta_and_se %>% select(starts_with("beta")) %>% as.matrix()
@@ -95,7 +124,7 @@ run_mashr <- function(beta_and_se, mashr_mode, ED_p_cutoff = NULL){
     U <- make_age_antag_matrix(0.5) %>% make_sex_specific("M") %>% add_matrix(U, "Male_specific_0.5")
     U <- make_age_antag_matrix(0.75) %>% make_sex_specific("M") %>% add_matrix(U, "Male_specific_0.75")
     
-    # Nwegatively correlated across ages, and also sex-specific
+    # Negatively correlated across ages, and also sex-specific
     U <- make_age_antag_matrix(-0.25) %>% make_sex_specific("F") %>% add_matrix(U, "Female_specific_age_antag_0.25")
     U <- make_age_antag_matrix(-0.5) %>% make_sex_specific("F") %>% add_matrix(U, "Female_specific_age_antag_0.5")
     U <- make_age_antag_matrix(-0.75) %>% make_sex_specific("F") %>% add_matrix(U, "Female_specific_age_antag_0.75")
@@ -123,64 +152,115 @@ run_mashr <- function(beta_and_se, mashr_mode, ED_p_cutoff = NULL){
   return(mash(data = mash_data, Ulist = U)) # Run mashr
 }
 
-data_for_mashr <- read_csv("data/derived/all_univariate_GEMMA_results.csv") %>% 
-  select(starts_with("beta"), starts_with("SE"))
 
-run_mashr(data_for_mashr, mashr_mode = "ED", ED_p_cutoff = 0.2) %>%
-  write_rds(path = "data/derived/mashr_results_ED.rds")
-
-run_mashr(data_for_mashr, mashr_mode = "canonical") %>%
-  write_rds(path = "data/derived/mashr_results_canonical.rds")
-
-
-## ----eval = FALSE----------------------------------------------------------------------------------------------------------------------------------------------------------------
-## # Get the mixture weights, as advised by mash authors here: https://github.com/stephenslab/mashr/issues/68
-## posterior_weights_cov <- mashr_results_canonical$posterior_weights
-## colnames(posterior_weights_cov) <- sapply(str_split(colnames(posterior_weights_cov), '\\.'),
-##                                                  function(x) {
-##                                                    if(length(x)==1) return(x)
-##                                                    else if(length(x)==2) return(x[1])
-##                                                    else if(length(x)==3) return(paste(x[1], x[2], sep = "."))
-##                                                    })
-## posterior_weights_cov <- t(rowsum(t(posterior_weights_cov), colnames(posterior_weights_cov)))
-## 
-## # Make a neat dataframe
-## mixture_assignment_probabilities <- data.frame(
-##   SNP_clump = read_csv("data/derived/all_univariate_GEMMA_results.csv")$SNPs,
-##   posterior_weights_cov,
-##   stringsAsFactors = FALSE
-## ) %>% as_tibble() %>%
-##   rename(P_equal_effects = equal_effects,
-##          P_female_specific = Female_specific_1,
-##          P_male_specific = Male_specific_1,
-##          P_null = null,
-##          P_sex_antag = Sex_antag_0.25)
+if(!file.exists("data/derived/mashr_results_canonical.rds")){
+  
+  data_for_mashr <- get_mashr_data()
+  
+  print("Starting the data-driven analysis")
+  run_mashr(data_for_mashr, mashr_mode = "ED", ED_p_cutoff = 0.2) %>%
+    saveRDS(file = "data/derived/mashr_results_ED.rds")
+  
+  print("Starting the canonical analysis")
+  run_mashr(data_for_mashr, mashr_mode = "canonical") %>%
+    saveRDS(file = "data/derived/mashr_results_canonical.rds")
+} else {
+  mashr_results_ED <- read_rds("data/derived/mashr_results_ED.rds")
+  mashr_results_canonical <- read_rds("data/derived/mashr_results_canonical.rds")
+}
 
 
-## ----eval=FALSE------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----mashr_by_chromosome--------------------------------------------------------------------------------------------------------------------------------------------
+mashr_one_chromosome <- function(chr){
+  
+  data_for_mashr <- get_mashr_data()
+  
+  focal_data <- data_for_mashr %>% 
+    filter(grepl(glue("{chr}_"), SNPs)) %>%
+    select(starts_with("beta"), starts_with("SE"))
+  
+  run_mashr(focal_data, mashr_mode = "canonical") %>%
+    saveRDS(file = glue("data/derived/mashr_results_canonical_chr{chr}.rds"))
+}
+
+if(!file.exists("data/derived/mashr_results_canonical_chrX.rds")){
+  print("Starting the chromosome-specific analysis")
+  lapply(c("2L", "2R", "3L", "3R", "X"), mashr_one_chromosome)
+} 
+
+
+## ----get_mixture_assignments, message=FALSE-------------------------------------------------------------------------------------------------------------------------
+# Get the mixture weights, as advised by mash authors here: https://github.com/stephenslab/mashr/issues/68
+posterior_weights_cov <- mashr_results_canonical$posterior_weights 
+colnames(posterior_weights_cov) <- sapply(
+  str_split(colnames(posterior_weights_cov), '\\.'), 
+  function(x) {
+    if(length(x) == 1) return(x)
+    else if(length(x) == 2) return(x[1])
+    else if(length(x) == 3) return(paste(x[1], x[2], sep = "."))
+  })
+posterior_weights_cov <- t(rowsum(t(posterior_weights_cov), 
+                                  colnames(posterior_weights_cov)))
+
+data_for_mashr <- get_mashr_data()
+
+# Make a neat dataframe
+mixture_assignment_probabilities <- data.frame(
+  SNP_clump = data_for_mashr$SNPs,
+  posterior_weights_cov,
+  stringsAsFactors = FALSE
+) %>% as_tibble() %>%
+  rename(P_equal_effects = equal_effects,
+         P_female_specific = Female_specific_1,
+         P_male_specific = Male_specific_1,
+         P_null = null,
+         P_sex_antag = Sex_antag_0.25)
+
+
+## ----eval=FALSE-----------------------------------------------------------------------------------------------------------------------------------------------------
 ## all_univariate_lmm_results <- read_csv("data/derived/all_univariate_GEMMA_results.csv") %>%
 ##   rename_at(vars(-SNPs), ~ str_c(., "_raw"))
-## mashr_results_canonical <- read_rds("data/derived/mashr_results_canonical.rds")
-## mashr_results_ED <- read_rds("data/derived/mashr_results_ED.rds")
+## 
+## mashr_snps <- data_for_mashr$SNPs
+## 
+## canonical_estimates <- get_pm(mashr_results_canonical) %>%
+##   as_tibble() %>%
+##   rename_all(~str_c(., "_mashr_canonical"))
+## 
+## ED_estimates <- get_pm(mashr_results_ED) %>%
+##   as_tibble() %>%
+##   rename_all(~str_c(., "_mashr_ED"))
+## 
+## lfsr_canonical <- get_lfsr(mashr_results_canonical) %>%
+##   as_tibble() %>%
+##   rename_all(~str_replace_all(., "beta", "LFSR")) %>%
+##   rename_all(~str_c(., "_mashr_canonical"))
+## 
+## lfsr_ED <- get_lfsr(mashr_results_ED) %>%
+##   as_tibble() %>%
+##   rename_all(~str_replace_all(., "beta", "LFSR")) %>%
+##   rename_all(~str_c(., "_mashr_ED"))
 ## 
 ## 
-## canonical_estimates <- get_pm(mashr_results_canonical) %>% as_tibble() %>% rename_all(~str_c(., "_mashr_canonical"))
-## ED_estimates        <- get_pm(mashr_results_ED) %>% as_tibble() %>% rename_all(~str_c(., "_mashr_ED"))
+## all_mashr_results <- bind_cols(
+##   tibble(SNPs = mashr_snps),
+##   canonical_estimates,
+##   ED_estimates,
+##   lfsr_canonical,
+##   lfsr_ED)
 ## 
-## lfsr_canonical <- get_lfsr(mashr_results_canonical) %>% as_tibble() %>% rename_all(~str_replace_all(., "beta", "LFSR")) %>% rename_all(~str_c(., "_mashr_canonical"))
-## lfsr_ED <- get_lfsr(mashr_results_ED) %>% as_tibble() %>% rename_all(~str_replace_all(., "beta", "LFSR")) %>% rename_all(~str_c(., "_mashr_ED"))
-## 
-## 
-## all_univariate_lmm_results <- bind_cols(all_univariate_lmm_results, canonical_estimates, ED_estimates, lfsr_canonical, lfsr_ED)
+## all_univariate_lmm_results <- left_join(all_univariate_lmm_results, all_mashr_results, by = "SNPs")
 ## 
 ## nested <- all_univariate_lmm_results %>% filter(str_detect(SNPs, ", "))
+## split_snps <- strsplit(nested$SNPs, split = ", ")
 ## nested <- lapply(1:nrow(nested),
 ##                  function(i) {
-##                    data.frame(SNP = strsplit(nested$SNPs[i], split = ", ")[[1]],
+##                    data.frame(SNP = split_snps[[i]],
 ##                               SNP_clump = nested$SNPs[i],
 ##                               nested[i,] %>% select(-SNPs), stringsAsFactors = FALSE)
 ##                    }) %>%
 ##   do.call("rbind", .) %>% as_tibble()
+## rm(split_snps)
 ## 
 ## all_univariate_lmm_results <- all_univariate_lmm_results %>%
 ##   filter(!str_detect(SNPs, ", ")) %>%
@@ -194,69 +274,77 @@ run_mashr(data_for_mashr, mashr_mode = "canonical") %>%
 ##   all_univariate_lmm_results %>%
 ##   left_join(mixture_assignment_probabilities, by = "SNP_clump")
 ## 
-## db <- DBI::dbConnect(RSQLite::SQLite(), "data/derived/annotations.sqlite3")
+## db <- DBI::dbConnect(RSQLite::SQLite(),
+##                      "data/derived/annotations.sqlite3", create = FALSE)
+## 
+## # tbl(db, "univariate_lmm_results") %>% collect() %>% write_tsv("data/derived/mashr_results_early_2021/original_database_sheet.tsv.gz")
 ## 
 ## db %>% db_drop_table(table = "univariate_lmm_results")
 ## db %>% copy_to(all_univariate_lmm_results,
 ##                "univariate_lmm_results", temporary = FALSE)
 
 
-## ----load_mashr_results, echo=FALSE----------------------------------------------------------------------------------------------------------------------------------------------
+## ----load_mashr_results, echo=FALSE---------------------------------------------------------------------------------------------------------------------------------
 mashr_results_canonical <- read_rds("data/derived/mashr_results_canonical.rds")
 mashr_results_ED <- read_rds("data/derived/mashr_results_ED.rds")
 
 
-## --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-tibble(`Mashr version` = c("1. Data-driven covariance matrices",
-                           "2. Cononical covariance matrices",
-                           "Likelihood ratio (1 / 2)"),
+## -------------------------------------------------------------------------------------------------------------------------------------------------------------------
+tibble(`Mashr version` = c("A. Data-driven covariance matrices",
+                           "B. Cononical covariance matrices",
+                           "Likelihood ratio (A / B)"),
        `Log likelihood` = c(get_loglik(mashr_results_ED),
                             get_loglik(mashr_results_canonical),
                             get_loglik(mashr_results_ED) / get_loglik(mashr_results_canonical))) %>%
-  pander()
+  kable() %>%
+  kable_styling()
 
 
-## ----plot_mixtrure_props---------------------------------------------------------------------------------------------------------------------------------------------------------
-melt(sort(get_estimated_pi(mashr_results_canonical))) %>%
-  rownames_to_column("Mixture_component") %>%
-  filter(value > 0.01) %>% 
-  spread(Mixture_component, value) %>%
-  rename(`Equal effects on\neach fitness component` = equal_effects,
-         `Female-specific effect` = Female_specific_1,
-         `Male-specific effect` = Male_specific_1,
-         `Sexually-antagonistic effect` = Sex_antag_0.25) %>%
-  gather() %>%
-  arrange(-value) %>%
-  mutate(key = factor(key, rev(key))) %>%
-  ggplot(aes(key, 100*value)) + 
-  geom_bar(stat = "identity", fill = "#ff6f61", colour = "grey10") + 
-  coord_flip() + 
-  scale_y_continuous(expand = c(0, 0), limits = c(0, 67)) + 
-  theme_bw() + 
-  theme(axis.ticks.y = element_blank()) +
-  ylab("Estimated % SNPs") +
-  xlab(NULL)
+## ----pairwise_sharing-----------------------------------------------------------------------------------------------------------------------------------------------
+get_pairwise_sharing(mashr_results_ED, 
+                     factor = 0, 
+                     lfsr_thresh = 0.05) %>% 
+  round(3)
 
 
-## --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-melt(sort(get_estimated_pi(mashr_results_ED))) %>%
-  rownames_to_column("Mixture_component") %>%
-  filter(value > 0.01) %>%
-  arrange(-value) %>%
-  mutate(Mixture_component = factor(Mixture_component, rev(Mixture_component))) %>%
-  ggplot(aes(Mixture_component, 100*value)) + 
-  geom_bar(stat = "identity", fill = "#ff6f61", colour = "grey10") + 
-  coord_flip() + 
-  scale_y_continuous(expand = c(0, 0), limits = c(0, 78)) + 
-  theme_bw() + 
-  theme(axis.ticks.y = element_blank()) +
-  ylab("Estimated % SNPs") +
-  xlab(NULL)
+## ----mashr_check_plot, fig.height=3.1, fig.width=7.3----------------------------------------------------------------------------------------------------------------
+db <- DBI::dbConnect(RSQLite::SQLite(), 
+                     "data/derived/annotations.sqlite3")
 
-mashr_results_ED$fitted_g$Ulist[["ED_tPCA"]] %>% cov2cor()
-mashr_results_ED$fitted_g$Ulist[["ED_PCA_1"]] %>% cov2cor()
+# Results for all 1,613,615 SNPs, even those that are in 100% LD with others (these are grouped up by the SNP_clump column)
+all_snps <- tbl(db, "univariate_lmm_results")
+
+# All SNPs and SNP groups that are in <100% LD with one another (n = 1,207,357)
+SNP_clumps <- all_snps %>% select(-SNP) %>% distinct() %>% collect(n=Inf)
+
+# Subsetting variable to get the approx-LD subset of SNPs
+LD_subset <- !is.na(SNP_clumps$LFSR_female_early_mashr_ED)
 
 
-## --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-get_pairwise_sharing(mashr_results_ED, factor = 0, lfsr_thresh = 0.05) %>% round(3)
+hex_plot <- function(x, y, xlab, ylab){
+  filter(SNP_clumps,LD_subset) %>% 
+    ggplot(aes_string(x, y)) + 
+    geom_abline(linetype = 2) + 
+    geom_vline(xintercept = 0, linetype = 3) +
+    geom_hline(yintercept = 0, linetype = 3) +
+    stat_binhex(bins = 200, colour = "#FFFFFF00") + 
+    scale_fill_distiller(palette = "Purples") + 
+    coord_cartesian(xlim = c(-1,1), ylim = c(-0.55, 0.3)) + 
+    theme_minimal() + xlab(xlab) + ylab(ylab) +
+    theme(legend.position = "none")
+}
+grid.arrange(
+  hex_plot("beta_female_early_raw", 
+           "beta_female_early_mashr_canonical", 
+           "Raw estimate of SNP\neffect size from LMM", 
+           "Corrected estimate from\nmashr (canonical)"),
+  hex_plot("beta_female_early_raw", 
+           "beta_female_early_mashr_ED", 
+           "Raw estimate of SNP\neffect size from LMM", 
+           "Corrected estimate from\nmashr (data-driven)"),
+  hex_plot("beta_female_early_mashr_canonical", 
+         "beta_female_early_mashr_ED", 
+         "Corrected estimate from\nmashr (canonical)", 
+         "Corrected estimate from\nmashr (data-driven)"),
+  ncol = 3)
 

@@ -5,7 +5,6 @@ authors:
     department: Department of Computer Science
     affiliation: Cranberry-Lemon University
     location: Pittsburgh, PA 15213
-    email: heidi@email.com
   - name: Luke Holman
     thanks: Previous address&#58; Melbourne. 
     department: School of Applied Sciences
@@ -58,46 +57,62 @@ _Male fitness assay_: To measure male fitness, we placed 5 males from the focal 
 We similarly used a multivariate GLMM to estimate the line mean male fitness. The procedure was similar to the model used for females, except that the response variable was the proportion of offspring sired (modelled using the binomial family and logit link), and we additionally corrected for the number of live competitor GFP males that were present at the time the females were removed for egg collection (by including the number of competitors as a covariate). Thus, we assume that the GFP males died randomly with respect to the genotype of the DGRP males, and adjusted the fitness of each line accordingly. We again derived the posterior predictions of the line means, and estimated the proportion of variance in siring success that was explained by line.
 
 
-\subsection*{Quantifying genetic (co)variance}
+\subsection*{Estimating quantitative genetic parameters}
 
-Write?
+We estimated heritabilities and genetic (co)variances from the parameter estimates of a Bayesian multivariate random effects model implemented in `brms` (REF). The response variable was a matrix of the four phenotypes for each line (estimated in the previously mentioned GLMMs), the predictor variable was line. The line-level random effects were assumed to covary between phenotypes, according to the covariances in the genomic relatedness matrix, which we estimated from their multilocus genotypes using `sommer` (REF). We took the between-line (co)variance estimates as measures of the genetic (co)variances, and calculated heritability as the proportion of variance explained by line. We also calculated the posterior differences between pairs of genetic correlations, to test hypotheses about how these correlations differ by sex/age.
 
 \subsection*{Univariate GWAS and multivariate adaptive shrinkage}
-In short, we performed a genome-wide association study (GWAS) using the software GEMMA (ref), and used multivariate adaptive shrinkage implemented in the R package `mashr` (REF) to process and interpret the GWAS results. 
+In short, we performed a genome-wide association study (GWAS) using the software GEMMA (ref), and used multivariate adaptive shrinkage implemented in the R package `mashr` (REF) to process and interpret the GWAS results.
 
-We included in the GWAS all loci (SNPs and indels) that had been genotyped in at least 90% of the DGRP lines in our study and which had a minor allele frequency of $\ge5\%$. There were XX such loci, although only XX of these were in <100% linkage disequilibrium with all other loci; we therefore analysed these XX variants or variant groups (the latter were identified using PLINK). Missing genotypes were imputed using Beagle (REF). Using GEMMA's `lmm` function, we ran one one univariate linear mixed model per variant per phenotype, to estimate the variant effect sizes, standard errors, and $p$-values while adjusting for population structure via eigen decomposition of the genomic relatedness matrix. p-values were Benjamini-Hochberg corrected to control the false discovery rate.
+We included in the GWAS all loci (SNPs and indels) that had been genotyped in at least 90% of the DGRP lines in our study and which had a minor allele frequency of $\ge5\%$. There were XX such loci, although XX of these were in complete linkage disequilibrium with other loci in the lines that we studied; we therefore analysed a total of XX variant groups that contained $\ge1$ completely linked variants (the latter were identified using PLINK). Missing genotypes were imputed using Beagle (REF). Using GEMMA's `lmm` function, we ran one one univariate linear mixed model per variant per phenotype, to estimate the variant effect sizes, standard errors, and $p$-values while adjusting for population structure via eigen decomposition of the genomic relatedness matrix. The $p$-values were Benjamini-Hochberg corrected to control the false discovery rate.
 
-Variant effect sizes are usually measured with considerable error in GWAS, and univariate GWAS ignores the correlations that likely exist between effects on the four phenotypes we measured. Furthermore, a key aim of our study is to estimate the frequency of sexuall-antagonistic and age-antagonisitic variants. The analysis using `mashr` can... 
-and it can be valuable to run additional analyses on the effect sizes to estimate the true effect sizes, and to identify which effects are robust and mitigate 'winner's curse' effects (REF). 
+Variant effect sizes are usually measured with considerable error in GWAS, and univariate GWAS ignores the correlations that likely exist between effects on the four phenotypes we measured. Furthermore, a key aim of our study is to estimate the frequency of sexually-antagonistic and age-antagonisitic variants. We therefore ran the software `mashr` in two different modes -- data-driven mode and canonical mode -- which assist these two respective aims. In data-driven mode, one first estimates the commonest ways in which the effect sizes of each variant on the four phenotypes tend to co-vary, by using a method called Extreme Convolution to estimate these possible covariances structures from the GWAS summary statistics. For our data, this method yields five $4\times4$ covariance matrices that each describe different types of variants (e.g. one of the matrices has large positive values on the diagonals, corresponding to variants that affects fitness similarly in both sexes and both age classes; another matrix corresponds to sexually antagonistic variants). `mashr` then fits a multivariate mixture model which finds a mixture assignment probability for each variant for each covariance matrix, and adjusts (shrinks) the variants' effect sizes on the four phenotypes accordingly. The output data includes the shrinked effect sizes, which we use in downstream analyses as the most accurate estimate of the true effect size of each variant on each phenotype.
+
+When running `mashr` in canonical mode, the user must instead specify a set of hypothesised covariances matrices, instead of estimating them from the data. We specified 45 different possible matrices, in the interests of including all that we could conceive of. Complete details are given in the accompanying code, but in brief we included matrices for variants that are null (i.e. have no phenotypic effect), affect only one phenotype, affect only one sex (age concordantly and antagonistically), affect only one age (sexually concordantly and antagonistically), or which affect both sexes/ages (concordantly and antagonistically, or in only one age/sex). `mashr` then estimates the proportion of variants that belong to each of the hypothesised types (which we use, _inter alia_, to estimate the proportion of sexually antagonistic variants in the genome), and calculates a mixture assignment probability for each variants (which we use to calculate the probability that a given variant is sexually antagonistic).
+
+We ran `mashr` either on the complete set of variants, or on a subset corresponding to each of the chromosome arms. The latter results were used to compare the estimated proportions of different variant types between chromosomes, while the former was used for all other analyses. 
+
+\subsection*{Variant annotations and enrichment tests}
+We used the variant annotations provided by the Mackay lab, who used the software SnpEff to classify each variant by site class (e.g. whether the variant is in an intron, or a non-synonymous codon position, etc). Additionally, we assigned a list of KEGG and GO terms to each variant, which matched those associated with the gene (or genes) in which that variant resides (obtained from NCBI).
+
+Enrichment tests and site class model...
+
+\subsection*{Transcriptome-wide association study (TWAS)}
+
+We performed a TWAS on the microarray data from Huang et al. (REF, 2015). We removed transcripts that 
+
+
+<!-- \subsection*{Measuring the specificity of selection across sexes and age classes} -->
+
+<!-- We calculated a selection index, termed I, for each variant, by adapting the formula from Innocenti and Morrow (XX): -->
+
+<!-- FORMULA -->
+
+<!-- Innocenti and Morrow referred to I as an “index of sex-specific selection”, but I is equally useful for any study that measured selection in two categories of individuals; in our case, we calculated I to compare the effects of each variant on A) male and female fitness, and B) early life and late life fitness.  -->
+
+<!-- When I is positive, selection is “concordant”, meaning that there is selection in both sexes or age classes, in the same direction (i.e. the same variant is associated with elevated fitness in both cases). When I is close to zero, selection is absent in one or both cases. When I is negative, selection is “antagonistic” meaning that there is selection in both sexes or age classes, but the variant that is associated with higher fitness is different in each case. We calculated I to compare four kinds of selection: A) males vs females, in early life; B) males vs females, in late life; C) young vs old males; D) young vs old females. -->
+
+<!-- To numerically estimate the uncertainty associated with each estimate of I, we generated 1000 independent samples of b_i and b_j by drawing random numbers from a normal distribution with a mean and standard deviation obtained from the models used to estimate b_i and b_j. This yielded 1000 estimates of I, from which we recorded the median and 95% quantiles, which approximate the 95% confidence limits on I given the uncertainty associated with b_i and b_j. -->
 
 
 
-We estimated selection on each variant using linear regression (REFS). The statistical model used to test each variant was a simple linear model with the formula Y ~ Genotype, where Y is relative fitness (e.g. the predicted line mean for male early-life fitness, divided by the average of all the predicted line means), and Genotype is the genotype of the focal line. Genotype was coded as a 0 for lines homozygous for the reference allele or 1 for lines homozygous the alternate allele for the focal variant - heterozygous loci are rare in the DGRP, and were excluded from analysis (because the genotype is unknown for these loci in our study). We defined the reference allele as the one that was most common across the entire panel of DGRP lines (n = 205), such that a positive slope means that the minor (i.e. rarer) allele confers higher fitness, and a negative slope means that the major (commoner) allele confers higher fitness. For each variant, we recorded the effect size, the associated standard error, and the t, df and p values for the test.
 
-Our approach is equivalent to performing a GWAS with relative fitness as the response variable. The reason we did not use the GWAS pipeline generously provided online by the creators of the DGRP is that we wished to obtain effect size for every variant, and the pipeline only provides effect size for statistically significant variants. However, we did compare the results of our analysis with the results obtained by the Mackay lab’s pipeline, and obtained essentially identical results (e.g. our analysis identified the same statistically significant variant), suggesting that our approach were very similar. One difference is that the Mackay lab’s pipeline estimates the effects of each variant after correcting for the presence/absence of Wolbachia and chromosomal inversions in each line. We conducted pilot analyses which showed that including these variables yielded very similar results (because Wolbachia and chromosomal inversions were both unassociated with fitness in our study; p > 0.05), and so we elected to leave them out of our models for simplicity.
-
-\subsection*{Measuring the specificity of selection across sexes and age classes}
-
-We calculated a selection index, termed I, for each variant, by adapting the formula from Innocenti and Morrow (XX):
-
-FORMULA
-
-Innocenti and Morrow referred to I as an “index of sex-specific selection”, but I is equally useful for any study that measured selection in two categories of individuals; in our case, we calculated I to compare the effects of each variant on A) male and female fitness, and B) early life and late life fitness. 
-
-When I is positive, selection is “concordant”, meaning that there is selection in both sexes or age classes, in the same direction (i.e. the same variant is associated with elevated fitness in both cases). When I is close to zero, selection is absent in one or both cases. When I is negative, selection is “antagonistic” meaning that there is selection in both sexes or age classes, but the variant that is associated with higher fitness is different in each case. We calculated I to compare four kinds of selection: A) males vs females, in early life; B) males vs females, in late life; C) young vs old males; D) young vs old females.
-
-To numerically estimate the uncertainty associated with each estimate of I, we generated 1000 independent samples of b_i and b_j by drawing random numbers from a normal distribution with a mean and standard deviation obtained from the models used to estimate b_i and b_j. This yielded 1000 estimates of I, from which we recorded the median and 95% quantiles, which approximate the 95% confidence limits on I given the uncertainty associated with b_i and b_j.
-
-\subsection*{Annotations for each variant}
-We relied on the annotations generated by the creators of the DGRP, who used the software SnpEff to classify each variant by site class (e.g. whether the variant is in an intron, or a non-synonymous codon position, etc). Additionally, we assigned a list of KEGG and GO terms to each variant, which matched those associated with the gene (or genes) in which that variant resides (obtained from NCBI).
 
 \section*{Results}
 
 \subsection*{Variance and covariance in fitness across lines}
 
-There was substantial variation in line mean relative fitness, for both sexes and both age classes (Figure 1).  All correlations in Figure 1 are positive and significant (p < 0.001), indicating that lines with high male fitness tended to have high female fitness, and lines with high early-life fitness tended to have high late-life fitness. 
+There was substantial variation in line mean relative fitness, for both sexes and both age classes (Figure 1).  All correlations in Figure 1A are positive (Table SX), indicating that lines with high male fitness tended to have high female fitness, and lines with high early-life fitness tended to have high late-life fitness. Despite the overall positive correlations, some lines had higher than average female fitness but below-average male fitness, and some that ranked highly for early life fitness had low late-life fitness (and vice versa; Figure 1B). In sum, the data suggest that the majority of genetic variance in fitness is concordant across sexes and age classes, but provide support for the existence of alleles with antagonistic effects on the four phenotypes (particularly male and female fitness).
 
-In spite of the overall positive correlations between sexes and age classes, some lines ranked highly for female fitness had low male fitness, and some that ranked highly for early life fitness had low late-life fitness (and vice versa; Figure 2). In sum, the data suggest that the majority of genetic variance in fitness is concordant across sexes and age classes, but alleles with antagonistic fitness effects may nevertheless exist.
+
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=1.0\textwidth]{../figures/fig1.pdf}
+\caption{\footnotesize{Panel A shows correlations among estimated line means for the four fitness components from Bayesian mixed models adjusting for block effects. Panel B shows the same data expressed as ranks, and the panels illustrate how the ranks co-vary between pairs of phenotypes (the colours indicate the slope of the line, e.g. redder lines have high-ranked female fitness and low-ranked male fitness).}}
+\end{figure}
+\newpage
+
 
 \subsection*{Genetic variance and covariance in fitness}
 
@@ -105,19 +120,45 @@ The estimated G matrix for our four traits is shown in Table 1. Fitness was high
 
 \subsection*{Distribution of fitness effects across variants}
 
-Figure 3 plots the estimated effects of each of the XX variants on each of the four fitness traits: positive numbers mean that the commonest variant was associated with elevated fitness, and negative numbers indicate the reverse. 
+Figure 2 plots the mashr-adjusted effect sizes of the polymorphic loci on each of the four phenotypes (see Table SX for associated Spearman correlation statistics). As expected based on the line means in Figure 1, there was a positive correlation, such that at loci where the minor allele increase or decrease female fitness, the minor allele tended to have a similar effect on male fitness. The correlation was similarly strong in both age classes, though the slope was shallower in the late life age class due to a smaller effect sizes on male fitness as compared to the early life age class. 
 
-Variants had smaller average effects on relative fitness in males relative to females, and in young individuals relative to older ones. There was positive covariance for all combinations, such that variants that positively affected one fitness component tended to positively affect another (Figure 3; Table XX). Additionally, we detected XX variants that affected fitness in two fitness components, but all of these affected fitness in a concordant rather than antagonistic fashion; for example, we did not find any alleles that elevated male fitness but reduced female fitness. 
+The mean effect on fitness across all variants was significantly negative for all but one of the phenotypes, which means that the minor alleles were, on average, associated with lower fitness than the major alleles (Table SX). The exception was male early-life fitness, for which the reverse was true: the major allele tended to be associated with lower fitness than the minor allele. However the average variant effect size differed by only a small amount from zero (i.e. the value expected under the null hypothesis that the minor and major alleles are equally likely to be the beneficial one).
 
-The mean effect on fitness across all variants was slightly negative for all traits, which means that the minor alleles were, on average, associated with lower fitness than the major alleles (Table XX). Additionally, the distribution of fitness effects was significantly positively skewed for all four fitness measures, such that there were was an excess of loci with highly positive fitness effects relative to the number with highly negative effects (Figure 3; Table XX). This means that among the subset of loci with extreme effects on fitness, the beneficial allele tended to be the minor rather than major allele.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=1.0\textwidth]{../figures/SNP_effect_ED.pdf}
+\caption{\footnotesize{Effect sizes of 1,207,357 loci (i.e. groups of one or more polymorphic sites in complete linkage disequilibrium) on male and female fitness, plotted separately for the early-life and late-life estimates. The effect sizes estimated using GEMMA have been corrected using mashr, using the data-driven method to apply shrinkage (Figure SX shows the raw estimates). The data have been binned into hexagons, with the colour and contour lines indicating the number of loci. The diagonal line represents $y=x$. Positive effect sizes indicate that the minor allele is associated with higher fitness.}}
+\end{figure}
+\newpage
+
+\subsection*{Top hits from the GWAS}
+
+We used the SNP clumping method in PLINK to identify groups of loci in linkage disequilibrium with one another, for which at least one group member affected one of the four phenotypes with $-log10(p) > 5$ (Table SX). There were 83 such groups of loci (15 groups with $-log10(p) > 6$, and 3 with $-log10(p) > 7$). Many of these regions overlapped genes. For example, we found a significant variant ($-log10(p) = 7.3$) in an intron of _serontonin receptor 1A_ (FBgn0004168), where the minor allele (MAF = 0.11) reduced fitness in both sexes. A complete list of affected genes in given in Table SX.
+
+We found one polymorphic region that had a sexually antagonistic effect on fitness (with the major allele benefitting females and harming males; MAF = 0.10), overlapped six genes: _Death regulator Nedd2-like caspase_ (_Dronc_; FBgn0026404), _variable nurse cells_ (_vnc_; FBgn0263251), and _defective proboscis extension response 6_ (_dpr6_; FBgn0040823) plus 3 uncharacterised genes (FBgn0036062, FBgn0036063, and FBgn0259932). _Dronc_ mediates caspase-dependent cell death, and is implicated in the DNA damage response, sperm differentiation, and cell specification, while _vnc_ is involved in histone acetylation and oogenesis. _dpr6_ is involved in synapse organisation and the perception of chemical stimuli; another _dpr_ gene is required for proper male courtship (https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.0030216). The three uncharacterised genes all show high expression in the ovary and less expression in the testis (modENCODE Tissue Expression), implying roles in reproduction.
+
+\subsection*{Top hits from the TWAS}
+
 
 
 \subsection*{Almost all loci affect fitness, or are close to a locus that does}
-Inspired by Boyle et al. (xx), we sorted all of the variants by their fitness effects, placed them in bins of 1000, and then calculated the average fitness effect for each bin. Figure 4 shows that there was a very tight correlation (XXX) between the average effects of the variants in each bin on male and female fitness. 
-As well as reaffirming our earlier results that there is a positive genetic correlation between male and female fitness, these results reveal that fitness is an extremely polygenic trait. The male and female fitness measurements were collected independently, and so Figure 4 allows us to distinguish small but genuine effects from statistical noise, despite the low power of our study (and most GWAS) to detect variants with weak effects. To see why, consider an alternative hypothesis, in which the great majority of variants have no effect on fitness, and the genetic (co)variance in fitness reported above resulted from a small subset (dozens or hundreds) of variants with comparatively large average effects. The plot in Figure 4 would then be flat in the centre with steep inflections at each end. The straight line that we see instead suggests that there a large number of variants that each affect fitness - typically in both sexes, in the same direction - whose effect sizes range from tiny to moderate (see Boyle et al. XXX). Put another way, the effect size of each 1000-variant bin on female fitness was replicated for male fitness, suggesting that the effects are real, as opposed to being deviations from a true effect of zero caused by statistical uncertainty.
+Inspired by Figure 1C in Boyle et al. (REF), we sorted all of the variants by their fitness effects, placed them in bins of 1000, and then calculated the average fitness effect for each bin. Figure 3 shows that there was a very tight correlation (XXX) between the average effects of the variants in each bin on male and female fitness, and that the shape of the relationship was different between age classes. For the early life age class, there was a very tight positive correlation between the effect size on males and females for loci where the minor allele increased fitness in females (i.e. those $x > 0$ in Figure 3A). For loci where the major allele increased female fitness ($x < 0$ in Figure 3A), the correlation was non-linear, such that the effect of the major allele on male fitness became less positive as its effect on females increased. Figure 3A thus implies a shortage of loci where the major allele is strongly beneficial to fitness in both sexes in the early life age class (though there was no shortage of loci where the minor allele was strongly beneficial in both sexes). Figure 1B showed similar patterns, except that the relationship did not change between loci where the minor versus major allele benefitted females. 
 
-\subsection*{Selection estimates and allele frequencies are correlated}
-At loci for which the minor allele was associated with higher fitness, the minor allele tended to be more common across the DGRP. This confirms the intuitive prediction that...
+Figures 3 reaffirms the results shown in Figures 1-2 that there is a positive genetic correlation between male and female fitness, and that this correlation changes between age classes, but Figure 3 also implies that our four phenotypes are highly polygenic (or 'omnigenic'; Boyle et al. REF) and are affected by large numbers of loci with small effects. The male and female fitness measurements were collected independently, and so Figure 3 allows us to distinguish small but genuine effects from statistical noise, despite the low power of our study (and most GWAS) to detect variants with weak effects. To see why, consider an alternative hypothesis, in which the great majority of variants have no effect on fitness, and the genetic (co)variance in phenotypes observed across lines (Figure 1 and QUANT GEN TABLE) resulted from comparatively few (e.g. dozens) of variants with comparatively large effects. The plot in Figure 3 would then be flat in the centre with steep inflections at each end. The straight line that we see instead suggests that there a large number of variants that each affect fitness - typically in both sexes, in the same direction - whose effect sizes range from tiny to moderate. Put another way, the effect size of each 1000-variant bin on female fitness was replicated for male fitness, suggesting that many of the non-zero effect size estimates refelct real non-zero effects, as opposed to statistical sampling variance.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=1.0\textwidth]{../figures/boyle_plot.pdf}
+\caption{\footnotesize{Mean effect size on each phenotype for groups of 1,000 loci. The loci were first sorted in order of their effect on female fitness, then binned and their effect sizes on each sex were calculated. The line shows a quadratic linear regression fit with standard error in grey.}}
+\end{figure}
+\newpage
+
+\subsection*{Mixture modelling results from the GWAS and TWAS}
+
+Figure 4A shows the results of a mixture modelling analysis of the GWAS results, from the R package `mashr` (in canonical mode). `mashr` allows one to estimate the proportions of various types of locus, using a set of covariance matrices ($4\times4$ matrices, in our case) that are specified _a priori_ by the user. To be inclusive of all possibilities, we hypothesised that loci might A) have no effect on any of the four phenotypes, B) affect one of the four phenotypes and not the others, C) affect both phenotypes for one sex, either concordantly or antagonistically across age classes, D) affect both phenotypes for one age class, either concordantly or antagonistically across sexes, or E) affect all four phenotypes in the same direction or differing directions (including complex types, such as loci that are sexually antagonistic in one age class and sexually concordant in the other). Several of these possibilities were calculated to apply to fewer than 1% of loci by `mashr`, and thus are not plotted in Figure 4. We ran `mashr` once for all the loci, and ran it a further 5 times using just the loci from one of the 5 major chromosome arms. 
+
+Figure 4A shows that the most common type of locus was estimated to be the type that has an identical effect size on all four phenotypes (recorded as 'sexually concordant' in Figure 4A). The model estimated that 0% of loci have age-specific or age-antagonistic effects, and so these types are not plotted. Loci with no effect on fitness were rare, despite the model's prior that this type of locus is ten-fold more common than any other type, again indicating that most loci either affect fitness or are closely linked to a locus that does. Loci with sex-specific effects were estimated to be quite common, especially loci with sexually antagonistic (12%, genome-wide) or female-specific effects (19%). The X chromosome was inferred to have the highest proportion of sexually antagonistic loci (24%), with an estimate that was twice as high as the estimate for the whole genome, and substantially higher than for other chromosomes (e.g. 7.4% for chromosome 2L). 
 
 
 \subsection*{Distribution of fitness effects across chromosomes}
@@ -138,12 +179,6 @@ To do...
 \newpage
 \section*{Figures}
 
-<!-- \begin{figure}[h] -->
-<!-- \centering -->
-<!-- \includegraphics[width=1.0\textwidth]{../figures/figure1_moths.pdf} -->
-<!-- \caption{\footnotesize{Some hypothetical \textit{Z}-linked suppression drives considered in this study. Panel A illustrates normal inheritance of sex chromosomes in a wild type \textit{ZW} female (assumed to be mated to a wild type \textit{ZZ} male; not shown): the offspring sex ratio is even. In panel B, the female carries a \textit{W}-shredder allele ($Z^*$) that kills gametes or offspring early enough that missing daughters are replaced with more $Z^*$-bearing sons. In panel C, the lost daughters are not replaced, though their absence increases the survival probability of the sons somewhat (shown by their larger size), causing super-Mendelian inheritance of the $Z^*$ allele. Lastly, panel D shows a \textit{Z}-linked female-sterilising allele (e.g. an allele that cleaves the \textit{W} chromosome or a female-essential gene in somatic cells); since it is strongly disadvantageous in females, such an allele would go extinct unless it benefits from gene drive in heterozygous males.}} -->
-<!-- \end{figure} -->
-<!-- \newpage -->
 
 
 

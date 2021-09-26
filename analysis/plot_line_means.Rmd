@@ -6,23 +6,22 @@ output:
 ---
 
 ```{r message=FALSE, warning=FALSE, results="hide"}
-library(ggplot2)
+library(tidyverse)
 library(ggExtra)
-library(dplyr)
-library(tidyr)
 library(grid)
 library(gridExtra)
 library(RColorBrewer)
 library(showtext) # For fancy Google font in figures
 font_add_google(name = "Raleway", family = "Raleway", regular.wt = 400, bold.wt = 700) # Install font from Google Fonts
+showtext::showtext.auto()
 
 # Load the predicted line means, as calculated by get_predicted_line_means
-predicted_line_means <- read.csv("data/derived/predicted_line_means.csv", stringsAsFactors = FALSE)
+predicted_line_means <- read_csv("data/derived/predicted_line_means.csv")
 ```
 
 ## Variance and covariance in line mean phenotypes
 Generally there is positive covariance between line means for different traits, and all 4 measures of fitness exhibit considerable phenotypic variance across lines.
-```{r message=FALSE, warning=FALSE, fig.showtext=TRUE, fig.height = 9, fig.width = 9}
+```{r message=FALSE, warning=FALSE, fig.showtext=TRUE, fig.height = 6, fig.width = 6}
 lims <- c(1.1*min(apply(predicted_line_means[,2:5], 2, min)), 
           1.1*max(apply(predicted_line_means[,2:5], 2, max)))
 
@@ -73,9 +72,10 @@ make_figure_1 <- function(){
   p4 <- nice.plot(predicted_line_means, "female.fitness.early", "female.fitness.late")
   full_plot <- grid.arrange(p1, p2, p3, p4)
   
-  cairo_ps("figures/figure1.eps", height = 9, width = 9)
-  full_plot
-  invisible(dev.off())
+  # Saving does not work (ggmarginal + showtext issue?), so get it from the HTML output
+  # svg("figures/figure1.svg", height = 9, width = 9)
+  # full_plot
+  # invisible(dev.off())
 }
 make_figure_1()
 ```
@@ -85,20 +85,19 @@ make_figure_1()
 
 ## Interaction plot showing trait covariance across lines
 All possible types of lines were observed: some lines are uniformly bad, or uniformly good, or good in one sex or age class but bad in the other.
-```{r}
+```{r fig.showtext=TRUE, fig.height = 6, fig.width = 6}
 make_figure_2 <- function(){
-  out.file <- "figures/figure2.eps"
-  
+
   interaction.plot <- function(predicted_line_means, x1, x2, title, sex.or.age){
     if(sex.or.age == "sex"){
       x.labs <-  c("Female", "Male") 
-      cols <- c("red", "darkgrey", "blue")
+      cols <- c("steelblue", "darkgrey", "deeppink2")
     } else {
-      x.labs <- c("Young", "Old")
+      x.labs <- c("Early life", "Late life")
       cols <- c("green", "darkgrey", "purple")
     }
     
-    df <- predicted_line_means %>% select_(x1, x2) 
+    df <- predicted_line_means %>% select(!!x1, !!x2) 
     df$rank.x1 <- rank(df[,1]) / max(abs(rank(df[,1])))
     df$rank.x2 <- rank(df[,2]) / max(abs(rank(df[,2])))
     df %>% mutate(slope = rank.x1 - rank.x2,
@@ -107,26 +106,24 @@ make_figure_2 <- function(){
       mutate(fitness = fitness / max(fitness),
              title = title) %>%  
       ggplot(aes(x = sex_or_age, y = fitness, group = line, colour = slope)) + 
-      geom_line(size=0.8, alpha=.7) + 
+      geom_line(size = 0.4, alpha = 0.7) + 
       scale_color_gradient2(low = cols[1], mid = cols[2], high = cols[3]) + 
       scale_x_discrete(expand = c(0.1,0.1), labels = x.labs) + 
       theme_classic(15) + 
       theme(strip.background = element_blank(),
-            strip.text = element_text(hjust =0.1, face = "bold")) +
+            text = element_text(family = "Raleway")) +
       xlab(NULL) + ylab(NULL) + 
       facet_wrap(~title) + 
       theme(legend.position = "none")
   }
   
-  cairo_ps("figures/figure2.eps", height = 9, width = 9)
-  grid.arrange(
+  full_plot <- grid.arrange(
     interaction.plot(predicted_line_means, "female.fitness.early", "male.fitness.early", "Early-life fitness", "sex"),
     interaction.plot(predicted_line_means, "female.fitness.late", "male.fitness.late", "Late-life fitness", "sex"),
     interaction.plot(predicted_line_means, "female.fitness.early", "female.fitness.late", "Females", "age"),
     interaction.plot(predicted_line_means, "male.fitness.early", "male.fitness.late", "Males", "age"),
-    ncol = 2, left = "Fitness rank among the 115 lines (0 is worst, 1 is best)", bottom = "Sex or age category"
+    ncol = 2, left = "Fitness rank among the 125 lines", bottom = "Sex or age category"
   )
-  invisible(dev.off())
 }
 make_figure_2()
 ```
@@ -135,22 +132,22 @@ make_figure_2()
 
 
 
-# Relating fitness data to genotype
+<!-- # Relating fitness data to genotype -->
 
-## Check for effects of wolbachia and inversions
-The Mackay lab have collected data on the Wolbachia infection status of each line, and recorded which chromosomal inversions each line carries. It is possible to statistically account for these variables when doing GWAS, but it makes the analysis more complex. Our fitness data are not correlated with the _Wolbachia_ or inversion data, and in light of this we elected not to include them as predictors when writing our GWAS functions below. Additional analyses (not shown) suggest that the results are essentially identical if we run the models with these predictors included. However, including these parameters as random effects slows down the Bayesian GWAS a lot (and it already takes months of CPU time), so we elected to leave them out.
-```{r message=FALSE, warning=FALSE}
-inv.data <- predicted_line_means %>% 
-  left_join(read.csv("data/input/inversion genotypes.csv", stringsAsFactors = FALSE) %>% 
-              mutate(line = paste("line_", line, sep = "")), by = "line") %>% 
-  left_join(read.csv("data/input/wolbachia.csv", stringsAsFactors = FALSE) %>% 
-              mutate(line = paste("line_", line, sep = "")), by = "line") %>% select(-line, -block)
-inv.data[inv.data == "homozygous"] <- NA
-inv.data[inv.data == "ST"] <- 0
-inv.data[inv.data == "INV"] <- 1
-inv.data[inv.data == "n"] <- 0
-inv.data[inv.data == "y"] <- 1
-for(i in 1:ncol(inv.data)) inv.data[,i] <- inv.data[,i] %>% as.numeric()
-inversion.cors <- cor(inv.data, use = "pairwise.complete.obs")
-heatmap(inversion.cors[!is.na(inversion.cors[,1]), !is.na(inversion.cors[,1])])
-```
+<!-- ## Check for effects of wolbachia and inversions -->
+<!-- The Mackay lab have collected data on the Wolbachia infection status of each line, and recorded which chromosomal inversions each line carries. It is possible to statistically account for these variables when doing GWAS, but it makes the analysis more complex. Our fitness data are not correlated with the _Wolbachia_ or inversion data, and in light of this we elected not to include them as predictors when writing our GWAS functions below. Additional analyses (not shown) suggest that the results are essentially identical if we run the models with these predictors included. However, including these parameters as random effects slows down the Bayesian GWAS a lot (and it already takes months of CPU time), so we elected to leave them out. -->
+<!-- ```{r message=FALSE, warning=FALSE} -->
+<!-- inv.data <- predicted_line_means %>%  -->
+<!--   left_join(read.csv("data/input/inversion genotypes.csv", stringsAsFactors = FALSE) %>%  -->
+<!--               mutate(line = paste("line_", line, sep = "")), by = "line") %>%  -->
+<!--   left_join(read.csv("data/input/wolbachia.csv", stringsAsFactors = FALSE) %>%  -->
+<!--               mutate(line = paste("line_", line, sep = "")), by = "line") %>% select(-line, -block) -->
+<!-- inv.data[inv.data == "homozygous"] <- NA -->
+<!-- inv.data[inv.data == "ST"] <- 0 -->
+<!-- inv.data[inv.data == "INV"] <- 1 -->
+<!-- inv.data[inv.data == "n"] <- 0 -->
+<!-- inv.data[inv.data == "y"] <- 1 -->
+<!-- for(i in 1:ncol(inv.data)) inv.data[,i] <- inv.data[,i] %>% as.numeric() -->
+<!-- inversion.cors <- cor(inv.data, use = "pairwise.complete.obs") -->
+<!-- heatmap(inversion.cors[!is.na(inversion.cors[,1]), !is.na(inversion.cors[,1])]) -->
+<!-- ``` -->

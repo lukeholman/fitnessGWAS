@@ -16,9 +16,9 @@ This script creates a SQLite3 database holding two tables: one with annotations 
 
 This script uses Bayesian mixed models implemented in `brms` to estimate the line means for our four fitness traits.
 
-### [3. Calculating quantitative genetic parameters](XXX.html)
+### [3. Calculating quantitative genetic parameters](quantitative_genetics.html)
 
-Using linear mixed models implemented in the R package `sommer` to estimate the heritability of, and genetic covariance among, our four fitness traits. 
+Using a multivariate random effects model implemented in `brms`, we estimate the heritability of, and genetic covariance among, our four phenotypes based on the genomic relatedness matrix. 
 
 ### [4. Running the GWAS](perfom_gwas.html)
 
@@ -32,12 +32,11 @@ Here, we use the R package `mashr` to perform multivariate adaptive shrinkage on
 
 This script generates some plots of the SNP effect sizes under the two forms of shrinkage (canonical and data-driven) to check that `mashr` is performing as expected.
 
-### [7. Running the TWAS, identifying eQTLs, and applying mashr to the TWAS results](TWAS.html)
+### [7. Running the TWAS and applying mashr to the TWAS results](TWAS.html)
 
 This script uses the transcriptomic data from Huang et al. 2015 _PNAS_ on the DGRP. In this script, we
 
 - Calculate the average expression and sex bias in expression for each transcript in Huang et al.
-- Identify loci that associated with fitness in our GWAS, and which were also identified as eQTLs in Huang et al.
 - Perform 'TWAS', i.e. searching for transcripts whose expression correlates with our fitness measures across lines
 - Adjust the results of the TWAS linear models using `mashr` in canonical and data-driven modes.
 

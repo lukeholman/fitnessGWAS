@@ -59,10 +59,25 @@ my_data_table <- function(df){ # Make html tables:
 }
 
 # Helper to load Huang et al.'s data
-load_expression_data <- function(sex){
+load_expression_data <- function(sex, both_sex_chromosomes = TRUE){
+  
+  # Note: Huang et al's data contains weird stuff like supposedly Y-linked genes that have
+  # higher/equal expression in *females* in all lines, presumably microarray issues/errors.
+  # To be conservative, we restrict our analyses to genes that are known to be on a
+  # chromosomes that is present in both sexes
+  if(both_sex_chromosomes){
+    genes_allowed <- tbl(db, "genes") %>%
+      filter(chromosome %in% c("2L", "2R", "3L", "3R", "4", "X")) %>%
+      pull(FBID)
+  } else {
+    genes_allowed <- tbl(db, "genes") %>%
+      pull(FBID)
+  }
   
   if(sex != "both"){
-    expression <- glue("data/input/huang_transcriptome/dgrp.array.exp.{sex}.txt") %>% read_delim(delim = " ")
+    expression <- glue("data/input/huang_transcriptome/dgrp.array.exp.{sex}.txt") %>% 
+      read_delim(delim = " ") %>%
+      filter(gene %in% genes_allowed)
     sample_names <- names(expression)[names(expression) != "gene"] %>% str_remove(":[12]") 
     gene_names <- expression$gene
     expression <- expression %>% select(-gene) %>% as.matrix() %>% t() 
@@ -74,9 +89,11 @@ load_expression_data <- function(sex){
              mutate(line = str_remove_all(line, "[.]1")))
   }
   
-  females <- read_delim("data/input/huang_transcriptome/dgrp.array.exp.female.txt", delim = " ")
+  females <- read_delim("data/input/huang_transcriptome/dgrp.array.exp.female.txt", delim = " ") %>%
+    filter(gene %in% genes_allowed)
   names(females)[-1] <- paste("F_", names(females)[-1],sep="") #%>% str_remove(":[12]") 
-  females <- females %>% left_join(read_delim("data/input/huang_transcriptome/dgrp.array.exp.male.txt", delim = " "), by = "gene")
+  females <- females %>% 
+    left_join(read_delim("data/input/huang_transcriptome/dgrp.array.exp.male.txt", delim = " "), by = "gene")
   sample_names <- names(females)[names(females) != "gene"] %>% str_remove(":[12]") 
   gene_names <- females$gene
   sex <- ifelse(str_detect(sample_names, "F_"), "female", "male")
@@ -88,45 +105,47 @@ load_expression_data <- function(sex){
     expression = females
   )
 }
-```
-
-### Load all data
-```{r message=FALSE}
-# Load the predicted line means, as calculated in get_predicted_line_means.Rmd
-predicted_line_means <- read_csv("data/derived/predicted_line_means.csv")
-
-# Load the results of four univariate linear mixed models run in GEMMA and corrected by mashr
-univariate_lmm_results <- tbl(db, "univariate_lmm_results") %>%
-  left_join(tbl(db, "variants") %>% select(SNP, FBID, site.class, MAF), by = "SNP") %>%
-  left_join(tbl(db, "genes") %>% select(FBID, gene_name), by = "FBID")
-
-# Results of one multivariate linear mixed model run in GEMMA:
-# multivariate_lmm_results <- read_tsv("data/derived/output/all_four_traits.assoc.txt") %>%
-#   select(-contains("Vbeta")) %>%
-#   left_join(tbl(db, "variants") %>% select(SNP, FBID, site.class, MAF) %>% collect(), by = "SNP") %>% 
-#   left_join(tbl(db, "genes") %>% 
-#               select(FBID, gene_name) %>% 
-#               collect(), by = "FBID") %>% 
-#   left_join(univariate_lmm_results %>% select(SNP, SNP_clump) %>% collect(n=Inf), by = "SNP") %>%
-#   select(SNP, SNP_clump, gene_name, FBID, contains("male"), p_wald, fdr) 
-
-
-# Load the supplementary data files from Huang et al. 2015 PNAS
-# Table S2: results of statistical tests for sex, line and sex-by-line effects on expression of each transcript
-# huang_expression <- read_csv("data/input/huang_2015_tableS2_gene_expression.csv")
 
 # Table S5: heritability of the expression level of each transcript (as measured in males, or females)
 huang_heritability <- read_csv("data/input/huang_2015_tableS5_transcript_heritability.csv")
 
-# Table S11+S12: statistically significant eQTLs, and the transcripts they affect (for each sex)
-huang_eQTL_females <- read_csv("data/input/huang_2015_tableS11_eQTL_females.csv") %>%
-  left_join(tbl(db, "genes") %>% select(FBID, gene_name) %>% collect(), by = "FBID") %>%
-  rename(Affected_FBID = FBID, Affected_gene = gene_name)
-
-huang_eQTL_males <- read_csv("data/input/huang_2015_tableS12_eQTL_males.csv") %>%
-  left_join(tbl(db, "genes") %>% select(FBID, gene_name) %>% collect(), by = "FBID") %>%
-  rename(Affected_FBID = FBID, Affected_gene = gene_name)
+# Load the predicted line means from present study, as calculated in get_predicted_line_means.Rmd
+predicted_line_means <- read_csv("data/derived/predicted_line_means.csv")
 ```
+
+<!-- ### Load all data -->
+<!-- ```{r message=FALSE} -->
+<!-- # Load the results of four univariate linear mixed models run in GEMMA and corrected by mashr -->
+<!-- # univariate_lmm_results <- tbl(db, "univariate_lmm_results") %>% -->
+<!-- #   left_join(tbl(db, "variants") %>% select(SNP, FBID, site.class, MAF), by = "SNP") %>% -->
+<!-- #   left_join(tbl(db, "genes") %>% select(FBID, gene_name), by = "FBID") -->
+
+<!-- # Results of one multivariate linear mixed model run in GEMMA: -->
+<!-- # multivariate_lmm_results <- read_tsv("data/derived/output/all_four_traits.assoc.txt") %>% -->
+<!-- #   select(-contains("Vbeta")) %>% -->
+<!-- #   left_join(tbl(db, "variants") %>% select(SNP, FBID, site.class, MAF) %>% collect(), by = "SNP") %>%  -->
+<!-- #   left_join(tbl(db, "genes") %>%  -->
+<!-- #               select(FBID, gene_name) %>%  -->
+<!-- #               collect(), by = "FBID") %>%  -->
+<!-- #   left_join(univariate_lmm_results %>% select(SNP, SNP_clump) %>% collect(n=Inf), by = "SNP") %>% -->
+<!-- #   select(SNP, SNP_clump, gene_name, FBID, contains("male"), p_wald, fdr)  -->
+
+
+<!-- # Load the supplementary data files from Huang et al. 2015 PNAS -->
+<!-- # Table S2: results of statistical tests for sex, line and sex-by-line effects on expression of each transcript -->
+<!-- # huang_expression <- read_csv("data/input/huang_2015_tableS2_gene_expression.csv") -->
+
+
+
+<!-- # # Table S11+S12: statistically significant eQTLs, and the transcripts they affect (for each sex) -->
+<!-- # huang_eQTL_females <- read_csv("data/input/huang_2015_tableS11_eQTL_females.csv") %>% -->
+<!-- #   left_join(tbl(db, "genes") %>% select(FBID, gene_name) %>% collect(), by = "FBID") %>% -->
+<!-- #   rename(Affected_FBID = FBID, Affected_gene = gene_name) -->
+<!-- #  -->
+<!-- # huang_eQTL_males <- read_csv("data/input/huang_2015_tableS12_eQTL_males.csv") %>% -->
+<!-- #   left_join(tbl(db, "genes") %>% select(FBID, gene_name) %>% collect(), by = "FBID") %>% -->
+<!-- #   rename(Affected_FBID = FBID, Affected_gene = gene_name) -->
+<!-- ``` -->
 
 ## Calculate sex bias in expression for each transcript
 
@@ -152,7 +171,6 @@ write_csv(sex_bias_in_expression, "data/derived/gene_expression_by_sex.csv")
 
 rm(expression_data_both_sexes)
 ```
-
 
 
 <!-- ## Overlap between significant SNPs from our GWAS and known eQTls {.tabset} -->
@@ -237,7 +255,12 @@ Huang et al.'s microarray data was downloaded from the [DGRP website](http://dgr
 
 ### Linear models to find transcripts that correlate with fitness across DGRP lines ("TWAS")
 
-Here, we perform a large number of simple linear regressions, and obtain the slope (beta or $\beta$) and its standard error from a regression of transcript $i$ on fitness trait $j$. The number of regression run was 72,560, i.e. 4 fitness traits $\times$ 18,140 transcripts. We nickname this approach 'TWAS'. 
+```{r echo=FALSE}
+n_transcripts <- ncol(load_expression_data("male", both_sex_chromosomes = TRUE))
+```
+
+
+Here, we perform a large number of simple linear regressions, and obtain the slope (beta or $\beta$) and its standard error from a regression of transcript $i$ on fitness trait $j$. The number of regression run was `r n_transcripts*4`, i.e. 4 fitness traits $\times$ `r n_transcripts` transcripts. This approach is often called 'TWAS'. 
 
 ```{r message=FALSE}
 transcript_selection_analysis <- function(expression_data, phenotypes){
@@ -277,13 +300,18 @@ transcript_selection_analysis <- function(expression_data, phenotypes){
     FL <- summary(lm(female.fitness.late ~ expression_level, data = expression_data))$coefficients
     ME <- summary(lm(male.fitness.early ~ expression_level, data = expression_data))$coefficients
     ML <- summary(lm(male.fitness.late ~ expression_level, data = expression_data))$coefficients
-    c(FE[2,1], FL[2,1], ME[2,1], ML[2,1], FE[2,2], FL[2,2], ME[2,2], ML[2,2])
+    
+    c(FE[2,1], FL[2,1], ME[2,1], ML[2,1], # effect size
+      FE[2,2], FL[2,2], ME[2,2], ML[2,2], # SE
+      FE[2,4], FL[2,4], ME[2,4], ML[2,4]) # p-value
   }
   
   # Runs do_one_transcript() on all the transcripts listed in the vector 'transcripts'
   do_chunk_of_transcripts <- function(transcripts){
     output <- data.frame(transcripts, lapply(transcripts, do_one_transcript) %>% do.call("rbind", .))
-    names(output) <- c("gene", "beta_FE", "beta_FL", "beta_ME", "beta_ML", "SE_FE", "SE_FL", "SE_ME", "SE_ML")
+    names(output) <- c("gene", "beta_FE", "beta_FL", "beta_ME", "beta_ML", 
+                       "SE_FE", "SE_FL", "SE_ME", "SE_ML",
+                       "pval_FE", "pval_FL", "pval_ME", "pval_ML")
     output
   }
   
@@ -304,12 +332,6 @@ if(!file.exists("data/derived/TWAS/TWAS_result_males.csv")){
   TWAS_result_males <- read_csv("data/derived/TWAS/TWAS_result_males.csv")
 }
 ```
-
-
-
-
-
-
 
 ### Run `mashr` to adjust the TWAS results 
 
@@ -483,7 +505,7 @@ if(!file.exists("data/derived/TWAS/TWAS_ED.rds")){
 
 TWAS_mashr_results <- 
   data.frame(
-    FBID = read_delim("data/input/huang_transcriptome/dgrp.array.exp.female.txt", delim = " ") %>% pull(gene),
+    FBID = colnames(load_expression_data("female"))[-1],
     as.data.frame(get_pm(TWAS_canonical)) %>% rename_all(~str_c("canonical_", .)),
     as.data.frame(get_lfsr(TWAS_canonical)) %>% 
       rename_all(~str_replace_all(., "beta", "LFSR")) %>% rename_all(~str_c("canonical_", .))) %>% 
@@ -546,47 +568,71 @@ saveRDS(TWAS_mixture_assignment_probabilities,
 ## Identify significantly antagonistic and concordant transcripts
 Here, we define significantly antagonistic transcripts as those where the relationship with fitness is significantly positive for one sex or age class and significantly negative for the other. Similarly, we define significantly concordant transcripts as those where the relationship with fitness is significantly positive for one sex or age class and also significantly positive for the other. This is quite conservative, because a transcript has to have a LFSR < 0.05 for two tests, giving two chances for a 'false negative' error.
 
+<!-- ### Calculate the p-value for the `sex:expression` interaction term -->
+
+<!-- ```{r} -->
+<!-- get_one_transcript <- function(gene){ -->
+<!--   data.frame(expression_data_both_sexes[[1]],  -->
+<!--              as.data.frame(expression_data_both_sexes[[2]])) %>% -->
+<!--     select(line, sex, !!gene) %>% -->
+<!--     filter(line %in% predicted_line_means$line) %>% -->
+<!--     group_by(line, sex) %>% -->
+<!--     summarise_all(~ mean(.x)) %>% -->
+<!--     left_join(predicted_line_means %>% select(-block), by = "line") %>% -->
+<!--     mutate(early_fitness = female.fitness.early, -->
+<!--            early_fitness = replace(early_fitness, sex == "male", male.fitness.early[sex == "male"]), -->
+<!--            late_fitness = female.fitness.late, -->
+<!--            late_fitness = replace(late_fitness, sex == "male", male.fitness.late[sex == "male"])) %>% -->
+<!--     filter(!is.na(early_fitness)) %>% select(-contains("male")) -->
+<!-- } -->
+
+<!-- model_one_transcript <- function(focal_gene){ -->
+<!--   dat <- get_one_transcript(focal_gene) -->
+<!--   formula1 <- glue("early_fitness ~ {focal_gene} * sex") -->
+<!--   formula2 <- glue("late_fitness ~ {focal_gene} * sex") -->
+<!--   interaction_p_early <- summary(lm(formula1, data = dat))$coefficients[4,4] -->
+<!--   interaction_p_late <- summary(lm(formula2, data = dat))$coefficients[4,4] -->
+<!--   data.frame(focal_gene, interaction_p_early, interaction_p_late) -->
+<!-- } -->
+
+<!-- if(!file.exists("data/derived/TWAS/interaction_p_values.csv")){ -->
+<!--   interaction_p_values <- colnames(expression_data_both_sexes[[2]]) %>%  -->
+<!--     mclapply(model_one_transcript) %>% bind_rows() %>% as_tibble() -->
+<!--   write_csv(interaction_p_values, "data/derived/TWAS/interaction_p_values.csv") -->
+<!-- } else interaction_p_values <- read_csv("data/derived/TWAS/interaction_p_values.csv") -->
+<!-- ``` -->
+
 ```{r}
-get_sig <- function(TWAS_mashr){
-  FBIDs <- TWAS_result_females$gene
-  significant <- ifelse(get_lfsr(TWAS_mashr) < 0.05, 1, 0) %>% as.data.frame()
-  positive <- ifelse(get_pm(TWAS_mashr) > 0, 1, 0) %>% as.data.frame()
-  sig_SA_early <- which((positive$beta_FE != positive$beta_ME) & (significant$beta_FE==1 & significant$beta_ME==1))
-  sig_SA_late <-  which((positive$beta_FL != positive$beta_ML) & (significant$beta_FL==1 & significant$beta_ML==1))
-  sig_AA_females <- which((positive$beta_FE != positive$beta_FL) & (significant$beta_FE==1 & significant$beta_FL==1))
-  sig_AA_males <-   which((positive$beta_ME != positive$beta_ML) & (significant$beta_ME==1 & significant$beta_ML==1))
-  
-  sig_SC_early <- which((positive$beta_FE == positive$beta_ME) & (significant$beta_FE==1 & significant$beta_ME==1))
-  sig_SC_late <-  which((positive$beta_FL == positive$beta_ML) & (significant$beta_FL==1 & significant$beta_ML==1))
-  sig_AC_females <- which((positive$beta_FE == positive$beta_FL) & (significant$beta_FE==1 & significant$beta_FL==1))
-  sig_AC_males <-   which((positive$beta_ME == positive$beta_ML) & (significant$beta_ME==1 & significant$beta_ML==1))
-  
-  helper <- function(sigs){
-    x <- get(sigs)
-    if(length(x) > 0) x <- data.frame(type = sigs, 
-                                      FBID = FBIDs[x], 
-                                      get_pm(TWAS_mashr)[x, ])
-    else x <- NULL
-    x
-  }
+TWAS_results <- data.frame(
+  FBID = TWAS_result_females$gene,
+  as.data.frame(get_pm(TWAS_ED)),
+  as.data.frame(get_lfsr(TWAS_ED))) %>% 
+  as_tibble()
 
-  bind_rows(
-    helper("sig_SA_early"), helper("sig_SA_late"), helper("sig_AA_females"), helper("sig_AA_males"),
-    helper("sig_SC_early"), helper("sig_SC_late"), helper("sig_AC_females"), helper("sig_AC_males")) %>%
-    mutate(type = as.character(type))
-}
+names(TWAS_results)[6:9] <- paste("LFSR", c("FE","FL","ME","ML"), sep="_")
 
-sig_transcripts_table <- get_sig(TWAS_ED) %>%
-  left_join(TWAS_mashr_results %>% select(FBID, contains("ED_LFSR")), by = "FBID") %>% # LFSR for each trait (like p-value)
-  left_join(tbl(db, "genes") %>% collect(), by = "FBID") %>% # gene info for each
-  left_join(sex_bias_in_expression, by = "FBID") %>% 
+p_cutoff <- 0.01
+
+TWAS_results <- TWAS_results  %>%
+  mutate(sig_SA_early = ifelse(sign(beta_FE) != sign(beta_ME) & LFSR_FE < p_cutoff & LFSR_ME < p_cutoff, "*", ""),
+         sig_SA_late = ifelse(sign(beta_FL) != sign(beta_ML) & beta_FL < p_cutoff & beta_ML < p_cutoff, "*", ""),
+         sig_AA_females = ifelse(sign(beta_FE) != sign(beta_FL) & LFSR_FE < p_cutoff & beta_FL < p_cutoff, "*", ""),
+         sig_AA_males = ifelse(sign(beta_ME) != sign(beta_ML) & LFSR_ME < p_cutoff & beta_ML < p_cutoff, "*", ""),
+         
+         sig_SC_early = ifelse(sign(beta_FE) == sign(beta_ME) & LFSR_FE < p_cutoff & LFSR_ME < p_cutoff, "*", ""),
+         sig_SC_late = ifelse(sign(beta_FL) == sign(beta_ML) & beta_FL < p_cutoff & beta_ML < p_cutoff, "*", ""),
+         sig_AC_females = ifelse(sign(beta_FE) == sign(beta_FL) & LFSR_FE < p_cutoff & beta_FL < p_cutoff, "*", ""),
+         sig_AC_males = ifelse(sign(beta_ME) == sign(beta_ML) & LFSR_ME < p_cutoff & beta_ML < p_cutoff, "*", "")
+  ) %>% 
+  left_join(tbl(db, "genes") %>% select(FBID, gene_name, chromosome) %>% collect(), by = "FBID") %>% # gene info for each
+  left_join(sex_bias_in_expression, by = "FBID") %>%
   left_join(TWAS_mixture_assignment_probabilities, by = "FBID") %>%
   mutate(across(where(is.numeric), ~ round(.x, 2))) %>%
   as_tibble() %>%
   distinct()
 
-sig_transcripts_table %>%
-  write_csv("data/derived/TWAS/sig_transcripts_table.csv")
+TWAS_results %>%
+  write_csv("data/derived/TWAS/TWAS_results.csv")
 ```
 
 

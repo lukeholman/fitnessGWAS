@@ -12,7 +12,7 @@ library(kableExtra)
 
 kable_table <- function(df) { # cool tables
   kable(df, "html") %>%
-  kable_styling() %>%
+  kable_styling(full_width = FALSE) %>%
   scroll_box(height = "300px")
 }
 
@@ -37,24 +37,27 @@ my_data_table <- function(df){ # Make html tables:
   )
 }
 
-sig_transcripts_table <- read_csv("data/derived/TWAS/sig_transcripts_table.csv")
+sig_transcripts_table <- read_csv("data/derived/TWAS/TWAS_results.csv") %>%
+   filter(LFSR_FE < 0.01 | LFSR_FL < 0.01 | LFSR_ME < 0.01 | LFSR_ML < 0.01) 
 
-tallies <- sort(table(sig_transcripts_table$type))
+tallies <- sig_transcripts_table %>%
+  select(starts_with("sig_")) %>%
+  summarise_all(~ sum(!is.na(.x))) %>%
+  gather(type, n_transcripts) %>%
+  arrange(-n_transcripts)
 
-big_table <- sig_transcripts_table %>%
-  select(-type) %>%
-  left_join(
-    sig_transcripts_table %>%
-      group_by(FBID) %>%
-      summarise(type = list(type), .groups = "drop") %>%
-      mutate(type = str_remove_all(map_chr(type, ~ paste0(.x, collapse = "; ")), "sig_")),
-    by = "FBID") %>%
-  select(FBID, gene_name, type, chromosome, AveExpr, male_bias_in_expression, everything()) %>%
-  mutate(chromosome = replace(chromosome, is.na(chromosome), "Unknown")) %>%
-  select(-gene_symbol, -entrez_id) %>%
-  arrange(-P_sex_antag) %>%
+rnd<- function(x) format(round(x, 2), nsmall = 2)
+
+
+big_table <- sig_transcripts_table %>% 
+  select(FBID, gene_name, chromosome, AveExpr, male_bias_in_expression, everything()) %>%
+  select(-contains("heritability")) %>%
+  mutate(beta_FE = paste(beta_FE, " (", rnd(LFSR_FE), ")", sep = ""),
+         beta_FL = paste(beta_FL, " (", rnd(LFSR_FL), ")", sep = ""),
+         beta_ME = paste(beta_ME, " (", rnd(LFSR_ME), ")", sep = ""),
+         beta_ML = paste(beta_ML, " (", rnd(LFSR_ML), ")", sep = "")) %>%
+  select(-contains("LFSR")) %>%
   rename(`Gene name` = gene_name,
-         Significance = type,
          Chromosome = chromosome,
          `Female early` = beta_FE,
          `Female late` = beta_FL,
@@ -62,34 +65,34 @@ big_table <- sig_transcripts_table %>%
          `Male late` = beta_ML,
          `Male bias in expression (logFC)` = male_bias_in_expression,
          `Average expression level` = AveExpr) %>%
-  rename_all(~ str_remove_all(.x, "ED[_]")) %>%
-  distinct() 
+  arrange(-P_sex_antag)
 ```
 
 
 
 ## Table showing the significant transcripts
 
-The table shows the `r nrow(big_table)` transcripts that were significant in one or more ways (shown in the 'significance' column), e.g. transcripts whose abundance showed a sexually antagonistic relationship with fitness in the early-life assays are denoted `SA_early`. Columns 7-10 show the `mashr`-adjusted regression coefficients that relate the line mean transcript abundance to the line mean fitnesses. The last five columns give the mixture assignment probabilities from `mashr`. Abbreviations: AC = age concordant, SC = sexually concordant, SA = sexually antagonistic. 
+The table shows the `r nrow(big_table)` transcripts that were associated with one or more of the four phenotypes, with a local false sign rate < 0.01 (LFSR; computed by `mashr`). Columns 5-8 show the  regression coefficients (adjusted with `mashr` in data-driven mode) that relate the line mean transcript abundance to the line mean fitnesses, while columns 9-12 give the local false sign rates that for these coefficients from `mashr`. The `sig_` (signficant) columns provide a binary summary of whether the transcript was significantly pleiotropic between ages and sex classes (see below). Finally, the last five columns give the mixture assignment probabilities from `mashr` (this time, run in canonical mode). 
 
-We define significantly antagonistic transcripts as those where the relationship with fitness is significantly positive for one sex (or age class) and significantly negative for the other, with LFSR < 0.05. Similarly, we define significantly concordant transcripts as those where the relationship with fitness is significantly positive for one sex or age class and also significantly positive for the other (LFSR < 0.05). This is quite conservative, because a transcript needs to have a LFSR < 0.05 for two tests, giving two chances for a 'false negative'.
+To make the 'significance' columns, we defined significantly antagonistic transcripts as those where the relationship with fitness is significantly positive for one sex (or age class) and significantly negative for the other, with LFSR < 0.01. Similarly, we define significantly concordant transcripts as those where the relationship with fitness is significantly positive for one sex or age class and also significantly positive for the other (LFSR < 0.01). This is quite conservative, because a transcript needs to have a LFSR < 0.01 for two tests, giving two chances for a 'false negative'. One can sort the table by these columns, for example to see a list of transcripts that showed a significantly antagonistic relationship with fitness in the early-life fitness assays, sort by the `sig_SA_early` column.
+
+Abbreviations: AC = age concordant, SC = sexually concordant, SA = sexually antagonistic. 
 
 ```{r}
-big_table %>%  my_data_table()
+big_table %>% my_data_table()
 ```
 
 
 ### Count the numbers of significant genes
-Abbreviations: AC = age concordant, SC = sexually concordant, SA = sexually antagonistic. 
+Abbreviations: AC = age concordant, SC = sexually concordant, SA = sexually antagonistic. We defined significantly antagonistic transcripts as those where the relationship with fitness is significantly positive for one sex (or age class) and significantly negative for the other, with LFSR < 0.01. Similarly, we define significantly concordant transcripts as those where the relationship with fitness is significantly positive for one sex or age class and also significantly positive for the other (LFSR < 0.01). This is quite conservative, because a transcript needs to have a LFSR < 0.01 for two tests, giving two chances for a 'false negative'.
 ```{r}
 tallies %>%
-  enframe() %>%
-  arrange(-value) %>%
-  mutate(x = str_remove_all(name, "sig_"),
-         `Number statistically significant` = value) %>%
+  mutate(x = str_remove_all(type, "sig_"),
+         `Number statistically significant` = n_transcripts) %>%
   mutate(x = str_replace_all(x, "AC", "Age concordant"),
+         x = str_replace_all(x, "AA", "Age antagonistic"),
          x = str_replace_all(x, "SC", "Sexually concordant"),
-         x = str_replace_all(x, "SA", "Sexually angatonistic"),
+         x = str_replace_all(x, "SA", "Sexually antagonistic"),
          x = str_replace_all(x, "_females", " (in females)"),
          x = str_replace_all(x, "_males", " (in males)"),
          x = str_replace_all(x, "_early", " (in early life)"),

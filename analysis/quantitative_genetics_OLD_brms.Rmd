@@ -1,0 +1,514 @@
+---
+title: "Estimating genetic (co)variance and heritability from the GRM"
+output: 
+  workflowr::wflow_html:
+    code_folding: hide 
+  
+---
+
+
+```{r, include=FALSE}
+options(width=120)
+local({
+  hook_output <- knitr::knit_hooks$get('output')
+  knitr::knit_hooks$set(output = function(x, options) {
+    options$attr.output <- c(
+      options$attr.output,
+      sprintf('style="max-height: %s;"', options$max.height)
+    )
+    hook_output(x, options)
+  })
+}) 
+```
+
+<!-- # knitr::purl(input = "analysis/quantitative_genetics.Rmd", output = "code/quant_gen_1.R") -->
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(brms)
+library(kableExtra)
+
+brms_data <- read_csv("data/derived/predicted_line_means.csv") %>% 
+  mutate(line = factor(str_remove_all(line, "_"))) %>%
+  filter(!is.na(male.fitness.early)) %>%
+  rename(femalefitnessearly = female.fitness.early,
+         femalefitnesslate = female.fitness.late,
+         malefitnessearly = male.fitness.early,
+         malefitnesslate = male.fitness.late)
+```
+
+
+## Estimate the genomic relatedness matrix between lines
+
+Using the genotypes of the DGRP from the PLINK files provided by the Mackay lab, we calculate the genomic covariance matrix using `sommer::A.mat()`. This matrix is used to specify how the line random effects co-vary with each other in the model below.
+
+```{r}
+if(!file.exists("data/input/genomic_relatedness_matrix.rds")){
+  
+  library(bigsnpr)
+  library(sommer)
+  
+  bigsnp <- snp_readBed("data/derived/dgrp2_QC_all_lines.bed", backingfile = tempfile())
+  bigsnp_attached <- snp_attach(bigsnp)
+  G <- A.mat(bigsnp_attached$genotypes[1:nrow(bigsnp_attached$genotypes), 
+                                       1:ncol(bigsnp_attached$genotypes)] - 1) 
+  colnames(G) <- bigsnp_attached$fam[,1]
+  rownames(G) <- bigsnp_attached$fam[,1]
+  focal_lines <- brms_data %>% pull(line)
+  G <- G[rownames(G) %in% focal_lines, 
+         colnames(G) %in% focal_lines]
+  saveRDS(G, "data/input/genomic_relatedness_matrix.rds")
+} else G <- readRDS("data/input/genomic_relatedness_matrix.rds")
+```
+
+## Fit multivariate mixed effects model
+
+The following (run on a supercomputer as it needs more than 32GB RAM) fits a multivariate random effects model using `brms`. The input data are the line means for our four phenotypes estimated in `get_predicted_line_means.Rmd`, as well as the genomic relatedness matrix (GRM) estimated above. The model assumes each trait follows a Gaussian distribution, and that the traits (co)vary across lines, with `line` modelled as a random effect. The line effects are modelled as correlated (see `?brms::gr`), with the line effect covariances constrained to follow those in the GRM. The estimated standard deviation of the line effects, and the correlations among them, are used below to estimate quantitative genetic parameters. To ensure the model converges without divergent transitions and other warnings, we used a large number of warmup iterations, a large value for the `adapt_delta` parameter (which affects the NUTS sampler used by Stan), and quite informative priors on the line effects, residual variances, and correlations.
+
+```{r}
+if(!file.exists("data/derived/posterior_brms_quant_gen.csv")){
+  brms_quant_gen <- brm(
+    bf(femalefitnessearly  ~ 0 + (1 | p | gr(line, cov = G))) +
+      bf(femalefitnesslate ~ 0 + (1 | p | gr(line, cov = G))) +
+      bf(malefitnessearly  ~ 0 + (1 | p | gr(line, cov = G))) +
+      bf(malefitnesslate   ~ 0 + (1 | p | gr(line, cov = G))) +
+      set_rescor(FALSE),
+    data = brms_data, data2 = list(G = G), 
+    iter = 90000, chains = 4, cores = 1, warmup = 80000,
+    control = list(adapt_delta = 0.99999999999999, max_treedepth = 20), 
+    
+    prior = c(
+      prior(normal(0.5, 0.1), "sd", resp = 'femalefitnessearly', group = "line"),
+      prior(normal(0.5, 0.1), "sd", resp = 'femalefitnesslate', group = "line"),
+      prior(normal(0.5, 0.1), "sd", resp = 'malefitnessearly', group = "line"),
+      prior(normal(0.5, 0.1), "sd", resp = 'malefitnesslate', group = "line"),
+      prior(normal(0.5, 0.1), "sigma", resp = 'femalefitnessearly'),
+      prior(normal(0.5, 0.1), "sigma", resp = 'femalefitnesslate'),
+      prior(normal(0.5, 0.1), "sigma", resp = 'malefitnessearly'),
+      prior(normal(0.5, 0.1), "sigma", resp = 'malefitnesslate'),
+      prior(lkj(0.5), class = "cor", group = "line"))
+  )
+  writeLines(capture.output(summary(brms_quant_gen)), 
+             con = "data/derived/model_summary_brms_quant_gen.txt")
+  write_csv(posterior_samples(brms_quant_gen)[,1:14], 
+            "data/derived/posterior_brms_quant_gen.csv")
+}
+```
+
+### Inspect the output of `summary()` for the `brms` model
+```{r comment='', max.height='300px', max.width='800px'}
+cat(readLines("data/derived/model_summary_brms_quant_gen.txt"), sep = '\n')
+```
+
+### Table of quantitative genetic estimates
+
+The table shows the posterior median estimate, the associated error, and the 95% credible intervals for each heritability, genetic correlation, and additive genetic (co)variance, as well as differences between two pairs of genetic correlations that are of interest. 
+
+- Additive genetic covariances for trait $i$ ($V_{Ai}$) were estimated as the square of the line-level standard deviation estimated by the model.
+- Heritability for trait $i$ was estimated as $V_{Ai} / (V_{Ai} + V_{Ei})$, where $V_{Ei}$ the square of the residual standard deviation (estimated by the model) for the $i$th trait. 
+- Additive genetic correlations for trait pair $i$ and $j$ -- $cor_{Ai,j}$ -- were estimated as the correlation in line effects for that trait pair.
+- Additive genetic covariances were estimated as $cor_{Ai,j} = cor_{Ai,j}V_{A1}V_{A2}$
+- We also computed the posterior difference between two pairs of genetic correlations, to test whether the inter-sex correlation changes between age classes, and whether the inter-age correlation differs between sexes (the 95% CIs of the posterior estimate of the difference include zero, so there is no strong evidence for this) 
+
+```{r message=FALSE, warning=FALSE}
+p <- read_csv("data/derived/posterior_brms_quant_gen.csv") %>% as.data.frame()
+p <- tibble(
+  VA_FE = p[, "sd_line__femalefitnessearly_Intercept"]^2,
+  VA_FL = p[, "sd_line__femalefitnesslate_Intercept"]^2,
+  VA_ME = p[, "sd_line__malefitnessearly_Intercept"]^2,
+  VA_ML = p[, "sd_line__malefitnesslate_Intercept"]^2,
+  h2_FE = VA_FE / (VA_FE + p[, "sigma_femalefitnessearly"]^2),
+  h2_FL = VA_FL /  (VA_FL + p[, "sigma_femalefitnesslate"]^2),
+  h2_ME = VA_ME /  (VA_ME + p[, "sigma_malefitnessearly"]^2),
+  h2_ML = VA_ML /  (VA_ML + p[, "sigma_malefitnesslate"]^2),
+  corr_FE_FL = p[,"cor_line__femalefitnessearly_Intercept__femalefitnesslate_Intercept"],
+  corr_FE_ME = p[,"cor_line__femalefitnessearly_Intercept__malefitnessearly_Intercept"],
+  corr_FL_ME = p[,"cor_line__femalefitnesslate_Intercept__malefitnessearly_Intercept"],
+  corr_FE_ML = p[,"cor_line__femalefitnessearly_Intercept__malefitnesslate_Intercept"],
+  corr_FL_ML = p[,"cor_line__femalefitnesslate_Intercept__malefitnesslate_Intercept"],
+  corr_ME_ML = p[,"cor_line__malefitnessearly_Intercept__malefitnesslate_Intercept"],
+  cov_FE_FL = corr_FE_FL * sqrt(VA_FE) * sqrt(VA_FL),
+  cov_FE_ME = corr_FE_ME * sqrt(VA_FE) * sqrt(VA_ME),
+  cov_FL_ME = corr_FL_ME * sqrt(VA_FL) * sqrt(VA_ME),
+  cov_FE_ML = corr_FE_ML * sqrt(VA_FE) * sqrt(VA_ML),
+  cov_FL_ML = corr_FL_ML * sqrt(VA_FL) * sqrt(VA_ML),
+  cov_ME_ML = corr_ME_ML * sqrt(VA_ME) * sqrt(VA_ML),
+  corr_FE_ME_minus_corr_FL_ML = corr_FE_ME - corr_FL_ML,
+  corr_FE_FL_minus_corr_ME_ML = corr_FE_FL - corr_ME_ML) %>% 
+  gather(Parameter, value) %>% 
+  mutate(Parameter = factor(Parameter, unique(Parameter)))
+
+post_summary <- p %>%
+  group_by(Parameter) %>%
+  summarise(value = list(posterior_summary(value))) %>%
+  mutate(Estimate = map_dbl(value, ~ .x[[1]]),
+         `Est. Error` = map_dbl(value, ~ .x[[2]]),
+         `Lower 95% CI` = map_dbl(value, ~ .x[[3]]),
+         `Upper 95% CI` = map_dbl(value, ~ .x[[4]])) %>%
+  dplyr::select(-value) %>%
+  mutate(sp = str_split(Parameter, "_"), 
+         Type = map_chr(sp, ~ .x[[1]]),
+         Parameter = map_chr(sp, ~ paste0(.x[-1], collapse = " - ")),
+         Type = replace(Type, str_detect(Parameter, "minus"), 
+                        "Comparing corrs"),
+         Type = factor(Type, c("h2", "corr", "VA", "cov", 
+                               "Comparing corrs")),
+         Parameter = replace(
+           Parameter, 
+           Parameter == "FE - ME - minus - corr - FL - ML", 
+           "corr(FE,ME) - corr(FL,ML)"),
+         Parameter = replace(
+           Parameter, 
+           Parameter == "FE - FL - minus - corr - ME - ML", 
+           "corr(FE,FL) - corr(ME,ML)")
+  ) %>% arrange(Type)
+
+post_summary %>%
+  dplyr::select(-Type, -sp) %>%
+  kable(digits = 3) %>%
+  kable_styling(full_width = FALSE) %>%
+  pack_rows("Heritabilities", 1, 4) %>%
+  pack_rows("Genetic correlations", 5, 10) %>%
+  pack_rows("Additive genetic variances", 11, 14) %>%
+  pack_rows("Additive genetic covariances", 15, 20) %>%
+  pack_rows("Comparisons of genetic correlations", 21, 22)
+```
+
+
+
+
+
+
+
+<!-- ## Estimate genetic (co)variances -->
+
+<!-- The following code fit (sometimes multivariate) mixed models using `brms`, to estimate the amount of variance explained by the DGRP line, using a covariance structure that accounts for the similarity between lines captured by the genomic relatedness matrix (GRM). -->
+
+<!-- Initial testing revealed that  -->
+
+<!-- The response variables are the predicted line means for the four phenotypes, as estimated in the previous section. We fit line as a random effect, specifying a covariance structure among the line effects that is equal to the genomic relatedness matrix (GRM), which we estimate using the SNP genotypes of the full sample of 205 DGRP lines. We use a somewhat informative prior to help the model converge; the prior is that the line and residual variances are not large (which must be true, given that the response variables have overall variance of 1), and that only 10% of the phenotype variance is explained by line (the posterior estimates suggest much higher line variance, indicating strong signal in the data). -->
+
+<!-- The table below indicates that much of the variance in fitness is due to additive genetic effects, and that there is a positive geneti -->
+
+<!-- <!-- # conside this paper method too: https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1558-5646.2012.01673.x --> -->
+
+<!-- ## Models to find heritability -->
+<!-- ```{r} -->
+<!-- if(!file.exists("data/derived/posterior_brms_quant_gen_FE.csv")){  -->
+
+<!--   brms_quant_gen_FE <- brm( # female early -->
+<!--     femalefitnessearly ~ 0 + (1 | p | gr(line, cov = G)), -->
+<!--     data = brms_data, data2 = list(G = G),  -->
+<!--     iter = 15000, chains = 4, cores = 1, warmup = 5000, -->
+<!--     control = list(adapt_delta = 0.9999999999, max_treedepth = 20), -->
+
+<!--     prior = prior(normal(0.5, 0.15), "sd", group = "line") -->
+<!--   ) -->
+
+<!--   writeLines(capture.output(summary(brms_quant_gen_FE)), con = "data/derived/model_summary_brms_quant_gen_FE.txt") -->
+<!--   write_csv(posterior_samples(brms_quant_gen_FE)[,1:2], "data/derived/posterior_brms_quant_gen_FE.csv") -->
+<!-- } -->
+
+<!-- if(!file.exists("data/derived/posterior_brms_quant_gen_FL.csv")){ -->
+
+<!--   brms_quant_gen_FL <- brm( # female late -->
+<!--     femalefitnesslate ~ 0 + (1 | p | gr(line, cov = G)),    -->
+<!--     data = brms_data, data2 = list(G = G),  -->
+<!--     iter = 80000, chains = 4, cores = 1, warmup = 70000, -->
+<!--     control = list(adapt_delta = 0.9999999999999999, max_treedepth = 20), -->
+
+<!--     prior = prior(normal(0.5, 0.15), "sd", group = "line")  -->
+<!--   ) -->
+
+<!--   writeLines(capture.output(summary(brms_quant_gen_FL)), con = "data/derived/model_summary_brms_quant_gen_FL.txt") -->
+<!--   write_csv(posterior_samples(brms_quant_gen_FL)[,1:2], "data/derived/posterior_brms_quant_gen_FL.csv") -->
+<!-- } -->
+
+<!-- if(!file.exists("data/derived/posterior_brms_quant_gen_ME.csv")){ -->
+
+<!--   brms_quant_gen_ME <- brm( # male early -->
+<!--     femalefitnessearly ~ 0 + (1 | p | gr(line, cov = G)), -->
+<!--     data = brms_data, data2 = list(G = G),  -->
+<!--     iter = 15000, chains = 4, cores = 1, warmup = 5000, -->
+<!--     control = list(adapt_delta = 0.9999999999, max_treedepth = 20), -->
+
+<!--     prior = prior(normal(0.5, 0.15), "sd", group = "line") -->
+<!--   ) -->
+
+<!--   writeLines(capture.output(summary(brms_quant_gen_ME)), con = "data/derived/model_summary_brms_quant_gen_ME.txt") -->
+<!--   write_csv(posterior_samples(brms_quant_gen_ME)[,1:2], "data/derived/posterior_brms_quant_gen_ME.csv") -->
+<!-- } -->
+
+<!-- if(!file.exists("data/derived/posterior_brms_quant_gen_FE.csv")){ -->
+
+<!--   brms_quant_gen_ML <- brm( # male late -->
+<!--     femalefitnessearly ~ 0 + (1 | p | gr(line, cov = G)), -->
+<!--     data = brms_data, data2 = list(G = G),  -->
+<!--     iter = 15000, chains = 4, cores = 1, warmup = 5000, -->
+<!--     control = list(adapt_delta = 0.9999999999, max_treedepth = 20), -->
+
+<!--     prior = prior(normal(0.5, 0.15), "sd", group = "line") -->
+<!--   ) -->
+
+<!--   writeLines(capture.output(summary(brms_quant_gen_ML)), con = "data/derived/model_summary_brms_quant_gen_ML.txt") -->
+<!--   write_csv(posterior_samples(brms_quant_gen_ML)[,1:2], "data/derived/posterior_brms_quant_gen_ML.csv") -->
+<!-- } -->
+<!-- ``` -->
+
+
+
+<!-- ## Models to find genetic correlations -->
+<!-- ```{r} -->
+<!-- switch <- 4 -->
+
+<!-- # Run quant gen model using brms -->
+<!-- if(!file.exists("data/derived/brms_quant_gen_FE_ME.rds") & switch == 1){ -->
+
+<!--   # Female early - male early model -->
+<!--   brms_quant_gen_FE_ME <- brm( -->
+<!--     bf(femalefitnessearly ~ 0 + (1 | p | gr(line, cov = G))) + -->
+<!--       bf(malefitnessearly ~ 0 + (1 | p | gr(line, cov = G))) + -->
+<!--       set_rescor(FALSE), -->
+<!--     data = brms_data, data2 = list(G = G),  -->
+<!--     iter = 60000, chains = 4, cores = 1, warmup = 40000, -->
+<!--     control = list(adapt_delta = 0.9999999999, max_treedepth = 20), -->
+
+<!--     prior = c( -->
+<!--       prior(normal(0.5, 0.15), "sd", resp = 'femalefitnessearly', group = "line"), -->
+<!--       prior(normal(0.5, 0.15), "sd", resp = 'malefitnessearly', group = "line"), -->
+<!--       prior(normal(0.5, 0.15), "sigma", resp = 'femalefitnessearly'), -->
+<!--       prior(normal(0.5, 0.15), "sigma", resp = 'malefitnessearly'), -->
+<!--       prior(lkj(0.5), class = "cor", group = "line")) -->
+<!--     ) -->
+<!--   # saveRDS(brms_quant_gen_FE_ME, "data/derived/brms_quant_gen_FE_ME.rds") -->
+
+<!--   writeLines(capture.output(summary(brms_quant_gen_FE_ME)), con = "data/derived/model_summary_brms_quant_gen_FE_ME.txt") -->
+<!--   write_csv(posterior_samples(brms_quant_gen_FE_ME)[,1:5], "data/derived/posterior_brms_quant_gen_FE_ME.csv") -->
+<!-- } -->
+
+<!-- if(!file.exists("data/derived/brms_quant_gen_FL_ML.rds") & switch == 2){ -->
+<!--   # Female late - male late model -->
+<!--   brms_quant_gen_FL_ML <- brm( -->
+<!--     bf(femalefitnesslate ~ 0 + (1 | p | gr(line, cov = G))) + -->
+<!--       bf(malefitnesslate ~ 0 + (1 | p | gr(line, cov = G))) + -->
+<!--       set_rescor(FALSE), -->
+<!--     data = brms_data, data2 = list(G = G),  -->
+<!--     iter = 60000, chains = 4, cores = 1, warmup = 40000, -->
+<!--     control = list(adapt_delta = 0.9999999999, max_treedepth = 20), -->
+
+<!--     prior = c( -->
+<!--       prior(normal(0.5, 0.15), "sd", resp = 'femalefitnesslate', group = "line"), -->
+<!--       prior(normal(0.5, 0.15), "sd", resp = 'malefitnesslate', group = "line"), -->
+<!--       prior(normal(0.5, 0.15), "sigma", resp = 'femalefitnesslate'), -->
+<!--       prior(normal(0.5, 0.15), "sigma", resp = 'malefitnesslate'), -->
+<!--       prior(lkj(0.5), class = "cor", group = "line")) -->
+<!--     ) -->
+
+<!--   # saveRDS(brms_quant_gen_FL_ML, "data/derived/brms_quant_gen_FL_ML.rds") -->
+<!--   writeLines(capture.output(summary(brms_quant_gen_FL_ML)), con = "data/derived/model_summary_brms_quant_gen_FL_ML.txt") -->
+<!--   write_csv(posterior_samples(brms_quant_gen_FL_ML)[,1:5], "data/derived/posterior_brms_quant_gen_FL_ML.csv") -->
+
+<!-- } -->
+
+
+<!-- if(!file.exists("data/derived/brms_quant_gen_FE_FL.rds") & switch == 3){    -->
+<!--   # Female early - female late model -->
+<!--   brms_quant_gen_FE_FL <- brm(  -->
+<!--     bf(femalefitnessearly ~ 0 + (1 | p | gr(line, cov = G))) + -->
+<!--       bf(femalefitnesslate ~ 0 + (1 | p | gr(line, cov = G))) + -->
+<!--       set_rescor(FALSE), -->
+<!--     data = brms_data, data2 = list(G = G),  -->
+<!--     iter = 50000, chains = 4, cores = 1, warmup = 40000, -->
+<!--     control = list(adapt_delta = 0.999999999999, max_treedepth = 20), -->
+
+<!--     prior = c( -->
+<!--       prior(normal(0.5, 0.15), "sd", resp = 'femalefitnessearly', group = "line"), -->
+<!--       prior(normal(0.5, 0.15), "sd", resp = 'femalefitnesslate', group = "line"), -->
+<!--       prior(normal(0.5, 0.15), "sigma", resp = 'femalefitnessearly'), -->
+<!--       prior(normal(0.5, 0.15), "sigma", resp = 'femalefitnesslate'), -->
+<!--       prior(lkj(0.5), class = "cor", group = "line")) -->
+<!--     ) -->
+
+<!--   # saveRDS(brms_quant_gen_FE_FL, "data/derived/brms_quant_gen_FE_FL.rds") -->
+<!--   writeLines(capture.output(summary(brms_quant_gen_FE_FL)), con = "data/derived/model_summary_brms_quant_gen_FE_FL.txt") -->
+<!--   write_csv(posterior_samples(brms_quant_gen_FE_FL)[,1:5], "data/derived/posterior_brms_quant_gen_FE_FL.csv") -->
+<!-- } -->
+
+<!-- if(!file.exists("data/derived/brms_quant_gen_ME_ML.rds") & switch == 4){   -->
+<!--   # Male early - male late model -->
+<!--   brms_quant_gen_ME_ML <- brm( -->
+<!--     bf(malefitnessearly ~ 0 + (1 | p | gr(line, cov = G))) + -->
+<!--       bf(malefitnesslate ~ 0 + (1 | p | gr(line, cov = G))) + -->
+<!--       set_rescor(FALSE), -->
+<!--     data = brms_data, data2 = list(G = G),  -->
+<!--     iter = 60000, chains = 4, cores = 1, warmup = 40000, -->
+<!--     control = list(adapt_delta = 0.99999999999999, max_treedepth = 20),  -->
+
+<!--     prior = c( -->
+<!--       prior(normal(0.5, 0.1), "sd", resp = 'malefitnessearly', group = "line"), -->
+<!--       prior(normal(0.5, 0.1), "sd", resp = 'malefitnesslate', group = "line"), -->
+<!--       prior(normal(0.5, 0.1), "sigma", resp = 'malefitnessearly'), -->
+<!--       prior(normal(0.5, 0.1), "sigma", resp = 'malefitnesslate'), -->
+<!--       prior(lkj(0.5), class = "cor", group = "line")) -->
+<!--     ) -->
+
+<!--   # saveRDS(brms_quant_gen_ME_ML, "data/derived/brms_quant_gen_ME_ML.rds") -->
+<!--   writeLines(capture.output(summary(brms_quant_gen_ME_ML)), con = "data/derived/model_summary_brms_quant_gen_ME_ML.txt") -->
+<!--   write_csv(posterior_samples(brms_quant_gen_ME_ML)[,1:5], "data/derived/posterior_brms_quant_gen_ME_ML.csv") -->
+<!-- } -->
+<!-- ``` -->
+
+
+<!-- ## Inspect the results -->
+
+<!-- ```{r} -->
+<!-- # brms_quant_gen_FE_ME <- readRDS("data/derived/brms_quant_gen_FE_ME.rds") -->
+<!-- # brms_quant_gen_FL_ML <- readRDS("data/derived/brms_quant_gen_FL_ML.rds") -->
+<!-- # brms_quant_gen_FE_FL <- readRDS("data/derived/brms_quant_gen_FE_FL.rds") -->
+<!-- # brms_quant_gen_ME_ML <- readRDS("data/derived/brms_quant_gen_ME_ML.rds") -->
+
+<!-- p_FE <- read_csv("data/derived/posterior_brms_quant_gen_FE.csv") -->
+<!-- p_FL <- read_csv("data/derived/posterior_brms_quant_gen_FL.csv") -->
+<!-- p_ME <- read_csv("data/derived/posterior_brms_quant_gen_ME.csv") -->
+<!-- p_ML <- read_csv("data/derived/posterior_brms_quant_gen_ML.csv") -->
+<!-- p_FE_ME <- read_csv("data/derived/posterior_brms_quant_gen_FE_ME.csv") -->
+<!-- p_FL_ML <- read_csv("data/derived/posterior_brms_quant_gen_FL_ML.csv") -->
+<!-- p_FE_FL <- read_csv("data/derived/posterior_brms_quant_gen_FE_FL.csv") -->
+<!-- p_ME_ML <- read_csv("data/derived/posterior_brms_quant_gen_ME_ML.csv") -->
+
+<!-- p <- list( -->
+<!--   VA_FE = p_FE[, "sd_line__Intercept"]^2, -->
+<!--   VA_FL = p_FL[, "sd_line__Intercept"]^2, -->
+<!--   VA_ME = p_ME[, "sd_line__Intercept"]^2, -->
+<!--   VA_ML = p_ML[, "sd_line__Intercept"]^2, -->
+<!--   h2_FE = p_FE[, "sd_line__Intercept"]^2 / (p_FE[, "sd_line__Intercept"]^2 + p_FE[, "sigma"]^2), -->
+<!--   h2_FL = p_FL[, "sd_line__Intercept"]^2 /  (p_FL[, "sd_line__Intercept"]^2 + p_FL[, "sigma"]^2), -->
+<!--   h2_ME = p_ME[, "sd_line__Intercept"]^2 /  (p_ME[, "sd_line__Intercept"]^2 + p_ME[, "sigma"]^2), -->
+<!--   h2_ML = p_ML[, "sd_line__Intercept"]^2 /  (p_ML[, "sd_line__Intercept"]^2 + p_ML[, "sigma"]^2), -->
+<!--   corr_FE_FL = p_FE_FL[,"cor_line__femalefitnessearly_Intercept__femalefitnesslate_Intercept"], -->
+<!--   corr_FE_ME = p_FE_ME[,"cor_line__femalefitnessearly_Intercept__malefitnessearly_Intercept"], -->
+<!--   # corr_FL_ME = p[,"cor_line__femalefitnesslate_Intercept__malefitnessearly_Intercept"], -->
+<!--   # corr_FE_ML = p[,"cor_line__femalefitnessearly_Intercept__malefitnesslate_Intercept"], -->
+<!--   corr_FL_ML = p_FL_ML[,"cor_line__femalefitnesslate_Intercept__malefitnesslate_Intercept"], -->
+<!--   corr_ME_ML = p_ME_ML[,"cor_line__malefitnessearly_Intercept__malefitnesslate_Intercept"], -->
+<!--   # cov_FE_FL = corr_FE_FL * VA_FE^2 * VA_FL^2, -->
+<!--   # cov_FE_ME = corr_FE_ME * VA_FE^2 * VA_ME^2, -->
+<!--   # cov_FL_ME = corr_FL_ME * VA_FL^2 * VA_ME^2, -->
+<!--   # cov_FE_ML = corr_FE_ML * VA_FE^2 * VA_ML^2, -->
+<!--   # cov_FL_ML = corr_FL_ML * VA_FL^2 * VA_ML^2, -->
+<!--   # cov_ME_ML = corr_ME_ML * VA_ME^2 * VA_ML^2, -->
+<!--   corr_FE_ME_minus_corr_FL_ML = p_FE_ME[,"cor_line__femalefitnessearly_Intercept__malefitnessearly_Intercept"] - p_FL_ML[,"cor_line__femalefitnesslate_Intercept__malefitnesslate_Intercept"], -->
+<!--   corr_FE_FL_minus_corr_ME_ML = p_FE_FL[,"cor_line__femalefitnessearly_Intercept__femalefitnesslate_Intercept"] - p_ME_ML[,"cor_line__malefitnessearly_Intercept__malefitnesslate_Intercept"] -->
+<!-- ) #%>% gather(Parameter, value) -->
+
+<!-- post_summary <- p %>% -->
+<!--   lapply(function(x){posterior_summary(x[,1])}) %>% -->
+<!--   enframe() %>%  -->
+<!--   mutate(Estimate = map_dbl(value, ~ .x[[1]]), -->
+<!--          `Est. Error` = map_dbl(value, ~ .x[[2]]), -->
+<!--          `Lower 95% CI` = map_dbl(value, ~ .x[[3]]), -->
+<!--          `Upper 95% CI` = map_dbl(value, ~ .x[[4]])) %>% -->
+<!--   select(-value) -->
+
+<!-- post_summary %>% -->
+<!--   kable(digits = 3) %>% -->
+<!--   kable_styling(full_width = FALSE) -->
+
+<!--   # mutate(sp = str_split(Parameter, "_"), -->
+<!--   #        Type = factor(map_chr(sp, ~ .x[[1]]), c("h2", "corr", "VA", "cov")), -->
+<!--   #        Parameter = map_chr(sp, ~ paste0(.x[-1], collapse = " - "))) %>% -->
+<!--   # arrange(Type) %>% -->
+<!--   # dplyr::select(-sp, -Type) %>% -->
+<!--   # kable(digits = 3) %>% -->
+<!--   # kable_styling(full_width = FALSE) #%>% -->
+<!--   # pack_rows("Heritabilities", 1, 4) %>% -->
+<!--   # pack_rows("Genetic correlations", 5, 10) %>% -->
+<!--   # pack_rows("Additive genetic variances", 11, 14) %>% -->
+<!--   # pack_rows("Additive genetic covariances", 15, 20) -->
+<!-- ``` -->
+
+
+
+
+<!-- ```{r} -->
+<!-- dat <- brms_data %>% -->
+<!--   select(-block) %>% -->
+<!--   gather(trait, value, -line) -->
+
+
+<!-- brms_quant_gen_v2 <- brm( -->
+<!--   bf(value ~ 0 + (trait | p | gr(line, cov = G)),  -->
+<!--      sigma ~ (trait | q | line)), -->
+<!--   data = dat, data2 = list(G = G),  -->
+<!--   iter = 60000, chains = 4, cores = 1, warmup = 40000, -->
+<!--   control = list(adapt_delta = 0.9999999999, max_treedepth = 20), -->
+
+<!--   prior = prior(normal(0.5, 0.3), "sd", group = "line") -->
+<!-- ) -->
+
+<!-- saveRDS(brms_quant_gen_v2, "data/derived/brms_quant_gen_v2.rds") -->
+<!-- ``` -->
+
+
+<!-- ```{r} -->
+<!-- xx <- readRDS("data/derived/brms_quant_gen.rds") -->
+<!-- new <- dat %>% -->
+<!--   select(line, trait) %>% -->
+<!--   distinct() -->
+
+<!-- preds <- data.frame(new, fitted(xx, new)) %>% -->
+<!--   select(trait, line, Estimate) %>% -->
+<!--   spread(trait, Estimate) -->
+
+<!-- ggplot(preds, aes(Estimate)) + -->
+<!--   geom_histogram() + -->
+<!--   facet_wrap(~ trait) -->
+
+<!-- ggplot(preds, aes(femalefitnesslate, malefitnesslate)) + -->
+<!--   geom_point() -->
+
+
+<!-- p <- posterior_samples(xx) -->
+<!-- p <- tibble( -->
+<!--   VA_FE = (p[, "sd_line__Intercept"])^2, -->
+<!--   VA_FL = (p[, "sd_line__traitfemalefitnesslate"])^2, -->
+<!--   VA_ME = (p[, "sd_line__traitmalefitnessearly"])^2, -->
+<!--   VA_ML = (p[, "sd_line__traitmalefitnesslate"])^2, -->
+<!--   corr_FE_FL = p[,"cor_line__Intercept__traitfemalefitnesslate"], -->
+<!--   corr_FE_ME = p[,"cor_line__Intercept__traitmalefitnessearly"], -->
+<!--   corr_FL_ME = p[,"cor_line__traitfemalefitnesslate__traitmalefitnessearly"], -->
+<!--   corr_FE_ML = p[,"cor_line__Intercept__traitmalefitnesslate"], -->
+<!--   corr_FL_ML = p[,"cor_line__traitfemalefitnesslate__traitmalefitnesslate"], -->
+<!--   corr_ME_ML = p[,"cor_line__traitmalefitnessearly__traitmalefitnesslate"], -->
+<!--   cov_FE_FL = corr_FE_FL * VA_FE^2 * VA_FL^2, -->
+<!--   cov_FE_ME = corr_FE_ME * VA_FE^2 * VA_ME^2, -->
+<!--   cov_FL_ME = corr_FL_ME * VA_FL^2 * VA_ME^2, -->
+<!--   cov_FE_ML = corr_FE_ML * VA_FE^2 * VA_ML^2, -->
+<!--   cov_FL_ML = corr_FL_ML * VA_FL^2 * VA_ML^2, -->
+<!--   cov_ME_ML = corr_ME_ML * VA_ME^2 * VA_ML^2, -->
+<!--   corr_FE_ME_minus_corr_FL_ML = corr_FE_ME - corr_FL_ML, -->
+<!--   corr_FE_FL_minus_corr_ME_ML = corr_FE_FL - corr_ME_ML -->
+<!-- ) %>% gather(Parameter, value) -->
+
+<!-- library(kableExtra) -->
+<!-- p %>% -->
+<!--   group_by(Parameter) %>% -->
+<!--   summarise(summ = list(posterior_summary(value)), -->
+<!--             Estimate = map_dbl(summ, ~ .x[[1]]), -->
+<!--             `Est. Error` = map_dbl(summ, ~ .x[[2]]), -->
+<!--             `Lower 95% CI` = map_dbl(summ, ~ .x[[3]]), -->
+<!--             `Upper 95% CI` = map_dbl(summ, ~ .x[[4]]), -->
+<!--             .groups = "drop") %>% -->
+<!--   dplyr::select(-summ) %>% -->
+<!--   mutate(sp = str_split(Parameter, "_"), -->
+<!--          Type = factor(map_chr(sp, ~ .x[[1]]), c("h2", "corr", "VA", "cov")), -->
+<!--          Parameter = map_chr(sp, ~ paste0(.x[-1], collapse = " - "))) %>% -->
+<!--   arrange(Type) %>% -->
+<!--   dplyr::select(-sp, -Type) %>% -->
+<!--   kable(digits = 3) %>% -->
+<!--   kable_styling(full_width = FALSE) %>% -->
+<!--   pack_rows("Genetic correlations", 1, 8) %>% -->
+<!--   pack_rows("Additive genetic variances", 9, 12) %>% -->
+<!--   pack_rows("Additive genetic covariances", 13, 18) -->
+<!-- ``` -->
+

@@ -5,7 +5,7 @@ output:
     code_folding: hide 
 ---
 
-Note: `mashr` requires a large amount of RAM, and so to get this script to run on the full SNP dataset, I had to launch R from the Terminal with extra memory allocation. I used `knitr::purl(input = "analysis/gwas_adaptive_shrinkage.Rmd", output = "code/run_mashr.R")` to generate an R script from this R Markdown document, then `env R_MAX_VSIZE=700Gb Rscript code/run_mashr.R`. Successfully ran on a late 2015 iMac with 32GB RAM over a few days.
+<!-- Note: `mashr` requires a large amount of RAM, and so to get this script to run on the full SNP dataset, I had to launch R from the Terminal with extra memory allocation. I used `knitr::purl(input = "analysis/gwas_adaptive_shrinkage.Rmd", output = "code/run_mashr.R")` to generate an R script from this R Markdown document, then `env R_MAX_VSIZE=700Gb Rscript code/run_mashr.R`. I upload the script to Spartan with scp ~/Rprojects/fitnessGWAS/code/run_mashr.R lukeholman@spartan:/data/projects/punim0243/DGRP_mashr. -->
 
 
 ```{r message=FALSE, warning=FALSE, results="hide"}
@@ -14,51 +14,79 @@ library(ashr) # Also requires installation of RMosek, which needs a (free) licen
 library(mashr) # NB: This has multiple dependencies and was tricky to install. Read the Github page, and good luck!
 library(glue)
 library(kableExtra)
+library(gridExtra)
+
+
+# Get the list of SNPs (or chunks of 100% SNP clumps) that are in approx. LD with one another
+get_mashr_data <- function(){
+  
+  SNPs_in_LD <- read.table("data/derived/SNPs_in_LD", header = FALSE)
+  
+  data_for_mashr <- read_csv("data/derived/all_univariate_GEMMA_results.csv") %>% 
+    filter(str_detect(SNPs, ",") | SNPs %in% SNPs_in_LD$V1) %>% 
+    select(SNPs, starts_with("beta"), starts_with("SE")) 
+  
+  single_snps <- data_for_mashr %>% filter(!str_detect(SNPs, ","))
+  multiple_snps <- data_for_mashr %>% filter(str_detect(SNPs, ","))
+  multiple_snps <- multiple_snps[enframe(strsplit(multiple_snps$SNPs, split = ", ")) %>% 
+                                   unnest(value) %>% 
+                                   filter(value %in% SNPs_in_LD$V1) %>% 
+                                   pull(name), ]
+  bind_rows(single_snps, multiple_snps) %>% arrange(SNPs)
+}
 ```
 
 ```{r echo=FALSE}
 # setwd("/Users/lholman/Rprojects/fitnessGWAS")
-#setwd("/data/projects/punim0243/DGRP_mashr")
+# setwd("/data/projects/punim0243/DGRP_mashr")
 ```
 
+```{r echo = FALSE, message=FALSE, warning=FALSE}
+n_snps <- nrow(read_csv("data/derived/all_univariate_GEMMA_results.csv"))
+n_snps <- prettyNum(n_snps, big.mark=",", scientific=FALSE)
+
+loci_tested <- nrow(get_mashr_data())
+loci_tested <- prettyNum(loci_tested, big.mark=",", scientific=FALSE)
+```
 
 
 ## Run multivariate adaptive shrinkage using `mashr`
 
-The following code runs the R package `mashr`, which attempts to infer the true estimates of the SNP effects (the $\beta$s) based on the multivariate structure of the data. `mashr` accepts a matrix of $\beta$s and their standard errors, and uses mixture models to infer the true $\beta$s, the local false sign rate, the proportion of SNPs that belong to each mixture component, and other useful things. For more information on `mashr`, see the [package website](https://stephenslab.github.io/mashr/index.html), and the associated paper by Urbut, Wang, and Stephens (doi:10.1101/096552).
+### Whole-genome analyses
 
-Importantly, there are two ways to run `mashr`: using "canonical" covariance matrices that are defined _a priori_ by the user, or using covariance matrices that are selected by algorithmically investigating the structure of the data. The following code runs both approaches, since they provide contain complementary information.
+This section analyses variants from all chromosomes for which data were available (2L, 2R, 3L, 3R, 4, and X).
 
-The canonical method is helpful for testing specific hypotheses about how the effect sizes are correlated across the multiple phenotypes being analysed; in our case, we are interested in identifying and counting SNPs with sex-specific and/or age-specific effects. 
+The following code runs the package `mashr`, which attempts to infer more accurate estimates of the true SNP effect sizes (denoted $\beta$) by applying shrinkage based on the multivariate structure of the data. `mashr` accepts a matrix of four $\beta$ terms for each locus (for the four fitness measures) as well as the four associated standard errors. `mashr` then uses Bayesian mixture models to estimate the true (i.e. shrinked) $\beta$ terms, the local false sign rate, the proportion of SNPs that belong to each mixture component, and other useful things. For more information on `mashr`, see the [package website](https://stephenslab.github.io/mashr/index.html), and the associated paper by Urbut, Wang, and Stephens (doi:10.1101/096552).
 
-By contrast, the data-driven approach uses the software `Extreme Deconvolution` to infer the true covariance structure in the data (using a subset of the most accurately-measured effects), and then selects a small number of covariance matrices (six, including the null) that provide a good approximation of the true mixture of covariance structures in the data. 
-
-The data-driven approach provides "shrinked" estimates of $\beta$ that are likely to be closer to the true value than does the canonical approach, since the matrices used in the mixture model are expected to be more realistic. However the mixture proportions produced by the canonical approach are easier to interpret; e.g. we can use them to draw conclusions like "variants whose effects were inferred to female-specific were more common than male-specific ones" or "There are twice as many sexually-concordant variants as sexually-antagonistic variants".
-
+Importantly, there are two ways to run `mashr`: fitting a mixture model that uses "canonical" covariance matrices which are defined _a priori_ by the user, or using covariance matrices that are selected by an algorithm based on the multivariate structure of the raw data. The following code runs both approaches, since they provide complementary information (see Methods in our paper). 
 
 In the 'canonical' analysis, we were _a priori_ interested in determining the relative abundances of variants that affect fitness in the following list of possible ways:
 
   - null (no effect on fitness)
   - uniform effect (the fitness effect of the allele is identical on all sexes and age classes; termed `equal_effects` in `mashr`)
-  - same sign, variable magnitude (the fitness effect of the allele has the same sign for all sexes and age classes, though its magnitude is allowed to vary; termed `simple_het` in `mashr`)
+  - same sign, variable magnitude (the fitness effect of the allele has the same sign for all sexes and age classes, though its magnitude is variable; termed `simple_het` in `mashr`)
   - sexually antagonistic (one allele is good for one sex and bad for the other, though this effect is the same in young and old individuals)
   - age antagonistic (one allele is good for one age class and bad for the other, though this effect is the same in males and females)
   - female-specific (there is an effect in females but no effect in males; same sign of effect across age classes)
   - male-specific (there is an effect in males but no effect in females; same sign of effect across age classes)
-  - early-life-specific (the locus affects the fitness of young flies, but has no effect on old flies)
-  - late-life-specific (the locus affects the fitness of old flies, but has no effect on young flies)
+  - early-life-specific (the locus affects the fitness of young flies of both sexes, but has no effect on old flies)
+  - late-life-specific (the locus affects the fitness of old flies of both sexes, but has no effect on young flies)
   - female-specific effect, with a variable effect across age classes
   - male-specific effect, with an effect magnitude and/or sign that changes with age
   - female-specific effect, with an effect magnitude and/or sign that changes with age
   - early-life-specific effect, with an effect magnitude and/or sign that differs between sexes
   - late-life-specific effect, with an effect magnitude and/or sign that differs between sexes
 
-These categories were chosen because our _a priori_ hypothesis is that different loci conceiveably affect fitness in a manner that depends on age, sex, and the age-sex interaction. There were 46 covariances matrices, including the null.
+These categories were chosen because our _a priori_ hypothesis is that different loci conceivably affect fitness in a manner that depends on age, sex, and the age-sex interaction. There were 46 covariance matrices, including the null, though most of these are inferred to be absent or very rare and thus have essentially no influence on the results of the mixture model.
 
-Both `mashr` analyses use the default 'null-biased' prior, which means that loci with no effect on any of the fitness components are 10-fold more common than any of the other possibilities. 
+Both `mashr` analyses use the default 'null-biased' prior, which means that loci with no effect on any of the fitness components are 10-fold more common than any of the other possibilities (reflecting our expectation that genetic polymorphisms with strong effects on fitness are probably rare).
+
+Because `mashr` models are computationally intensive, and to avoid issues of pseudoreplication in downstream analyses, we ran `mashr` on a subset of the `r n_snps` loci that were analysed using GEMMA. We pruned this list to a subset of `r loci_tested` loci that were in approximate linkage disequilibrium with one another.
 
 ```{r}
 run_mashr <- function(beta_and_se, mashr_mode, ED_p_cutoff = NULL){
+  
+  print(str(beta_and_se))
   
   mashr_setup <- function(beta_and_se){
     betas <- beta_and_se %>% select(starts_with("beta")) %>% as.matrix()
@@ -140,7 +168,7 @@ run_mashr <- function(beta_and_se, mashr_mode, ED_p_cutoff = NULL){
     U <- make_age_antag_matrix(0.5) %>% make_sex_specific("M") %>% add_matrix(U, "Male_specific_0.5")
     U <- make_age_antag_matrix(0.75) %>% make_sex_specific("M") %>% add_matrix(U, "Male_specific_0.75")
     
-    # Nwegatively correlated across ages, and also sex-specific
+    # Negatively correlated across ages, and also sex-specific
     U <- make_age_antag_matrix(-0.25) %>% make_sex_specific("F") %>% add_matrix(U, "Female_specific_age_antag_0.25")
     U <- make_age_antag_matrix(-0.5) %>% make_sex_specific("F") %>% add_matrix(U, "Female_specific_age_antag_0.5")
     U <- make_age_antag_matrix(-0.75) %>% make_sex_specific("F") %>% add_matrix(U, "Female_specific_age_antag_0.75")
@@ -168,32 +196,47 @@ run_mashr <- function(beta_and_se, mashr_mode, ED_p_cutoff = NULL){
   return(mash(data = mash_data, Ulist = U)) # Run mashr
 }
 
-data_for_mashr <- read_csv("data/derived/all_univariate_GEMMA_results.csv") %>% 
-  select(starts_with("beta"), starts_with("SE"))
 
 if(!file.exists("data/derived/mashr_results_canonical.rds")){
-  run_mashr(data_for_mashr, mashr_mode = "ED", ED_p_cutoff = 0.2) %>%
-    write_rds(path = "data/derived/mashr_results_ED.rds")
   
+  data_for_mashr <- get_mashr_data()
+  
+  print("Starting the data-driven analysis")
+  run_mashr(data_for_mashr, mashr_mode = "ED", ED_p_cutoff = 0.2) %>%
+    saveRDS(file = "data/derived/mashr_results_ED.rds")
+  
+  print("Starting the canonical analysis")
   run_mashr(data_for_mashr, mashr_mode = "canonical") %>%
-    write_rds(path = "data/derived/mashr_results_canonical.rds")
+    saveRDS(file = "data/derived/mashr_results_canonical.rds")
+  
+  mashr_results_ED <- read_rds("data/derived/mashr_results_ED.rds")
+  mashr_results_canonical <- read_rds("data/derived/mashr_results_canonical.rds")
+  
 } else {
   mashr_results_ED <- read_rds("data/derived/mashr_results_ED.rds")
   mashr_results_canonical <- read_rds("data/derived/mashr_results_canonical.rds")
 }
 ```
 
+### Chromosome-specific analyses
+
+This section runs a single canonical analysis for each of the major chromosomes (2L, 2R, 3L, 3R, and X; chromosome 4 was ommited because it carries only a few polymorphisms not in strong LD). The purpose of this analysis is to copare the inferred frequencies of different types of variants on each chromosome, e.g. to test whether the X chromosome is enriched for sexually antagonistic loci as predicted by some theoretical models.
+
 ```{r mashr_by_chromosome}
 mashr_one_chromosome <- function(chr){
-  focal_data <- read_csv("data/derived/all_univariate_GEMMA_results.csv") %>% 
+  
+  data_for_mashr <- get_mashr_data()
+  
+  focal_data <- data_for_mashr %>% 
     filter(grepl(glue("{chr}_"), SNPs)) %>%
     select(starts_with("beta"), starts_with("SE"))
   
   run_mashr(focal_data, mashr_mode = "canonical") %>%
-    write_rds(path = glue("data/derived/mashr_results_canonical_chr{chr}.rds"))
+    saveRDS(file = glue("data/derived/mashr_results_canonical_chr{chr}.rds"))
 }
 
 if(!file.exists("data/derived/mashr_results_canonical_chrX.rds")){
+  print("Starting the chromosome-specific analysis")
   lapply(c("2L", "2R", "3L", "3R", "X"), mashr_one_chromosome)
 } 
 ```
@@ -202,7 +245,7 @@ if(!file.exists("data/derived/mashr_results_canonical_chrX.rds")){
 ## Find mixture probabilities for each SNP
 This uses the canonical analysis' classifications. Each SNP gets a posterior probability that it belongs to the $i$'th mixture component -- only the mixture components that are not very rare are included. These are: `equal_effects` (i.e. the SNP is predicted to affect all 4 traits equally), female-specific and male-specific (i.e. an effect on females/males only, which is concordant across age categories), sexually antagonistic (again, regardless of age), and null. The null category is the rarest one, despite the prior assuming null SNPs are $10\times$ more common than any other type. The analysis therefore suggests that most SNPs either affect some/all of our 4 phenotypes, or (more likely) are in linkage disequilibrium with a SNP which does. 
 
-```{r get_mixture_assignments}
+```{r get_mixture_assignments, message=FALSE}
 # Get the mixture weights, as advised by mash authors here: https://github.com/stephenslab/mashr/issues/68
 posterior_weights_cov <- mashr_results_canonical$posterior_weights 
 colnames(posterior_weights_cov) <- sapply(
@@ -215,9 +258,11 @@ colnames(posterior_weights_cov) <- sapply(
 posterior_weights_cov <- t(rowsum(t(posterior_weights_cov), 
                                   colnames(posterior_weights_cov)))
 
+data_for_mashr <- get_mashr_data()
+
 # Make a neat dataframe
 mixture_assignment_probabilities <- data.frame(
-  SNP_clump = read_csv("data/derived/all_univariate_GEMMA_results.csv")$SNPs,
+  SNP_clump = data_for_mashr$SNPs,
   posterior_weights_cov,
   stringsAsFactors = FALSE
 ) %>% as_tibble() %>%
@@ -235,6 +280,8 @@ Here, we make a single large dataframe holding all of the 'raw' results from the
 ```{r eval=FALSE}
 all_univariate_lmm_results <- read_csv("data/derived/all_univariate_GEMMA_results.csv") %>% 
   rename_at(vars(-SNPs), ~ str_c(., "_raw"))
+
+mashr_snps <- data_for_mashr$SNPs
 
 canonical_estimates <- get_pm(mashr_results_canonical) %>% 
   as_tibble() %>% 
@@ -255,12 +302,14 @@ lfsr_ED <- get_lfsr(mashr_results_ED) %>%
   rename_all(~str_c(., "_mashr_ED"))
 
 
-all_univariate_lmm_results <- bind_cols(
-  all_univariate_lmm_results, 
+all_mashr_results <- bind_cols(
+  tibble(SNPs = mashr_snps), 
   canonical_estimates, 
   ED_estimates, 
   lfsr_canonical, 
   lfsr_ED)
+
+all_univariate_lmm_results <- left_join(all_univariate_lmm_results, all_mashr_results, by = "SNPs")
 
 nested <- all_univariate_lmm_results %>% filter(str_detect(SNPs, ", "))
 split_snps <- strsplit(nested$SNPs, split = ", ")
@@ -319,22 +368,65 @@ tibble(`Mashr version` = c("A. Data-driven covariance matrices",
 
 ## Proportion of 'significant' effect sizes which share the same sign for each pair of phenotypes
 
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-loci_tested <- nrow(read_csv("data/derived/all_univariate_GEMMA_results.csv"))
-loci_tested <- prettyNum(loci_tested, big.mark=",", scientific=FALSE)
-```
-
-
-To find the proportion of sex or age-antagonistic SNPs among the `r loci_tested` that were tested, we simply take 1 minus this matrix, e.g. $100\times(1 - 0.976) = 2.4\%$ of the loci that significantly (i.e. LFSR < 0.05) affected both male and female early-life fitness had an _opposite_ effect on each sex (as opposed to a same-sign effect). 
+To find the proportion of sex or age-antagonistic SNPs among the `r loci_tested` that were tested using `mashr`, we simply take 1 minus this matrix, e.g. $100\times(1 - 0.976) = 2.4\%$ of the loci that significantly (i.e. LFSR < 0.05) affected both male and female early-life fitness had an _opposite_ effect on each sex (as opposed to a same-sign effect). 
 
 Note that this approach is a very conservative way of measuring the % sexually antagonistic (or age antagonistic) loci in the genome, because the LFSR needs to be < 0.05 for _both_ traits (meaning there are 2 chances to make a 'false negative', which matters because the power is low for any individual locus). Also note that this matrix was calculated using the data-driven (not canonical) covariance matrices, which are expected to more accurately estimate effect size of each SNP.
 
 The matrix highlights that there are zero loci where one allele significantly improves early-life fitness and lower late-life fitness with a sex (they might exist, but none were detected using this conservative test and our data). However, some sexually antagonistic loci were detected: about 2.4% of loci were sexually antagonistic in the early-life assay, and 1.2% in the late-life assay. 
 
+
 ```{r pairwise_sharing}
+library(kableExtra)
 get_pairwise_sharing(mashr_results_ED, 
                      factor = 0, 
                      lfsr_thresh = 0.05) %>% 
-  round(3)
+  round(3) %>% kable() %>% kable_styling()
 ```
 
+## Inspecting the effect of adaptive shrinkage on the SNP effect size estimates
+
+The plots below reveal that `mashr` did indeed shrinking the effect size estimates towards zero. The amount of shrinkage applied was very similar when applying `mashr` using either the data-driven or canonical covariance matrices.
+
+```{r mashr_check_plot, fig.height=3.1, fig.width=7.3}
+db <- DBI::dbConnect(RSQLite::SQLite(), 
+                     "data/derived/annotations.sqlite3")
+
+# Results for all 1,613,615 SNPs, even those that are in 100% LD with others (these are grouped up by the SNP_clump column)
+all_snps <- tbl(db, "univariate_lmm_results")
+
+# All SNPs and SNP groups that are in <100% LD with one another (n = 1,207,357)
+SNP_clumps <- all_snps %>% select(-SNP) %>% distinct() %>% collect(n=Inf)
+
+# Subsetting variable to get the approx-LD subset of SNPs
+LD_subset <- !is.na(SNP_clumps$LFSR_female_early_mashr_ED)
+
+
+hex_plot <- function(x, y, xlab, ylab){
+  filter(SNP_clumps,LD_subset) %>% 
+    ggplot(aes_string(x, y)) + 
+    geom_abline(linetype = 2) + 
+    geom_vline(xintercept = 0, linetype = 3) +
+    geom_hline(yintercept = 0, linetype = 3) +
+    stat_binhex(bins = 200, colour = "#FFFFFF00") + 
+    scale_fill_distiller(palette = "Purples") + 
+    coord_cartesian(xlim = c(-1,1), ylim = c(-0.55, 0.3)) + 
+    theme_minimal() + xlab(xlab) + ylab(ylab) +
+    theme(legend.position = "none")
+}
+grid.arrange(
+  hex_plot("beta_female_early_raw", 
+           "beta_female_early_mashr_canonical", 
+           "Raw estimate of SNP\neffect size from LMM", 
+           "Corrected estimate from\nmashr (canonical)"),
+  hex_plot("beta_female_early_raw", 
+           "beta_female_early_mashr_ED", 
+           "Raw estimate of SNP\neffect size from LMM", 
+           "Corrected estimate from\nmashr (data-driven)"),
+  hex_plot("beta_female_early_mashr_canonical", 
+         "beta_female_early_mashr_ED", 
+         "Corrected estimate from\nmashr (canonical)", 
+         "Corrected estimate from\nmashr (data-driven)"),
+  ncol = 3)
+```
+
+**Figure SX**: Plots comparing the raw effect sizes for each locus (calculated by linear mixed models implemented in GEMMA, LMM) with the effect sizes obtained using adaptive shrinkage implemented in mashr (either in 'data-driven' or 'canonical' methods). The dashed line shows $y = x$, such that the first two plots illustrate that both forms of shrinkage moved both negative and positive effects towards zero. The third plot illustrates that very similar effect sizes were obtained whether we used the data-driven or canonical method.

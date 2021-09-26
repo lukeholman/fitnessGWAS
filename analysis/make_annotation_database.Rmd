@@ -114,7 +114,7 @@ go_meanings <- distinct(go_meanings)
 
 ## Create the SQLite database and add various tables of annotations
 
-```{r}
+```{r eval = FALSE}
 if(file.exists("data/derived/annotations.sqlite3")) unlink("data/derived/annotations.sqlite3")
 
 db <- DBI::dbConnect(RSQLite::SQLite(), "data/derived/annotations.sqlite3", create = TRUE)
@@ -139,6 +139,7 @@ db %>% copy_to(go_meanings,
 
 The `variants` table is expanded upon in the script `perform_gwas.Rmd`, which also adds the minor allele frequencies, the alleles that were treated as the reference and alternate, etc. 
 ```{r}
+db <- DBI::dbConnect(RSQLite::SQLite(), "data/derived/annotations.sqlite3")
 db %>% tbl("variants")
 ```
 

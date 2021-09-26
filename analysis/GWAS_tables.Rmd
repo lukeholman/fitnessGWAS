@@ -52,8 +52,7 @@ xx <- bind_rows(
          FBIDs = replace(FBIDs, is.na(FBIDs), "")) %>%
   mutate(genes = str_remove_all(genes, ", NA"),
          genes = replace(genes, is.na(genes), "")) %>%
-  mutate(`Index variant log10 p` = round(-1 * log10(index_SNP_p_value), 2)) %>%
-  select(index_SNP, other_snps, FBIDs, genes, `Index variant log10 p`) 
+  select(index_SNP, other_snps, FBIDs, genes) 
 
 # Because we clumped separately for the 4 traits, some of the "index SNPs" appear inside the ranges
 # tagged by other index SNPs, so there is some redundancy. The following ugly code sorts this out 
@@ -97,129 +96,57 @@ xx <- xx %>%
   select(-to_add) %>%
   mutate(other_snps = str_replace_all(other_snps, "NA", ""))
 
-# Now get the mashr-ED adjusted effect sizes for the index SNPs, 
+# Now get the RAW effect sizes for the index SNPs, 
 # and their mixture assignment probs.
 univariate_lmm_results <- 
   tbl(db, "univariate_lmm_results") %>%
   filter(SNP %in% !! xx$index_SNP) %>%
   select(-contains("canonical"), 
-         -contains("raw")) %>% 
-  inner_join(tbl(db, "variants") %>% 
-               select(-chr, -position), 
+         -contains("ED"), -contains("P_"), -contains("SE")) %>% 
+  inner_join(tbl(db, "variants"), 
              by = "SNP") %>%
   left_join(
     tbl(db, "genes") %>% 
       select(FBID, gene_name), by = "FBID") %>%
   collect(n=Inf) %>%
-  arrange(LFSR_female_early_mashr_ED) %>%
-  mutate_at(vars(contains("LFSR")), ~ -log10(.x)) %>%
-  mutate_if(is.numeric, ~ round(.x, 2)) %>%
+  mutate(beta_female_early_raw = round(beta_female_early_raw, 2),
+         beta_female_late_raw = round(beta_female_late_raw, 2),
+         beta_male_early_raw = round(beta_male_early_raw, 2),
+         beta_male_late_raw = round(beta_male_late_raw, 2)) %>% 
   rename_all(~ gsub("beta_", "", .x)) %>%
-  rename_all(~ gsub("_mashr_ED", "", .x)) %>%
-  arrange(-P_equal_effects) %>%
-  select(SNP, starts_with("female"), 
-         starts_with("male"), starts_with("P_")) %>%
+  rename_all(~ gsub("_raw", "", .x)) %>%
+  select(SNP, MAF, site.class, starts_with("female"), 
+          starts_with("male"), starts_with("P_"), starts_with("pvalue")) %>%
   distinct()
 
 GWAS_table <- xx %>%
   left_join(univariate_lmm_results, by = c("index_SNP" = "SNP")) %>%
-  arrange(index_SNP) %>%
+  filter(!is.na(female_early)) %>% 
+  arrange(pvalue_female_early + pvalue_female_late + pvalue_male_early + pvalue_male_late) %>% 
   rename(`Index variant` = index_SNP,
+         `MAF of index` = MAF,
+         `Site class of index` = site.class,
          `Other variants` = other_snps,
          `Genes` = genes, 
-         `Female early` = female_early,
-         `Female late` = female_late,
-         `Male early` = male_early,
-         `Male late` = male_late) %>%
-  rename_all(~ str_replace_all(.x, "_", " "))
+         `Female early effect` = female_early,
+         `Female late effect` = female_late,
+         `Male early effect` = male_early,
+         `Male late effect` = male_late,
+         `Female early pval` = pvalue_female_early,
+         `Female late pval` = pvalue_female_late,
+         `Male early pval` = pvalue_male_early,
+         `Male late pval` = pvalue_male_late) 
+
+write_csv(GWAS_table, "data/derived/GWAS_significant_snps.csv")
 ```
 
 ## Table of significant groups of linked variants
 
-This table shows loci (i.e. groups of linked variants) that passed the arbitrary statistical significance threshold of $p < 10^{-5}$ for one or more of the four phenotypes (in a linear mixed model GWAS implemented in GEMMA). The loci were identified using the SNP clumping method of PLINK, and each group of variants contains one or more variants that met the significance threshold. The third and fourth columns identify the gene(s) whose exons and introns overlap the focal locus. Columns 6-9 show the estimated effect size of the index variant on the four phenotypes (corrected by `mashr` using the data-driven method), while the final columns show the mixture proportions estimated by `mashr` using the canonical method.  
+This table shows loci (i.e. groups of linked variants) that passed the arbitrary statistical significance threshold of $p < 10^{-5}$ for one or more of the four phenotypes (in a linear mixed model GWAS implemented in GEMMA). The significant loci (and groups of loci surrounding the significant one) were identified using the SNP clumping method of PLINK; each group of loci contains at least one variant that met the significance threshold, plus other loci that are within 250kb of the most significant locus, plus in linkage disequilibrium with it with r-squared > 0.5 (see the [PLINK documentation](http://zzz.bwh.harvard.edu/plink/clump.shtml)). The third and fourth columns identify the gene(s) whose exons and introns overlap the focal locus. Columns 6-9 show the estimated effect size of the index variant on the four phenotypes (corrected by `mashr` using the data-driven method), while the final columns show the mixture proportions estimated by `mashr` using the canonical method.  
 
 ```{r}
 GWAS_table %>%
   my_data_table()
 ```
 
-
-<!-- # Results of one multivariate linear mixed model run in GEMMA: -->
-<!-- # multivariate_lmm_results <-  -->
-<!-- #   read_tsv("data/derived/output/all_four_traits.assoc.txt") %>% -->
-<!-- #   filter(p_fdr < 0.05) %>%  -->
-<!-- #   inner_join(tbl(db, "variants") %>%  -->
-<!-- #                select(-chr, -position) %>% -->
-<!-- #                collect(), by = "SNP") %>%  -->
-<!-- #   arrange(p_wald) %>%  -->
-<!-- #   select(-contains("Vbeta")) %>% -->
-<!-- #   left_join( -->
-<!-- #     tbl(db, "genes") %>%  -->
-<!-- #       select(FBID, gene_name) %>%  -->
-<!-- #       collect(n=Inf), by = "FBID") %>% -->
-<!-- #   mutate(gene_name = replace(gene_name, is.na(FBID), NA))  -->
-<!-- #  -->
-<!-- # multivariate_lmm_results <- multivariate_lmm_results[,c(1:8, 14, 9:13)] -->
-<!-- #  -->
-<!-- # multivariate_lmm_results <- multivariate_lmm_results %>% -->
-<!-- #   mutate_at(vars(starts_with("p_")), ~ -log10(.x)) %>% -->
-<!-- #   mutate_if(is.numeric, ~ format(round(.x, 2), nsmall = 2)) %>% -->
-<!-- #   left_join(tbl(db, "univariate_lmm_results") %>%  -->
-<!-- #               select(SNP, SNP_clump) %>%  -->
-<!-- #               collect(), -->
-<!-- #             by = "SNP") %>% -->
-<!-- #   distinct(SNP_clump, .keep_all = TRUE) %>% -->
-<!-- #   select(SNP, SNP_clump, everything()) -->
-
-<!-- ## Results of multivariate association tests -->
-<!-- ```{r message=FALSE} -->
-<!-- multivariate_lmm_results  %>% -->
-<!--   add_colour() %>% -->
-<!--   kable(format = "html", escape = FALSE) %>% -->
-<!--   kable_styling("striped") %>% -->
-<!--   scroll_box(height = "300px") -->
-<!-- ``` -->
-
-
-<!-- ### All four traits -->
-<!-- ```{r message=FALSE} -->
-<!-- read_tsv("data/derived/all_four_traits_SNP_clumps.txt") %>% -->
-<!--   kable_table() -->
-<!-- ``` -->
-
-
-<!-- ```{r eval=F} -->
-<!-- # http://bergmanlab.genetics.uga.edu/flyreg/v2.0/Target.html -->
-<!-- TFBS <- read_csv("data/input/TF_binding_sites.csv") -->
-
-<!-- ranges <- xx$other_snps %>%  -->
-<!--   str_extract_all("[_][:digit:]+") %>%  -->
-<!--   map(~ as.numeric(str_remove_all(.x, "_"))) %>%  -->
-<!--   map(~ c(min(.x), max(.x))) -->
-<!-- ranges <- map_df(1:nrow(xx), ~ data.frame(index = xx$index_SNP[.x], min =ranges[[.x]][1], max = ranges[[.x]][2]))%>% -->
-<!--   filter(!is.na(min)) %>% mutate(chr = substr(index, 1,2)) %>% -->
-<!--   filter(!is.infinite(min)) -->
-
-<!-- ranges_index <- xx$index_SNP %>%  -->
-<!--   str_extract_all("[_][:digit:]+") %>%  -->
-<!--   map(~ as.numeric(str_remove_all(.x, "_"))) %>%  -->
-<!--   map(~ c(min(.x), max(.x))) -->
-<!-- ranges_index <- map_df(1:nrow(xx), ~ data.frame(index = xx$index_SNP[.x],  -->
-<!--                                                 min =ranges_index[[.x]][1],  -->
-<!--                                                 max = ranges_index[[.x]][2])) %>% -->
-<!--   filter(!is.na(min)) %>% mutate(chr = substr(index, 1,2)) %>% -->
-<!--   filter(!(index %in% ranges$index)) -->
-
-<!-- sig_ranges <- bind_rows(ranges, ranges_index) %>%  -->
-<!--   arrange(index) %>% -->
-<!--   mutate(chr = replace(chr, chr == "X_", "X")) -->
-
-<!-- for(i in 1:nrow(sig_ranges)){ -->
-<!--   hits <- TFBS %>% -->
-<!--     filter(chr == sig_ranges$chr[i]) %>% -->
-<!--     filter(start > sig_ranges$min[i]  & start < sig_ranges$max[i] | -->
-<!--              stop > sig_ranges$min[i] & stop < sig_ranges$max[i]) -->
-<!--   if(nrow(hits) > 0) print(hits) -->
-<!-- } -->
-<!-- ``` -->
 

@@ -18,6 +18,7 @@ library(future.apply) # for parallel code
 
 # Load the predicted line means, as calculated by get_predicted_line_means
 predicted_line_means <- read_csv("data/derived/predicted_line_means.csv")
+plink <- paste(getwd(), "code/plink", sep = "/")
 
 # # Load the wolbachia infection status data from the DGRP website
 # wolbachia <- read_csv("data/input/wolbachia.csv") %>% 
@@ -48,7 +49,6 @@ We cleaned up the DGRP's .bed/.bim/.fam files (available from the [Mackay lab we
 Note that in the PLINK-formatted genotype files, lines fixed for the major allele are coded as 2, and lines fixed for the minor allele as 0. This means that in the association tests we calculate, negative effect sizes mean that the minor allele is associated with lower fitness, while positive effect sizes means that the minor allele is associated with higher fitness.
 
 ```{r QC_and_imputation, results='hide', eval=FALSE}
-plink  <- bigsnpr::download_plink()
 beagle <- bigsnpr::download_beagle()
 
 perform_SNP_QC_and_imputation <- function(phenotypes){
@@ -108,7 +108,8 @@ perform_SNP_QC_and_imputation <- function(phenotypes){
   # The file created is called data/derived/plink.frq
   run_command("{plink} --bfile dgrp2_QC_all_lines_imputed_correct --freq", path = "/data/derived")
 
-  # Now cull the PLINK files to just the lines that we measured, and re-apply the MAF cut-off of 0.05 for the new smaller sample of DGRP lines
+  # Now cull the PLINK files to just the lines that we measured, and re-apply the 
+  # MAF cut-off of 0.05 for the new smaller sample of DGRP lines
   run_command(glue("{plink} --bfile dgrp2_QC_all_lines_imputed_correct",
                    " --keep-allele-order", # force PLINK to retain the major/minor allele designations that apply to the DGRP as a whole
                    " --keep lines_to_keep.txt --geno 0.1 --maf 0.05", 
@@ -123,7 +124,11 @@ perform_SNP_QC_and_imputation <- function(phenotypes){
            "data/derived/dgrp2_QC_all_lines_imputed.bed",
            "data/derived/dgrp2_QC_all_lines_imputed.bim",
            "data/derived/dgrp2_QC_all_lines_imputed.fam",
-           "data/derived/dgrp2_QC_all_lines_imputed.log"))
+           "data/derived/dgrp2_QC_all_lines_imputed.log",
+           "data/derived/dgrp2_QC_all_lines_imputed_correct.bed",
+           "data/derived/dgrp2_QC_all_lines_imputed_correct.bim",
+           "data/derived/dgrp2_QC_all_lines_imputed_correct.fam",
+           "data/derived/dgrp2_QC_all_lines_imputed_correct.log"))
 }
 
 perform_SNP_QC_and_imputation(phenotypes = predicted_line_means)
@@ -218,7 +223,7 @@ c("gemma -bfile {bed} {GRM_female} {opts} -n 1 -o female_early_lmm",
 
 According to the manual, GEMMA calculates the relatedness matrix from the SNP data, then "extracts the matrix elements corresponding to the analyzed individuals (which may be smaller than the number of total individuals), centers the matrix, and then performs an eigendecomposition". The aim is to better estimate the effects of each SNP independently of the rest of the genome. 
 
-The metric `pve` in the outputs below is "the proportion of variance in the phenotype explained by typed genotypes", also called SNP heritability. Next, `vg` is $V_g$, the variance in phenotype due to variance in genotype, while `ve` is $V_e$, the variance in phenotype due to variance in environment. 
+The metric `pve` in the outputs below is "the proportion of variance in the phenotype explained by typed genotypes", also called SNP heritability. Next, `vg` is $V_g$, the variance in phenotype due to variance in genotype, while `ve` is $V_e$, the variance in phenotype due to variance in environment. Note that we present alternative estimates from gcta64 for the heritabilities in the manuscript, though these estimates from GEMMA are qualitatively very similar. 
 
 #### Female early-life fitness
 ```{r lmm1}
@@ -240,10 +245,7 @@ cat(readLines("data/derived/output/female_late_lmm.log.txt"), sep = "\n")
 cat(readLines("data/derived/output/male_late_lmm.log.txt"), sep = "\n")
 ```
 
-<!-- #### All four traits in MV model -->
-<!-- ```{r} -->
-<!-- cat(readLines("data/derived/output/all_four_traits.log.txt"), sep = "\n") -->
-<!-- ``` -->
+
 
 
 ### Add the allele IDs and minor allele frequencies (MAFs) to variant annotation database
@@ -290,35 +292,11 @@ c("data/derived/output/female_early_lmm.assoc.txt",
     df %>% select(SNP, beta, se, p_wald) %>% 
       write_tsv(filename)
   })
-
-# The multivariate file:
-# all_four <- read_tsv("data/derived/output/all_four_traits.assoc.txt") %>% 
-#   rename(SNP = rs,
-#          female_early = beta_1, 
-#          female_late  = beta_2,
-#          male_early   = beta_3, 
-#          male_late    = beta_4) %>%
-#   select(-chr, -ps, -n_miss, -allele1, -allele0, -af) %>%
-#   arrange(p_wald) 
-
-# Perform FDR on p-vals, assuming we only run one test on groups of SNPs in perfect LD with each other
-# p_vals <- all_four %>%
-#   select(female_early, female_late, male_early, male_late, p_wald) %>% 
-#   distinct() %>% 
-#   select(p_wald) %>%
-#   mutate(p_fdr = p.adjust(p_wald, method = "BH"))
-
-# all_four %>%
-#   left_join(p_vals, by = "p_wald") %>% 
-#   write_tsv("data/derived/output/all_four_traits.assoc.txt")
-# 
-# rm(all_four)
 ```
 
 ### Perform SNP clumping using PLINK
 
 ```{r snp_clumping, eval=FALSE}
-if(!exists("plink")) plink  <- bigsnpr::download_plink()
 # Use the un-manipulated DGRP bed/bim/fam files, since they don't throw an error from plink
 bed <- "../input/dgrp2"
 
@@ -331,7 +309,6 @@ do_snp_clumping <- function(trait){
 
   run_command(glue("plink --bfile {bed}", 
                    " --clump output/{trait}.assoc.txt",
-                   " --noweb",
                    " --clump-field p_wald --clump-p1 0.00001"), # Each clump must contain one snp with p < 10 ^ -5
               path = "/data/derived")
   trait <- gsub("_lmm", "", trait)
@@ -440,7 +417,7 @@ SNPs_to_remove <- all_univariate_lmm_results$SNPs[!complete.cases(all_univariate
 all_univariate_lmm_results <- all_univariate_lmm_results %>% 
   filter(!(SNPs %in% SNPs_to_remove))
 
-write_csv(all_univariate_lmm_results, path = "data/derived/all_univariate_GEMMA_results.csv")
+write_csv(all_univariate_lmm_results, file = "data/derived/all_univariate_GEMMA_results.csv")
 unlink("data/derived/output/female_early_lmm.assoc.txt")
 unlink("data/derived/output/female_late_lmm.assoc.txt")
 unlink("data/derived/output/male_early_lmm.assoc.txt")
@@ -448,7 +425,21 @@ unlink("data/derived/output/male_late_lmm.assoc.txt")
 ```
 
 
+## Create a reduced list of LD-pruned SNPs with PLINK
 
+To keep the computation time and memory usage for `mashr` manageable, we did not analyse every SNP analysed in the GWAS (i.e. `r nrow(read.csv("data/derived/all_univariate_GEMMA_results.csv"))` SNPs), but rather a subset of them that were approximately in linkage disequilibrium. We identified this LD-pruned set of SNPs using the PLINK arguments `--indep-pairwise 100 10 0.2`, i.e. pruning within 100kB sliding windows, sliding 10 variants along with each step, and allowing a maximum pairwise $r^2$ threshold of 0.2 between loci. With these parameters, 1420071 SNPs were removed, leaving `r 1646652 - 1420071` for downstream analysis.
+
+```{r}
+# indep-pairwise arguments are: 
+# 100kB window size, 
+# variant count to shift the window by 10 variants at the end of each step, 
+# pairwise r^2 threshold of 0.2
+run_command(glue("{plink} --bfile dgrp2_QC_focal_lines",
+                 " --indep-pairwise 100 10 0.2"), path = "/data/derived/")
+
+file.rename("data/derived/plink.prune.in", "data/derived/SNPs_in_LD")
+unlink("gwas_data/derived/plink.prune.out")
+```
 
 <!-- ## Run Bayesian Sparse Linear Mixed Models -->
 

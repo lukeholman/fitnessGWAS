@@ -16,9 +16,9 @@ This script creates a SQLite3 database holding two tables: one with annotations 
 
 This script uses Bayesian mixed models implemented in `brms` to estimate the line means for our four fitness traits.
 
-### [3. Calculating quantitative genetic parameters](quantitative_genetics.html)
+### [3. Calculating quantitative genetic parameters](gcta_quantitative_genetics.html)
 
-Using a multivariate random effects model implemented in `brms`, we estimate the heritability of, and genetic covariance among, our four phenotypes based on the genomic relatedness matrix. 
+Using `gcta64`, ...
 
 ### [4. Running the GWAS](perfom_gwas.html)
 
@@ -28,11 +28,7 @@ The script first performs quality control and imputation on the dataset of SNPs 
 
 Here, we use the R package `mashr` to perform multivariate adaptive shrinkage on the results of the GWAS. We ran `mashr` using both possible modes: canonical, and data-driven. The canonical approach is useful for testing hypotheses about the relative abundance of different types of fitness-affecting SNPs, e.g. sexually antagonistic, sexually concordant, sex-limited, or null. The data-driven approach adjusts the GWAS estimates most accurately, as it estimates the patterns of covariances in the SNPs' effects on the 4 traits from the data; this is useful for deriving shrinked estimates of all the SNPs' effect sizes.
 
-### [6. Plots illustrating how adaptive shrinkage affected the results](checking_mashr_results.html)
-
-This script generates some plots of the SNP effect sizes under the two forms of shrinkage (canonical and data-driven) to check that `mashr` is performing as expected.
-
-### [7. Running the TWAS and applying mashr to the TWAS results](TWAS.html)
+### [6. Running the TWAS and applying mashr to the TWAS results](TWAS.html)
 
 This script uses the transcriptomic data from Huang et al. 2015 _PNAS_ on the DGRP. In this script, we
 
@@ -47,25 +43,17 @@ This script uses the transcriptomic data from Huang et al. 2015 _PNAS_ on the DG
 
 Text here
 
-### [9. Quantitative genetic parameters](XXXX.html)
+### [9. Tables of GWAS results](GWAS_tables.html)
 
 Text here
 
-### [10. Tables of GWAS results](GWAS_tables.html)
+### [10. Tables of TWAS results](TWAS_tables.html)
 
 Text here
 
-### [11. Tables of TWAS results](TWAS_tables.html)
-
-Text here
-
-### [12. Plot and model the variant effect sizes](plot_models_variant_effects.html)
+### [11. Plot and model the variant effect sizes](plot_models_variant_effects.html)
 
 Here, we plot the correlations in the estimated effects of each variant (or group of variants in perfect linkage disequilibrium with one another). For the GWAS results, we run linear models to test whether variants differ in their effect on fitness according to chromosome, site class, and minor allele frequency. For the TWAS results, we run linear models to test whether transcripts differ in their effect on fitness according to chromosome, average expression level, and the sex bias in expression.
-
-### [13. GO and KEGG enrichment analyses](GO_KEGG_enrichment.html)
-
-Text here
 
 
 <!-- Heritability -->

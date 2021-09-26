@@ -16,7 +16,7 @@ This script creates a SQLite3 database holding two tables: one with annotations 
 
 This script uses Bayesian mixed models implemented in `brms` to estimate the line means for our four fitness traits.
 
-### [3. Calculating quantitative genetic parameters](gcta_quantitative_genetics.html)
+### [3. Calculating quantitative genetic parameters](gcta_quant_genetics.html)
 
 Using `gcta64`, ...
 

@@ -35,17 +35,19 @@ For the progeny count data used to measure early and late female fitness, we use
 
 `Progeny count (late) = Intercept + (1 | p | line) + (1 | q | block) + (1 | r | vial)`
 
-To explain, the terms with the form `(1 | x | y)` represent random intercepts for line, block, and vial ID, where the letter between the pipe operator indicates which random intercepts should be assumed to be (potentially) correlated with which other random intercepts. We therefore assume that the effect of line, block, and vial ID on each observation are potentially correlated for both of the response variables, and estimate that correlation while fitting the multivariate model.
+To explain, the terms with the form `(1 | x | y)` represent random intercepts for line, block, and vial ID (i.e. `y`), where the letter between the pipe operators (`x`) indicates which random intercepts are assumed to be correlated with which other random intercepts. Thus, we assume that the effects of line, block, and vial ID on early- and late-life fitness are potentially correlated, and estimate this correlation using the data and prior.
 
 The progeny count data were assumed to follow a Poisson distribution (with the standard log link function).
 
-Similarly, for our measure of male fitness (proportion of offspring sired), we used a multivariate model consisting of a pair of binomial GLMMs, with the following formula:
+Similarly, for our measure of male fitness (proportion of offspring sired), we used a multivariate model consisting of a pair of binomial GLMMs (with logit link), with the following formula:
 
 `Proportion of progeny sired (early) = Intercept + (1 | p | line) + (1 | q | block) + (1 | r | vial)`
 
-`Proportion of progeny sired (late) = Intercept + num.GFP.males + (1 | p | line) + (1 | q | block) + (1 | r | vial)`
+`Proportion of progeny sired (late) = Intercept + (1 | p | line) + (1 | q | block) + (1 | r | vial)`
 
-Where the response variable was a Bernoulli outcome describing the paternity of each offspring observed. Note that in the late life fitness model, we included the number of surviving rival (GFP) males as an additional predictor. We reasoned that the rival males might die at random with respect to the genotype of the focal males, which lowers competition on the focal males, and so we can get an improved estimate of the focal males' siring success by statistically correcting for their deaths via the model.
+Where the response variable was a Bernoulli outcome describing the paternity of each offspring observed (either a male from the focal DGRP line, or from one of the competitor males). 
+
+For both models, we assume the default priors except for the fact that we chose more informative, 'skeptical' priors for the random intercept terms, of the form `cauchy(0, 0.1)`. This prior helps the model to converge by making very large estimates implausible, constraining the parameter space. 
 
 
 ### Define functions for prediction
@@ -71,16 +73,6 @@ load_and_tidy_fitness_data <- function(){
     mutate(vial = paste("M", line, block, replicate, sep = "_"),
            line = paste("line_", line, sep = "")) %>%
     dplyr::select(-num.DGRP.males, -replicate)
-  
-  # Remove the small number of observations where the females had no offspring, so we cannot measure the
-  # rival vs focal male competitive abilities
-  # NOTE: Not needed any more, because now I impute this as missing data
-  # exclude_early <- male_fitness$early.male.rival + male_fitness$early.male.focal == 0
-  # exclude_late <- male_fitness$late.male.rival + male_fitness$late.male.focal == 0
-  # male_fitness$early.male.rival[exclude_early] <- NA
-  # male_fitness$early.male.focal[exclude_early] <- NA
-  # male_fitness$late.male.rival[exclude_late] <- NA
-  # male_fitness$late.male.focal[exclude_late] <- NA
   
   # Save these tidy files, for data archiving
   write.csv(female_fitness, file = "data/input/female_fitness_CLEANED.csv", row.names = FALSE)
@@ -146,6 +138,7 @@ get_predicted_line_means <- function(overwrite = FALSE){
 
   ####### Run model on the female data 
   
+  # Define the priors for the models
   prior_females <- 
     c(set_prior("cauchy(0, 0.1)", class = "sd", resp = 'femalefitnessearly', group = "line"),
       set_prior("cauchy(0, 0.1)", class = "sd", resp = 'femalefitnessearly', group = "block"),
@@ -163,8 +156,6 @@ get_predicted_line_means <- function(overwrite = FALSE){
       set_prior("cauchy(0, 0.1)", class = "sd", resp = 'latemalefocal', group = "vial"))
       
    
-  
-  
   female1 <- bf(female.fitness.early ~ (1 | p | line) + (1 | q | block) + (1 | r | vial))
   female2 <- bf(female.fitness.late ~  (1 | p | line) + (1 | q | block) + (1 | r | vial))
   female_model <- brm(female1 + female2, 
@@ -178,9 +169,7 @@ get_predicted_line_means <- function(overwrite = FALSE){
   
   
   ### Run model on male data 
-  # Fit num.GFP.males, but only for the late life data
   male1 <- bf(early.male.focal | trials(total1) ~ (1 | p | line) + (1 | q | block) + (1 | r | vial))
-  # male2 <- bf(late.male.focal  | trials(total2) ~ num.GFP.males + (1 | p | line) + (1 | q | block) + (1 | r | vial))
   male2 <- bf(late.male.focal  | trials(total2) ~ (1 | p | line) + (1 | q | block) + (1 | r | vial))
   
   # Run 5 models, on each of the 5 imputed datasets, and combine the results

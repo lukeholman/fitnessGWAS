@@ -428,7 +428,7 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2021-09-26
+<strong>Last updated:</strong> 2021-09-27
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 1
@@ -543,16 +543,16 @@ relative
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreeaf15dd63a476b2499f2be7f3002df3ec72c28522targetblankaf15dd6a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/lukeholman/fitnessGWAS/tree/af15dd63a476b2499f2be7f3002df3ec72c28522" target="_blank">af15dd6</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree5d64d6345416b087e9a9cb10c80201dfbb935ea9targetblank5d64d63a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/lukeholman/fitnessGWAS/tree/5d64d6345416b087e9a9cb10c80201dfbb935ea9" target="_blank">5d64d63</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreeaf15dd63a476b2499f2be7f3002df3ec72c28522targetblankaf15dd6a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree5d64d6345416b087e9a9cb10c80201dfbb935ea9targetblank5d64d63a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/lukeholman/fitnessGWAS/tree/af15dd63a476b2499f2be7f3002df3ec72c28522" target="_blank">af15dd6</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/lukeholman/fitnessGWAS/tree/5d64d6345416b087e9a9cb10c80201dfbb935ea9" target="_blank">5d64d63</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -585,37 +585,19 @@ Ignored files:
 
 Untracked files:
     Untracked:  big_model.rds
-    Untracked:  code/gcta64
-    Untracked:  code/plink
     Untracked:  code/quant_gen_1.R
     Untracked:  data/input/genomic_relatedness_matrix.rds
-    Untracked:  figures/SNP_effect_ED.pdf
-    Untracked:  figures/boyle_plot.pdf
-    Untracked:  figures/fig1.pdf
-    Untracked:  manuscript/GWAS_manuscript.log
     Untracked:  old_analyses/
 
 Unstaged changes:
     Modified:   .gitignore
-    Deleted:    Rplots.pdf
-    Deleted:    analysis/GO_KEGG_enrichment.Rmd
-    Deleted:    analysis/plotting_results.Rmd
-    Deleted:    code/GO_and_KEGG_gsea.R
-    Deleted:    code/make_sites_files_for_ARGweaver.R
-    Deleted:    code/plotting_results.Rmd
-    Deleted:    code/run_argweaver.R
-    Modified:   code/run_mashr.R
-    Deleted:    data/input/clough_2014_dsx_targets.csv
     Modified:   figures/GWAS_stats_figure.pdf
+    Modified:   figures/SNP_effect_ED.pdf
     Modified:   figures/TWAS_stats_figure.pdf
     Modified:   figures/antagonism_ratios.pdf
+    Modified:   figures/boyle_plot.pdf
     Modified:   figures/composite_mixture_figure.pdf
     Modified:   figures/eff_size_histos.pdf
-    Deleted:    figures/figure1.eps
-    Deleted:    figures/figure2.eps
-    Modified:   manuscript/GWAS_manuscript.Rmd
-    Modified:   manuscript/GWAS_manuscript.pdf
-    Modified:   manuscript/GWAS_manuscript.tex
 
 </code></pre>
 <p>
@@ -654,6 +636,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/5d64d6345416b087e9a9cb10c80201dfbb935ea9/analysis/get_predicted_line_means.Rmd" target="_blank">5d64d63</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2021-09-27
+</td>
+<td>
+Commit Sept 2021
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/8d14298b4d59c2198b6f9c62d415e6adc9b7e658/docs/get_predicted_line_means.html" target="_blank">8d14298</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2021-09-26
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -812,12 +828,13 @@ library(kableExtra)</code></pre>
 <p>For the progeny count data used to measure early and late female fitness, we used multivariate model with two components, one for early- and one for late-life fitness, which had the following formulae (in <code>brms</code>-like pseudocode):</p>
 <p><code>Progeny count (early) = Intercept + (1 | p | line) + (1 | q | block) + (1 | r | vial)</code></p>
 <p><code>Progeny count (late) = Intercept + (1 | p | line) + (1 | q | block) + (1 | r | vial)</code></p>
-<p>To explain, the terms with the form <code>(1 | x | y)</code> represent random intercepts for line, block, and vial ID, where the letter between the pipe operator indicates which random intercepts should be assumed to be (potentially) correlated with which other random intercepts. We therefore assume that the effect of line, block, and vial ID on each observation are potentially correlated for both of the response variables, and estimate that correlation while fitting the multivariate model.</p>
+<p>To explain, the terms with the form <code>(1 | x | y)</code> represent random intercepts for line, block, and vial ID (i.e. <code>y</code>), where the letter between the pipe operators (<code>x</code>) indicates which random intercepts are assumed to be correlated with which other random intercepts. Thus, we assume that the effects of line, block, and vial ID on early- and late-life fitness are potentially correlated, and estimate this correlation using the data and prior.</p>
 <p>The progeny count data were assumed to follow a Poisson distribution (with the standard log link function).</p>
-<p>Similarly, for our measure of male fitness (proportion of offspring sired), we used a multivariate model consisting of a pair of binomial GLMMs, with the following formula:</p>
+<p>Similarly, for our measure of male fitness (proportion of offspring sired), we used a multivariate model consisting of a pair of binomial GLMMs (with logit link), with the following formula:</p>
 <p><code>Proportion of progeny sired (early) = Intercept + (1 | p | line) + (1 | q | block) + (1 | r | vial)</code></p>
-<p><code>Proportion of progeny sired (late) = Intercept + num.GFP.males + (1 | p | line) + (1 | q | block) + (1 | r | vial)</code></p>
-<p>Where the response variable was a Bernoulli outcome describing the paternity of each offspring observed. Note that in the late life fitness model, we included the number of surviving rival (GFP) males as an additional predictor. We reasoned that the rival males might die at random with respect to the genotype of the focal males, which lowers competition on the focal males, and so we can get an improved estimate of the focal males’ siring success by statistically correcting for their deaths via the model.</p>
+<p><code>Proportion of progeny sired (late) = Intercept + (1 | p | line) + (1 | q | block) + (1 | r | vial)</code></p>
+<p>Where the response variable was a Bernoulli outcome describing the paternity of each offspring observed (either a male from the focal DGRP line, or from one of the competitor males).</p>
+<p>For both models, we assume the default priors except for the fact that we chose more informative, ‘skeptical’ priors for the random intercept terms, of the form <code>cauchy(0, 0.1)</code>. This prior helps the model to converge by making very large estimates implausible, constraining the parameter space.</p>
 <div id="define-functions-for-prediction" class="section level3">
 <h3>Define functions for prediction</h3>
 <pre class="r"><code>load_and_tidy_fitness_data &lt;- function(){
@@ -841,16 +858,6 @@ library(kableExtra)</code></pre>
     mutate(vial = paste(&quot;M&quot;, line, block, replicate, sep = &quot;_&quot;),
            line = paste(&quot;line_&quot;, line, sep = &quot;&quot;)) %&gt;%
     dplyr::select(-num.DGRP.males, -replicate)
-  
-  # Remove the small number of observations where the females had no offspring, so we cannot measure the
-  # rival vs focal male competitive abilities
-  # NOTE: Not needed any more, because now I impute this as missing data
-  # exclude_early &lt;- male_fitness$early.male.rival + male_fitness$early.male.focal == 0
-  # exclude_late &lt;- male_fitness$late.male.rival + male_fitness$late.male.focal == 0
-  # male_fitness$early.male.rival[exclude_early] &lt;- NA
-  # male_fitness$early.male.focal[exclude_early] &lt;- NA
-  # male_fitness$late.male.rival[exclude_late] &lt;- NA
-  # male_fitness$late.male.focal[exclude_late] &lt;- NA
   
   # Save these tidy files, for data archiving
   write.csv(female_fitness, file = &quot;data/input/female_fitness_CLEANED.csv&quot;, row.names = FALSE)
@@ -916,6 +923,7 @@ get_predicted_line_means &lt;- function(overwrite = FALSE){
 
   ####### Run model on the female data 
   
+  # Define the priors for the models
   prior_females &lt;- 
     c(set_prior(&quot;cauchy(0, 0.1)&quot;, class = &quot;sd&quot;, resp = &#39;femalefitnessearly&#39;, group = &quot;line&quot;),
       set_prior(&quot;cauchy(0, 0.1)&quot;, class = &quot;sd&quot;, resp = &#39;femalefitnessearly&#39;, group = &quot;block&quot;),
@@ -933,8 +941,6 @@ get_predicted_line_means &lt;- function(overwrite = FALSE){
       set_prior(&quot;cauchy(0, 0.1)&quot;, class = &quot;sd&quot;, resp = &#39;latemalefocal&#39;, group = &quot;vial&quot;))
       
    
-  
-  
   female1 &lt;- bf(female.fitness.early ~ (1 | p | line) + (1 | q | block) + (1 | r | vial))
   female2 &lt;- bf(female.fitness.late ~  (1 | p | line) + (1 | q | block) + (1 | r | vial))
   female_model &lt;- brm(female1 + female2, 
@@ -948,9 +954,7 @@ get_predicted_line_means &lt;- function(overwrite = FALSE){
   
   
   ### Run model on male data 
-  # Fit num.GFP.males, but only for the late life data
   male1 &lt;- bf(early.male.focal | trials(total1) ~ (1 | p | line) + (1 | q | block) + (1 | r | vial))
-  # male2 &lt;- bf(late.male.focal  | trials(total2) ~ num.GFP.males + (1 | p | line) + (1 | q | block) + (1 | r | vial))
   male2 &lt;- bf(late.male.focal  | trials(total2) ~ (1 | p | line) + (1 | q | block) + (1 | r | vial))
   
   # Run 5 models, on each of the 5 imputed datasets, and combine the results

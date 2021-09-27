@@ -219,31 +219,33 @@ c("gemma -bfile {bed} {GRM_female} {opts} -n 1 -o female_early_lmm",
 ```
 
 
-### Inspect the GEMMA log files from the association tests {.tabset}
+<!-- # Alternative PVE estimates from GEMMA -->
 
-According to the manual, GEMMA calculates the relatedness matrix from the SNP data, then "extracts the matrix elements corresponding to the analyzed individuals (which may be smaller than the number of total individuals), centers the matrix, and then performs an eigendecomposition". The aim is to better estimate the effects of each SNP independently of the rest of the genome. 
+<!-- ### Inspect the GEMMA log files from the association tests {.tabset} -->
 
-The metric `pve` in the outputs below is "the proportion of variance in the phenotype explained by typed genotypes", also called SNP heritability. Next, `vg` is $V_g$, the variance in phenotype due to variance in genotype, while `ve` is $V_e$, the variance in phenotype due to variance in environment. Note that we present alternative estimates from gcta64 for the heritabilities in the manuscript, though these estimates from GEMMA are qualitatively very similar. 
+<!-- According to the manual, GEMMA calculates the relatedness matrix from the SNP data, then "extracts the matrix elements corresponding to the analyzed individuals (which may be smaller than the number of total individuals), centers the matrix, and then performs an eigendecomposition". The aim is to better estimate the effects of each SNP independently of the rest of the genome.  -->
 
-#### Female early-life fitness
-```{r lmm1}
-cat(readLines("data/derived/output/female_early_lmm.log.txt"), sep = "\n")
-```
+<!-- The metric `pve` in the outputs below is "the proportion of variance in the phenotype explained by typed genotypes", also called SNP heritability. Next, `vg` is $V_g$, the variance in phenotype due to variance in genotype, while `ve` is $V_e$, the variance in phenotype due to variance in environment. Note that we present alternative estimates from gcta64 for the heritabilities in the manuscript, though these estimates from GEMMA are qualitatively very similar.  -->
 
-#### Male early-life fitness
-```{r lmm2}
-cat(readLines("data/derived/output/male_early_lmm.log.txt"), sep = "\n")
-```
+<!-- #### Female early-life fitness -->
+<!-- ```{r lmm1} -->
+<!-- cat(readLines("data/derived/output/female_early_lmm.log.txt"), sep = "\n") -->
+<!-- ``` -->
 
-#### Female late-life fitness
-```{r lmm3}
-cat(readLines("data/derived/output/female_late_lmm.log.txt"), sep = "\n")
-```
+<!-- #### Male early-life fitness -->
+<!-- ```{r lmm2} -->
+<!-- cat(readLines("data/derived/output/male_early_lmm.log.txt"), sep = "\n") -->
+<!-- ``` -->
 
-#### Male late-life fitness
-```{r lmm4}
-cat(readLines("data/derived/output/male_late_lmm.log.txt"), sep = "\n")
-```
+<!-- #### Female late-life fitness -->
+<!-- ```{r lmm3} -->
+<!-- cat(readLines("data/derived/output/female_late_lmm.log.txt"), sep = "\n") -->
+<!-- ``` -->
+
+<!-- #### Male late-life fitness -->
+<!-- ```{r lmm4} -->
+<!-- cat(readLines("data/derived/output/male_late_lmm.log.txt"), sep = "\n") -->
+<!-- ``` -->
 
 
 

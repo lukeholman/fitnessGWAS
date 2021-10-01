@@ -516,16 +516,6 @@ TWAS_mashr_results <-
       as.data.frame(get_lfsr(TWAS_ED)) %>% 
         rename_all(~str_replace_all(., "beta", "LFSR")) %>% rename_all(~str_c("ED_", .))) %>% 
       as_tibble()) 
-
-
-# get_innocenti_morrow_index <- function(s1, s2) (s1 * s2) / sqrt((s1^2 + s2^2) / 2)
-# TWAS_ED_antagonism_effects <- data.frame(
-#   FBID = read_delim("data/input/huang_transcriptome/dgrp.array.exp.female.txt", delim = " ") %>% pull(gene),
-#   as.data.frame(get_pm(TWAS_ED)) %>%
-#   mutate(SA_young  = get_innocenti_morrow_index(beta_FE, beta_ME),
-#          SA_old    = get_innocenti_morrow_index(beta_FL, beta_ML),
-#          AA_female = get_innocenti_morrow_index(beta_FE, beta_FL),
-#          AA_male   = get_innocenti_morrow_index(beta_ME, beta_ML))) %>% as_tibble()
 ```
 
 
@@ -609,7 +599,7 @@ TWAS_results <- data.frame(
   as.data.frame(get_lfsr(TWAS_ED))) %>% 
   as_tibble()
 
-names(TWAS_results)[6:9] <- paste("LFSR", c("FE","FL","ME","ML"), sep="_")
+names(TWAS_results)[6:9] <- paste("LFSR", c("FE", "FL", "ME", "ML"), sep = "_")
 
 p_cutoff <- 0.01
 

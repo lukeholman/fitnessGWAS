@@ -85,8 +85,8 @@ make_figure_1()
 
 ## Interaction plot showing trait covariance across lines
 All possible types of lines were observed: some lines are uniformly bad, or uniformly good, or good in one sex or age class but bad in the other.
-```{r fig.showtext=TRUE, fig.height = 6, fig.width = 6}
-make_figure_2 <- function(){
+```{r fig.showtext=TRUE, fig.height = 6, fig.width = 6, warning = FALSE}
+make_bonus_figure <- function(){
 
   interaction.plot <- function(predicted_line_means, x1, x2, title, sex.or.age){
     if(sex.or.age == "sex"){
@@ -125,10 +125,10 @@ make_figure_2 <- function(){
     ncol = 2, left = "Fitness rank among the 125 lines", bottom = "Sex or age category"
   )
 }
-make_figure_2()
+make_bonus_figure()
 ```
 <br></br>
-**Figure 2**: The relative fitness ranks for each line, for four pairs of fitness traits. The y-axis was calculated by taking the adjusted line mean fitnesses, ranking them, and then dividing by the number of lines. The intensity and hue of the colour helps highlight genotypes that rank highly for one fitness component but not the other. 
+**Bonus figure**: The relative fitness ranks for each line, for four pairs of fitness traits. The y-axis was calculated by taking the adjusted line mean fitnesses, ranking them, and then dividing by the number of lines. The intensity and hue of the colour helps highlight genotypes that rank highly for one fitness component but not the other. 
 
 
 

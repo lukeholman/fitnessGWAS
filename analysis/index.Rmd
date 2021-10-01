@@ -6,7 +6,9 @@ output:
     toc: false
 ---
 
-## Running quantitative genetic analyses
+This website relates to the forthcoming paper 'A genome-wide scan for pleiotropic fitness effects on sexes and age classes in _Drosophila_', by Wong and Holman. 
+
+Click the headings below to see the code, results, plots, tables and figures associated with this study. 
 
 ### [1. Setting up a database to hold variant/gene annotations and GWAS results](make_annotation_database.html)
 
@@ -18,19 +20,19 @@ This script uses Bayesian mixed models implemented in `brms` to estimate the lin
 
 ### [3. Calculating quantitative genetic parameters](gcta_quant_genetics.html)
 
-Using `gcta64`, ...
+We first present a table showing the proportion of variance in fitness explained by ‘DGRP line’, which was calculated using the models in Section 2. We then use `gcta64` software to estimate the genetics (co)variances for the four fitness metrics from the genomic relatedness matrix.
 
 ### [4. Running the GWAS](perfom_gwas.html)
 
-The script first performs quality control and imputation on the dataset of SNPs and indels for the DGRP. Second, it runs association tests on our four phenotypes using the software command-line software [GEMMA](http://www.xzlab.org/software/GEMMAmanual.pdf). Third, it uses PLINK to identify groups of loci that are in complete linkage disequilibrium ('SNP clumps'). 
+This script first performs quality control and imputation on the dataset of SNPs and indels for the DGRP. Second, it runs mixed model association tests on our four phenotypes using the software [GEMMA](http://www.xzlab.org/software/GEMMAmanual.pdf). Third, it uses PLINK to identify groups of loci that are in complete linkage disequilibrium ('SNP clumps'). 
 
 ### [5. Applying adaptive shrinkage to the GWAS results](gwas_adaptive_shrinkage.html)
 
-Here, we use the R package `mashr` to perform multivariate adaptive shrinkage on the results of the GWAS. We ran `mashr` using both possible modes: canonical, and data-driven. The canonical approach is useful for testing hypotheses about the relative abundance of different types of fitness-affecting SNPs, e.g. sexually antagonistic, sexually concordant, sex-limited, or null. The data-driven approach adjusts the GWAS estimates most accurately, as it estimates the patterns of covariances in the SNPs' effects on the 4 traits from the data; this is useful for deriving shrinked estimates of all the SNPs' effect sizes.
+Here, we use the R package `mashr` to perform multivariate adaptive shrinkage on the results of the GWAS, for an LD-pruned subset of loci. This produces corrected estimates of each SNP's effect size, and allows estimation of the frequencies of different types of loci (e.g. sexually- or age-antagonistic loci).
 
 ### [6. Running the TWAS and applying mashr to the TWAS results](TWAS.html)
 
-This script uses the transcriptomic data from Huang et al. 2015 _PNAS_ on the DGRP. In this script, we
+This script uses the transcriptomic data on the DGRP from Huang et al. 2015 _PNAS_. In this script, we
 
 - Calculate the average expression and sex bias in expression for each transcript in Huang et al.
 - Perform 'TWAS', i.e. searching for transcripts whose expression correlates with our fitness measures across lines
@@ -41,11 +43,11 @@ This script uses the transcriptomic data from Huang et al. 2015 _PNAS_ on the DG
 
 ### [8. Plots showing line mean fitness](plot_line_means.html)
 
-Text here
+This script plots the estimated line means for each of the four fitness metrics, i.e. Figure 1 in the paper.
 
 ### [9. Tables of GWAS results](GWAS_tables.html)
 
-Text here
+This script presents a searchable HTML table showing list of significant loci from the GWAS using GEMMA, with annotations, effect sizes, and $p$-values for each one. 
 
 ### [10. Tables of TWAS results](TWAS_tables.html)
 

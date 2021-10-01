@@ -5,7 +5,7 @@ output:
     code_folding: hide 
 ---
 
-```{r libraries, message=FALSE, warning=FALSE, results='hide'}
+```{r make_all, message=FALSE, warning=FALSE, results='hide'}
 library(tidyverse)
 library(DT)
 library(kableExtra)
@@ -34,70 +34,124 @@ my_data_table <- function(df){ # Make html tables:
           filename = 'TWAS_sig_genes')),
       pageLength = 50
     )
-  )
+  ) %>%
+    formatStyle(
+        columns = c("Female early effect", "Male early effect", "Female late effect", "Male late effect"), 
+        color = styleInterval(cuts = 0, values = c("tomato", "steelblue")),
+        fontWeight = "bold")
 }
 
-sig_transcripts_table <- read_csv("data/derived/TWAS/TWAS_results.csv") %>%
-   filter(LFSR_FE < 0.01 | LFSR_FL < 0.01 | LFSR_ME < 0.01 | LFSR_ML < 0.01) 
+sci_notation <- function(x) formatC(x, format = "e", digits = 1)
+rnd <- function(x) format(round(x, 2), nsmall = 2)
 
-tallies <- sig_transcripts_table %>%
-  select(starts_with("sig_")) %>%
-  summarise_all(~ sum(!is.na(.x))) %>%
-  gather(type, n_transcripts) %>%
-  arrange(-n_transcripts)
+make_tally <- function(p_cutoff){
+  TWAS_results <- left_join(read.csv("data/derived/TWAS/TWAS_result_females.csv") %>% 
+              select(gene, beta_FE, beta_FL, pval_FE, pval_FL), 
+            read.csv("data/derived/TWAS/TWAS_result_males.csv") %>% 
+              select(gene, beta_ME, beta_ML, pval_ME, pval_ML), by = "gene") %>%
+    mutate(sum_p = pval_FE + pval_FL + pval_ME + pval_ML) %>% 
+    arrange(sum_p) %>% select(-sum_p) %>% 
+    mutate(
+      type = 
+        factor(case_when(
+          
+          (sign(beta_FE) != sign(beta_ME) & pval_FE < p_cutoff & pval_ME < p_cutoff) & 
+            (sign(beta_FL) != sign(beta_ML) & pval_FL < p_cutoff & pval_ML < p_cutoff) ~ "Sex antagonistic, both ages",
+          
+          (sign(beta_FE) == sign(beta_ME) & pval_FE < p_cutoff & pval_ME < p_cutoff) & 
+            (sign(beta_FL) == sign(beta_ML) & pval_FL < p_cutoff & pval_ML < p_cutoff) ~ "Sex concordant, both ages",
+          
+          (sign(beta_FE) != sign(beta_FL) & pval_FE < p_cutoff & pval_FL < p_cutoff) & 
+            (sign(beta_ME) != sign(beta_ML) & pval_ME < p_cutoff & pval_ML < p_cutoff) ~ "Age antagonistic, both sexes",
+          
+          (sign(beta_FE) == sign(beta_FL) & pval_FE < p_cutoff & pval_FL < p_cutoff) &
+            (sign(beta_ME) == sign(beta_ML) & pval_ME < p_cutoff & pval_ML < p_cutoff) ~ "Age concordant, both sexes",
+          
+          sign(beta_FE) != sign(beta_ME) & pval_FE < p_cutoff & pval_ME < p_cutoff ~ "Sex antagonistic, early",
+          sign(beta_FL) != sign(beta_ML) & pval_FL < p_cutoff & pval_ML < p_cutoff ~ "Sex antagonistic, late",
+          
+          sign(beta_FE) == sign(beta_ME) & pval_FE < p_cutoff & pval_ME < p_cutoff ~ "Sex concordant, early",
+          sign(beta_FL) == sign(beta_ML) & pval_FL < p_cutoff & pval_ML < p_cutoff ~ "Sex concordant, late",
+          
+          sign(beta_FE) != sign(beta_FL) & pval_FE < p_cutoff & pval_FL < p_cutoff ~ "Age antagonistic, females",
+          sign(beta_ME) != sign(beta_ML) & pval_ME < p_cutoff & pval_ML < p_cutoff ~ "Age antagonistic, males",
+          
+          sign(beta_FE) == sign(beta_FL) & pval_FE < p_cutoff & pval_FL < p_cutoff ~ "Age concordant, females",
+          sign(beta_ME) == sign(beta_ML) & pval_ME < p_cutoff & pval_ML < p_cutoff ~ "Age concordant, males",
+          
+          pval_FE < p_cutoff ~ "Female early only",
+          pval_FL < p_cutoff ~ "Female late only",
+          pval_ME < p_cutoff ~ "Male early only",
+          pval_ML < p_cutoff ~ "Male late only",
+          TRUE ~ "Uncorrelated with fitness"
+        ), levels = c("Sex antagonistic, both ages", "Sex concordant, both ages", 
+                      "Age antagonistic, both sexes", "Age concordant, both sexes",
+                      "Sex antagonistic, early", "Sex concordant, early", "Sex antagonistic, late", "Sex concordant, late",
+                      "Age antagonistic, females", "Age antagonistic, males", "Age concordant, females", "Age concordant, males",
+                      "Female early only", "Male early only", "Female late only", "Male late only", "Uncorrelated with fitness")))
+  
+  tally <- table(TWAS_results$type) %>% sort(decreasing = T) %>% enframe()
+  names(tally)[2] <- paste("Using p <", p_cutoff)
+  tally
+}
 
-rnd<- function(x) format(round(x, 2), nsmall = 2)
+tally_table <- make_tally(0.05) %>% 
+  left_join(make_tally(0.01), by = "name") %>% 
+  left_join(make_tally(0.001), by = "name") %>% 
+  left_join(make_tally(0.0001), by = "name") %>% 
+  left_join(make_tally(0.00001), by = "name") %>% 
+  rename(`Relationship to fitness` = name)
+
+p_cutoff <- 1e-02
+sig_TWAS_results <- 
+  left_join(read_csv("data/derived/TWAS/TWAS_result_females.csv") %>% 
+              select(gene, beta_FE, beta_FL, pval_FE, pval_FL), 
+            read_csv("data/derived/TWAS/TWAS_result_males.csv") %>% 
+              select(gene, beta_ME, beta_ML, pval_ME, pval_ML), by = "gene") %>%
+  mutate(sum_p = pval_FE + pval_FL + pval_ME + pval_ML) %>% 
+  arrange(sum_p) %>% select(-sum_p) %>% 
+  filter(pval_FE < p_cutoff | pval_FL < p_cutoff | pval_ME < p_cutoff | pval_ML < p_cutoff) 
 
 
-big_table <- sig_transcripts_table %>% 
-  select(FBID, gene_name, chromosome, AveExpr, male_bias_in_expression, everything()) %>%
-  select(-contains("heritability")) %>%
-  mutate(beta_FE = paste(beta_FE, " (", rnd(LFSR_FE), ")", sep = ""),
-         beta_FL = paste(beta_FL, " (", rnd(LFSR_FL), ")", sep = ""),
-         beta_ME = paste(beta_ME, " (", rnd(LFSR_ME), ")", sep = ""),
-         beta_ML = paste(beta_ML, " (", rnd(LFSR_ML), ")", sep = "")) %>%
-  select(-contains("LFSR")) %>%
+big_table <- sig_TWAS_results %>% 
+  mutate(pval_FE = sci_notation(pval_FE), 
+         pval_FL = sci_notation(pval_FL),
+         pval_ME = sci_notation(pval_ME),
+         pval_ML = sci_notation(pval_ML)) %>%
+  left_join(read_csv("data/derived/TWAS/TWAS_results.csv") %>% 
+              select(FBID, gene_name, chromosome, male_bias_in_expression, AveExpr), by = c("gene" = "FBID")) %>% 
+  select(gene, gene_name, chromosome, male_bias_in_expression, AveExpr,  starts_with("beta"), starts_with("pval")) %>%
+  mutate(across(where(is.numeric), rnd)) %>%
   rename(`Gene name` = gene_name,
          Chromosome = chromosome,
-         `Female early` = beta_FE,
-         `Female late` = beta_FL,
-         `Male early` = beta_ME,
-         `Male late` = beta_ML,
+         `Female early effect` = beta_FE,
+         `Female late effect` = beta_FL,
+         `Male early effect` = beta_ME,
+         `Male late effect` = beta_ML,
+         `Female early pval` = pval_FE,
+         `Female late pval` = pval_FL,
+         `Male early pval` = pval_ME,
+         `Male late pval` = pval_ML,
          `Male bias in expression (logFC)` = male_bias_in_expression,
-         `Average expression level` = AveExpr) %>%
-  arrange(-P_sex_antag)
+         `Average expression level` = AveExpr) 
 ```
 
 
 
-## Table showing the significant transcripts
 
-The table shows the `r nrow(big_table)` transcripts that were associated with one or more of the four phenotypes, with a local false sign rate < 0.01 (LFSR; computed by `mashr`). Columns 5-8 show the  regression coefficients (adjusted with `mashr` in data-driven mode) that relate the line mean transcript abundance to the line mean fitnesses, while columns 9-12 give the local false sign rates that for these coefficients from `mashr`. The `sig_` (signficant) columns provide a binary summary of whether the transcript was significantly pleiotropic between ages and sex classes (see below). Finally, the last five columns give the mixture assignment probabilities from `mashr` (this time, run in canonical mode). 
 
-To make the 'significance' columns, we defined significantly antagonistic transcripts as those where the relationship with fitness is significantly positive for one sex (or age class) and significantly negative for the other, with LFSR < 0.01. Similarly, we define significantly concordant transcripts as those where the relationship with fitness is significantly positive for one sex or age class and also significantly positive for the other (LFSR < 0.01). This is quite conservative, because a transcript needs to have a LFSR < 0.01 for two tests, giving two chances for a 'false negative'. One can sort the table by these columns, for example to see a list of transcripts that showed a significantly antagonistic relationship with fitness in the early-life fitness assays, sort by the `sig_SA_early` column.
+## Table showing significant transcripts from the TWAS
 
-Abbreviations: AC = age concordant, SC = sexually concordant, SA = sexually antagonistic. 
+The table shows the `r nrow(big_table)` transcripts that were associated with one or more of the four phenotypes, with a p-value less than `r p_cutoff`. The sex difference in expression (column 4) and the average expression level (across both sexes; column 5) were calculated from the DGRP expression data from Huang et al. 2015 (_PNAS_). Columns 6-9 show the regression coefficients that relate the line mean transcript abundance to the line mean fitnesses (with positive and negative values highlighted in colour), while columns 10-13 give the associated $p$-values. 
 
 ```{r}
 big_table %>% my_data_table()
 ```
 
 
-### Count the numbers of significant genes
-Abbreviations: AC = age concordant, SC = sexually concordant, SA = sexually antagonistic. We defined significantly antagonistic transcripts as those where the relationship with fitness is significantly positive for one sex (or age class) and significantly negative for the other, with LFSR < 0.01. Similarly, we define significantly concordant transcripts as those where the relationship with fitness is significantly positive for one sex or age class and also significantly positive for the other (LFSR < 0.01). This is quite conservative, because a transcript needs to have a LFSR < 0.01 for two tests, giving two chances for a 'false negative'.
+### Table showing the numbers of transcripts related to fitness
+The table tallies up the numbers of transcripts showing a particular significant relationship with fitness (rows) for various different $p$-value thresholds (columns). For example, 'Female early only' counts the number of transcripts whose expression significantly correlated with mean female early life fitness across lines. 'Age concordant, males' counts transcripts whose expression correlated with early- and late-life fitness in males, in the same direction, while 'Age antagonistic, males' counts transcripts showing a significant, opposite relationships with male early- and male late-life fitness. Similarly, 'Sex concordant, early' counts transcripts showing a concordant effect on early life fitness in both males and females, and 'Sex antagonistic, late' counts those showing opposing effects on late-life fitness in males and females. The categories are all mutually exclusive, such that transcripts are only counted towards the most specific category that applies to them. Note that this method has low power to detect transcripts that correlate with two or more fitness metrics, because there are two or more opportunities to make a 'false negative' error, and the power is low for any given transcripts (this is why we use a range of $p$-values, including some low ones).
+
 ```{r}
-tallies %>%
-  mutate(x = str_remove_all(type, "sig_"),
-         `Number statistically significant` = n_transcripts) %>%
-  mutate(x = str_replace_all(x, "AC", "Age concordant"),
-         x = str_replace_all(x, "AA", "Age antagonistic"),
-         x = str_replace_all(x, "SC", "Sexually concordant"),
-         x = str_replace_all(x, "SA", "Sexually antagonistic"),
-         x = str_replace_all(x, "_females", " (in females)"),
-         x = str_replace_all(x, "_males", " (in males)"),
-         x = str_replace_all(x, "_early", " (in early life)"),
-         x = str_replace_all(x, "_late", " (in late life)")) %>%
-  rename(`Type of transcript` = x) %>%
-  select(`Type of transcript`, `Number statistically significant`) %>%
-  kable_table()
+tally_table %>% kable_table() 
 ```

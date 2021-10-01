@@ -5,11 +5,12 @@ output:
     code_folding: hide 
 ---
 
-## Load and clean the GWAS results
 ```{r libraries, message=FALSE, warning=FALSE, results='hide'}
 library(tidyverse)
 library(kableExtra)
 library(DT)
+
+sci_notation <- function(x) formatC(x, format = "e", digits = 1)
 
 kable_table <- function(df) {
   kable(df, "html") %>%
@@ -35,99 +36,45 @@ my_data_table <- function(df){ # Make html tables:
           filename = 'GWAS_sig_loci')),
       pageLength = 50
     )
-  )
+  ) %>%
+    formatStyle(
+        columns = c("Female early effect", "Male early effect", "Female late effect", "Male late effect"), 
+        color = styleInterval(cuts = 0, values = c("tomato", "steelblue")),
+        fontWeight = "bold")
 }
 
 db <- DBI::dbConnect(RSQLite::SQLite(), "data/derived/annotations.sqlite3")
 
+p_cutoff <- 1e-05
 
-# Load the SNP-clumped GWAS results, created with GEMMA and clumped with PLINK
-xx <- bind_rows(
-  read_tsv("data/derived/female_early_SNP_clumps.txt"),
-  read_tsv("data/derived/female_late_SNP_clumps.txt"),
-  read_tsv("data/derived/male_early_SNP_clumps.txt"),
-  read_tsv("data/derived/male_late_SNP_clumps.txt")) %>%
-  distinct(index_SNP, .keep_all = TRUE) %>%
-  mutate(FBIDs = str_remove_all(FBIDs, ", NA"),
-         FBIDs = replace(FBIDs, is.na(FBIDs), "")) %>%
-  mutate(genes = str_remove_all(genes, ", NA"),
-         genes = replace(genes, is.na(genes), "")) %>%
-  select(index_SNP, other_snps, FBIDs, genes) 
-
-# Because we clumped separately for the 4 traits, some of the "index SNPs" appear inside the ranges
-# tagged by other index SNPs, so there is some redundancy. The following ugly code sorts this out 
-# by putting index SNPs that appear inside the range of another index SNP into the 'other SNPs' 
-# column for that index SNP
-ranges <- xx$other_snps %>% 
-  str_extract_all("[_][:digit:]+") %>% 
-  map(~ as.numeric(str_remove_all(.x, "_"))) %>% 
-    map(~ c(min(.x), max(.x)))
-
-ranges <- map_df(1:nrow(xx), 
-                 ~ data.frame(index = xx$index_SNP[.x], 
-                              min =ranges[[.x]][1], 
-                              max = ranges[[.x]][2]))%>%
-  filter(!is.na(min)) %>% 
-  mutate(chr = substr(index, 1,2))
-
-to_modify <- lapply(1:nrow(xx), function(i){
-  chr <- substr(xx$index_SNP[i],1,2) # get chr and pos
-  pos <- as.numeric(str_remove_all(str_extract_all(xx$index_SNP[i], "_[:digit:]+"), "_"))
-  foc_ranges <- ranges[ranges$chr == chr & 
-                         ranges$min <= pos & 
-                         ranges$max >= pos &
-                         ranges$index != xx$index_SNP[i], ]
-  if(nrow(foc_ranges) > 0) {
-    return(data.frame(index_SNP = foc_ranges$index, 
-                      to_add = xx$index_SNP[i]))
-  }
-  return(NULL)
-}) %>% bind_rows()
-
-xx <- xx %>% 
-  filter(!(index_SNP %in% to_modify$to_add)) %>% 
-  left_join(to_modify) %>% 
-  mutate(to_add = replace(to_add, is.na(to_add), "NA"))
-
-xx <- xx %>% 
-  mutate(other_snps = str_split(str_c(xx$other_snps, to_add, sep = ", "), ", "),
-              other_snps = map_chr(other_snps, 
-                                   ~ paste0(.x[.x != "NA"], collapse = ", "))) %>%
-  select(-to_add) %>%
-  mutate(other_snps = str_replace_all(other_snps, "NA", ""))
-
-# Now get the RAW effect sizes for the index SNPs, 
-# and their mixture assignment probs.
 univariate_lmm_results <- 
   tbl(db, "univariate_lmm_results") %>%
-  filter(SNP %in% !! xx$index_SNP) %>%
-  select(-contains("canonical"), 
-         -contains("ED"), -contains("P_"), -contains("SE")) %>% 
-  inner_join(tbl(db, "variants"), 
-             by = "SNP") %>%
+  select(SNP, SNP_clump, contains("raw"), -contains("SE")) %>% 
+  filter(pvalue_female_early_raw < p_cutoff | pvalue_female_late_raw < p_cutoff | 
+           pvalue_male_early_raw < p_cutoff | pvalue_male_late_raw < p_cutoff) %>% 
+  inner_join(tbl(db, "variants"), by = "SNP") %>%
   left_join(
     tbl(db, "genes") %>% 
       select(FBID, gene_name), by = "FBID") %>%
   collect(n=Inf) %>%
-  mutate(beta_female_early_raw = round(beta_female_early_raw, 2),
-         beta_female_late_raw = round(beta_female_late_raw, 2),
-         beta_male_early_raw = round(beta_male_early_raw, 2),
-         beta_male_late_raw = round(beta_male_late_raw, 2)) %>% 
+  mutate_at(vars(contains("beta")), ~ format(round(.x, 2), nsmall = 2)) %>% 
   rename_all(~ gsub("beta_", "", .x)) %>%
   rename_all(~ gsub("_raw", "", .x)) %>%
-  select(SNP, MAF, site.class, starts_with("female"), 
+  select(SNP, SNP_clump, MAF, FBID, gene_name, site.class, starts_with("female"), 
           starts_with("male"), starts_with("P_"), starts_with("pvalue")) %>%
   distinct()
 
-GWAS_table <- xx %>%
-  left_join(univariate_lmm_results, by = c("index_SNP" = "SNP")) %>%
-  filter(!is.na(female_early)) %>% 
-  arrange(pvalue_female_early + pvalue_female_late + pvalue_male_early + pvalue_male_late) %>% 
-  rename(`Index variant` = index_SNP,
-         `MAF of index` = MAF,
-         `Site class of index` = site.class,
-         `Other variants` = other_snps,
-         `Genes` = genes, 
+GWAS_table <- univariate_lmm_results %>% 
+  split(.$SNP_clump) %>% # Only keep one SNP from each clump
+  map_df(~ mutate(.x, sum_p = pvalue_female_early + pvalue_female_late + pvalue_male_early + pvalue_male_late) %>% 
+        arrange(sum_p) %>% head(1)) %>% 
+  select(-sum_p) %>% 
+  mutate_at(vars(contains("pval")), sci_notation) %>% 
+  mutate(SNP_clump = replace(SNP_clump, SNP == SNP_clump, "")) %>% 
+  rename(`Variant` = SNP,
+         `Variant clump` = SNP_clump,
+         `Site class` = site.class,
+         `Gene` = gene_name, 
          `Female early effect` = female_early,
          `Female late effect` = female_late,
          `Male early effect` = male_early,
@@ -140,13 +87,82 @@ GWAS_table <- xx %>%
 write_csv(GWAS_table, "data/derived/GWAS_significant_snps.csv")
 ```
 
-## Table of significant groups of linked variants
+## Table showing significant loci from the GWAS
 
-This table shows loci (i.e. groups of linked variants) that passed the arbitrary statistical significance threshold of $p < 10^{-5}$ for one or more of the four phenotypes (in a linear mixed model GWAS implemented in GEMMA). The significant loci (and groups of loci surrounding the significant one) were identified using the SNP clumping method of PLINK; each group of loci contains at least one variant that met the significance threshold, plus other loci that are within 250kb of the most significant locus, plus in linkage disequilibrium with it with r-squared > 0.5 (see the [PLINK documentation](http://zzz.bwh.harvard.edu/plink/clump.shtml)). The third and fourth columns identify the gene(s) whose exons and introns overlap the focal locus. Columns 6-9 show the estimated effect size of the index variant on the four phenotypes (corrected by `mashr` using the data-driven method), while the final columns show the mixture proportions estimated by `mashr` using the canonical method.  
+*Table SX*: This table shows loci (either individual SNPs and indels, or variant clumps in complete linkage disequilibrium) that passed the statistical significance threshold of $p < 10^{-5}$ for at least one of the four phenotypes, in a linear mixed model GWAS implemented in GEMMA. Column 3 gives the minor allele frequency, columns 4-5 identify genes that overlap the focal locus, and column 6 shows the site class. Columns 7-10 show the estimated effect size of the index variant on the four phenotypes (where positive values mean that the minor allele is associated with higher fitness, and negative values that the minor allele is associated with lower fitness), and the final columns show the corresponding $p$-values.
 
 ```{r}
-GWAS_table %>%
-  my_data_table()
+GWAS_table %>% my_data_table()
+```
+
+### Table showing the numbers of loci related to fitness
+The table tallies up the numbers of clumps of perfectly linked loci showing a particular significant relationship with fitness (rows) for various different $p$-value thresholds (columns). For example, 'Female early only' counts the number of loci whose expression significantly correlated with mean female early life fitness across lines. 'Age concordant, males' counts loci whose expression correlated with early- _and_ late-life fitness in males, in the same direction, while 'Age antagonistic, males' counts loci showing a significant, opposite relationships with male early- and male late-life fitness. Similarly, 'Sex concordant, early' counts loci showing a concordant effect on early life fitness in both males and females, and 'Sex antagonistic, late' counts those showing opposing effects on late-life fitness in males and females. The categories are all mutually exclusive, such that loci are only counted towards the most specific category that applies to them. Note that this method has low power to detect loci that correlate with two or more fitness metrics, because there are two or more opportunities to make a 'false negative' error, and the power is low for any given locus (this is why we use a range of p-values, including some low ones).
+
+```{r make_tally_table}
+make_tally <- function(p_cutoff){
+  GWAS_results <- tbl(db, "univariate_lmm_results") %>%
+    select(SNP_clump, contains("raw"), -contains("SE")) %>% 
+    mutate(sum_p = pvalue_female_early_raw + pvalue_female_late_raw + pvalue_male_early_raw + pvalue_male_late_raw) %>% 
+    arrange(sum_p) %>% select(-sum_p) %>% 
+    rename(beta_FE = beta_female_early_raw, beta_FL = beta_female_late_raw,
+           beta_ME = beta_male_early_raw, beta_ML = beta_male_late_raw,
+           pval_FE = pvalue_female_early_raw, pval_FL = pvalue_female_late_raw,
+           pval_ME = pvalue_male_early_raw, pval_ML = pvalue_male_late_raw) %>% 
+    distinct() %>% # Analyse clumps of SNPs in <100% LD with one another
+    collect(n = Inf) %>% 
+    mutate(
+      type = 
+        factor(case_when(
+          
+          (sign(beta_FE) != sign(beta_ME) & pval_FE < p_cutoff & pval_ME < p_cutoff) & 
+            (sign(beta_FL) != sign(beta_ML) & pval_FL < p_cutoff & pval_ML < p_cutoff) ~ "Sex antagonistic, both ages",
+          
+          (sign(beta_FE) == sign(beta_ME) & pval_FE < p_cutoff & pval_ME < p_cutoff) & 
+            (sign(beta_FL) == sign(beta_ML) & pval_FL < p_cutoff & pval_ML < p_cutoff) ~ "Sex concordant, both ages",
+          
+          (sign(beta_FE) != sign(beta_FL) & pval_FE < p_cutoff & pval_FL < p_cutoff) & 
+            (sign(beta_ME) != sign(beta_ML) & pval_ME < p_cutoff & pval_ML < p_cutoff) ~ "Age antagonistic, both sexes",
+          
+          (sign(beta_FE) == sign(beta_FL) & pval_FE < p_cutoff & pval_FL < p_cutoff) &
+            (sign(beta_ME) == sign(beta_ML) & pval_ME < p_cutoff & pval_ML < p_cutoff) ~ "Age concordant, both sexes",
+          
+          sign(beta_FE) != sign(beta_ME) & pval_FE < p_cutoff & pval_ME < p_cutoff ~ "Sex antagonistic, early",
+          sign(beta_FL) != sign(beta_ML) & pval_FL < p_cutoff & pval_ML < p_cutoff ~ "Sex antagonistic, late",
+          
+          sign(beta_FE) == sign(beta_ME) & pval_FE < p_cutoff & pval_ME < p_cutoff ~ "Sex concordant, early",
+          sign(beta_FL) == sign(beta_ML) & pval_FL < p_cutoff & pval_ML < p_cutoff ~ "Sex concordant, late",
+          
+          sign(beta_FE) != sign(beta_FL) & pval_FE < p_cutoff & pval_FL < p_cutoff ~ "Age antagonistic, females",
+          sign(beta_ME) != sign(beta_ML) & pval_ME < p_cutoff & pval_ML < p_cutoff ~ "Age antagonistic, males",
+          
+          sign(beta_FE) == sign(beta_FL) & pval_FE < p_cutoff & pval_FL < p_cutoff ~ "Age concordant, females",
+          sign(beta_ME) == sign(beta_ML) & pval_ME < p_cutoff & pval_ML < p_cutoff ~ "Age concordant, males",
+          
+          pval_FE < p_cutoff ~ "Female early only",
+          pval_FL < p_cutoff ~ "Female late only",
+          pval_ME < p_cutoff ~ "Male early only",
+          pval_ML < p_cutoff ~ "Male late only",
+          TRUE ~ "Uncorrelated with fitness"
+        ), levels = c("Sex antagonistic, both ages", "Sex concordant, both ages", 
+                      "Age antagonistic, both sexes", "Age concordant, both sexes",
+                      "Sex antagonistic, early", "Sex concordant, early", "Sex antagonistic, late", "Sex concordant, late",
+                      "Age antagonistic, females", "Age antagonistic, males", "Age concordant, females", "Age concordant, males",
+                      "Female early only", "Male early only", "Female late only", "Male late only", "Uncorrelated with fitness")))
+  
+  tally <- table(GWAS_results$type) %>% sort(decreasing = T) %>% enframe()
+  names(tally)[2] <- paste("p <", p_cutoff)
+  tally
+}
+
+tally_table <- make_tally(0.01) %>% 
+  left_join(make_tally(0.001), by = "name") %>% 
+  left_join(make_tally(0.0001), by = "name") %>% 
+  left_join(make_tally(0.00001), by = "name") %>% 
+  left_join(make_tally(0.000001), by = "name") %>% 
+  left_join(make_tally(0.0000001), by = "name") %>% 
+  rename(`Relationship to fitness` = name)
+
+tally_table %>% kable_table()
 ```
 
 

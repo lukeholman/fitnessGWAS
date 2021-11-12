@@ -13,12 +13,21 @@
 
 <title>Plots and models of variant effect sizes</title>
 
-<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<script src="site_libs/jquery-3.5.0/jquery-3.5.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
 <script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
@@ -26,8 +35,6 @@
 <script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<link href="site_libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
-<script src="site_libs/anchor-sections-1.0/anchor-sections.js"></script>
 <script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
 <link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
@@ -51,11 +58,6 @@ div.section {
     </style>
 
 <style type="text/css">code{white-space: pre;}</style>
-<style type="text/css">
-  pre:not([class]) {
-    background-color: white;
-  }
-</style>
 <script type="text/javascript">
 if (window.hljs) {
   hljs.configure({languages: []});
@@ -68,32 +70,7 @@ if (window.hljs) {
 
 
 
-<style type="text/css">
-h1 {
-  font-size: 34px;
-}
-h1.title {
-  font-size: 38px;
-}
-h2 {
-  font-size: 30px;
-}
-h3 {
-  font-size: 24px;
-}
-h4 {
-  font-size: 18px;
-}
-h5 {
-  font-size: 16px;
-}
-h6 {
-  font-size: 12px;
-}
-.table th:not([align]) {
-  text-align: left;
-}
-</style>
+
 
 
 
@@ -103,10 +80,6 @@ h6 {
   max-width: 940px;
   margin-left: auto;
   margin-right: auto;
-}
-code {
-  color: inherit;
-  background-color: rgba(0, 0, 0, 0.04);
 }
 img {
   max-width:100%;
@@ -123,40 +96,13 @@ button.code-folding-btn:focus {
 summary {
   display: list-item;
 }
+pre code {
+  padding: 0;
+}
 </style>
 
 
 <style type="text/css">
-/* padding for bootstrap navbar */
-body {
-  padding-top: 51px;
-  padding-bottom: 40px;
-}
-/* offset scroll position for anchor links (for fixed navbar)  */
-.section h1 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h2 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h3 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h4 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h5 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h6 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
 .dropdown-submenu {
   position: relative;
 }
@@ -184,7 +130,7 @@ body {
   margin-right: -10px;
 }
 .dropdown-submenu:hover>a:after {
-  border-left-color: #ffffff;
+  border-left-color: #adb5bd;
 }
 .dropdown-submenu.pull-left {
   float: none;
@@ -196,7 +142,7 @@ body {
 }
 </style>
 
-<script>
+<script type="text/javascript">
 // manage active state of menu based on current page
 $(document).ready(function () {
   // active menu anchor
@@ -207,10 +153,23 @@ $(document).ready(function () {
   var menuAnchor = $('a[href="' + href + '"]');
 
   // mark it active
-  menuAnchor.parent().addClass('active');
+  menuAnchor.tab('show');
 
   // if it's got a parent navbar menu mark it active as well
   menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
 });
 </script>
 
@@ -222,7 +181,6 @@ $(document).ready(function () {
   max-height: 500px;
   min-height: 44px;
   overflow-y: auto;
-  background: white;
   border: 1px solid #ddd;
   border-radius: 4px;
 }
@@ -351,7 +309,7 @@ div.tocify {
 
 
 <!-- setup 3col/9col grid for toc_float and main content  -->
-<div class="row-fluid">
+<div class="row">
 <div class="col-xs-12 col-sm-4 col-md-3">
 <div id="TOC" class="tocify">
 </div>
@@ -393,11 +351,11 @@ div.tocify {
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-<div class="fluid-row" id="header">
+<div id="header">
 
-<div class="btn-group pull-right">
-<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
-<ul class="dropdown-menu" style="min-width: 50px;">
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
 <li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
 <li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
 </ul>
@@ -430,7 +388,7 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2021-10-01
+<strong>Last updated:</strong> 2021-11-12
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -521,16 +479,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree01226ab272891d92a8444e19cac034c1b079d263targetblank01226aba"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/lukeholman/fitnessGWAS/tree/01226ab272891d92a8444e19cac034c1b079d263" target="_blank">01226ab</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreede681496ef6dbd7c9cde9f258aba20fedaecf37ftargetblankde68149a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/lukeholman/fitnessGWAS/tree/de681496ef6dbd7c9cde9f258aba20fedaecf37f" target="_blank">de68149</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree01226ab272891d92a8444e19cac034c1b079d263targetblank01226aba" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreede681496ef6dbd7c9cde9f258aba20fedaecf37ftargetblankde68149a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/lukeholman/fitnessGWAS/tree/01226ab272891d92a8444e19cac034c1b079d263" target="_blank">01226ab</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/lukeholman/fitnessGWAS/tree/de681496ef6dbd7c9cde9f258aba20fedaecf37f" target="_blank">de68149</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -557,18 +515,19 @@ Ignored files:
     Ignored:    data/input/dgrp2.fam
     Ignored:    data/input/huang_transcriptome/
     Ignored:    figures/.DS_Store
-    Ignored:    figures/fig1_inkscape.svg
-    Ignored:    figures/figure1a.pdf
-    Ignored:    figures/figure1b.pdf
 
 Untracked files:
     Untracked:  big_model.rds
     Untracked:  code/quant_gen_1.R
     Untracked:  data/input/genomic_relatedness_matrix.rds
+    Untracked:  figures/fig2_SNPs_manhattan_plot.png
+    Untracked:  figures/manhattan_plot.png
     Untracked:  old_analyses/
 
 Unstaged changes:
     Modified:   .gitignore
+    Modified:   analysis/GWAS_tables.Rmd
+    Modified:   analysis/plot_line_means.Rmd
     Modified:   figures/GWAS_stats_figure.pdf
     Modified:   figures/SNP_effect_ED.pdf
     Modified:   figures/TWAS_stats_figure.pdf
@@ -576,6 +535,7 @@ Unstaged changes:
     Modified:   figures/boyle_plot.pdf
     Modified:   figures/composite_mixture_figure.pdf
     Modified:   figures/eff_size_histos.pdf
+    Modified:   figures/fig1.pdf
 
 </code></pre>
 <p>
@@ -614,6 +574,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/de681496ef6dbd7c9cde9f258aba20fedaecf37f/analysis/plot_models_variant_effects.Rmd" target="_blank">de68149</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2021-11-12
+</td>
+<td>
+wflow_publish(“analysis/plot_models_variant_effects.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/7449a9097af63aa27121cdc1dc12b529a29695ca/docs/plot_models_variant_effects.html" target="_blank">7449a90</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2021-10-01
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 html
@@ -1091,6 +1085,7 @@ lukeholman
 </div>
 </div>
 <p><strong>Figure 2</strong>: Effect sizes of 1207357 loci (i.e. groups of one or more polymorphic sites in complete linkage disequilibrium) on male and female fitness, plotted separately for the early-life and late-life estimates. The effect sizes estimated using GEMMA have been corrected using mashr, using the data-driven method to apply shrinkage (Figure SX shows the raw estimates). The data have been binned into hexagons, with the colour and contour lines indicating the number of loci. The diagonal line represents <span class="math inline">\(y=x\)</span>. Positive effect sizes indicate that the minor allele is associated with higher fitness.</p>
+<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="pearson-correlation" class="section level4">
 <h4>Pearson correlation</h4>
@@ -1646,7 +1641,7 @@ Residual standard error: 0.3479 on 208986 degrees of freedom</code></pre>
   geom_point() +
   stat_smooth(method = &quot;lm&quot;, formula = y ~ x + I(x^2), size = 0.6) +
   facet_wrap(~ age) +
-  scale_y_continuous(limits = c(-0.1, 0.27)) +
+  scale_y_continuous(limits = c(-0.1, 0.2)) +
   xlab(NULL) + ylab(NULL) + 
   theme_bw() +
   theme(strip.background = element_blank(),
@@ -1667,7 +1662,7 @@ p2 &lt;- SNP_clumps %&gt;%
   geom_point() +
   stat_smooth(method = &quot;lm&quot;, formula = y ~ x + I(x^2), size = 0.6) +
   facet_wrap(~ age) +
-  scale_y_continuous(limits = c(-0.1, 0.27)) +
+  scale_y_continuous(limits = c(-0.1, 0.2)) +
   xlab(NULL) + ylab(NULL) + 
   theme_bw() +
   theme(strip.background = element_blank(),
@@ -3622,6 +3617,7 @@ p1 &lt;- manhattan_data %&gt;%
   xlab(&quot;&quot;) +
   theme_bw() + 
   theme(axis.text.x = element_blank(),
+        # text = element_text(family = &quot;Raleway&quot;, size = 12),
         panel.border = element_blank(),
         axis.ticks.x = element_blank())
 
@@ -3634,6 +3630,7 @@ p2 &lt;- manhattan_data %&gt;%
   scale_y_reverse(limits = c(8,0)) +
   theme_bw() + 
   theme(axis.text.x = element_blank(),
+        # text = element_text(family = &quot;Raleway&quot;, size = 12),
         panel.border = element_blank(),
         axis.ticks.x = element_blank())
 
@@ -3655,10 +3652,7 @@ grid_arrange_shared_legend &lt;- function(..., ncol = length(list(...)), nrow = 
   
   grid.newpage()
   grid.draw(combined)
-
-  # return gtable invisibly
-  invisible(combined)
-
+  invisible(combined) # return gtable invisibly
 }
 
 grid_arrange_shared_legend(p1, p2)</code></pre>
@@ -4016,31 +4010,31 @@ loaded via a namespace (and not attached):
  [28] Matrix_1.2-18       cli_2.0.2           later_1.0.0        
  [31] acepack_1.4.1       htmltools_0.5.0     tools_4.0.3        
  [34] gtable_0.3.0        glue_1.4.2          Rcpp_1.0.4.6       
- [37] cellranger_1.1.0    vctrs_0.3.0         svglite_1.2.3      
- [40] nlme_3.1-149        xfun_0.22           rvest_0.3.5        
- [43] lifecycle_0.2.0     irlba_2.3.3         MASS_7.3-53        
- [46] scales_1.1.1        vroom_1.5.3         hms_0.5.3          
- [49] promises_1.1.0      parallel_4.0.3      sandwich_2.5-1     
- [52] RColorBrewer_1.1-2  curl_4.3            yaml_2.2.1         
- [55] memoise_1.1.0       gdtools_0.2.2       rpart_4.1-15       
- [58] RSQLite_2.2.0       latticeExtra_0.6-29 calibrate_1.7.7    
- [61] stringi_1.5.3       SQUAREM_2020.2      rmeta_3.0          
- [64] highr_0.8           checkmate_2.0.0     truncnorm_1.0-8    
- [67] rlang_0.4.6         pkgconfig_2.0.3     systemfonts_0.2.2  
- [70] evaluate_0.14       invgamma_1.1        labeling_0.3       
- [73] htmlwidgets_1.5.1   bit_1.1-15.2        tidyselect_1.1.0   
- [76] plyr_1.8.6          magrittr_2.0.1      R6_2.4.1           
- [79] generics_0.0.2      DBI_1.1.0           mgcv_1.8-33        
- [82] pillar_1.4.4        haven_2.3.1         whisker_0.4        
- [85] foreign_0.8-80      withr_2.2.0         abind_1.4-5        
- [88] mixsqp_0.3-43       nnet_7.3-14         modelr_0.1.8       
- [91] crayon_1.3.4        utf8_1.1.4          tzdb_0.1.2         
- [94] rmarkdown_2.5       jpeg_0.1-8.1        isoband_0.2.1      
- [97] readxl_1.3.1        data.table_1.12.8   blob_1.2.1         
-[100] git2r_0.27.1        webshot_0.5.2       reprex_0.3.0       
-[103] digest_0.6.25       httpuv_1.5.3.1      stats4_4.0.3       
-[106] munsell_0.5.0       viridisLite_0.3.0   beeswarm_0.4.0     
-[109] vipor_0.4.5        </code></pre>
+ [37] cellranger_1.1.0    jquerylib_0.1.1     vctrs_0.3.0        
+ [40] svglite_1.2.3       nlme_3.1-149        xfun_0.26          
+ [43] rvest_0.3.5         lifecycle_0.2.0     irlba_2.3.3        
+ [46] MASS_7.3-53         scales_1.1.1        vroom_1.5.3        
+ [49] hms_0.5.3           promises_1.1.0      parallel_4.0.3     
+ [52] sandwich_2.5-1      RColorBrewer_1.1-2  curl_4.3           
+ [55] yaml_2.2.1          memoise_1.1.0       gdtools_0.2.2      
+ [58] rpart_4.1-15        RSQLite_2.2.0       latticeExtra_0.6-29
+ [61] calibrate_1.7.7     stringi_1.5.3       SQUAREM_2020.2     
+ [64] rmeta_3.0           highr_0.8           checkmate_2.0.0    
+ [67] truncnorm_1.0-8     rlang_0.4.6         pkgconfig_2.0.3    
+ [70] systemfonts_0.2.2   evaluate_0.14       invgamma_1.1       
+ [73] labeling_0.3        htmlwidgets_1.5.1   bit_1.1-15.2       
+ [76] tidyselect_1.1.0    plyr_1.8.6          magrittr_2.0.1     
+ [79] R6_2.4.1            generics_0.0.2      DBI_1.1.0          
+ [82] mgcv_1.8-33         pillar_1.4.4        haven_2.3.1        
+ [85] whisker_0.4         foreign_0.8-80      withr_2.2.0        
+ [88] abind_1.4-5         mixsqp_0.3-43       nnet_7.3-14        
+ [91] modelr_0.1.8        crayon_1.3.4        utf8_1.1.4         
+ [94] tzdb_0.1.2          rmarkdown_2.11      jpeg_0.1-8.1       
+ [97] isoband_0.2.1       readxl_1.3.1        data.table_1.12.8  
+[100] blob_1.2.1          git2r_0.27.1        webshot_0.5.2      
+[103] reprex_0.3.0        digest_0.6.25       httpuv_1.5.3.1     
+[106] stats4_4.0.3        munsell_0.5.0       viridisLite_0.3.0  
+[109] beeswarm_0.4.0      vipor_0.4.5        </code></pre>
 </div>
 </div>
 
@@ -4085,7 +4079,7 @@ $(document).ready(function () {
 
 $(document).ready(function () {
   $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
+    $(this).parent().toggleClass('nav-tabs-open');
   });
 });
 </script>
@@ -4099,6 +4093,9 @@ $(document).ready(function () {
 
 <script>
 $(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
 
     // move toc-ignore selectors from section div to header
     $('div.section.toc-ignore')

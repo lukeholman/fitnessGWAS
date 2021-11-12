@@ -178,6 +178,8 @@ grid.arrange(p1, p2, ncol = 2, left = "Effect on male fitness")
 **Figure 2**: Effect sizes of `r nrow(SNP_clumps)` loci (i.e. groups of one or more polymorphic sites in complete linkage disequilibrium) on male and female fitness, plotted separately for the early-life and late-life estimates. The effect sizes estimated using GEMMA have been corrected using mashr, using the data-driven method to apply shrinkage (Figure SX shows the raw estimates). The data have been binned into hexagons, with the colour and contour lines indicating the number of loci. The diagonal line represents $y=x$. Positive effect sizes indicate that the minor allele is associated with higher fitness.
 
 ```{r echo=FALSE, fig.showtext=TRUE}
+fig2_top <- grid.arrange(p1, p2, ncol = 2, left = "Effect on male fitness")
+
 ggsave("figures/SNP_effect_ED.pdf",
        grid.arrange(p1, p2, ncol = 2, left = "Effect on male fitness"),
   height = 4, width = 8)
@@ -324,7 +326,7 @@ p1 <- SNP_clumps %>%
   geom_point() +
   stat_smooth(method = "lm", formula = y ~ x + I(x^2), size = 0.6) +
   facet_wrap(~ age) +
-  scale_y_continuous(limits = c(-0.1, 0.27)) +
+  scale_y_continuous(limits = c(-0.1, 0.2)) +
   xlab(NULL) + ylab(NULL) + 
   theme_bw() +
   theme(strip.background = element_blank(),
@@ -345,7 +347,7 @@ p2 <- SNP_clumps %>%
   geom_point() +
   stat_smooth(method = "lm", formula = y ~ x + I(x^2), size = 0.6) +
   facet_wrap(~ age) +
-  scale_y_continuous(limits = c(-0.1, 0.27)) +
+  scale_y_continuous(limits = c(-0.1, 0.2)) +
   xlab(NULL) + ylab(NULL) + 
   theme_bw() +
   theme(strip.background = element_blank(),
@@ -1089,6 +1091,7 @@ p1 <- manhattan_data %>%
   xlab("") +
   theme_bw() + 
   theme(axis.text.x = element_blank(),
+        # text = element_text(family = "Raleway", size = 12),
         panel.border = element_blank(),
         axis.ticks.x = element_blank())
 
@@ -1101,6 +1104,7 @@ p2 <- manhattan_data %>%
   scale_y_reverse(limits = c(8,0)) +
   theme_bw() + 
   theme(axis.text.x = element_blank(),
+        # text = element_text(family = "Raleway", size = 12),
         panel.border = element_blank(),
         axis.ticks.x = element_blank())
 
@@ -1122,15 +1126,20 @@ grid_arrange_shared_legend <- function(..., ncol = length(list(...)), nrow = 1) 
   
   grid.newpage()
   grid.draw(combined)
-
-  # return gtable invisibly
-  invisible(combined)
-
+  invisible(combined) # return gtable invisibly
 }
 
 grid_arrange_shared_legend(p1, p2)
 ```
 
+
+```{r echo=FALSE, results='hide', message=F, warning=F}
+# Make composite figure 2, with SNP effects and Manhattan plot
+
+png("figures/fig2_SNPs_manhattan_plot.png", height = 8, width = 8, units = "in", res = 300) 
+grid.arrange(fig2_top, grid_arrange_shared_legend(p1, p2))
+dev.off()
+```
 
 
 

@@ -1,0 +1,356 @@
+---
+title: "GO and KEGG enrichment tests on the GWAS and TWAS results"
+output: 
+  workflowr::wflow_html:
+    code_folding: hide 
+---
+
+## Setting up
+
+### Libraries etc
+```{r libraries, message=FALSE, warning=FALSE, results='hide'}
+library(dplyr)
+library(tibble)
+library(clusterProfiler) 
+library(fgsea)
+library(ggplot2)
+library(readr)
+library(glue)
+library(stringr)
+library(tidyr)
+library(kableExtra)
+library(purrr)
+library(DT)
+source("code/GO_and_KEGG_gsea.R")
+
+
+# Make html tables:
+my_data_table <- function(df){
+  datatable(
+    df, rownames=FALSE,
+    autoHideNavigation = TRUE,
+    extensions = c("Scroller",  "Buttons"),
+    options = list(
+      dom = 'Bfrtip',
+      deferRender=TRUE,
+      scrollX=TRUE, scrollY=400,
+      scrollCollapse=TRUE,
+      buttons = 
+        list('pageLength', 'colvis', 'csv', list(
+          extend = 'pdf',
+          pageSize = 'A4',
+          orientation = 'landscape',
+          filename = 'GWAS_enrichment')),
+       columnDefs = list( list(targets = c(9,10), visible = FALSE)),
+      pageLength = 50
+    )
+  )
+}
+
+options(stringsAsFactors = FALSE)
+
+# Connect to the database of annotations
+db <- DBI::dbConnect(RSQLite::SQLite(), "data/derived/annotations.sqlite3")
+```
+
+
+
+# GO and KEGG on the GWAS results
+
+## Run enrichment tests
+
+The following uses custom code stored in `code/GO_and_KEGG_gsea.R`, which in turn relies on the `fgsea` package. This test involves ranking genes by some statistic (e.g. the ) and then searching for GO and KEGG terms that are over-represented among genes at the top or bottom of the list. 
+
+Here, we first calculate the average for each of the mixture assignment probabilities (i.e. equal effects, sexual anatagonism, female-limited, and male limited) for all the loci mapping to each gene, to obtain gene-level measures. The reults are then used for GO and KEGG enrichment tests using `fgsea`. The output of `fgsea` includes the "normalised enrichment score" (NES), which describes how much the pathway is over-represented at the top of this list (for positive NES), or over-represented at the bottom (negative NES), and there is an associated $p$-value for each NES (calculated by resampling).
+
+In the tables below, one can click 'column visibility' then either 'leadingEdge' or 'genes' to see a list of genes that were annotated with the focal GO or KEGG term and also scored highly for the focal gene-level metric. 
+
+```{r run_GO_and_KEGG_tests_GWAS, warning=FALSE, message=FALSE}
+gene_means <- tbl(db, "univariate_lmm_results") %>%
+  select(SNP, starts_with("P_")) %>% select(-P_null) %>%
+  left_join(tbl(db, "variants") %>% select(SNP, FBID), by = "SNP") %>%
+  select(-SNP) %>%
+  filter(!is.na(FBID) & !is.na(P_equal_effects)) %>%
+  collect(n=Inf) %>%
+  group_by(FBID) %>%
+  summarise_all(mean) %>%
+  left_join(tbl(db, "genes") %>% 
+              select(FBID, gene_name) %>% 
+              collect(n=Inf), by = "FBID")
+
+concordant_enrichment <- GO_and_KEGG_gsea(gene_means, column = "P_equal_effects") %>% select(term, everything())
+female_specific_enrichment <- GO_and_KEGG_gsea(gene_means, column = "P_female_specific") %>% select(term, everything())
+male_specific_enrichment   <- GO_and_KEGG_gsea(gene_means, column = "P_male_specific") %>% select(term, everything())
+sex_antag_enrichment <- GO_and_KEGG_gsea(gene_means, column = "P_sex_antag") %>% select(term, everything())
+```
+
+
+## KEGG enrichment {.tabset}
+
+### Sexually concordant effect on fitness
+```{r}
+concordant_enrichment %>%
+  filter(Test_type == "KEGG") %>%
+  my_data_table()
+```
+
+### Female-specific effect on fitness
+```{r}
+female_specific_enrichment %>%
+  filter(Test_type == "KEGG") %>%
+  my_data_table()
+```
+
+### Male-specific effect on fitness
+```{r}
+male_specific_enrichment %>%
+  filter(Test_type == "KEGG") %>%
+  my_data_table()
+```
+
+### Sexually antagonistic effect on fitness
+```{r}
+sex_antag_enrichment %>%
+  filter(Test_type == "KEGG") %>%
+  my_data_table()
+```
+
+
+
+
+## GO: Biological process enrichment {.tabset}
+
+### Sexually concordant effect on fitness
+```{r}
+concordant_enrichment %>%
+  filter(Test_type == "GO: Biological process") %>%
+  my_data_table()
+```
+
+### Female-specific effect on fitness
+```{r}
+female_specific_enrichment %>%
+  filter(Test_type == "GO: Biological process") %>%
+  my_data_table()
+```
+
+### Male-specific effect on fitness
+```{r}
+male_specific_enrichment %>%
+  filter(Test_type == "GO: Biological process") %>%
+  my_data_table()
+```
+
+### Sexually antagonistic effect on fitness
+```{r}
+sex_antag_enrichment %>%
+  filter(Test_type == "GO: Biological process") %>%
+  my_data_table()
+```
+
+
+
+## GO: Molecular function enrichment {.tabset}
+
+### Sexually concordant effect on fitness
+```{r}
+concordant_enrichment %>%
+  filter(Test_type == "GO: Molecular function") %>%
+  my_data_table()
+```
+
+### Female-specific effect on fitness
+```{r}
+female_specific_enrichment %>%
+  filter(Test_type == "GO: Molecular function") %>%
+  my_data_table()
+```
+
+### Male-specific effect on fitness
+```{r}
+male_specific_enrichment %>%
+  filter(Test_type == "GO: Molecular function") %>%
+  my_data_table()
+```
+
+### Sexually antagonistic effect on fitness
+```{r}
+sex_antag_enrichment %>%
+  filter(Test_type == "GO: Molecular function") %>%
+  my_data_table()
+```
+
+
+
+
+## GO: Cellular component enrichment {.tabset}
+
+### Sexually concordant effect on fitness
+```{r}
+concordant_enrichment %>%
+  filter(Test_type == "GO: Cellular component") %>%
+  my_data_table()
+```
+
+### Female-specific effect on fitness
+```{r}
+female_specific_enrichment %>%
+  filter(Test_type == "GO: Cellular component") %>%
+  my_data_table()
+```
+
+### Male-specific effect on fitness
+```{r}
+male_specific_enrichment %>%
+  filter(Test_type == "GO: Cellular component") %>%
+  my_data_table()
+```
+
+### Sexually antagonistic effect on fitness
+```{r}
+sex_antag_enrichment %>%
+  filter(Test_type == "GO: Cellular component") %>%
+  my_data_table()
+```
+
+
+
+# GO and KEGG on the TWAS results
+
+```{r run_GO_and_KEGG_tests_TWAS, warning=FALSE, message=FALSE}
+TWAS_mixture_assignment <- readRDS("data/derived/TWAS/TWAS_mixture_assignment_probabilities.rds") 
+concordant_enrichment <- GO_and_KEGG_gsea(TWAS_mixture_assignment, column = "P_equal_effects") %>% select(term, everything())
+female_specific_enrichment <- GO_and_KEGG_gsea(TWAS_mixture_assignment, column = "P_female_specific") %>% select(term, everything())
+male_specific_enrichment   <- GO_and_KEGG_gsea(TWAS_mixture_assignment, column = "P_male_specific") %>% select(term, everything())
+sex_antag_enrichment <- GO_and_KEGG_gsea(TWAS_mixture_assignment, column = "P_sex_antag") %>% select(term, everything())
+```
+
+## KEGG enrichment {.tabset}
+
+### Sexually concordant effect on fitness
+```{r}
+concordant_enrichment %>%
+  filter(Test_type == "KEGG") %>%
+  my_data_table()
+```
+
+### Female-specific effect on fitness
+```{r}
+female_specific_enrichment %>%
+  filter(Test_type == "KEGG") %>%
+  my_data_table()
+```
+
+### Male-specific effect on fitness
+```{r}
+male_specific_enrichment %>%
+  filter(Test_type == "KEGG") %>%
+  my_data_table()
+```
+
+### Sexually antagonistic effect on fitness
+```{r}
+sex_antag_enrichment %>%
+  filter(Test_type == "KEGG") %>%
+  my_data_table()
+```
+
+
+
+
+## GO: Biological process enrichment {.tabset}
+
+### Sexually concordant effect on fitness
+```{r}
+concordant_enrichment %>%
+  filter(Test_type == "GO: Biological process") %>%
+  my_data_table()
+```
+
+### Female-specific effect on fitness
+```{r}
+female_specific_enrichment %>%
+  filter(Test_type == "GO: Biological process") %>%
+  my_data_table()
+```
+
+### Male-specific effect on fitness
+```{r}
+male_specific_enrichment %>%
+  filter(Test_type == "GO: Biological process") %>%
+  my_data_table()
+```
+
+### Sexually antagonistic effect on fitness
+```{r}
+sex_antag_enrichment %>%
+  filter(Test_type == "GO: Biological process") %>%
+  my_data_table()
+```
+
+
+
+## GO: Molecular function enrichment {.tabset}
+
+### Sexually concordant effect on fitness
+```{r}
+concordant_enrichment %>%
+  filter(Test_type == "GO: Molecular function") %>%
+  my_data_table()
+```
+
+### Female-specific effect on fitness
+```{r}
+female_specific_enrichment %>%
+  filter(Test_type == "GO: Molecular function") %>%
+  my_data_table()
+```
+
+### Male-specific effect on fitness
+```{r}
+male_specific_enrichment %>%
+  filter(Test_type == "GO: Molecular function") %>%
+  my_data_table()
+```
+
+### Sexually antagonistic effect on fitness
+```{r}
+sex_antag_enrichment %>%
+  filter(Test_type == "GO: Molecular function") %>%
+  my_data_table()
+```
+
+
+
+
+## GO: Cellular component enrichment {.tabset}
+
+### Sexually concordant effect on fitness
+```{r}
+concordant_enrichment %>%
+  filter(Test_type == "GO: Cellular component") %>%
+  my_data_table()
+```
+
+### Female-specific effect on fitness
+```{r}
+female_specific_enrichment %>%
+  filter(Test_type == "GO: Cellular component") %>%
+  my_data_table()
+```
+
+### Male-specific effect on fitness
+```{r}
+male_specific_enrichment %>%
+  filter(Test_type == "GO: Cellular component") %>%
+  my_data_table()
+```
+
+### Sexually antagonistic effect on fitness
+```{r}
+sex_antag_enrichment %>%
+  filter(Test_type == "GO: Cellular component") %>%
+  my_data_table()
+```
+
+

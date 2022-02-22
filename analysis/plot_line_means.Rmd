@@ -78,6 +78,8 @@ make_figure_1 <- function(){
   # invisible(dev.off())
 }
 make_figure_1()
+
+ggsave(filename = "figures/fig1.pdf", make_figure_1(), height = 7, width = 7)
 ```
 <br></br>
 **Figure 1**: Correlations among estimated line means for the four fitness components. The line means were estimated from Bayesian mixed models that account for block effects, and the non-independence of our early- and late-life fitness measurements.

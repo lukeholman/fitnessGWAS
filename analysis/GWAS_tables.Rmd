@@ -89,7 +89,7 @@ write_csv(GWAS_table, "data/derived/GWAS_significant_snps.csv")
 
 ## Table showing significant loci from the GWAS
 
-*Table SX*: This table shows loci (either individual SNPs and indels, or variant clumps in complete linkage disequilibrium) that passed the statistical significance threshold of $p < 10^{-5}$ for at least one of the four phenotypes, in a linear mixed model GWAS implemented in GEMMA. Column 3 gives the minor allele frequency, columns 4-5 identify genes that overlap the focal locus, and column 6 shows the site class. Columns 7-10 show the estimated effect size of the index variant on the four phenotypes (where positive values mean that the minor allele is associated with higher fitness, and negative values that the minor allele is associated with lower fitness), and the final columns show the corresponding $p$-values.
+*Table SX*: This table shows variants (either individual SNPs or indels, or clumps of variants in complete linkage disequilibrium) that passed the statistical significance threshold of $p < 10^{-5}$ for at least one of the four phenotypes, in a linear mixed model GWAS implemented in GEMMA. Column 3 gives the minor allele frequency, columns 4-5 identify genes that overlap the variant, and column 6 shows the site class. Columns 7-10 show the estimated effect size of the variant on the four phenotypes (where positive values mean that the minor allele is associated with higher fitness, and negative values that the minor allele is associated with lower fitness), and the final columns show the corresponding $p$-values.
 
 ```{r}
 GWAS_table %>% my_data_table()

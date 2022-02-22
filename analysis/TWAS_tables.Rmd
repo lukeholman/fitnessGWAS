@@ -102,14 +102,14 @@ tally_table <- make_tally(0.05) %>%
   left_join(make_tally(0.00001), by = "name") %>% 
   rename(`Relationship to fitness` = name)
 
-p_cutoff <- 1e-02
+p_cutoff <- 0.01
 sig_TWAS_results <- 
   left_join(read_csv("data/derived/TWAS/TWAS_result_females.csv") %>% 
               select(gene, beta_FE, beta_FL, pval_FE, pval_FL), 
             read_csv("data/derived/TWAS/TWAS_result_males.csv") %>% 
               select(gene, beta_ME, beta_ML, pval_ME, pval_ML), by = "gene") %>%
-  mutate(sum_p = pval_FE + pval_FL + pval_ME + pval_ML) %>% 
-  arrange(sum_p) %>% select(-sum_p) %>% 
+  mutate(sum_p = pval_FE + pval_FL + pval_ME + pval_ML) %>% arrange(sum_p) %>% 
+  select(-sum_p) %>% 
   filter(pval_FE < p_cutoff | pval_FL < p_cutoff | pval_ME < p_cutoff | pval_ML < p_cutoff) 
 
 

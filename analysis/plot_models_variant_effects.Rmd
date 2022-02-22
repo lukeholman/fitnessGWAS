@@ -21,6 +21,7 @@ library(mashr)
 library(kableExtra)
 library(cowplot)
 library(grid)
+library(RColorBrewer)
 font_add_google(name = "Raleway", family = "Raleway", regular.wt = 400, bold.wt = 700) # Install font from Google Fonts
 showtext_auto()
 
@@ -62,47 +63,16 @@ univariate_lmm_results <- univariate_lmm_results %>%
          site.class = capitalize(tolower(site.class)),
          site.class = gsub("Utr", "UTR", site.class)
   )
-
-# Results of one multivariate linear mixed model run in GEMMA:
-# multivariate_lmm_results <- 
-#   read_tsv("data/derived/output/all_four_traits.assoc.txt") %>%
-#   filter(p_fdr < 0.05) %>% 
-#   inner_join(tbl(db, "variants") %>% 
-#                select(-chr, -position) %>%
-#                collect(), by = "SNP") %>% 
-#   arrange(p_wald) %>% 
-#   select(-contains("Vbeta")) %>%
-#   left_join(
-#     tbl(db, "genes") %>% 
-#       select(FBID, gene_name) %>% 
-#       collect(n=Inf), by = "FBID") %>%
-#   mutate(gene_name = replace(gene_name, is.na(FBID), NA)) 
-# 
-# multivariate_lmm_results <- multivariate_lmm_results[,c(1:8, 14, 9:13)]
-# 
-# multivariate_lmm_results <- multivariate_lmm_results %>%
-#   mutate_at(vars(starts_with("p_")), ~ -log10(.x)) %>%
-#   mutate_if(is.numeric, ~ format(round(.x, 2), nsmall = 2)) %>%
-#   left_join(tbl(db, "univariate_lmm_results") %>% 
-#               select(SNP, SNP_clump) %>% 
-#               collect(),
-#             by = "SNP") %>%
-#   distinct(SNP_clump, .keep_all = TRUE) %>%
-#   select(SNP, SNP_clump, everything())
 ```
 
 
 ## Q-Q plots {.tabset}
 
-Here are some quantile-quantile plots, which are commonly used to check GWAS results, and to test the hypothesis that there are more SNPs than expected showing large effects on the trait of interest. There is an excess of loci with effects on female fitness, but not much of a visible excess for males.
+Here are some quantile-quantile plots, which are commonly used to check GWAS results, and to test the hypothesis that there are more SNPs than expected showing large effects on the trait of interest. There is an excess of loci with effects on female fitness, but not much of a visible excess for males. These plots use the raw $p$-values results from GEMMA.
 
 ### Female early-life fitness
 
 ```{r qqplot1}
-# univariate_lmm_pvals <- tbl(db, "univariate_lmm_results") %>%
-#   select(contains("LFSR")) %>% select(contains("ED")) %>% collect(n=Inf) %>% as.data.frame()
-# qqman::qq(univariate_lmm_results$LFSR_female_early_mashr_ED)
-
 univariate_lmm_pvals <- SNP_clumps %>%
   select(contains("pvalue")) %>% filter(LD_subset) %>% as.data.frame()
 qqman::qq(univariate_lmm_pvals$pvalue_female_early_raw)
@@ -111,27 +81,24 @@ qqman::qq(univariate_lmm_pvals$pvalue_female_early_raw)
 ### Female late-life fitness
 
 ```{r qqplot2}
-#qqman::qq(univariate_lmm_results$LFSR_female_late_mashr_ED)
 qqman::qq(univariate_lmm_pvals$pvalue_female_late_raw)
 ```
 
 ### Male early-life fitness
 
 ```{r qqplot3}
-# qqman::qq(univariate_lmm_results$LFSR_male_early_mashr_ED)
 qqman::qq(univariate_lmm_pvals$pvalue_male_early_raw)
 ```
 
 ### Male late-life fitness
 
 ```{r qqplot4}
-# qqman::qq(univariate_lmm_results$LFSR_male_late_mashr_ED)
 qqman::qq(univariate_lmm_pvals$pvalue_male_late_raw)
 ```
 
 ## Hex bin plots and correlations in variant effect sizes
 
-### Effect sizes adjusted using 'data-driven' adaptive shrinkage {.tabset}
+### Effect sizes adjusted using 'data-driven' adaptive shrinkage in `mashr` {.tabset}
 
 #### Plot
 
@@ -175,14 +142,14 @@ p2 <- hex_plot("beta_female_late_mashr_ED",
 grid.arrange(p1, p2, ncol = 2, left = "Effect on male fitness")
 ```
 
-**Figure 2**: Effect sizes of `r nrow(SNP_clumps)` loci (i.e. groups of one or more polymorphic sites in complete linkage disequilibrium) on male and female fitness, plotted separately for the early-life and late-life estimates. The effect sizes estimated using GEMMA have been corrected using mashr, using the data-driven method to apply shrinkage (Figure SX shows the raw estimates). The data have been binned into hexagons, with the colour and contour lines indicating the number of loci. The diagonal line represents $y=x$. Positive effect sizes indicate that the minor allele is associated with higher fitness.
+**Figure 2**: Effect sizes of `r nrow(SNP_clumps)` loci (i.e. groups of one or more polymorphic sites in complete linkage disequilibrium) on male and female fitness, plotted separately for the early-life and late-life estimates. The effect sizes estimated using GEMMA have been corrected using `mashr`, using the data-driven method to apply shrinkage (Figure SX shows the raw estimates). The data have been binned into hexagons, with the colour and contour lines indicating the number of loci. The diagonal line represents $y=x$. Positive effect sizes indicate that the minor allele is associated with higher fitness.
 
 ```{r echo=FALSE, fig.showtext=TRUE}
 fig2_top <- grid.arrange(p1, p2, ncol = 2, left = "Effect on male fitness")
 
-ggsave("figures/SNP_effect_ED.pdf",
-       grid.arrange(p1, p2, ncol = 2, left = "Effect on male fitness"),
-  height = 4, width = 8)
+# ggsave("figures/SNP_effect_ED.pdf",
+#        grid.arrange(p1, p2, ncol = 2, left = "Effect on male fitness"),
+#   height = 4, width = 8)
 ```
 
 
@@ -199,41 +166,41 @@ SNP_clumps %>%
 ```
 
 
-### Effect sizes adjusted using 'canonical' adaptive shrinkage {.tabset}
+<!-- ### Effect sizes adjusted using 'canonical' adaptive shrinkage {.tabset} -->
 
-#### Plot
+<!-- #### Plot -->
 
-The unusual distribution here reflects the fact that this analysis imposed constraints on the effects of each locus. For example, loci assigned to the 'Female-specific' category with high probability necessarily have an effect size close to zero in males. The figure should be interpreted cautiously - the main purpose of the canonical analysis is to inference the mixture proportions, and to assign mixture probabilities to each locus, not to accurately estimate the true effect size of each variant. 
+<!-- The unusual distribution here reflects the fact that this analysis imposed constraints on the effects of each locus. For example, loci assigned to the 'Female-specific' category with high probability necessarily have an effect size close to zero in males. The figure should be interpreted cautiously - the main purpose of the canonical analysis is to inference the mixture proportions, and to assign mixture probabilities to each locus, not to accurately estimate the true effect size of each variant.  -->
 
-```{r hex2, message=FALSE, warning=FALSE, fig.showtext=TRUE, fig.height = 5, fig.width = 9}
-p1 <- hex_plot("beta_female_early_mashr_canonical", 
-           "beta_male_early_mashr_canonical", 
-           "Effect on female fitness", 
-           NULL,
-           "A. Early life fitness")
+<!-- ```{r hex2, message=FALSE, warning=FALSE, fig.showtext=TRUE, fig.height = 5, fig.width = 9} -->
+<!-- p1 <- hex_plot("beta_female_early_mashr_canonical",  -->
+<!--            "beta_male_early_mashr_canonical",  -->
+<!--            "Effect on female fitness",  -->
+<!--            NULL, -->
+<!--            "A. Early life fitness") -->
 
-p2 <- hex_plot("beta_female_late_mashr_canonical", 
-           "beta_male_late_mashr_canonical", 
-           "Effect on female fitness", 
-           NULL,
-           "B. Late life fitness")
+<!-- p2 <- hex_plot("beta_female_late_mashr_canonical",  -->
+<!--            "beta_male_late_mashr_canonical",  -->
+<!--            "Effect on female fitness",  -->
+<!--            NULL, -->
+<!--            "B. Late life fitness") -->
 
-grid.arrange(p1, p2, ncol = 2, left = "Effect on male fitness")
-```
+<!-- grid.arrange(p1, p2, ncol = 2, left = "Effect on male fitness") -->
+<!-- ``` -->
 
 
 
-#### Pearson correlation
+<!-- #### Pearson correlation -->
 
-```{r}
-SNP_clumps %>%
-  select(contains("mashr_canonical")) %>%
-  select(contains("beta")) %>%
-  rename_all(~ paste(ifelse(str_detect(.x, "female"), "Female", "Male"), 
-                     ifelse(str_detect(.x, "early"), "early", "late"))) %>%
-  cor(use = "pairwise.complete.obs") %>% 
-  kable(digits = 3) %>% kable_styling(full_width = FALSE)
-```
+<!-- ```{r} -->
+<!-- SNP_clumps %>% -->
+<!--   select(contains("mashr_canonical")) %>% -->
+<!--   select(contains("beta")) %>% -->
+<!--   rename_all(~ paste(ifelse(str_detect(.x, "female"), "Female", "Male"),  -->
+<!--                      ifelse(str_detect(.x, "early"), "early", "late"))) %>% -->
+<!--   cor(use = "pairwise.complete.obs") %>%  -->
+<!--   kable(digits = 3) %>% kable_styling(full_width = FALSE) -->
+<!-- ``` -->
 
 ### Unadjusted effect sizes {.tabset}
 
@@ -305,751 +272,6 @@ summary(lm(beta_male_late_raw ~ 1,
            data = SNP_clumps %>% filter(LD_subset), 
            weights = 1 / SE_male_late_raw))
 ```
-
-
-## Test boyle idea
-
-Inspired by Boyle et al. (Cell), we sorted all of the variants by their fitness effects, placed them in bins of 1000, and then calculated the average fitness effect for each bin. Figure 4 shows that there was a very tight correlation between the average effects of the variants in each bin on male and female fitness. This is what would predict if variants that affect male fitness tend to also affect female fitness in the same direction, and if a very large number of loci have small (and concordant) effects on the fitness of both sexes. 
-
-```{r}
-p1 <- SNP_clumps %>%
-  filter(LD_subset) %>% # The figure looks the same whether or not the data are thinned to the LD set of SNPs
-  arrange(beta_female_early_raw) %>%
-  mutate(bin = c(rep(1:floor(n()/1000), each = 1000), 
-                 rep(floor(n()/1000) + 1, each = n() %% 1000)),
-         age = "A. Early life") %>%
-  group_by(bin, age) %>%
-  summarise(females = mean(beta_female_early_raw), males = mean(beta_male_early_raw)) %>%
-  ggplot(aes(females, males)) +
-  geom_hline(yintercept = 0, linetype = 2) +
-  geom_vline(xintercept = 0, linetype = 2) +
-  geom_point() +
-  stat_smooth(method = "lm", formula = y ~ x + I(x^2), size = 0.6) +
-  facet_wrap(~ age) +
-  scale_y_continuous(limits = c(-0.1, 0.2)) +
-  xlab(NULL) + ylab(NULL) + 
-  theme_bw() +
-  theme(strip.background = element_blank(),
-        strip.text = element_text(hjust=0))   + 
-  theme(text = element_text(family = "Raleway", size = 12))
-
-p2 <- SNP_clumps %>%
-  filter(LD_subset) %>% 
-  arrange(beta_female_late_raw) %>%
-  mutate(bin = c(rep(1:floor(n()/1000), each = 1000), 
-                 rep(floor(n()/1000) + 1, each = n() %% 1000)),
-         age = "B. Late life") %>%
-  group_by(bin, age) %>%
-  summarise(females = mean(beta_female_late_raw), males = mean(beta_male_late_raw)) %>%
-  ggplot(aes(females, males)) +
-  geom_hline(yintercept = 0, linetype = 2) +
-  geom_vline(xintercept = 0, linetype = 2) +
-  geom_point() +
-  stat_smooth(method = "lm", formula = y ~ x + I(x^2), size = 0.6) +
-  facet_wrap(~ age) +
-  scale_y_continuous(limits = c(-0.1, 0.2)) +
-  xlab(NULL) + ylab(NULL) + 
-  theme_bw() +
-  theme(strip.background = element_blank(),
-        strip.text = element_text(hjust=0))   + 
-  theme(text = element_text(family = "Raleway", size = 12))
-
-grid.arrange(p1, p2, nrow = 1, bottom = "Mean effect size on female fitness", 
-  left = "Mean effect size on male fitness")
-```
-
-```{r echo=FALSE}
-ggsave("figures/boyle_plot.pdf", 
-       grid.arrange(p1, p2, nrow = 1, 
-                    bottom = "Mean effect size on female fitness", 
-                    left = "Mean effect size on male fitness"),
-       height = 3, width = 6)
-```
-
-
-## Plot the estimated mixture proportions from `mashr`
-
-```{r mixture_props, fig.showtext = TRUE, fig.height = 8, fig.width = 5, message=FALSE, warning=FALSE}
-# Make plot for the GWAS
-mashr_results_canonical <- read_rds("data/derived/mashr_results_canonical.rds")
-mashr_2L <- readRDS("data/derived/mashr_results_canonical_chr2L.rds")
-mashr_2R <- readRDS("data/derived/mashr_results_canonical_chr2R.rds")
-mashr_3L <- readRDS("data/derived/mashr_results_canonical_chr3L.rds")
-mashr_3R <- readRDS("data/derived/mashr_results_canonical_chr3R.rds")
-mashr_X <- readRDS("data/derived/mashr_results_canonical_chrX.rds")
-
-mix <- bind_rows(
-  enframe(sort(get_estimated_pi(mashr_results_canonical))) %>%
-    mutate(Chromosome = "All"),
-  enframe(sort(get_estimated_pi(mashr_2L))) %>%
-    mutate(Chromosome = "2L"),
-  enframe(sort(get_estimated_pi(mashr_2R))) %>%
-    mutate(Chromosome = "2R"),
-  enframe(sort(get_estimated_pi(mashr_3L))) %>%
-    mutate(Chromosome = "3L"),
-  enframe(sort(get_estimated_pi(mashr_3R))) %>%
-    mutate(Chromosome = "3R"),
-  enframe(sort(get_estimated_pi(mashr_X))) %>%
-    mutate(Chromosome = "X")) %>% 
-  rename(Mixture_component = name) 
-
-to_keep <- mix %>%
-  group_by(Mixture_component) %>%
-  summarise(value = max(value), .groups = "drop") %>%
-  filter(value > 0.01) %>%
-  pull(Mixture_component)
-
-mix <- mix %>%
-  filter(Mixture_component %in% to_keep) %>%
-  spread(Mixture_component, value) %>%
-  rename(`Sexually concordant effect` = equal_effects,
-         `Female-specific effect` = Female_specific_1,
-         `Male-specific effect` = Male_specific_1,
-         `Sexually antagonistic effect` = Sex_antag_0.25,
-         `No effect on fitness` = null) %>%
-  gather(Mixture_component, value, -Chromosome) %>%
-  arrange(-value) 
-
-chr_levels <- mix %>% 
-  filter(Mixture_component == "Sexually antagonistic effect") %>%
-  arrange(value) %>% pull(Chromosome)
-
-mix <- mix %>%
-  mutate(Chromosome = factor(Chromosome, chr_levels),
-         Mixture_component = factor(Mixture_component, 
-                                    c("Sexually antagonistic effect",
-                                      "Sexually concordant effect",
-                                      "Female-specific effect",
-                                      "Male-specific effect",
-                                      "No effect on fitness"))) 
-
-
-p1 <- mix %>%
-  ggplot(aes(Chromosome, 100 * value)) + 
-  geom_bar(stat = "identity",aes(fill = Chromosome), colour = "grey10",  size = 0.3) + 
-  scale_fill_brewer(palette = "Spectral", direction = -1) + 
-  coord_flip() + 
-  theme_bw() + 
-  scale_y_continuous(expand = c(0,0), limits = c(0, 70)) + 
-  scale_x_discrete(expand = c(0.14, 0.14)) + 
-  theme(axis.ticks.y = element_blank(),
-        legend.position = "none",
-        panel.border = element_rect(size = 0.8),
-        text = element_text(family = "Raleway", size = 12),
-        strip.background = element_blank(),
-        panel.grid.major.y = element_blank()) +
-  ylab("Estimated % of loci") +
-  facet_wrap(~ Mixture_component, ncol = 1)
-
-
-# Make plot for the TWAS
-mashr_results_canonical <- readRDS("data/derived/TWAS/TWAS_canonical.rds")
-mashr_2L <- readRDS("data/derived/TWAS/TWAS_canonical_2L.rds")
-mashr_2R <- readRDS("data/derived/TWAS/TWAS_canonical_2R.rds")
-mashr_3L <- readRDS("data/derived/TWAS/TWAS_canonical_3L.rds")
-mashr_3R <- readRDS("data/derived/TWAS/TWAS_canonical_3R.rds")
-mashr_X <- readRDS("data/derived/TWAS/TWAS_canonical_X.rds")
-
-mix <- bind_rows(
-  enframe(sort(get_estimated_pi(mashr_results_canonical))) %>%
-    mutate(Chromosome = "All"),
-  enframe(sort(get_estimated_pi(mashr_2L))) %>%
-    mutate(Chromosome = "2L"),
-  enframe(sort(get_estimated_pi(mashr_2R))) %>%
-    mutate(Chromosome = "2R"),
-  enframe(sort(get_estimated_pi(mashr_3L))) %>%
-    mutate(Chromosome = "3L"),
-  enframe(sort(get_estimated_pi(mashr_3R))) %>%
-    mutate(Chromosome = "3R"),
-  enframe(sort(get_estimated_pi(mashr_X))) %>%
-    mutate(Chromosome = "X")) %>% 
-  rename(Mixture_component = name) %>%
-  mutate(Mixture_component = str_remove_all(Mixture_component, "_0.25"),
-         Mixture_component = str_remove_all(Mixture_component, "_0.5"),
-         Mixture_component = str_remove_all(Mixture_component, "_0.75"),
-         Mixture_component = str_remove_all(Mixture_component, "_1.0")) %>%
-  group_by(Mixture_component, Chromosome) %>%
-  summarise(value = sum(value), .groups = "drop")
-
-to_keep <- mix %>%
-  group_by(Mixture_component) %>%
-  summarise(value = max(value), .groups = "drop") %>%
-  filter(value > 0.01) %>%
-  pull(Mixture_component)
-
-mix <- mix %>%
-  filter(Mixture_component %in% to_keep) %>%
-  spread(Mixture_component, value) %>%
-  rename(`Sexually concordant effect` = equal_effects,
-         `Female-specific effect` = Female_specific_1,
-         `Male-specific effect` = Male_specific_1,
-         `Sexually antagonistic effect` = Sex_antag,
-         `No effect on fitness` = null) %>%
-  gather(Mixture_component, value, -Chromosome) %>%
-  arrange(-value) 
-
-chr_levels <- rev(c("X", "3L", "3R", "All", "2R", "2L"))
-
-mix <- mix %>%
-  mutate(Chromosome = factor(Chromosome, chr_levels),
-         Mixture_component = factor(Mixture_component, 
-                                    c("Sexually antagonistic effect",
-                                      "Sexually concordant effect",
-                                      "Female-specific effect",
-                                      "Male-specific effect",
-                                      "No effect on fitness"))) 
-
-p2 <- mix %>%
-  ggplot(aes(Chromosome, 100 * value)) + 
-  geom_bar(stat = "identity",aes(fill = Chromosome), colour = "grey10",  size = 0.3) + 
-  scale_fill_brewer(palette = "Spectral", direction = -1) + 
-  coord_flip() + 
-  theme_bw() + 
-  scale_y_continuous(expand = c(0,0), limits = c(0, 65)) + # 
-  scale_x_discrete(expand = c(0.14, 0.14)) + 
-  theme(axis.ticks.y = element_blank(),
-        legend.position = "none",
-        panel.border = element_rect(size = 0.8),
-        text = element_text(family = "Raleway", size = 12),
-        strip.background = element_blank(),
-        panel.grid.major.y = element_blank()) +
-  ylab("Estimated % of transcripts") +
-  xlab(" ") + 
-  facet_wrap(~ Mixture_component, ncol = 1)
-
-
-# Save composite figure of the GWAS and TWAS mixture proportions
-ggsave(filename = "figures/composite_mixture_figure.pdf", 
-       cowplot::plot_grid(p1, p2, labels = c('A', 'B'), label_size = 12),
-       width = 5, height = 8)
-
-cowplot::plot_grid(p1, p2, labels = c('A', 'B'), label_size = 12)
-```
-
-
-**Figure X**: Proportions of each type of locus, as estimated using the mixture model computed by `mashr` in the analysis using canonical covariance matrices. This analysis involved a number of pre-specified covariance matrices, each corresponding to a type of locus that we hypothesised to exist (shown in panel headings). The analysis fit some other matrix types not shown here, because the corresponding locus type was inferred to be rare/absent (these included neutral loci, estimated to comprise 0.5-1% of those tested, and age-antagonistic loci, none of which were detected). The analysis was run either using all 1,207,357 loci for which data were available (labeled 'All') or for all loci on each of the chromosomes (chromosomes 4 and Y had insufficient data). Notably, sexually-antagonistic loci were inferred to be especially common on the X chromosome, loci that affected males only were inferred to be rarer than those affecting females only, and chromosome 2R had many more female-specific than male-specific loci.
-
-
-
-<!-- ## Plot SNP effects by site class {.tabset} -->
-
-<!-- Here, we set a local false sign rate threshold of 0.001, to ensure that more of the SNPs plotted here have genuine positive or negative effect on the focal phenotype. We then plot the estimate of each SNP's effect on the focal phenotype separately for each site class, to test whether certain  -->
-
-<!-- ```{r} -->
-<!-- do_boxplots <- function(trait, lfsr){ -->
-
-<!--   names(univariate_lmm_results)[names(univariate_lmm_results) == trait] <- "focal_trait" -->
-<!--   names(univariate_lmm_results)[names(univariate_lmm_results) == lfsr] <- "lfsr" -->
-
-<!--   dat <- univariate_lmm_results %>% -->
-<!--     mutate(site.class = as.character(site.class)) %>% -->
-<!--     filter(lfsr < 0.01) %>% -->
-<!--     mutate(sign = ifelse(focal_trait < 0, "Negative", "Positive"))  -->
-
-<!--   # Combine these rare site classes: -->
-<!--   dat$site.class[dat$site.class %in%  -->
-<!--                    c("Codon change plus codon insertion",  -->
-<!--                      "Codon insertion", "Splice site region",  -->
-<!--                      "Start gained")] <- "Other site class" -->
-
-<!--   levels <- dat %>% -->
-<!--     group_by(site.class) %>% -->
-<!--     summarise(m = median(abs(focal_trait[focal_trait < 0])), .groups = "drop") %>% -->
-<!--     arrange(m) %>% pull(site.class) -->
-
-<!--   dat <- mutate(dat, site.class = factor(site.class, levels[!is.na(levels)])) %>% -->
-<!--         filter(!is.na(site.class))  -->
-
-<!--   grand_median_neg <- dat %>% -->
-<!--     filter(sign == "Negative") %>% -->
-<!--     summarise(m = median(focal_trait), .groups = "drop") %>% pull(m) -->
-
-<!--   grand_median_pos <- dat %>% -->
-<!--     filter(sign == "Positive") %>% -->
-<!--     summarise(m = median(focal_trait), .groups = "drop") %>% pull(m) -->
-
-<!--   group_medians <-  -->
-<!--     bind_rows( -->
-<!--       dat %>% -->
-<!--         filter(sign == "Negative") %>% -->
-<!--         group_by(site.class) %>% -->
-<!--         summarise(focal_trait = median(focal_trait), .groups = "drop") %>% -->
-<!--         mutate(sign = "negative"), -->
-<!--       dat %>% -->
-<!--         filter(sign == "Positive") %>% -->
-<!--         group_by(site.class) %>% -->
-<!--         summarise(focal_trait = median(focal_trait), .groups = "drop") %>% -->
-<!--         mutate(sign = "positive") -->
-<!--     ) -->
-
-<!--   dat  %>% -->
-<!--     ggplot(aes(x = site.class, y = focal_trait)) +  -->
-<!--     geom_hline(yintercept = grand_median_neg, linetype = 2, colour = "tomato", size = 1.4) +  -->
-<!--     geom_hline(yintercept = grand_median_pos, linetype = 2, colour = "tomato", size = 1.4) +  -->
-<!--     geom_boxplot(aes(fill = site.class, group = paste(sign, site.class)),  position = "identity") +  -->
-<!--     scale_x_discrete(expand = c(0.1, 0.1)) + -->
-<!--     coord_flip() + -->
-<!--     theme_bw() +  -->
-<!--     theme(legend.position = "none") + -->
-<!--     ylab("Estimated effect size of the minor allele") + -->
-<!--     xlab("Site class of the variant") -->
-<!-- } -->
-<!-- ``` -->
-
-
-<!-- ### Female early-life fitness -->
-<!-- ```{r fig.showtext=TRUE, fig.height = 6, fig.width = 5} -->
-<!-- do_boxplots("female_early", "LFSR_female_early") -->
-<!-- ``` -->
-
-<!-- ### Female late-life fitness -->
-<!-- ```{r fig.showtext=TRUE, fig.height = 6, fig.width = 5} -->
-<!-- do_boxplots("female_late", "LFSR_female_late") -->
-<!-- ``` -->
-
-<!-- ### Male early-life fitness -->
-<!-- ```{r fig.showtext=TRUE, fig.height = 6, fig.width = 5} -->
-<!-- do_boxplots("male_early", "LFSR_male_early") -->
-<!-- ``` -->
-
-<!-- ### Male late-life fitness -->
-<!-- ```{r fig.showtext=TRUE, fig.height = 6, fig.width = 5} -->
-<!-- do_boxplots("male_late", "LFSR_male_late") -->
-<!-- ``` -->
-
-## Statistical models: effects of site class, MAF and chromosome
-
-The following models test whether site class, MAF (minor allele frequency) and chromosome predict how each locus affected our four phenotypes. 
-
-These analyses use the mixture assignment probabilities calculated by `mashr` (in the "canonical" analysis). For every locus, the `mashr` analysis calculated the probability that each locus was A) sexually antagonistic (meaning it had opposite effects on male and female fitness that were consistent across the two age categories), B) female-specific (meaning it affect female fitness but not male), C) male-specific (affecting male fitness only), and D) had equal effects on all four phenotypes (mean the allele that associated with higher fitness in males also was associated with higher fitness in females). Other types of loci were also considered in the model (e.g. null effect loci and ones with age-specific effects), but these were found to be quite rare, precluding analysis here. 
-
-Here, we use these mixture assignment probabilities as the response variable, in order to ask whether e.g. sexually antagonistic loci tend to appear in any particular type of site or chromosome, and whether they had a higher or lower MAF than average. Since these probabilities are bounded between zero and one, we use beta regression (a form of GLM designed to model variables in the range [0,1]). We fit a full model with site class, MAF and chromosome as predictor variables, as well as all the simpler nested models, and compare them using AICc model selection. We also present the results of the full model, and plot the parameter estimates from each of the four models below. 
-
-The dataset used in this model is 
-
-### Tables of statistical results (models of GWAS effects)
-
-```{r warning=FALSE, message=FALSE}
-library(betareg)
-library(MuMIn)
-library("lmtest")
-
-LFSR_cutoff <- 0.05
-
-dat <- univariate_lmm_results %>%
-  filter(LFSR_female_early < LFSR_cutoff | LFSR_female_late < LFSR_cutoff | 
-           LFSR_male_early < LFSR_cutoff | LFSR_male_late < LFSR_cutoff) %>%
-  mutate(chr = gsub("_", "", substr(SNP, 1, 2))) %>%
-  select(SNP, SNP_clump, starts_with("P_"), MAF, site.class, chr) %>%
-  distinct() 
-
-# Focus only on the commonest site classes:
-dat <- dat %>% 
-  filter(site.class %in% c("Intron", "Intergenic", "Downstream", "Upstream",
-                           "Synonymous coding", "Non-synonymous coding", "UTR 3-prime",
-                           "Exon", "UTR 5-prime")) 
-
-# Remove chromosome 4 (too few sites)
-dat <- dat %>% filter(chr != "4") 
-
-# If there are multiple site classes for a SNP, or multiple SNPs 
-# in the same 100% LD clump, pick one SNP and/or 1 site class at random
-set.seed(1)
-dat <- dat[sample(nrow(dat),nrow(dat)), ] %>%
-  split(.$SNP_clump) %>%
-  map_df(~ .x[1, ])
-
-dat <- dat %>% arrange(site.class)
-dat$site.class <- relevel(factor(dat$site.class), ref = "Synonymous coding")
-
-n_loci <- prettyNum(nrow(dat), big.mark = ",", scientific = FALSE)
-
-compare_mods <- function(MAF_and_Chromosome_and_site_class){
-  
-  MAF_and_Chromosome <- update(MAF_and_Chromosome_and_site_class, ~ . -site.class)
-  MAF_and_siteclass <- update(MAF_and_Chromosome_and_site_class, ~ . -chr)
-  Chromosome_and_siteclass <- update(MAF_and_Chromosome_and_site_class, ~ . -chr)
-  
-  MAF <- update(MAF_and_Chromosome_and_site_class, ~ . -site.class - chr)
-  Chromosome <- update(MAF_and_Chromosome_and_site_class, ~ . -site.class - MAF)
-  siteclass <- update(MAF_and_Chromosome_and_site_class, ~ .  - MAF -chr)
-  Null_model <- update(MAF_and_Chromosome_and_site_class, ~ . -site.class - MAF -chr)
-  
-  AICc(MAF_and_Chromosome_and_site_class, 
-       MAF_and_Chromosome, 
-       MAF_and_siteclass,
-       Chromosome_and_siteclass,
-       MAF, Chromosome, siteclass, 
-       Null_model) %>% 
-    rownames_to_column("Model") %>%
-    arrange(AICc) %>%
-    mutate(delta = AICc - AICc[1],
-           Model = str_replace_all(Model, "_and+_", " + "),
-           Weight = round(exp(-0.5 * delta) / sum(exp(-0.5 * delta)), 3),
-           delta = round(delta, 2)) %>%
-    kable(digits = 2) %>% kable_styling(full_width = FALSE)
-}
-```
-
-
-In each of the following analyses, the response variable is the mixture assignment probability to type $i$ for each of the `r n_loci` loci that affected at least one of the phenotypes significantly (defined as LFSR < `r LFSR_cutoff`), where $i$ is one of the four variant types shown in the above figure. In cases where multiple SNP or indel loci were in 100% linkage with one another, we picked a single locus at random and discarded the others. 
-
-Three predictors were available for each locus: the minor allele frequency (MAF) in the overall DGRP, the site class of the variant, and chromosome. Loci that were annotated with more than one site class (e.g. intron as well as exon, due to an overlap of genes) were assigned one of these site classes at random.
-
-To evaluate the effects of three predictors on the response variable, we fit 8 nested models and compared them using AICc. We also present the `summary()` output for the top-ranked model according to AICc. 
-
-#### Probability of sexual antagonism {.tabset}
-
-##### AICc table
-```{r message=FALSE, warning=FALSE}
-betareg(P_sex_antag ~ MAF + chr + site.class, 
-        data = dat) %>% compare_mods()
-```
-
-##### Full model
-```{r message=FALSE, warning=FALSE}
-p1 <- summary(betareg(P_sex_antag ~ MAF + chr + site.class, data = dat), type = "deviance")
-p1
-```
-
-
-#### Probability of being female-specific {.tabset}
-
-##### AICc table
-```{r message=FALSE, warning=FALSE}
-betareg(P_female_specific ~ MAF + chr + site.class, 
-        data = dat) %>% compare_mods()
-```
-
-##### Full model
-```{r message=FALSE, warning=FALSE}
-p2 <- summary(betareg(P_female_specific ~ MAF + chr + site.class, data = dat), type = "deviance")
-p2 
-```
-
-
-#### Probability of being male-specific {.tabset}
-
-##### AICc table
-```{r message=FALSE, warning=FALSE}
-betareg(P_male_specific ~ MAF + chr + site.class, 
-        data = dat) %>% compare_mods()
-```
-
-##### Full model
-```{r message=FALSE, warning=FALSE}
-p3 <- summary(betareg(P_male_specific ~ MAF + chr + site.class, data = dat), type = "deviance")
-p3
-```
-
-
-#### Probability of equal effects {.tabset}
-
-##### AICc table
-```{r message=FALSE, warning=FALSE}
-betareg(P_equal_effects ~ MAF + chr + site.class, 
-        data = dat) %>% compare_mods()
-```
-
-##### Full model
-```{r message=FALSE, warning=FALSE}
-p4 <- summary(betareg(P_equal_effects ~ MAF + chr + site.class, data = dat), type = "deviance")
-p4
-```
-
-### Tables of statistical results (models of TWAS effects)
-
-```{r message=FALSE}
-twas <- readRDS("data/derived/TWAS/TWAS_mixture_assignment_probabilities.rds") %>%
-  left_join(tbl(db, "genes") %>% select(FBID, chromosome) %>% collect(), by = "FBID") %>%
-  left_join(read_csv("data/derived/gene_expression_by_sex.csv"), by = "FBID") %>%
-  filter(chromosome %in% c("2L", "2R", "3L", "3R", "X")) %>%
-  mutate(h2 = (female_narrow_heritability + male_narrow_heritability) / 2)
-
-
-compare_mods <- function(Sex_bias_and_Chromosome_and_Expression_level_and_Heritability){
-  
-  Chromosome_and_Expression_level_and_Heritability <- update(Sex_bias_and_Chromosome_and_Expression_level_and_Heritability, 
-                                                             ~ . -male_bias_in_expression)
-  Sex_bias_and_Chromosome_and_Expression_level <- update(Sex_bias_and_Chromosome_and_Expression_level_and_Heritability, 
-                                                             ~ . -h2)
-  Sex_bias_and_Expression_level_and_Heritability <- update(Sex_bias_and_Chromosome_and_Expression_level_and_Heritability, 
-                                                             ~ . -chromosome)
-  Sex_bias_and_Chromosome_and_Heritability <- update(Sex_bias_and_Chromosome_and_Expression_level_and_Heritability, 
-                                                             ~ . -AveExpr)
-  
-  Chromosome_and_Expression_level <- update(Sex_bias_and_Chromosome_and_Expression_level_and_Heritability, ~ . -male_bias_in_expression -h2)
-  Sex_bias_and_Expression_level <- update(Sex_bias_and_Chromosome_and_Expression_level_and_Heritability, ~ . -chromosome -h2)
-  Sex_bias_and_Chromosome <- update(Sex_bias_and_Chromosome_and_Expression_level_and_Heritability, ~ . -AveExpr -h2)
-  
-  Heritability_and_Expression_level <- update(Sex_bias_and_Chromosome_and_Expression_level_and_Heritability, 
-                                              ~ . -male_bias_in_expression -chromosome)
-  Heritability_and_Sex_bias <- update(Sex_bias_and_Chromosome_and_Expression_level_and_Heritability, 
-                                      ~ . -chromosome -AveExpr)
-  Heritability_and_Chromosome <- update(Sex_bias_and_Chromosome_and_Expression_level_and_Heritability, 
-                                        ~ . -male_bias_in_expression -AveExpr)
-  
-  Chromosome <- update(Chromosome_and_Expression_level, ~ . -AveExpr)
-  Sex_bias <- update(Sex_bias_and_Expression_level, ~ . -AveExpr)
-  Expression_level <- update(Sex_bias_and_Expression_level, ~ .  - male_bias_in_expression)
-  Heritability <- update(Heritability_and_Sex_bias, ~ .  - male_bias_in_expression)
-  Null_model <- update(Chromosome, ~ . -chromosome)
-  
-  AICc(
-    Sex_bias_and_Chromosome_and_Expression_level_and_Heritability,
-    Chromosome_and_Expression_level_and_Heritability,
-    Sex_bias_and_Chromosome_and_Expression_level,
-    Sex_bias_and_Expression_level_and_Heritability,
-    Sex_bias_and_Chromosome_and_Heritability,
-    Chromosome_and_Expression_level, 
-    Sex_bias_and_Expression_level,
-    Sex_bias_and_Chromosome,
-    Heritability_and_Expression_level,
-    Heritability_and_Sex_bias,
-    Heritability_and_Chromosome,
-    Chromosome, Sex_bias, Expression_level, Heritability,
-    Null_model) %>% 
-    rownames_to_column("Model") %>%
-    arrange(AICc) %>%
-    mutate(delta = AICc - AICc[1],
-           Model = str_replace_all(Model, "_and+_", " + "),
-           Weight = round(exp(-0.5 * delta) / sum(exp(-0.5 * delta)), 3),
-           delta = round(delta, 2))
-}
-```
-
-
-#### Probability of sexual antagonism {.tabset}
-
-##### AICc table
-```{r}
-betareg(P_sex_antag ~ male_bias_in_expression + chromosome + AveExpr + h2, 
-        data = twas) %>% compare_mods()
-```
-
-##### Full model
-```{r message=FALSE, warning=FALSE}
-q1 <- summary(betareg(P_sex_antag ~ male_bias_in_expression + AveExpr + chromosome + h2, data = twas), type = "deviance")
-q1
-```
-
-#### Probability of being female-specific {.tabset}
-
-##### AICc table
-```{r}
-betareg(P_female_specific ~ male_bias_in_expression + chromosome + AveExpr + h2, 
-        data = twas) %>% compare_mods()
-```
-
-##### Full model
-```{r message=FALSE, warning=FALSE}
-q2 <- summary(betareg(P_female_specific ~ male_bias_in_expression + AveExpr + chromosome + h2, data = twas), type = "deviance")
-q2
-```
-
-#### Probability of being female-specific {.tabset}
-
-##### AICc table
-```{r}
-betareg(P_male_specific ~ male_bias_in_expression + chromosome + AveExpr + h2,
-        data = twas) %>% compare_mods()
-```
-
-##### Full model
-```{r message=FALSE, warning=FALSE}
-q3 <- summary(betareg(P_male_specific ~ male_bias_in_expression + AveExpr + chromosome + h2, data = twas), type = "deviance")
-q3
-```
-
-#### Probability of equal effects {.tabset}
-
-##### AICc table
-```{r}
-betareg(P_equal_effects ~ male_bias_in_expression + chromosome + AveExpr + chromosome + h2, 
-        data = twas) %>% compare_mods()
-```
-
-##### Full model
-```{r message=FALSE, warning=FALSE}
-q4 <- summary(betareg(P_equal_effects ~ male_bias_in_expression + AveExpr + chromosome + h2, data = twas), type = "deviance")
-q4
-```
-
-#### Probability of null effect {.tabset}
-
-##### AICc table
-```{r}
-betareg(P_null ~ male_bias_in_expression + chromosome + AveExpr + chromosome + h2,
-        data = twas) %>% compare_mods()
-```
-
-##### Full model
-```{r message=FALSE, warning=FALSE}
-q5 <- summary(betareg(P_null ~ male_bias_in_expression + AveExpr + chromosome + h2, data = twas), type = "deviance")
-q5
-```
-
-### Plots showing the statistical results
-
-```{r make_stats_figs}
-gwas_stats_fig <- bind_rows(p1$coefficients$mean %>%
-            as.data.frame() %>%
-            rownames_to_column("Parameter") %>%
-            mutate(type = "P(sexually antagonistic)"),
-          p2$coefficients$mean %>%
-            as.data.frame() %>%
-            rownames_to_column("Parameter") %>%
-            mutate(type = "P(female-specific)"),
-          p3$coefficients$mean %>%
-            as.data.frame() %>%
-            rownames_to_column("Parameter") %>%
-            mutate(type = "P(male-specific)"),
-          p4$coefficients$mean %>%
-            as.data.frame() %>%
-            rownames_to_column("Parameter") %>%
-            mutate(type = "P(equal effects)")) %>%
-  mutate(Parameter = str_replace_all(Parameter, "site[.]class", "Site class: "),
-         Parameter = str_replace_all(Parameter, "chr", "Chromosome: "),
-         sig = ifelse(`Pr(>|z|)` < 0.05, "yes", "no")) %>%
-  filter(Parameter != "(Intercept)") %>%
-  arrange(Parameter) %>%
-  mutate(Parameter = factor(Parameter, rev(unique(Parameter)))) %>%
-  ggplot(aes(Parameter, Estimate, colour = sig)) +
-  geom_hline(yintercept = 0, linetype = 2) +
-  geom_errorbar(aes(ymin = Estimate - `Std. Error`*1.96, ymax = Estimate + `Std. Error`*1.96), width = 0) + 
-  geom_point() + 
-  coord_flip() +
-  facet_wrap(~type) +
-  theme_bw() +
-  theme(legend.position = "none",
-        strip.background = element_blank(), 
-        text = element_text(family = "Raleway", size = 12)) +
-  scale_color_manual(values = c("black", "tomato")) + 
-  ylab("Estimate \u00B1 95% CIs") 
-
-twas_stats_fig <- bind_rows(q1$coefficients$mean %>%
-            as.data.frame() %>%
-            rownames_to_column("Parameter") %>%
-            mutate(type = "P(sexually antagonistic)"),
-          q2$coefficients$mean %>%
-            as.data.frame() %>%
-            rownames_to_column("Parameter") %>%
-            mutate(type = "P(female-specific)"),
-          q3$coefficients$mean %>%
-            as.data.frame() %>%
-            rownames_to_column("Parameter") %>%
-            mutate(type = "P(male-specific)"),
-          q4$coefficients$mean %>%
-            as.data.frame() %>%
-            rownames_to_column("Parameter") %>%
-            mutate(type = "P(equal effects)"),
-          q5$coefficients$mean %>%
-            as.data.frame() %>%
-            rownames_to_column("Parameter") %>%
-            mutate(type = "P(null effect)")) %>%
-  mutate(Parameter = str_replace_all(Parameter, "AveExpr", "Average expression level"),
-         Parameter = str_replace_all(Parameter, "male_bias_in_expression", "Male bias in expression"),
-         Parameter = str_replace_all(Parameter, "chromosome", "Chromosome: "),
-         sig = ifelse(`Pr(>|z|)` < 0.05, "yes", "no"),
-         type = factor(type, c("P(null effect)", "P(equal effects)", "P(sexually antagonistic)",
-                               "P(female-specific)", "P(male-specific)"))) %>%
-  filter(Parameter != "(Intercept)") %>%
-  arrange(Parameter) %>%
-  mutate(Parameter = factor(Parameter, rev(unique(Parameter)))) %>%
-  ggplot(aes(Parameter, Estimate, colour = sig)) +
-  geom_hline(yintercept = 0, linetype = 2) +
-  geom_errorbar(aes(ymin = Estimate - `Std. Error`*1.96, ymax = Estimate + `Std. Error`*1.96), width = 0) + 
-  geom_point() + 
-  coord_flip() +
-  facet_wrap(~type) +
-  theme_bw() +
-  theme(legend.position = "none",
-        strip.background = element_blank(), 
-        text = element_text(family = "Raleway", size = 12)) +
-  scale_color_manual(values = c("black", "tomato")) + 
-  ylab("Estimate \u00B1 95% CIs") 
-
-
-ggsave("figures/GWAS_stats_figure.pdf", gwas_stats_fig, width = 6, height = 6)
-ggsave("figures/TWAS_stats_figure.pdf", twas_stats_fig, width = 7, height = 6)
-```
-
-#### Effect sizes for the GWAS analysis
-```{r fig.showtext=T, fig.height=6, fig.width=6}
-gwas_stats_fig
-```
-
-**Figure XX**: The figure shows estimated parameters from four separate beta regression models seeking predictors of the mixture assignment probabilities calculated using `mashr` on the GWAS results. Positive values indicate that the predictor is associated with an elevated probability across loci; estimates that are non-zero with 95% confidence are shown in red. The clearest result is the strong, positive relationship between minor allele frequency (MAF) and the probability that the locus was assigned to the 'sexually antagonistic' mixture component. There was also a strong, negative relationship between MAF and the chance that the locus was assigned to the 'equal effects' mixture component (i.e. that the locus had concordant effects on male and female fitness). Loci with a relatively high probability of being female-specific tended to have _lower_ MAF, while loci with a relatively high probability of being male-specific tended to have _higher_ MAF. Chromosome 2L seems to be enriched for loci with male-specific effects, and de-enriched for loci that affect females relative to the other chromosomes. Finally, there were some associations between site class and mixture assignment probability, which (though sometimes statistically significant) were small and subtle.
-
-#### Effect sizes for the TWAS analysis
-
-```{r fig.showtext=T, fig.height=6, fig.width=6}
-twas_stats_fig
-```
-
-**Figure XX**: The figure shows estimated parameters from five separate beta regression models seeking predictors of the mixture assignment probabilities calculated using `mashr` on the TWAS results. Positive values indicate that the predictor is associated with an elevated probability across transcripts; estimates that are non-zero with 95% confidence are shown in red. The clearest result is the strong, negative relationship between the heritability of the transcript's expression level (calculated by Huang et al. 2015) and the probability that the transcript was assigned to any mixture component other than 'sexually antagonistic'. Transcripts with strongly male-biased expression were more likely to have no relationship with fitness (i.e. to be assigned to the 'null' mixture component); sex bias was a significant but weak predictor for the other mixture components. Transcripts with high expression levels were more likely to have a sexually concordant relationship with fitness, and less likely to be sexually antagonistic. Transcripts from genes located on the X chromosome were slightly more likely to have a female-specific correlation with fitness, or no correlation. 
-
-
-
-## Effect of the minor allele
-
-```{r echo=FALSE}
-n_loci <- tbl(db, "univariate_lmm_results") %>% pull(P_sex_antag) %>% length()
-fraction_n <- floor(n_loci*0.001)
-n_loci <- prettyNum(n_loci, big.mark = ",", scientific = FALSE)
-fraction_n <- prettyNum(fraction_n, big.mark = ",", scientific = FALSE)
-```
-
-
-Evolutionary theory makes various testable predictions about the effects of the major and minor alleles on phenotypes, especially phenotypes that are closely correlated with fitness. For example, the minor allele should generally be associated with the lower-fitness phenotype (and the major allele with the higher-fitness phenotype), due to selection removing the lower-fitness allele. Furthermore, it is interesting to ask whether the female-beneficial allele or the male-beneficial allele tends to be the major allele at sexually-antagonistic loci? Lastly, we might expect different results at loci where the minor allele is quite rare vs loci where the minor allele is only slightly rarer than the major allele; loci with comparatively low MAF are more likely to reflect new polymorphisms (since most mutations are neutral or deleterious, and it takes time for the minor allele to drift towards high frequencies), and are more likely to be under selection (since selection against the minor allele keeps it rare).
-
-To address these questions graphically, we here plot the effects on male and female early-life fitness of each allele, that was assigned to the female-specific, male-specific, or sexually antagonistic mixture component by `mashr`, with an assignment probability in the highest 0.1% across all the loci analysed. Since there were `r n_loci` loci, each column plots the male and female effect sizes for `r fraction_n` loci.
-
-Among the top 0.1% of loci with female-specific effects on fitness (first column), the minor allele was usually associated with reduced female fitness among loci where the minor allele frequency was below 0.2, as expected if alleles that harm female fitness are removed by selection. Among loci with MAF > 0.2, the minor allele beneficial to female fitness almost as often as the major allele was.
-
-There was no similar finding for the top 0.1% of loci with loci with _male_-specific effects (second column): the minor allele was equally likely to increase or reduce fitness, regardless of MAF. Also, most of these top male-specific loci had quite high minor allele frequencies, perhaps suggesting their effects on fitness were weaker than for the loci with female-specific fitness effects. 
-
-For the top 0.1% of loci with sexually-antagonistic effects on fitness (third column), the minor allele frequencies again tended to be high (above 0.2), suggesting either weak overall purifying selection (due to counteracting effects of selection on males and females), or even balancing selection. The minor allele tended to be the one that reduced female fitness and elevated male fitness, though alleles with the reverse effect were present as well.
-
-Finally, among loci inferred to be under sexually concordant selection, the effect sizes were strongest among loci with MAF < 0.2, as expected if selection prevents alleles with strong, detrimental effects on the fitness of both sexes from becoming common.
-
-
-```{r fig.width = 8, fig.height = 5}
-histo_data <- tbl(db, "univariate_lmm_results") %>% 
-  left_join(tbl(db, "variants") %>% 
-               select(SNP, MAF, site.class), 
-             by = "SNP") %>%
-  filter(!is.na(LFSR_female_early_mashr_ED)) %>% 
-  collect(n = Inf) %>% 
-  mutate(class = 
-           case_when(
-             P_sex_antag > quantile(P_sex_antag, probs = 0.999)  ~ "Top 0.1%\nsexually antagonistic loci",
-             P_equal_effects > quantile(P_equal_effects, probs = 0.999)  ~ "Top 0.1%\nsexually concordant loci",
-             P_female_specific > quantile(P_female_specific, probs = 0.999)  ~ "Top 0.1%\nfemale-specific loci",
-             P_male_specific > quantile(P_male_specific, probs = 0.999)  ~ "Top 0.1%\nmale-specific loci",
-           )) %>%
-  mutate(MAF = ifelse(MAF < 0.2, "0.05 < MAF < 0.2", "0.2 < MAF < 0.5")) %>%
-  filter(!is.na(class)) %>%
-  select(beta_female_early_mashr_ED, beta_male_early_mashr_ED, class, MAF)
-
-eff_size_histos <- ggplot(histo_data, aes(beta_female_early_mashr_ED)) + 
-  geom_vline(xintercept = 0, linetype = 2) +
-  geom_histogram(bins=30, fill="tomato", colour=NA, alpha = 0.5) + 
-  geom_histogram(aes(beta_male_early_mashr_ED), bins=30, fill="steelblue", colour=NA, alpha = 0.5) + 
-  geom_histogram(bins=30, fill=NA, colour="black") + 
-  geom_histogram(aes(beta_male_early_mashr_ED), bins=30,fill=NA,colour="black") + 
-  facet_grid(MAF ~ class, scales = "free_y") +
-  xlab("Effect of the minor allele on early-life fitness\n(females:red, males:blue)") + 
-  theme_bw() +
-  theme(legend.position = "none",
-        strip.background = element_blank(), 
-        text = element_text(family = "Raleway", size = 12)) +
-  ylab("Number of loci")
-
-ggsave("figures/eff_size_histos.pdf", width = 8, height = 5)
-eff_size_histos
-```
-
 
 ## Manhattan plot
 
@@ -1133,109 +355,612 @@ grid_arrange_shared_legend(p1, p2)
 ```
 
 
-```{r echo=FALSE, results='hide', message=F, warning=F}
+```{r make_fig2, echo=FALSE, results='hide', message=F, warning=F, fig.showtext=TRUE}
 # Make composite figure 2, with SNP effects and Manhattan plot
 
-png("figures/fig2_SNPs_manhattan_plot.png", height = 8, width = 8, units = "in", res = 300) 
-grid.arrange(fig2_top, grid_arrange_shared_legend(p1, p2))
-dev.off()
+try(png("figures/fig2_SNPs_manhattan_plot.png", height = 8, width = 8, units = "in", res = 300))
+try(grid.arrange(fig2_top, grid_arrange_shared_legend(p1, p2)))
+try(dev.off())
 ```
 
 
 
-<!-- ```{r} -->
-<!-- manhattan_data <- tbl(db, "univariate_lmm_results") %>%  -->
-<!--   select(SNP, starts_with("P_"), -->
-<!--          beta_female_early_mashr_ED, beta_male_early_mashr_ED) %>% -->
-<!--   distinct() %>% -->
-<!--   collect(n=Inf) %>% -->
-<!--   mutate(position = str_split(SNP, "_"), -->
-<!--          chr = map_chr(position, ~ .x[1]), -->
-<!--          position = as.numeric(map_chr(position, ~ .x[2])), -->
-<!--          P_pleiotropy = 1 - P_null - P_female_specific - P_male_specific, -->
-<!--          SA_not_concord = P_sex_antag > P_equal_effects, -->
-<!--          top_SA = P_sex_antag >= quantile(P_sex_antag, probs=0.9999)) %>% -->
-<!--   mutate(beta_female_early_mashr_ED = abs(beta_female_early_mashr_ED), -->
-<!--          beta_male_early_mashr_ED = abs(beta_male_early_mashr_ED)) %>% -->
-<!--   # mutate(beta_male_early_mashr_ED = replace( -->
-<!--   #   beta_male_early_mashr_ED,  -->
-<!--   #   beta_female_early_mashr_ED < 0,  -->
-<!--   #   beta_male_early_mashr_ED[beta_female_early_mashr_ED < 0] * -1), -->
-<!--   #   beta_female_early_mashr_ED = replace( -->
-<!--   #   beta_female_early_mashr_ED,  -->
-<!--   #   beta_female_early_mashr_ED < 0,  -->
-<!--   #   beta_female_early_mashr_ED[beta_female_early_mashr_ED < 0] * -1), -->
-<!--   #   ) %>% -->
-<!--   filter(chr != "4")  -->
+## Investigating pleiotropy and polygenicity of fitness
 
-<!-- max_pos <- manhattan_data %>% -->
-<!--   group_by(chr) %>% -->
-<!--   summarise(max_pos = max(position), .groups = "drop") %>% -->
-<!--   as.data.frame() -->
-<!-- max_pos$max_pos <- c(0, cumsum(max_pos$max_pos[1:4])) -->
+Inspired by Boyle et al. 2017 (_Cell_, specifically the analysis in their Figure 1C), we sorted all the variants in order of effect size on female fitness, placed the variants in bins of 1000, and then calculated the average effect size for each bin for both male and female fitness. This analysis was performed on the raw SNP effect sizes from GEMMA, pruned to a set of SNPs in approximate LD with one another. 
 
-<!-- manhattan_data <- manhattan_data %>% -->
-<!--     left_join(max_pos, by = "chr") %>% -->
-<!--     mutate(position = position + max_pos)  -->
+If there is pleiotropy between male and female fitness, we would predict a correlation between the effect sizes for male and female fitness; on the contrary if there were no pleiotropy, we would see no correlation. 
 
-<!-- # cols <- c("blue", "skyblue", "red", "pink", "orange", "yellow", -->
-<!-- #           "purple", "steelblue", "green", "tomato") -->
-<!-- # manhattan_data %>% -->
-<!-- #   filter(P_pleiotropy > 0.7485376) %>% -->
-<!-- #   sample_n(100000) %>% -->
-<!-- #   ggplot(aes(position, -1 * log10(1 - P_pleiotropy), colour = chr, stroke = 0.2)) + -->
-<!-- #   geom_point(size = 0.5, pch = 1) + -->
-<!-- #  # scale_color_manual(values = cols) + -->
-<!-- #   # scale_fill_brewer(palette = "Paired", name = "Chromosome") +  -->
-<!-- #   scale_colour_brewer(palette = "Paired", name = "Chromosome") +  -->
-<!-- #   ylab("-log10(Posterior probability of null effect)") + -->
-<!-- #   theme_bw() + -->
-<!-- #   theme(axis.text.x = element_blank(), -->
-<!-- #         axis.ticks.x = element_blank()) -->
+Moreover, if fitness is highly polygenic ('omnigenic'; Boyle et al. 2017), we predict a tight, straight line relationship, because each bin would contain some variants with small but genuine associations with fitness, and these effects would replicate in the other fitness trait. On the contrary if genetic variance in fitness stems from just a few genes with larger effects, the relationship between male and female fitness would be flat in the center and sloped at the extremes.
+
+Figure 4 shows that there was a very tight correlation between the average effects of the variants in each bin on male and female fitness. The data therefore suggest that variants associated with male fitness tend to also affect female fitness (in the same direction), and that a very large number of loci have small, concordant effects on fitness in both sexes. 
+
+Interestingly there appears to be a curve in Figure 4A to the left of the x-axis, indicating that variants where the minor allele is strongly, negatively associated with female fitness are (on average) less negatively associated with male fitness than expected based on predictions from variants with weaker effects on female fitness. One possible explanation is that alleles that are highly highly detrimental to both sexes are usually purged by selection (or at least kept below the 5% MAF threshold that we used), whereas female-harming alleles that are neutral or beneficial in males are purged less often, resulting a greater proportion of female-limited or sexually antagonistic alleles towards the left of the x-axis.
+
+```{r}
+p1 <- SNP_clumps %>%
+  filter(LD_subset) %>% # The figure looks the same whether or not the data are thinned to the LD set of SNPs
+  arrange(beta_female_early_raw) %>%
+  mutate(bin = c(rep(1:floor(n()/1000), each = 1000), 
+                 rep(floor(n()/1000) + 1, each = n() %% 1000)),
+         age = "A. Early life") %>%
+  group_by(bin, age) %>%
+  summarise(females = mean(beta_female_early_raw), males = mean(beta_male_early_raw)) %>%
+  ggplot(aes(females, males)) +
+  geom_hline(yintercept = 0, linetype = 2) +
+  geom_vline(xintercept = 0, linetype = 2) +
+  geom_point() +
+  stat_smooth(method = "lm", formula = y ~ x + I(x^2), size = 0.6) +
+  facet_wrap(~ age) +
+  scale_y_continuous(limits = c(-0.1, 0.2)) +
+  xlab(NULL) + ylab(NULL) + 
+  theme_bw() +
+  theme(strip.background = element_blank(),
+        strip.text = element_text(hjust=0))   + 
+  theme(text = element_text(family = "Raleway", size = 12))
+
+p2 <- SNP_clumps %>%
+  filter(LD_subset) %>% 
+  arrange(beta_female_late_raw) %>%
+  mutate(bin = c(rep(1:floor(n()/1000), each = 1000), 
+                 rep(floor(n()/1000) + 1, each = n() %% 1000)),
+         age = "B. Late life") %>%
+  group_by(bin, age) %>%
+  summarise(females = mean(beta_female_late_raw), males = mean(beta_male_late_raw)) %>%
+  ggplot(aes(females, males)) +
+  geom_hline(yintercept = 0, linetype = 2) +
+  geom_vline(xintercept = 0, linetype = 2) +
+  geom_point() +
+  stat_smooth(method = "lm", formula = y ~ x + I(x^2), size = 0.6) +
+  facet_wrap(~ age) +
+  scale_y_continuous(limits = c(-0.1, 0.2)) +
+  xlab(NULL) + ylab(NULL) + 
+  theme_bw() +
+  theme(strip.background = element_blank(),
+        strip.text = element_text(hjust=0))   + 
+  theme(text = element_text(family = "Raleway", size = 12))
+
+grid.arrange(p1, p2, nrow = 1, bottom = "Mean effect size on female fitness", 
+  left = "Mean effect size on male fitness")
+```
+
+```{r save_boyle_plot, echo=FALSE, fig.showtext=TRUE}
+# ggsave("figures/boyle_plot.pdf", 
+#        grid.arrange(p1, p2, nrow = 1, 
+#                     bottom = "Mean effect size on female fitness", 
+#                     left = "Mean effect size on male fitness"),
+#        height = 3, width = 6)
+
+try(png("figures/boyle_plot.png", height = 3, width = 6, units = "in", res = 300))
+try(grid.arrange(p1, p2, nrow = 1, 
+                    bottom = "Mean effect size on female fitness", 
+                    left = "Mean effect size on male fitness"))
+try(dev.off())
 
 
-<!-- p1 <- manhattan_data %>% -->
-<!--   ggplot(aes(position, beta_female_early_mashr_ED, group = chr, colour = chr, stroke = 0.2)) +  -->
-<!--   geom_point(size = 0.5) + -->
-<!--   geom_point(data = manhattan_data %>% filter(top_SA), -->
-<!--              aes(y = 0.43), size = 3, pch = 6) + -->
-<!--   scale_colour_brewer(palette = "Paired", name = "Chromosome") +  -->
-<!--   ylab("Effect on female fitness") +  -->
-<!--   xlab("") + -->
-<!--   theme_bw() +  -->
-<!--   theme(axis.text.x = element_blank(), -->
-<!--         panel.border = element_blank(), -->
-<!--         axis.ticks.x = element_blank()) -->
+```
 
-<!-- p2 <- manhattan_data %>% -->
-<!--   ggplot(aes(position, beta_male_early_mashr_ED, group = chr, colour = chr, stroke = 0.2)) +  -->
-<!--   geom_point(size = 0.5) + -->
-<!--   scale_colour_brewer(palette = "Paired", name = "Chromosome") +  -->
-<!--   ylab("Effect on male fitness") +  -->
-<!--   xlab("Position") + -->
-<!--   scale_y_reverse() + -->
-<!--   theme_bw() +  -->
-<!--   theme(axis.text.x = element_blank(), -->
-<!--         panel.border = element_blank(), -->
-<!--         axis.ticks.x = element_blank()) -->
 
-<!-- grid.arrange(p1, p2) -->
+
+
+
+<!-- ## Effect of the minor allele -->
+
+<!-- ```{r echo=FALSE} -->
+<!-- n_loci <- tbl(db, "univariate_lmm_results") %>% pull(P_sex_antag) %>% length() -->
+<!-- fraction_n <- floor(n_loci*0.001) -->
+<!-- n_loci <- prettyNum(n_loci, big.mark = ",", scientific = FALSE) -->
+<!-- fraction_n <- prettyNum(fraction_n, big.mark = ",", scientific = FALSE) -->
 <!-- ``` -->
 
 
-## Antagonism ratios figure 
+<!-- Evolutionary theory makes testable predictions about the effects of the major and minor alleles on fitness-related phenotypes. For example, the minor allele should generally be associated with the lower-fitness phenotype due to selection. Furthermore, it is interesting to ask whether the female-beneficial allele or the male-beneficial allele tends to be the major allele at sexually-antagonistic loci, as this reveals something about which sex is under stronger selection in the wild (provided that our lab-based fitness assays are somewhat correlated with natural selection). Finally, we might expect there to be a difference in effect sizes between loci where the minor allele is quite rare, compared to loci where the minor allele is quite common, for a few reasons. Selection should keep MAF low at loci with a strong (sex-averaged) fitness effect rare.  -->
 
-```{r evidence_ratio_plot, fig.showtext=TRUE, message=FALSE}
-make_evidence_ratio_plot <- function(dat, ymax, ylab){
-  # Argument needs to be dataframe of loci or transcripts, which are identified by col called "identifier"
-  # The FE, FL,ME, ML effect sizes need to be called pheno1-pheno4
-  # The corresponding LFSR columns need to be called LFSR1-LFSR4
-  
-  antagonism_evidence_ratios <- dat %>%
+<!-- To address these questions graphically, we here plot the effects on male and female early-life fitness of the minor allele, either for A) all loci in the LD-pruned set, B) the top 1% most sexually-antagonistic loci in this set, and C) the top 1% most sexually concordant loci in the set. For the latter two cases, we used the evidence ratios calculated above to rank loci from most to least sexually antagonistic (or concordant). The data are further subdivided into loci with lower MAF (between 0.05 and 0.1) and higher MAF (above 0.1). The plot shows the `mashr`-adjusted effect sizes, and considers the effect on early-life fitness in males and females (the corresponding plot for late-life fitness is very similar). -->
+
+<!-- Considering all loci, most alleles have an estimated effect size close to zero, and there is higher variance for male fitness -->
+
+
+
+
+
+
+<!-- ```{r} -->
+<!-- histo_data <- left_join( -->
+<!--   antagonism_evidence_ratios_gwas, -->
+<!--   collect(tbl(db, "variants") %>% select(SNP, MAF)), by = "SNP") %>%  # Add the MAF for each SNP -->
+<!--   select(-SNP) %>% distinct() %>% # Include SNPs in 100% LD a single time, such that SNP clumps are the unit of replication  -->
+<!--   mutate(class =  -->
+<!--            case_when( -->
+<!--              inter_sex_early < quantile(inter_sex_early, probs = 0.01)  ~ "Top 1% sexually antagonistic loci", -->
+<!--              inter_sex_early > quantile(inter_sex_early, probs = 0.99)  ~ "Top 1% sexually concordant loci", -->
+<!--            )) %>% -->
+<!--   mutate(MAF = ifelse(MAF < 0.1, "0.05 < MAF < 0.1", "0.1 < MAF < 0.5")) %>% -->
+<!--   filter(!is.na(class)) %>% -->
+<!--   left_join(SNP_clumps %>% select(SNP_clump, beta_female_early_mashr_ED, beta_male_early_mashr_ED), by = "SNP_clump") %>%  -->
+<!--   select(beta_female_early_mashr_ED, beta_male_early_mashr_ED, class, MAF) -->
+
+<!-- all_loci <- left_join( -->
+<!--   antagonism_evidence_ratios_gwas, -->
+<!--   collect(tbl(db, "variants") %>% select(SNP, MAF)), by = "SNP") %>%  # Add the MAF for each SNP -->
+<!--   select(-SNP) %>% distinct() %>% # Include SNPs in 100% LD a single time, such that SNP clumps are the unit of replication  -->
+<!--   mutate(MAF = ifelse(MAF < 0.1, "0.05 < MAF < 0.1", "0.1 < MAF < 0.5"),  -->
+<!--          class = "All loci") %>% -->
+<!--   left_join(SNP_clumps %>% select(SNP_clump, beta_female_early_mashr_ED, beta_male_early_mashr_ED), by = "SNP_clump") %>%  -->
+<!--   select(beta_female_early_mashr_ED, beta_male_early_mashr_ED, class, MAF) -->
+
+<!-- bind_rows(histo_data, all_loci) %>%  -->
+<!--   filter(!is.na(MAF)) %>%  -->
+<!--   arrange(MAF, class) %>%  -->
+<!--   mutate(facet = paste(class, MAF, sep = "\n"), -->
+<!--          facet = factor(facet, unique(facet))) %>%  -->
+<!-- ggplot(aes(beta_female_early_mashr_ED)) +  -->
+<!--   geom_vline(xintercept = 0, linetype = 2) + -->
+<!--   geom_histogram(bins=30, fill="tomato", colour=NA, alpha = 0.5) +  -->
+<!--   geom_histogram(aes(beta_male_early_mashr_ED), bins=30, fill="steelblue", colour=NA, alpha = 0.5) +  -->
+<!--   geom_histogram(bins=30, fill=NA, colour="black") +  -->
+<!--   geom_histogram(aes(beta_male_early_mashr_ED), bins=30,fill=NA,colour="black") +  -->
+<!--   facet_wrap(~ facet, scales = "free_y") + -->
+<!--   xlab("Effect of the minor allele on early-life fitness\n(females:red, males:blue)") +  -->
+<!--   theme_bw() + -->
+<!--   theme(legend.position = "none", -->
+<!--         strip.background = element_blank(),  -->
+<!--         strip.text = element_text(hjust = 0), -->
+<!--         text = element_text(family = "Raleway", size = 12)) + -->
+<!--   ylab("Number of loci") -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- histo_data <- left_join( -->
+<!--   antagonism_evidence_ratios_gwas, -->
+<!--   collect(tbl(db, "variants") %>% select(SNP, MAF)), by = "SNP") %>%  # Add the MAF for each SNP -->
+<!--   select(-SNP) %>% distinct() %>% # Include SNPs in 100% LD a single time, such that SNP clumps are the unit of replication  -->
+<!--   mutate(class =  -->
+<!--            case_when( -->
+<!--              inter_sex_late < quantile(inter_sex_late, probs = 0.01)  ~ "Top 1% sexually antagonistic loci", -->
+<!--              inter_sex_late > quantile(inter_sex_late, probs = 0.99)  ~ "Top 1% sexually concordant loci", -->
+<!--            )) %>% -->
+<!--   mutate(MAF = ifelse(MAF < 0.1, "0.05 < MAF < 0.1", "0.1 < MAF < 0.5")) %>% -->
+<!--   filter(!is.na(class)) %>% -->
+<!--   left_join(SNP_clumps %>% select(SNP_clump, beta_female_late_mashr_ED, beta_male_late_mashr_ED), by = "SNP_clump") %>%  -->
+<!--   select(beta_female_late_mashr_ED, beta_male_late_mashr_ED, class, MAF) -->
+
+<!-- all_loci <- left_join( -->
+<!--   antagonism_evidence_ratios_gwas, -->
+<!--   collect(tbl(db, "variants") %>% select(SNP, MAF)), by = "SNP") %>%  # Add the MAF for each SNP -->
+<!--   select(-SNP) %>% distinct() %>% # Include SNPs in 100% LD a single time, such that SNP clumps are the unit of replication  -->
+<!--   mutate(MAF = ifelse(MAF < 0.1, "0.05 < MAF < 0.1", "0.1 < MAF < 0.5"),  -->
+<!--          class = "All loci") %>% -->
+<!--   left_join(SNP_clumps %>% select(SNP_clump, beta_female_late_mashr_ED, beta_male_late_mashr_ED), by = "SNP_clump") %>%  -->
+<!--   select(beta_female_late_mashr_ED, beta_male_late_mashr_ED, class, MAF) -->
+
+<!-- bind_rows(histo_data, all_loci) %>%  -->
+<!--   filter(!is.na(MAF)) %>%  -->
+<!--   arrange(MAF, class) %>%  -->
+<!--   mutate(facet = paste(class, MAF, sep = "\n"), -->
+<!--          facet = factor(facet, unique(facet))) %>%  -->
+<!--   ggplot(aes(beta_female_late_mashr_ED)) +  -->
+<!--   geom_vline(xintercept = 0, linetype = 2) + -->
+<!--   geom_histogram(bins=30, fill="tomato", colour=NA, alpha = 0.5) +  -->
+<!--   geom_histogram(aes(beta_male_late_mashr_ED), bins=30, fill="steelblue", colour=NA, alpha = 0.5) +  -->
+<!--   geom_histogram(bins=30, fill=NA, colour="black") +  -->
+<!--   geom_histogram(aes(beta_male_late_mashr_ED), bins=30,fill=NA,colour="black") +  -->
+<!--   facet_wrap(~ facet, scales = "free_y") + -->
+<!--   xlab("Effect of the minor allele on late-life fitness\n(females:red, males:blue)") +  -->
+<!--   theme_bw() + -->
+<!--   theme(legend.position = "none", -->
+<!--         strip.background = element_blank(),  -->
+<!--         strip.text = element_text(hjust = 0), -->
+<!--         text = element_text(family = "Raleway", size = 12)) + -->
+<!--   ylab("Number of loci") -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- histo_data_early <- left_join( -->
+<!--   antagonism_evidence_ratios_gwas, -->
+<!--   collect(tbl(db, "variants") %>% select(SNP, MAF)), by = "SNP") %>%  # Add the MAF for each SNP -->
+<!--   select(-SNP) %>% distinct() %>% # Include SNPs in 100% LD a single time, such that SNP clumps are the unit of replication  -->
+<!--   mutate(class =  -->
+<!--            case_when( -->
+<!--              inter_sex_early < quantile(inter_sex_early, probs = 0.01)  ~ "Top 1% sexually antagonistic loci", -->
+<!--              inter_sex_early > quantile(inter_sex_early, probs = 0.99)  ~ "Top 1% sexually concordant loci", -->
+<!--            )) %>% -->
+<!--   mutate(MAF = ifelse(MAF < 0.1, "0.05 < MAF < 0.1", "0.1 < MAF < 0.5")) %>% -->
+<!--   filter(!is.na(class)) %>% -->
+<!--   left_join(SNP_clumps %>% select(SNP_clump, beta_female_early_mashr_ED, beta_male_early_mashr_ED), by = "SNP_clump") %>%  -->
+<!--   select(beta_female = beta_female_early_mashr_ED, beta_male = beta_male_early_mashr_ED, class, MAF) -->
+
+<!-- all_loci_early <- left_join( -->
+<!--   antagonism_evidence_ratios_gwas, -->
+<!--   collect(tbl(db, "variants") %>% select(SNP, MAF)), by = "SNP") %>%  # Add the MAF for each SNP -->
+<!--   select(-SNP) %>% distinct() %>% # Include SNPs in 100% LD a single time, such that SNP clumps are the unit of replication  -->
+<!--   mutate(MAF = ifelse(MAF < 0.1, "0.05 < MAF < 0.1", "0.1 < MAF < 0.5"),  -->
+<!--          class = "All loci") %>% -->
+<!--   left_join(SNP_clumps %>% select(SNP_clump, beta_female_early_mashr_ED, beta_male_early_mashr_ED), by = "SNP_clump") %>%  -->
+<!--   select(beta_female = beta_female_early_mashr_ED, beta_male = beta_male_early_mashr_ED, class, MAF) -->
+
+<!-- histo_data_late <- left_join( -->
+<!--   antagonism_evidence_ratios_gwas, -->
+<!--   collect(tbl(db, "variants") %>% select(SNP, MAF)), by = "SNP") %>%  # Add the MAF for each SNP -->
+<!--   select(-SNP) %>% distinct() %>% # Include SNPs in 100% LD a single time, such that SNP clumps are the unit of replication  -->
+<!--   mutate(class =  -->
+<!--            case_when( -->
+<!--              inter_sex_late < quantile(inter_sex_late, probs = 0.01)  ~ "Top 1% sexually antagonistic loci", -->
+<!--              inter_sex_late > quantile(inter_sex_late, probs = 0.99)  ~ "Top 1% sexually concordant loci", -->
+<!--            )) %>% -->
+<!--   mutate(MAF = ifelse(MAF < 0.1, "0.05 < MAF < 0.1", "0.1 < MAF < 0.5")) %>% -->
+<!--   filter(!is.na(class)) %>% -->
+<!--   left_join(SNP_clumps %>% select(SNP_clump, beta_female_late_mashr_ED, beta_male_late_mashr_ED), by = "SNP_clump") %>%  -->
+<!--   select(beta_female = beta_female_late_mashr_ED, beta_male = beta_male_late_mashr_ED, class, MAF) -->
+
+<!-- all_loci_late <- left_join( -->
+<!--   antagonism_evidence_ratios_gwas, -->
+<!--   collect(tbl(db, "variants") %>% select(SNP, MAF)), by = "SNP") %>%  # Add the MAF for each SNP -->
+<!--   select(-SNP) %>% distinct() %>% # Include SNPs in 100% LD a single time, such that SNP clumps are the unit of replication  -->
+<!--   mutate(MAF = ifelse(MAF < 0.1, "0.05 < MAF < 0.1", "0.1 < MAF < 0.5"),  -->
+<!--          class = "All loci") %>% -->
+<!--   left_join(SNP_clumps %>% select(SNP_clump, beta_female_late_mashr_ED, beta_male_late_mashr_ED), by = "SNP_clump") %>%  -->
+<!--   select(beta_female = beta_female_late_mashr_ED, beta_male = beta_male_late_mashr_ED, class, MAF) -->
+
+<!-- bind_rows( -->
+<!--   bind_rows(histo_data_early, all_loci_early) %>%  -->
+<!--     mutate(stage = "early") %>%  -->
+<!--     mutate(facet = paste(class, "early", sep = "\n")), -->
+
+<!--   bind_rows(histo_data_late, all_loci_late) %>%  -->
+<!--     mutate(stage = "late") %>%  -->
+<!--     mutate(facet = paste(class, "late", sep = "\n")))%>%  -->
+<!--   arrange(stage, class) %>%  -->
+<!--   mutate(facet = factor(facet, unique(facet))) %>%  -->
+<!--   # filter(MAF == "0.05 < MAF < 0.1") %>%  -->
+<!--   ggplot(aes(beta_female)) +  -->
+<!--   geom_vline(xintercept = 0, linetype = 2) + -->
+<!--   geom_histogram(bins=30, fill="tomato", colour=NA, alpha = 0.5) +  -->
+<!--   geom_histogram(aes(beta_male), bins=30, fill="steelblue", colour=NA, alpha = 0.5) +  -->
+<!--   geom_histogram(bins=30, fill=NA, colour="black") +  -->
+<!--   geom_histogram(aes(beta_male), bins=30,fill=NA,colour="black") +  -->
+<!--   facet_wrap(~ facet, scales = "free_y") + -->
+<!--   xlab("Effect of the minor allele on fitness\n(females:red, males:blue)") +  -->
+<!--   theme_bw() + -->
+<!--   theme(legend.position = "none", -->
+<!--         strip.background = element_blank(),  -->
+<!--         strip.text = element_text(hjust = 0), -->
+<!--         text = element_text(family = "Raleway", size = 12)) + -->
+<!--   ylab("Number of loci") -->
+
+
+<!-- ``` -->
+
+
+
+
+## Frequencies of antagonistic loci and transcripts
+
+The following figures show the proportions of loci/transcripts whose effect on female fitness (or early-life fitness) is similar or different to their effect on male fitness (or late-life fitness). The figures were made by first placing variant or transcript effect sizes (for female or early-life fitness) into quartiles, which we label as negative effects, weak negative effects, weak positive effects, and positive effects (taking advantage of the fact that the median effect size is very close to zero). We then do the same for male or late-life fitness, and plot the number of transcripts showing each combination of quartiles, giving an indication of how many loci/transcripts have aligned or opposing effects on the different fitness metrics.
+
+The following plots were made after processing the effect sizes with `mashr`, which should reduce the number of false signals. Because there is a positive correlation between the sexes and age classes, the shrinkage applied by `mashr` reduces the number of loci/transcripts that appear to show antagonism between ages and sexes (this should control the number of 'false positive' antagonistic loci/transcripts).
+
+
+
+### Frequencies of antagonistic loci 
+
+#### Comparing effects on the sexes {.tabset}
+
+Rather few loci are in the 1st quartile in their effect on male fitness and the 4th quartile for their effect on female fitness, or _vice versa_, suggesting that variants with strongly sex-opposite effects on fitness are rare
+
+##### Figure
+
+```{r fig.showtext=TRUE, fig.height=5, fig.width = 8}
+SNP_effects <- SNP_clumps %>%
+  filter(LD_subset) %>% 
+  select(contains("beta")) %>% 
+  select(contains("ED")) # this can be changed to "raw" to see the non-mashr effect sizes (i.e. statistical noise)
+names(SNP_effects)[grepl("female_early", names(SNP_effects))] <- "FE"
+names(SNP_effects)[grepl("female_late", names(SNP_effects))] <- "FL"
+names(SNP_effects)[grepl("male_early", names(SNP_effects))] <- "ME"
+names(SNP_effects)[grepl("male_late", names(SNP_effects))] <- "ML"
+
+temp <- SNP_effects %>% 
+  mutate(quartile_FE = ntile(FE, 4),
+         quartile_ME = ntile(ME, 4),
+         quartile_FL = ntile(FL, 4),
+         quartile_ML = ntile(ML, 4)) %>% 
+  mutate_at(vars(starts_with("quartile")), ~ {
+    SNP_effects <- .x
+    SNP_effects[SNP_effects == 1] <- "Negative"
+    SNP_effects[SNP_effects == 2] <- "Weakly\nnegative"
+    SNP_effects[SNP_effects == 3] <- "Weakly\npositive"
+    SNP_effects[SNP_effects == 4] <- "Positive"
+    factor(SNP_effects, c("Negative", "Weakly\nnegative", "Weakly\npositive", "Positive"))})
+
+mat_list <- list(table(temp$quartile_FE, temp$quartile_ME),
+                 table(temp$quartile_FL, temp$quartile_ML),
+                 table(temp$quartile_FE, temp$quartile_FL),
+                 table(temp$quartile_ME, temp$quartile_ML))  %>% 
+   map(~ as.data.frame(.x)) 
+names(mat_list) <- c("FE, ME", "FL, ML", "FE, FL", "ME, ML")
+# var1 is rows (first one, e.g. FE), 2 is cols (second one, e.g. ME)
+
+cols <- c(brewer.pal(9, "Reds")[c(6,3)], brewer.pal(9, "Blues")[c(3,6)])
+
+focal_dat <- rbind(
+    as.data.frame(mat_list[[1]]) %>% 
+      mutate(pp = "A. Early-life fitness"), 
+    as.data.frame(mat_list[[2]]) %>% 
+      mutate(pp = "B. Late-life fitness")) 
+
+fig_4_top_row <- focal_dat %>% 
+  ggplot(aes(Var1, Freq, fill = Var2)) + 
+  facet_wrap(~ pp) + 
+  geom_bar(stat="identity", colour = "grey20") +
+  scale_fill_manual(values = cols, name = "Association with\nmale fitness") + 
+  xlab("Association with female fitness") + 
+  ylab("Number of variants") + 
+  theme_bw() + 
+  theme(panel.grid.major.x = element_blank(),
+        strip.background = element_blank(),
+        #strip.text = element_text(hjust = 0, family = "Raleway", size = 12))
+        strip.text = element_text(hjust = 0, size = 12))
+
+# To count the total number of transcripts tested:
+# focal_dat$Freq[focal_dat$pp == "C. Early-life fitness"] %>% sum()
+
+fig_4_top_row
+```
+
+##### Table
+
+```{r}
+focal_dat %>% 
+  split(.$pp) %>% 
+  map_df(~ .x %>% mutate(`Percentage (overall)` = round(100 * Freq / sum(Freq), 2))) %>% 
+  split(paste((.$Var1), .$pp)) %>% 
+  map_df(~ .x %>% mutate(`Percentage (given effect on females)` = round(100 * Freq / sum(Freq), 2))) %>% 
+  arrange(pp, Var1, Var2) %>% 
+  select(pp, everything()) %>% 
+  rename(`Age class` = pp, `Association with female fitness` = Var1, 
+         `Association with male fitness` = Var2, 
+         `Number of variants` = Freq) %>% 
+  kable() %>% kable_styling(full_width = FALSE)
+```
+
+
+#### Comparing effects on the age classes {.tabset}
+
+##### Figure
+
+```{r fig.showtext=TRUE, fig.height=5, fig.width = 8}
+focal_dat <- rbind(
+  as.data.frame(mat_list[[3]]) %>% 
+    mutate(pp = "A. Female fitness"), 
+  as.data.frame(mat_list[[4]]) %>% 
+    mutate(pp = "B. Male fitness")) 
+
+focal_dat %>% 
+  ggplot(aes(Var1, Freq, fill = Var2)) + 
+  facet_wrap(~ pp) + 
+  geom_bar(stat="identity", colour = "grey20") +
+  scale_fill_manual(values = cols, name = "Association with\nlate-life fitness") + 
+  xlab("Association with early-life fitness") + 
+  ylab("Number of variants") + 
+  theme_bw() + 
+  theme(panel.grid.major.x = element_blank(),
+        strip.background = element_blank(),
+        strip.text = element_text(hjust = 0, family = "Raleway", size = 12))
+```
+
+##### Table
+
+```{r}
+focal_dat %>% 
+  split(.$pp) %>% 
+  map_df(~ .x %>% mutate(`Percentage (overall)` = round(100 * Freq / sum(Freq), 2))) %>% 
+  split(paste((.$Var1), .$pp)) %>% 
+  map_df(~ .x %>% mutate(`Percentage (given effect on females)` = round(100 * Freq / sum(Freq), 2))) %>% 
+  arrange(pp, Var1, Var2) %>% 
+  select(pp, everything()) %>% 
+  rename(`Sex` = pp, `Association with early-life fitness` = Var1, 
+         `Association with late-life fitness` = Var2, 
+         `Number of variants` = Freq) %>% 
+  kable() %>% kable_styling(full_width = FALSE)
+```
+
+
+#### Run a $\chi^2$ test
+
+The following $\chi^2$ test examines the null hypothesis that the proportion of candidate sexually antagonistic loci (i.e. those with a quartile 1 effect on fitness of sex $i$ and a quartile 4 effect on sex $j$) is equal when fitness associations are calculated using the early- and late-life fitness data. This null hypothesis is rejected: the % of SA loci is `r round(100 *(129+103) / 208987, 3)`% at early life and `r round(100 *(93+48) / 208987, 3)`% at late life, which is a `r round(0.1110117 / 0.06746831, 1)`-fold difference.
+
+```{r}
+chisq_table <- as.table(rbind(c(129+103, 208987 - (129+103)), c(93+48, 208987 - (93+48))))
+dimnames(chisq_table) <- list(life_stage = c("Early_life", "Late_life"),
+                              antagonism_status = c("Sex_antag","Non_sex_antag"))
+chisq_table
+chisq.test(chisq_table)
+```
+
+
+### Frequencies of antagonistic transcripts
+
+#### Comparing effects on the sexes {.tabset}
+
+##### Figure
+
+```{r fig.showtext=TRUE, fig.height=5, fig.width = 8}
+TWAS_ED <- readRDS("data/derived/TWAS/TWAS_ED.rds")
+
+binned_transcripts <- data.frame(
+  FBID = read_csv("data/derived/TWAS/TWAS_results.csv")$FBID,
+  as.data.frame(get_pm(TWAS_ED))) %>% 
+  as_tibble() %>% rename_all(~ str_remove_all(.x, "beta_")) %>% 
+  mutate(quartile_FE = ntile(FE, 4),
+         quartile_ME = ntile(ME, 4),
+         quartile_FL = ntile(FL, 4),
+         quartile_ML = ntile(ML, 4)) %>% 
+  mutate_at(vars(starts_with("quartile")), ~ {
+    SNP_effects <- .x
+    SNP_effects[SNP_effects == 1] <- "Negative"
+    SNP_effects[SNP_effects == 2] <- "Weakly\nnegative"
+    SNP_effects[SNP_effects == 3] <- "Weakly\npositive"
+    SNP_effects[SNP_effects == 4] <- "Positive"
+    factor(SNP_effects, c("Negative", "Weakly\nnegative", "Weakly\npositive", "Positive"))})
+
+
+mat_list <- list(table(binned_transcripts$quartile_FE, binned_transcripts$quartile_ME),
+                 table(binned_transcripts$quartile_FL, binned_transcripts$quartile_ML),
+                 table(binned_transcripts$quartile_FE, binned_transcripts$quartile_FL),
+                 table(binned_transcripts$quartile_ME, binned_transcripts$quartile_ML))  %>% 
+   map(~ as.data.frame(.x)) 
+names(mat_list) <- c("FE, ME", "FL, ML", "FE, FL", "ME, ML")
+# var1 is rows (first one, e.g. FE), 2 is cols (second one, e.g. ME)
+
+focal_dat <- rbind(
+    as.data.frame(mat_list[[1]]) %>% 
+      mutate(pp = "C. Early-life fitness"), 
+    as.data.frame(mat_list[[2]]) %>% 
+      mutate(pp = "D. Late-life fitness")) 
+
+# To count the total number of transcripts tested, 14286:
+# focal_dat$Freq[focal_dat$pp == "C. Early-life fitness"] %>% sum()
+
+fig_4_bottom_row <- focal_dat %>% 
+  ggplot(aes(Var1, Freq, fill = Var2)) + 
+  facet_wrap(~ pp) + 
+  geom_bar(stat="identity", colour = "grey20") +
+  scale_fill_manual(values = cols, name = "Association with\nmale fitness") + 
+  xlab("Association with female fitness") + 
+  ylab("Number of transcripts") + 
+  theme_bw() + 
+  theme(panel.grid.major.x = element_blank(),
+        strip.background = element_blank(),
+        #strip.text = element_text(hjust = 0, family = "Raleway", size = 12))
+        strip.text = element_text(hjust = 0, size = 12))
+
+fig_4_bottom_row
+```
+
+
+```{r fig.showtext=T, echo = FALSE, results='hide'}
+# Code to make the composite Figure 4, the stacked bar chart
+grid_arrange_shared_legend <- function(..., ncol = 1, nrow = 2, position = c("bottom", "right")) {
+
+  plots <- list(...)
+  position <- match.arg(position)
+  g <- ggplotGrob(plots[[1]] + theme(legend.position = position))$grobs
+  legend <- g[[which(sapply(g, function(x) x$name) == "guide-box")]]
+  lheight <- sum(legend$height)
+  lwidth <- sum(legend$width)
+  gl <- lapply(plots, function(x) x + theme(legend.position="none"))
+  gl <- c(gl, ncol = ncol, nrow = nrow)
+
+  combined <- switch(position,
+                     "bottom" = arrangeGrob(do.call(arrangeGrob, gl),
+                                            legend,
+                                            ncol = 1,
+                                            heights = unit.c(unit(1, "npc") - lheight, lheight)),
+                     "right" = arrangeGrob(do.call(arrangeGrob, gl),
+                                           legend,
+                                           ncol = 2,
+                                           widths = unit.c(unit(1, "npc") - lwidth, lwidth)))
+
+  grid.newpage()
+  grid.draw(combined)
+
+  # return gtable invisibly
+  invisible(combined)
+
+}
+
+
+ggsave("figures/fig4_quartiles_plot.png", 
+       grid_arrange_shared_legend(fig_4_top_row + 
+                                    theme(axis.text.x = element_blank(),
+                                          axis.ticks.x = element_blank()) +
+                                    xlab(" "), 
+                                  fig_4_bottom_row, position = "right"), 
+       height = 6, width = 7)
+```
+
+
+##### Table
+
+```{r}
+focal_dat %>% 
+  split(.$pp) %>% 
+  map_df(~ .x %>% mutate(`Percentage (overall)` = round(100 * Freq / sum(Freq), 2))) %>% 
+  split(paste((.$Var1), .$pp)) %>% 
+  map_df(~ .x %>% mutate(`Percentage (given effect on females)` = round(100 * Freq / sum(Freq), 2))) %>% 
+  arrange(pp, Var1, Var2) %>% 
+  select(pp, everything()) %>% 
+  rename(`Age class` = pp, `Association with female fitness` = Var1, 
+         `Association with male fitness` = Var2, 
+         `Number of transcripts` = Freq) %>% 
+  kable() %>% kable_styling(full_width = FALSE)
+```
+
+#### Run a $\chi^2$ test
+
+The following $\chi^2$ test examines the null hypothesis that the proportion of candidate sexually antagonistic transcripts (i.e. those with a quartile 1 effect on fitness of sex $i$ and a quartile 4 effect on sex $j$) is equal when fitness associations are calculated using the early- and late-life fitness data. This null hypothesis is not rejected: the % of SA transcripts is `r round(100 *(691+689) / 14286, 2)`% at early life and `r round(100 *(677 + 664) / 14286, 2)`% at late life, which is a `r round(9.659807 / 9.386812, 2)`-fold difference.
+
+```{r}
+chisq_table <- as.table(rbind(c(691+689, 14286 - (691+689)), c(677 + 664, 14286 - (677 + 664))))
+dimnames(chisq_table) <- list(life_stage = c("Early_life", "Late_life"),
+                              antagonism_status = c("Sex_antag","Non_sex_antag"))
+chisq_table
+chisq.test(chisq_table)
+```
+
+
+#### Comparing effects on the age classes {.tabset}
+
+##### Figure
+
+```{r fig.showtext=TRUE, fig.height=5, fig.width = 11}
+focal_dat <- rbind(
+  as.data.frame(mat_list[[3]]) %>% 
+    mutate(pp = "A. Female fitness"), 
+  as.data.frame(mat_list[[4]]) %>% 
+    mutate(pp = "B. Male fitness"))
+
+focal_dat %>% 
+  ggplot(aes(Var1, Freq, fill = Var2)) + 
+  facet_wrap(~ pp) + 
+  geom_bar(stat="identity", colour = "grey20") +
+  scale_fill_manual(values = cols, name = "Association with\nlate-life fitness") + 
+  xlab("Association with early-life fitness") + 
+  ylab("Number of transcripts") + 
+  theme_bw() + 
+  theme(panel.grid.major.x = element_blank(),
+        strip.background = element_blank(),
+        strip.text = element_text(hjust = 0, family = "Raleway", size = 12))
+```
+
+##### Table
+
+```{r}
+focal_dat %>% 
+  split(.$pp) %>% 
+  map_df(~ .x %>% mutate(`Percentage (overall)` = round(100 * Freq / sum(Freq), 2))) %>% 
+  split(paste((.$Var1), .$pp)) %>% 
+  map_df(~ .x %>% mutate(`Percentage (given effect on females)` = round(100 * Freq / sum(Freq), 2))) %>% 
+  arrange(pp, Var1, Var2) %>% 
+  select(pp, everything()) %>% 
+  rename(`Sex` = pp, `Association with early-life fitness` = Var1, 
+         `Association with late-life fitness` = Var2, 
+         `Number of transcripts` = Freq) %>% 
+  kable() %>% kable_styling(full_width = FALSE)
+```
+
+
+## Plotting and modelling the evidence for antagonism
+
+### Calculate the evidence ratios
+
+#### For the GWAS results
+```{r}
+get_antagonism_ratios <- function(dat){
+  dat %>%
     
-    # Convert the LFSR to probability that beta is positive
-    # Here, we use the ED results because they are agnostic to our expectations for the results
-    # However, running this with the Canonocial results instead gives an essentially identical graph
+    # Convert the LFSR to the probability that effect size is positive
     mutate(pp_female_early = ifelse(pheno1 > 0, LFSR1, 1 - LFSR1),
            pp_female_late  = ifelse(pheno2 > 0, LFSR2, 1 - LFSR2),
            pp_male_early   = ifelse(pheno3 > 0, LFSR3, 1 - LFSR3),
@@ -1258,17 +983,75 @@ make_evidence_ratio_plot <- function(dat, ymax, ylab){
            p_age_antag_males = pp_male_early * (1 - pp_male_late) + (1 - pp_male_early) * pp_male_late) %>%
     
     # Find the ratios of some of these probabilities (i.e. "evidence ratios")
-    mutate(`Inter-sex (early life)` = p_sex_concord_early / p_sex_antag_early,
-           `Inter-sex (late life)` = p_sex_concord_late / p_sex_antag_late,
-           `Inter-age (females)` = p_age_concord_females / p_age_antag_females,
-           `Inter-age (males)` = p_age_concord_males / p_age_antag_males) %>%
-    select(identifier,  starts_with("Inter")) %>%
-    gather(trait, evidence_ratio, -identifier) %>%
+    mutate(inter_sex_early = p_sex_concord_early / p_sex_antag_early,
+           inter_sex_late = p_sex_concord_late / p_sex_antag_late,
+           inter_age_females = p_age_concord_females / p_age_antag_females,
+           inter_age_males = p_age_concord_males / p_age_antag_males) 
+}
+
+antagonism_evidence_ratios_gwas <- all_snps %>%
+  rename(pheno1 = beta_female_early_mashr_ED, 
+         pheno2 = beta_female_late_mashr_ED, 
+         pheno3 = beta_male_early_mashr_ED, 
+         pheno4 = beta_male_late_mashr_ED,
+         LFSR1 = LFSR_female_early_mashr_ED, 
+         LFSR2 = LFSR_female_late_mashr_ED, 
+         LFSR3 = LFSR_male_early_mashr_ED, 
+         LFSR4 = LFSR_male_late_mashr_ED) %>% 
+  select(SNP, SNP_clump, starts_with("pheno"), LFSR1, LFSR2, LFSR3, LFSR4) %>% 
+  filter(!is.na(pheno1)) %>% 
+  collect(n=Inf) %>% 
+  distinct() %>% 
+  get_antagonism_ratios() %>%
+  select(SNP, SNP_clump, starts_with("inter")) 
+```
+
+#### For the TWAS results
+```{r}
+TWAS_ED <- readRDS("data/derived/TWAS/TWAS_ED.rds")
+
+twas <- data.frame(
+  FBID = read_csv("data/derived/TWAS/TWAS_results.csv")$FBID,
+      as.data.frame(get_pm(TWAS_ED)),
+      as.data.frame(get_lfsr(TWAS_ED)) %>% 
+        rename_all(~str_replace_all(., "beta", "LFSR"))) %>% 
+      as_tibble() %>%
+  left_join(tbl(db, "genes") %>% select(FBID, chromosome) %>% collect(), by = "FBID") %>%
+  left_join(read_csv("data/derived/gene_expression_by_sex.csv"), by = "FBID") %>%
+  filter(chromosome %in% c("2L", "2R", "3L", "3R", "X")) %>%
+  rename(pheno1 = beta_FE, 
+         pheno2 = beta_FL, 
+         pheno3 = beta_ME, 
+         pheno4 = beta_ML,
+         LFSR1 = LFSR_FE, 
+         LFSR2 = LFSR_FL, 
+         LFSR3 = LFSR_ME, 
+         LFSR4 = LFSR_ML)
+
+antagonism_evidence_ratios_twas <- twas %>% 
+  get_antagonism_ratios() %>%
+  select(FBID, chromosome, male_bias_in_expression, AveExpr, starts_with("inter")) %>% 
+  mutate(chromosome = relevel(factor(chromosome), ref = "X"))
+```
+
+### Plot the evidence ratios
+
+```{r evidence_ratio_plot, fig.showtext=TRUE, message=FALSE}
+make_evidence_ratio_plot <- function(ERs, ymax, ylab){
+  # Argument needs to be a dataframe of loci or transcripts, each identified by a column called "identifier"
+  # There should be a col called "evidence_ratio", calculated from the LFSR from ED mashr. The "trait" col says which type of ER it is.
+  
+  ERs$trait[ERs$trait == "inter_sex_early"] <- "Inter-sex (early life)"
+  ERs$trait[ERs$trait == "inter_sex_late"] <- "Inter-sex (late life)"
+  ERs$trait[ERs$trait == "inter_age_females"] <- "Inter-age (females)"
+  ERs$trait[ERs$trait == "inter_age_males"] <- "Inter-age (males)"
+  
+  antagonism_evidence_ratios <- ERs %>%
     mutate(trait = factor(trait, c("Inter-sex (early life)",
                                    "Inter-sex (late life)",
                                    "Inter-age (females)",
                                    "Inter-age (males)")))
-  print(antagonism_evidence_ratios %>% arrange(evidence_ratio))
+  
   antagonism_evidence_ratios %>%
     ggplot(aes(log2(evidence_ratio))) + 
     geom_histogram(data=subset(antagonism_evidence_ratios, evidence_ratio < 1), 
@@ -1282,53 +1065,29 @@ make_evidence_ratio_plot <- function(dat, ymax, ylab){
     xlab("Evidence ratio (log2 scale)") + ylab(ylab) + 
     theme_bw() + 
     theme(panel.border = element_rect(size = 0.8),
-         # text = element_text(family = "Raleway", size = 12),
+          text = element_text(family = "Raleway", size = 12),
           axis.text.x = element_text(angle = 45, vjust = 1, hjust=1),
           strip.background = element_blank())
 }
 
-GWAS_ratios_plot <- SNP_clumps %>%
-  rename(pheno1 = beta_female_early_mashr_ED, 
-         pheno2 = beta_female_late_mashr_ED, 
-         pheno3 = beta_male_early_mashr_ED, 
-         pheno4 = beta_male_late_mashr_ED,
-         LFSR1 = LFSR_female_early_mashr_ED, 
-         LFSR2 = LFSR_female_late_mashr_ED, 
-         LFSR3 = LFSR_male_early_mashr_ED, 
-         LFSR4 = LFSR_male_late_mashr_ED,
-         identifier = SNP_clump) %>%
-  make_evidence_ratio_plot(ymax = 10000, ylab = "Number of loci")
+GWAS_ratios_plot <- antagonism_evidence_ratios_gwas %>% 
+  select(SNP_clump,  starts_with("inter")) %>%
+  distinct() %>% # Include SNPs in 100% LD a single time, such that these clumps are the unit of replication
+  gather(trait, evidence_ratio, -SNP_clump) %>% 
+  rename(identifier = SNP_clump) %>% 
+  make_evidence_ratio_plot(ymax = 5000, ylab = "Number of loci")
 
-TWAS_ED <- readRDS("data/derived/TWAS/TWAS_ED.rds")
-TWAS_canonical <- readRDS("data/derived/TWAS/TWAS_canonical.rds")
+# For counting the number of transcripts with 50x more evidence for antagonism 
+# antagonism_evidence_ratios_twas %>% 
+#   select(FBID,  starts_with("inter")) %>%
+#   gather(trait, evidence_ratio, -FBID) %>% 
+#   rename(identifier = FBID) %>% filter(evidence_ratio < 1/50) %>% summarise(n())
 
-
-TWAS_mashr_results <- 
-  data.frame(
-    FBID = read_csv("data/derived/TWAS/TWAS_results.csv")$FBID,
-    as.data.frame(get_pm(TWAS_canonical)) %>% rename_all(~str_c("canonical_", .)),
-    as.data.frame(get_lfsr(TWAS_canonical)) %>% 
-      rename_all(~str_replace_all(., "beta", "LFSR")) %>% rename_all(~str_c("canonical_", .))) %>% 
-  as_tibble() %>% 
-  bind_cols(
-    data.frame(
-      as.data.frame(get_pm(TWAS_ED)) %>% rename_all(~str_c("ED_", .)),
-      as.data.frame(get_lfsr(TWAS_ED)) %>% 
-        rename_all(~str_replace_all(., "beta", "LFSR")) %>% rename_all(~str_c("ED_", .))) %>% 
-      as_tibble())
-
-TWAS_ratios_plot <- TWAS_mashr_results %>%
-  rename(pheno1 = ED_beta_FE, 
-         pheno2 = ED_beta_FL, 
-         pheno3 = ED_beta_ME, 
-         pheno4 = ED_beta_ML,
-         LFSR1 = ED_LFSR_FE, 
-         LFSR2 = ED_LFSR_FL, 
-         LFSR3 = ED_LFSR_ME, 
-         LFSR4 = ED_LFSR_ML,
-         identifier = FBID) %>%
+TWAS_ratios_plot <- antagonism_evidence_ratios_twas %>% 
+  select(FBID,  starts_with("inter")) %>%
+  gather(trait, evidence_ratio, -FBID) %>% 
+  rename(identifier = FBID) %>% 
   make_evidence_ratio_plot(ymax = 500, ylab = "Number of transcripts")
-
 
 pp <- plot_grid(GWAS_ratios_plot, TWAS_ratios_plot, 
                    labels = c('A', 'B'), label_size = 12)
@@ -1339,3 +1098,157 @@ ggsave("figures/antagonism_ratios.pdf", pp, width = 8.5, height = 4.9)
 
 pp
 ```
+
+
+### Model the evidence ratios
+
+```{r}
+# gwas models
+
+# Annotate it with MAF, site, class, etc. 
+dat <- left_join(antagonism_evidence_ratios_gwas,
+          collect(tbl(db, "variants")), by = "SNP") %>% 
+  distinct() %>% mutate(site.class = str_to_title(site.class))
+
+# Focus only on the commonest site classes:
+dat <- dat %>% 
+  filter(site.class %in% c("Intron", "Intergenic", "Downstream", "Upstream",
+                           "Synonymous_coding", "Non_synonymous_coding", "Utr_3_prime",
+                           "Exon", "Utr_5_prime")) 
+
+# Remove chromosome 4 (too few sites)
+dat <- dat %>% filter(chr != "4") 
+
+# If there are multiple site classes for a SNP, or multiple SNPs 
+# in the same 100% LD clump, pick one SNP and/or 1 site class at random
+set.seed(1)
+dat <- dat[sample(nrow(dat), nrow(dat)), ] %>%
+  split(.$SNP_clump) %>%
+  map_df(~ .x[1, ])
+
+dat <- dat %>% arrange(site.class)
+dat$site.class <- relevel(factor(dat$site.class), ref = "Synonymous_coding")
+dat$chr <- relevel(factor(dat$chr), ref = "X")
+
+n_loci <- prettyNum(nrow(dat), big.mark = ",", scientific = FALSE)
+
+
+intersex_early_model_gwas <- glm(antagonistic ~ chr + MAF + site.class, 
+             data = dat %>% 
+               mutate(antagonistic = as.numeric(inter_sex_early <= 
+                        quantile(dat$inter_sex_early, probs=0.01))), 
+    family = "binomial")
+car::Anova(intersex_early_model_gwas, type = 3)
+intersex_early_model_gwas <- update(intersex_early_model_gwas,  ~ . -site.class)
+car::Anova(intersex_early_model_gwas, type = 3)
+
+summary(intersex_early_model_gwas)
+
+
+intersex_late_model_gwas <- glm(antagonistic ~ chr + MAF + site.class, 
+             data = dat %>% 
+               mutate(antagonistic = inter_sex_late <= 
+                        quantile(dat$inter_sex_late, probs=0.01)), 
+    family = "binomial")
+car::Anova(intersex_late_model_gwas, type = 3)
+intersex_late_model_gwas <- update(intersex_late_model_gwas,  ~ . -site.class)
+car::Anova(intersex_late_model_gwas, type = 3)
+
+summary(intersex_late_model_gwas)
+```
+
+
+```{r}
+# twas models
+n_transcripts <- prettyNum(nrow(antagonism_evidence_ratios_twas), big.mark = ",", scientific = FALSE)
+
+twas_model_data <- antagonism_evidence_ratios_twas %>% 
+  mutate(antagonistic = inter_sex_early <= 
+           quantile(antagonism_evidence_ratios_twas$inter_sex_early, probs=0.01),
+         absolute_sex_bias_in_expression = abs(male_bias_in_expression),
+         mean_expression_level = AveExpr)
+
+
+intersex_early_twas <- glm(antagonistic ~ chromosome + absolute_sex_bias_in_expression + mean_expression_level, 
+             data = twas_model_data, 
+    family = "binomial")
+car::Anova(intersex_early_twas, type = 3)
+summary(intersex_early_twas)
+```
+
+
+```{r}
+intersex_late_model_twas <- glm(antagonistic ~ chromosome + absolute_sex_bias_in_expression + mean_expression_level, 
+             data = antagonism_evidence_ratios_twas %>% 
+  mutate(antagonistic = inter_sex_late <= 
+           quantile(antagonism_evidence_ratios_twas$inter_sex_late, probs=0.01),
+         absolute_sex_bias_in_expression = abs(male_bias_in_expression),
+         mean_expression_level = AveExpr), 
+    family = "binomial")
+car::Anova(intersex_late_model_twas, type = 3)
+intersex_late_model_twas <- update(intersex_late_model_twas,  ~ . -absolute_sex_bias_in_expression -chromosome)
+car::Anova(intersex_late_model_twas, type = 3)
+summary(intersex_late_model_twas)
+```
+
+
+
+```{r} 
+# plotting models
+new <- data.frame(MAF = seq(from = 0.05, to = 0.5, by = 0.01), chr = "X")
+inv_logit <- function(x) exp(x)/(1+exp(x))
+preds <- data.frame(new, prop = predict(intersex_early_model_gwas, newdata = new, se.fit=T, type = "link")) %>% 
+  mutate(y = prop.fit, lwr = prop.fit - 1.96*prop.se.fit, upr = prop.fit + 1.96*prop.se.fit,
+         y = inv_logit(y), lwr = inv_logit(lwr), upr = inv_logit(upr))
+p1 <- preds %>% 
+  ggplot(aes(MAF,  y)) + geom_line() + 
+  geom_hline(yintercept = .01, linetype = 3) + 
+  geom_line(aes(y = upr), linetype = 2) + 
+  geom_line(aes(y = lwr), linetype = 2) + 
+  scale_x_continuous(limits = c(0, 0.5)) + 
+  scale_y_continuous(limits = c(0, max(preds$y))) + 
+  theme_bw() +#+ theme(text = element_text(family = "Raleway", size = 12)) 
+  ylab("Probability of being in the top 1%\nsexually antagonistic loci (\u00B1 95% CIs)") +
+  xlab("Minor allele frequency")
+
+new2 <- data.frame(chr = levels(dat$chr), MAF = 0.3)
+inv_logit <- function(x) exp(x)/(1+exp(x))
+preds2 <- data.frame(new2, prop = predict(intersex_early_model_gwas, newdata = new2, se.fit=T, type = "link")) %>% 
+  mutate(y = prop.fit, lwr = prop.fit - 1.96*prop.se.fit, upr = prop.fit + 1.96*prop.se.fit,
+         y = inv_logit(y), lwr = inv_logit(lwr), upr = inv_logit(upr))
+p2 <- preds2 %>% 
+  ggplot(aes(chr,  y)) + 
+  geom_point(size = 3) + 
+  geom_errorbar(aes(ymin = lwr, ymax = upr), width = 0) + 
+  theme_bw() +#+ theme(text = element_text(family = "Raleway", size = 12)) 
+  ylab(" \n ") +
+  xlab("Chromosome arm")
+
+new <- data.frame(
+  mean_expression_level = seq(from = min(twas_model_data$mean_expression_level), 
+                                to = max(twas_model_data$mean_expression_level), by = 0.01), 
+                  chromosome = "X", 
+  absolute_sex_bias_in_expression = 0,
+                  mean_expression_level = mean(twas_model_data$absolute_sex_bias_in_expression))
+inv_logit <- function(x) exp(x)/(1+exp(x))
+preds <- data.frame(new, prop = predict(intersex_early_twas, newdata = new, se.fit=T, type = "link")) %>% 
+  mutate(y = prop.fit, lwr = prop.fit - 1.96*prop.se.fit, upr = prop.fit + 1.96*prop.se.fit,
+         y = inv_logit(y), lwr = inv_logit(lwr), upr = inv_logit(upr))
+p3 <- preds %>% 
+  ggplot(aes(mean_expression_level,  y)) + geom_line() + 
+  geom_hline(yintercept = .01, linetype = 3) + 
+  geom_line(aes(y = upr), linetype = 2) + 
+  geom_line(aes(y = lwr), linetype = 2) + 
+  ylab("Probability of being in the top 1%\nsexually antagonistic transcripts (\u00B1 95% CIs)") +
+  xlab("Average expression level") + 
+  theme_bw() #+ theme(text = element_text(family = "Raleway", size = 12)) 
+
+
+blank <- ggplot() + theme_void()
+
+
+fig_6_models <- grid.arrange(
+grid.arrange(p1, p2, ncol = 2), grid.arrange(blank, p3, blank, nrow = 1, widths = c(0.2,0.6,0.2)))
+ggsave("figures/fig6_models.pdf", fig_6_models, width = 6, height = 7)
+```
+

@@ -479,16 +479,16 @@ This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a> analysi
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree86444b2dbf34d4aaae69120242409639b78bef20targetblank86444b2a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/lukeholman/fitnessGWAS/tree/86444b2dbf34d4aaae69120242409639b78bef20" target="_blank">86444b2</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree17a62a70f2650bc75ac9272083bbd22fb6acb667targetblank17a62a7a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/lukeholman/fitnessGWAS/tree/17a62a70f2650bc75ac9272083bbd22fb6acb667" target="_blank">17a62a7</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree86444b2dbf34d4aaae69120242409639b78bef20targetblank86444b2a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree17a62a70f2650bc75ac9272083bbd22fb6acb667targetblank17a62a7a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/lukeholman/fitnessGWAS/tree/86444b2dbf34d4aaae69120242409639b78bef20" target="_blank">86444b2</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/lukeholman/fitnessGWAS/tree/17a62a70f2650bc75ac9272083bbd22fb6acb667" target="_blank">17a62a7</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -519,10 +519,13 @@ Ignored files:
 
 Untracked files:
     Untracked:  big_model.rds
+    Untracked:  code/main_paper_figures.Rmd
+    Untracked:  code/main_paper_figures.docx
     Untracked:  code/pdf_supp_material.Rmd
     Untracked:  code/quant_gen_1.R
     Untracked:  data/input/genomic_relatedness_matrix.rds
     Untracked:  figures/fig3_boyle_plot.pdf
+    Untracked:  figures/fig4_quartiles_plot.pdf
     Untracked:  figures/fig5_antagonism_ratios.pdf
 
 Unstaged changes:
@@ -578,6 +581,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/17a62a70f2650bc75ac9272083bbd22fb6acb667/analysis/plot_models_variant_effects.Rmd" target="_blank">17a62a7</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2022-02-23
+</td>
+<td>
+wflow_publish(“analysis/plot_models_variant_effects.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/1bb603c18144f3ad95844a63f1f0dedcab9e2d0b/docs/plot_models_variant_effects.html" target="_blank">1bb603c</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2022-02-23
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1073,43 +1110,71 @@ lukeholman
 <h3>Effect sizes adjusted using ‘data-driven’ adaptive shrinkage in <code>mashr</code></h3>
 <div id="plot" class="section level4">
 <h4>Plot</h4>
-<pre class="r"><code>hex_plot &lt;- function(x, y, xlab, ylab, title,
-                     xlim = c(-0.5, 0.5),
-                     ylim = c(-0.3, 0.3)
-                     ){
-  dat &lt;- SNP_clumps %&gt;%
-    mutate(facet = title) %&gt;% 
-    filter(LD_subset) # ensure only the LD SNPs from mashr are plotted
-  ggplot(dat, aes_string(x, y)) + 
-    geom_abline(linetype = 2) + 
-    geom_vline(xintercept = 0, linetype = 3) +
-    geom_hline(yintercept = 0, linetype = 3) +
-    stat_binhex(bins = 50)  +
-    geom_density_2d(colour = &quot;white&quot;, alpha = 0.6) + 
-    scale_fill_viridis_c() + 
-    coord_cartesian(xlim = xlim, ylim = ylim) + 
-    facet_wrap(~ facet) +
-    theme_bw() + xlab(xlab) + ylab(ylab) +
-    theme(legend.position = &quot;none&quot;,
-          strip.background = element_blank(),
-          strip.text = element_text(hjust=0))   + 
-    theme(text = element_text(family = &quot;Raleway&quot;, size = 12))
+<pre class="r"><code># hex_plot &lt;- function(x, y, xlab, ylab, title,
+#                      xlim = c(-0.45, 0.3),
+#                      ylim = c(-0.27, 0.27)
+#                      ){
+#   dat &lt;- SNP_clumps %&gt;%
+#     mutate(facet = title) %&gt;% 
+#     filter(LD_subset) # ensure only the LD SNPs from mashr are plotted
+#   ggplot(dat, aes_string(x, y)) + 
+#     geom_abline(linetype = 2) + 
+#     geom_vline(xintercept = 0, linetype = 3) +
+#     geom_hline(yintercept = 0, linetype = 3) +
+#     stat_binhex(bins = 50)  +
+#     geom_density_2d(colour = &quot;white&quot;, alpha = 0.6) + 
+#     scale_fill_viridis_c() + 
+#     # coord_cartesian(xlim = xlim, ylim = ylim) + 
+#     facet_wrap(~ facet) +
+#     theme_bw() + xlab(xlab) + ylab(ylab) +
+#     theme(legend.position = &quot;none&quot;,
+#           strip.background = element_blank(),
+#           strip.text = element_text(hjust=0))   + 
+#     theme(text = element_text(family = &quot;Raleway&quot;, size = 12))
+# 
+# }
+# 
+# p1 &lt;- hex_plot(&quot;beta_female_early_mashr_ED&quot;, 
+#                &quot;beta_male_early_mashr_ED&quot;, 
+#                &quot;Effect on female fitness&quot;, 
+#                NULL,
+#                &quot;A. Early life fitness&quot;)
+# 
+# p2 &lt;- hex_plot(&quot;beta_female_late_mashr_ED&quot;, 
+#                &quot;beta_male_late_mashr_ED&quot;, 
+#                &quot;Effect on female fitness&quot;, 
+#                NULL,
+#                &quot;B. Late life fitness&quot;)
+# 
+# grid.arrange(p1, p2, ncol = 2, left = &quot;Effect on male fitness&quot;)
 
-}
 
-p1 &lt;- hex_plot(&quot;beta_female_early_mashr_ED&quot;, 
-               &quot;beta_male_early_mashr_ED&quot;, 
-               &quot;Effect on female fitness&quot;, 
-               NULL,
-               &quot;A. Early life fitness&quot;)
+snp_effect_fig &lt;- bind_rows(
+  SNP_clumps %&gt;%
+    filter(LD_subset) %&gt;%  # ensure only the LD SNPs from mashr are plotted
+    select(female = beta_female_early_mashr_ED, male = beta_male_early_mashr_ED) %&gt;% 
+    mutate(age_class = &quot;A. Early-life fitness&quot;),
+  SNP_clumps %&gt;%
+    filter(LD_subset) %&gt;%  # ensure only the LD SNPs from mashr are plotted
+    select(female = beta_female_late_mashr_ED, male = beta_male_late_mashr_ED) %&gt;% 
+    mutate(age_class = &quot;B. Late-life fitness&quot;)) %&gt;% 
+  ggplot(aes(female, male)) + 
+  geom_abline(linetype = 2) + 
+  geom_vline(xintercept = 0, linetype = 3) +
+  geom_hline(yintercept = 0, linetype = 3) +
+  stat_binhex(bins = 50)  +
+  geom_density_2d(colour = &quot;white&quot;, alpha = 0.6) + 
+  scale_fill_viridis_c() + 
+  facet_wrap(~ age_class) +
+  theme_bw() + xlab(&quot;Effect on female fitness&quot;) + ylab(&quot;Effect on male fitness&quot;) +
+  theme(legend.position = &quot;none&quot;,
+        strip.background = element_blank(),
+        strip.text = element_text(hjust=0)) + 
+  theme(text = element_text(family = &quot;Raleway&quot;, size = 12))
 
-p2 &lt;- hex_plot(&quot;beta_female_late_mashr_ED&quot;, 
-               &quot;beta_male_late_mashr_ED&quot;, 
-               &quot;Effect on female fitness&quot;, 
-               NULL,
-               &quot;B. Late life fitness&quot;)
+fig2_top &lt;- snp_effect_fig
 
-grid.arrange(p1, p2, ncol = 2, left = &quot;Effect on male fitness&quot;)</code></pre>
+snp_effect_fig</code></pre>
 <p><img src="figure/plot_models_variant_effects.Rmd/hex1-1.png" width="864" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-hex1-1">
@@ -1159,45 +1224,7 @@ lukeholman
 </table>
 </div>
 </div>
-<p><strong>Figure 2</strong>: Effect sizes of 1207357 loci (i.e. groups of one or more polymorphic sites in complete linkage disequilibrium) on male and female fitness, plotted separately for the early-life and late-life estimates. The effect sizes estimated using GEMMA have been corrected using <code>mashr</code>, using the data-driven method to apply shrinkage (Figure SX shows the raw estimates). The data have been binned into hexagons, with the colour and contour lines indicating the number of loci. The diagonal line represents <span class="math inline">\(y=x\)</span>. Positive effect sizes indicate that the minor allele is associated with higher fitness.</p>
-<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-3-1">
-Past versions of unnamed-chunk-3-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-3-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/5a59d9f982db9a933d0cea448822677a000087c9/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-3-1.png" target="_blank">5a59d9f</a>
-</td>
-<td>
-lukeholman
-</td>
-<td>
-2021-11-12
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><strong>Top part of Figure 2</strong>: <code>mashr</code>-adjusted effect sizes of 1207357 loci (i.e. groups of one or more polymorphic sites in complete linkage disequilibrium) on male and female early- and late-life fitness. The data have been binned into hexagons, with the colour and contour lines indicating the number of loci. The diagonal line represents <span class="math inline">\(y=x\)</span>. Positive effect sizes indicate that the minor allele is associated with higher fitness.</p>
 </div>
 <div id="pearson-correlation" class="section level4">
 <h4>Pearson correlation</h4>
@@ -1330,24 +1357,29 @@ Male late
 <h3>Unadjusted effect sizes</h3>
 <div id="plot-1" class="section level4">
 <h4>Plot</h4>
-<p>Uses the variant effect sizes output by GEMMA, without applying any shrinkage (i.e. this is the data that was adjusted using <code>mashr</code>).</p>
-<pre class="r"><code>p1 &lt;- hex_plot(&quot;beta_female_early_raw&quot;, 
-           &quot;beta_male_early_raw&quot;, 
-           &quot;Effect on female fitness&quot;, 
-           NULL,
-           &quot;A. Early life fitness&quot;,
-           xlim = c(-1, 1),
-           ylim = c(-1, 1))
-
-p2 &lt;- hex_plot(&quot;beta_female_late_raw&quot;, 
-           &quot;beta_male_late_raw&quot;, 
-           &quot;Effect on female fitness&quot;, 
-           NULL,
-           &quot;B. Late life fitness&quot;,
-           xlim = c(-1, 1),
-           ylim = c(-1, 1))
-
-grid.arrange(p1, p2, ncol = 2, left = &quot;Effect on male fitness&quot;)</code></pre>
+<p>Uses the variant effect sizes output by GEMMA, without applying any shrinkage (i.e. this is the input data that was adjusted using <code>mashr</code>).</p>
+<pre class="r"><code>bind_rows(
+  SNP_clumps %&gt;%
+    filter(LD_subset) %&gt;%  # ensure only the LD SNPs from mashr are plotted
+    select(female = beta_female_early_raw, male = beta_male_early_raw) %&gt;% 
+    mutate(age_class = &quot;A. Early-life fitness&quot;),
+  SNP_clumps %&gt;%
+    filter(LD_subset) %&gt;%  # ensure only the LD SNPs from mashr are plotted
+    select(female = beta_female_late_raw, male = beta_male_late_raw) %&gt;% 
+    mutate(age_class = &quot;B. Late-life fitness&quot;)) %&gt;% 
+  ggplot(aes(female, male)) + 
+  geom_abline(linetype = 2) + 
+  geom_vline(xintercept = 0, linetype = 3) +
+  geom_hline(yintercept = 0, linetype = 3) +
+  stat_binhex(bins = 50)  +
+  geom_density_2d(colour = &quot;white&quot;, alpha = 0.6) + 
+  scale_fill_viridis_c() + 
+  facet_wrap(~ age_class) +
+  theme_bw() + xlab(&quot;Effect on female fitness&quot;) + ylab(&quot;Effect on male fitness&quot;) +
+  theme(legend.position = &quot;none&quot;,
+        strip.background = element_blank(),
+        strip.text = element_text(hjust=0)) + 
+  theme(text = element_text(family = &quot;Raleway&quot;, size = 12))</code></pre>
 <p><img src="figure/plot_models_variant_effects.Rmd/hex3-1.png" width="864" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-hex3-1">
@@ -1513,7 +1545,7 @@ Male late
 </div>
 <div id="average-effect-sizes-are-negative" class="section level2 tabset">
 <h2>Average effect sizes are negative</h2>
-<p>Each of the following four tests is an intercept-only linear model, weighted by the inverse of the standard error for the focal variant’s effect size (so, loci where the effect effect size was measured with more precision are weighted more heavily). The tests are run on the LD-pruned subset of SNPs, minimising pseudoreplication. A non-zero intercept term indicates that major (or minor) alleles tend to have consistently positive or negative associations with the focal fitness trait.</p>
+<p>Each of the following four tests is an intercept-only linear model, weighted by the inverse of the standard error for the focal variant’s effect size (so, loci where the effect effect size was measured with more precision are weighted more heavily). The tests are run on the LD-pruned subset of SNPs, minimising pseudoreplication. An intercept term less than zero indicates that on average, the minor allele tends to be associated with lower values of the focal fitness trait (compared to the major allele).</p>
 <p>These results indicate that the minor allele tends to <em>reduce</em> fitness, relative to the major allele. It’s a weak effect (note the small value in the Estimate column), this may reflect the large uncertainty with which the effect sizes are measured, in addition to a true biological result that most loci have little or no relationship with the fitness traits we measured.</p>
 <div id="female-early-life" class="section level3">
 <h3>Female early-life</h3>
@@ -1686,11 +1718,11 @@ grid_arrange_shared_legend(p1, p2)</code></pre>
 </div>
 <div id="investigating-pleiotropy-and-polygenicity-of-fitness" class="section level2">
 <h2>Investigating pleiotropy and polygenicity of fitness</h2>
-<p>Inspired by Boyle et al. 2017 (<em>Cell</em>, specifically the analysis in their Figure 1C), we sorted all the variants in order of effect size on female fitness, placed the variants in bins of 1000, and then calculated the average effect size for each bin for both male and female fitness. This analysis was performed on the raw SNP effect sizes from GEMMA, pruned to a set of SNPs in approximate LD with one another.</p>
+<p>Inspired by Boyle et al. 2017 (<em>Cell</em>, specifically the analysis in their Figure 1C), we sorted all the variants in order of effect size on female fitness, placed the variants in bins of 1000, and then calculated the average effect size for each bin for both male and female fitness. This analysis was performed on the raw SNP effect sizes from GEMMA, pruned to a set of 208987 SNPs in approximate LD with one another.</p>
 <p>If there is pleiotropy between male and female fitness, we would predict a correlation between the effect sizes for male and female fitness; on the contrary if there were no pleiotropy, we would see no correlation.</p>
 <p>Moreover, if fitness is highly polygenic (‘omnigenic’; Boyle et al. 2017), we predict a tight, straight line relationship, because each bin would contain some variants with small but genuine associations with fitness, and these effects would replicate in the other fitness trait. On the contrary if genetic variance in fitness stems from just a few genes with larger effects, the relationship between male and female fitness would be flat in the center and sloped at the extremes.</p>
-<p>Figure 4 shows that there was a very tight correlation between the average effects of the variants in each bin on male and female fitness. The data therefore suggest that variants associated with male fitness tend to also affect female fitness (in the same direction), and that a very large number of loci have small, concordant effects on fitness in both sexes.</p>
-<p>Interestingly there appears to be a curve in Figure 4A to the left of the x-axis, indicating that variants where the minor allele is strongly, negatively associated with female fitness are (on average) less negatively associated with male fitness than expected based on predictions from variants with weaker effects on female fitness. One possible explanation is that alleles that are highly highly detrimental to both sexes are usually purged by selection (or at least kept below the 5% MAF threshold that we used), whereas female-harming alleles that are neutral or beneficial in males are purged less often, resulting a greater proportion of female-limited or sexually antagonistic alleles towards the left of the x-axis.</p>
+<p>Figure 3 shows that there was a very tight correlation between the average effects of the variants in each bin on male and female fitness. The data therefore suggest that variants associated with male fitness tend to also affect female fitness (in the same direction), and that a very large number of loci have small, concordant effects on fitness in both sexes.</p>
+<p>Interestingly there appears to be a curve in Figure 3A to the left of the x-axis, indicating that variants where the minor allele is strongly, negatively associated with female fitness are (on average) less negatively associated with male fitness than expected based on predictions from variants with weaker effects on female fitness. One possible explanation is that alleles that are highly highly detrimental to both sexes are usually purged by selection (or at least kept below the 5% MAF threshold that we used), whereas female-harming alleles that are neutral or beneficial in males are purged less often, resulting a greater proportion of female-limited or sexually antagonistic alleles towards the left of the x-axis.</p>
 <pre class="r"><code>p1_data &lt;- SNP_clumps %&gt;%
   filter(LD_subset) %&gt;% # The figure looks the same whether or not the data are thinned to the LD set of SNPs
   arrange(beta_female_early_raw) %&gt;%
@@ -1723,44 +1755,7 @@ boyle_plot &lt;- bind_rows(p1_data, p2_data) %&gt;%
   theme(text = element_text(family = &quot;Raleway&quot;, size = 12))
 
 boyle_plot</code></pre>
-<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-10-1">
-Past versions of unnamed-chunk-10-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-10-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/652106368c95ac4a04b2383d560d3c8073990f18/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-10-1.png" target="_blank">6521063</a>
-</td>
-<td>
-lukeholman
-</td>
-<td>
-2022-02-22
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
 <pre><code>quartz_off_screen 
                 2 </code></pre>
 <!-- ## Effect of the minor allele -->
@@ -1975,11 +1970,14 @@ focal_dat &lt;- rbind(
     as.data.frame(mat_list[[2]]) %&gt;% 
       mutate(pp = &quot;B. Late-life fitness&quot;)) 
 
+labs &lt;- c(&quot;Negative&quot;, &quot;Weakly negative&quot;, &quot;Weakly positive&quot;, &quot;Positive&quot;)
+
 fig_4_top_row &lt;- focal_dat %&gt;% 
   ggplot(aes(Var1, Freq, fill = Var2)) + 
   facet_wrap(~ pp) + 
   geom_bar(stat=&quot;identity&quot;, colour = &quot;grey20&quot;) +
-  scale_fill_manual(values = cols, name = &quot;Association with\nmale fitness&quot;) + 
+  scale_fill_manual(values = cols, name = &quot;Association with\nmale fitness&quot;,
+                    labels = labs) + 
   xlab(&quot;Association with female fitness&quot;) + 
   ylab(&quot;Number of variants&quot;) + 
   theme_bw() + 
@@ -1992,13 +1990,13 @@ fig_4_top_row &lt;- focal_dat %&gt;%
 # focal_dat$Freq[focal_dat$pp == &quot;C. Early-life fitness&quot;] %&gt;% sum()
 
 fig_4_top_row</code></pre>
-<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-11-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-10-1.png" width="768" style="display: block; margin: auto;" /></p>
 <p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-11-1">
-Past versions of unnamed-chunk-11-1.png
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-10-1">
+Past versions of unnamed-chunk-10-1.png
 </button>
 </p>
-<div id="fig-unnamed-chunk-11-1" class="collapse">
+<div id="fig-unnamed-chunk-10-1" class="collapse">
 <div class="table-responsive">
 <table class="table table-condensed table-hover">
 <thead>
@@ -2017,24 +2015,24 @@ Date
 <tbody>
 <tr>
 <td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/5a59d9f982db9a933d0cea448822677a000087c9/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-11-1.png" target="_blank">5a59d9f</a>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/1bb603c18144f3ad95844a63f1f0dedcab9e2d0b/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-10-1.png" target="_blank">1bb603c</a>
 </td>
 <td>
 lukeholman
 </td>
 <td>
-2021-11-12
+2022-02-23
 </td>
 </tr>
 <tr>
 <td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/8d14298b4d59c2198b6f9c62d415e6adc9b7e658/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-11-1.png" target="_blank">8d14298</a>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/652106368c95ac4a04b2383d560d3c8073990f18/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-10-1.png" target="_blank">6521063</a>
 </td>
 <td>
 lukeholman
 </td>
 <td>
-2021-09-26
+2022-02-22
 </td>
 </tr>
 </tbody>
@@ -2737,14 +2735,63 @@ focal_dat %&gt;%
   ggplot(aes(Var1, Freq, fill = Var2)) + 
   facet_wrap(~ pp) + 
   geom_bar(stat=&quot;identity&quot;, colour = &quot;grey20&quot;) +
-  scale_fill_manual(values = cols, name = &quot;Association with\nlate-life fitness&quot;) + 
+  scale_fill_manual(values = cols, name = &quot;Association with\nlate-life fitness&quot;,
+                    labels = labs) + 
   xlab(&quot;Association with early-life fitness&quot;) + 
   ylab(&quot;Number of variants&quot;) + 
   theme_bw() + 
   theme(panel.grid.major.x = element_blank(),
         strip.background = element_blank(),
         strip.text = element_text(hjust = 0, family = &quot;Raleway&quot;, size = 12))</code></pre>
-<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-13-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-12-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-12-1">
+Past versions of unnamed-chunk-12-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-12-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/1bb603c18144f3ad95844a63f1f0dedcab9e2d0b/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-12-1.png" target="_blank">1bb603c</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2022-02-23
+</td>
+</tr>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/652106368c95ac4a04b2383d560d3c8073990f18/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-12-1.png" target="_blank">6521063</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2022-02-22
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="table-1" class="section level5">
 <h5>Table</h5>
@@ -3492,7 +3539,8 @@ fig_4_bottom_row &lt;- focal_dat %&gt;%
   ggplot(aes(Var1, Freq, fill = Var2)) + 
   facet_wrap(~ pp) + 
   geom_bar(stat=&quot;identity&quot;, colour = &quot;grey20&quot;) +
-  scale_fill_manual(values = cols, name = &quot;Association with\nmale fitness&quot;) + 
+  scale_fill_manual(values = cols, name = &quot;Association with\nmale fitness&quot;,
+                    labels = labs) + 
   xlab(&quot;Association with female fitness&quot;) + 
   ylab(&quot;Number of transcripts&quot;) + 
   theme_bw() + 
@@ -3503,7 +3551,7 @@ fig_4_bottom_row &lt;- focal_dat %&gt;%
         # strip.text = element_text(hjust = 0, size = 12))
 
 fig_4_bottom_row</code></pre>
-<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-16-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-15-1.png" width="768" style="display: block; margin: auto;" /></p>
 </div>
 <div id="table-2" class="section level5">
 <h5>Table</h5>
@@ -4218,14 +4266,15 @@ focal_dat %&gt;%
   ggplot(aes(Var1, Freq, fill = Var2)) + 
   facet_wrap(~ pp) + 
   geom_bar(stat=&quot;identity&quot;, colour = &quot;grey20&quot;) +
-  scale_fill_manual(values = cols, name = &quot;Association with\nlate-life fitness&quot;) + 
+  scale_fill_manual(values = cols, name = &quot;Association with\nlate-life fitness&quot;,
+                    labels = labs) + 
   xlab(&quot;Association with early-life fitness&quot;) + 
   ylab(&quot;Number of transcripts&quot;) + 
   theme_bw() + 
   theme(panel.grid.major.x = element_blank(),
         strip.background = element_blank(),
         strip.text = element_text(hjust = 0, family = &quot;Raleway&quot;, size = 12))</code></pre>
-<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-20-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-19-1.png" width="1056" style="display: block; margin: auto;" /></p>
 </div>
 <div id="table-3" class="section level5">
 <h5>Table</h5>
@@ -5048,9 +5097,7 @@ TWAS_ratios_plot &lt;- antagonism_evidence_ratios_twas %&gt;%
 
 pp &lt;- plot_grid(GWAS_ratios_plot, TWAS_ratios_plot, 
                    labels = c(&#39;A&#39;, &#39;B&#39;), label_size = 12)
-# ggdraw(add_sub(pp, &quot;Evidence ratio (log scale)&quot;, 
-#                vpadding=grid::unit(0,&quot;lines&quot;), 
-#                y=6.3, x=0.5, vjust=6))
+
 ggsave(&quot;figures/fig5_antagonism_ratios.pdf&quot;, pp, width = 8.5, height = 4.9)
 
 pp</code></pre>
@@ -5077,6 +5124,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/1bb603c18144f3ad95844a63f1f0dedcab9e2d0b/docs/figure/plot_models_variant_effects.Rmd/evidence_ratio_plot-1.png" target="_blank">1bb603c</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2022-02-23
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/lukeholman/fitnessGWAS/blob/652106368c95ac4a04b2383d560d3c8073990f18/docs/figure/plot_models_variant_effects.Rmd/evidence_ratio_plot-1.png" target="_blank">6521063</a>
@@ -5415,7 +5473,56 @@ blank &lt;- ggplot() + theme_void()
 
 fig_6_models &lt;- grid.arrange(
 grid.arrange(p1, p2, ncol = 2), grid.arrange(blank, p3, blank, nrow = 1, widths = c(0.2,0.6,0.2)))</code></pre>
-<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-27-1.png" width="672" style="display: block; margin: auto;" /><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-27-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-26-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-26-1">
+Past versions of unnamed-chunk-26-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-26-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/8d14298b4d59c2198b6f9c62d415e6adc9b7e658/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-26-1.png" target="_blank">8d14298</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2021-09-26
+</td>
+</tr>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/e112260eb7edb940edc701a4180d2cf98f9d1145/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-26-1.png" target="_blank">e112260</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2021-03-04
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-26-2.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>ggsave(&quot;figures/fig6_models.pdf&quot;, fig_6_models, width = 6, height = 7)</code></pre>
 <br>
 <p>

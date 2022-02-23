@@ -479,16 +479,16 @@ This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a> analysi
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreed573064c5223b276f7abcd63aa97f01e6f19643atargetblankd573064a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/lukeholman/fitnessGWAS/tree/d573064c5223b276f7abcd63aa97f01e6f19643a" target="_blank">d573064</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree86444b2dbf34d4aaae69120242409639b78bef20targetblank86444b2a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/lukeholman/fitnessGWAS/tree/86444b2dbf34d4aaae69120242409639b78bef20" target="_blank">86444b2</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreed573064c5223b276f7abcd63aa97f01e6f19643atargetblankd573064a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree86444b2dbf34d4aaae69120242409639b78bef20targetblank86444b2a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/lukeholman/fitnessGWAS/tree/d573064c5223b276f7abcd63aa97f01e6f19643a" target="_blank">d573064</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/lukeholman/fitnessGWAS/tree/86444b2dbf34d4aaae69120242409639b78bef20" target="_blank">86444b2</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -503,6 +503,7 @@ Ignored files:
     Ignored:    .pversion
     Ignored:    analysis/.DS_Store
     Ignored:    analysis/correlations_SNP_effects_cache/
+    Ignored:    analysis/figure/
     Ignored:    code/.DS_Store
     Ignored:    code/Drosophila_GWAS.Rmd
     Ignored:    data/.DS_Store
@@ -518,12 +519,27 @@ Ignored files:
 
 Untracked files:
     Untracked:  big_model.rds
+    Untracked:  code/pdf_supp_material.Rmd
     Untracked:  code/quant_gen_1.R
     Untracked:  data/input/genomic_relatedness_matrix.rds
+    Untracked:  figures/fig3_boyle_plot.pdf
+    Untracked:  figures/fig5_antagonism_ratios.pdf
 
 Unstaged changes:
     Modified:   .gitignore
+    Deleted:    figures/GWAS_mixture_proportions.rds
+    Deleted:    figures/GWAS_stats_figure.pdf
+    Deleted:    figures/TWAS_mixture_proportions.rds
+    Deleted:    figures/TWAS_stats_figure.pdf
+    Deleted:    figures/antagonism_ratios.pdf
+    Deleted:    figures/boyle_plot.pdf
+    Deleted:    figures/boyle_plot.png
+    Deleted:    figures/composite_mixture_figure.pdf
+    Deleted:    figures/eff_size_histos.pdf
     Modified:   figures/fig2_SNPs_manhattan_plot.png
+    Modified:   figures/fig4_quartiles_plot.png
+    Modified:   figures/fig6_models.pdf
+    Deleted:    figures/stats_figure.pdf
 
 </code></pre>
 <p>
@@ -562,6 +578,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/86444b2dbf34d4aaae69120242409639b78bef20/analysis/plot_models_variant_effects.Rmd" target="_blank">86444b2</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2022-02-23
+</td>
+<td>
+wflow_publish(“analysis/plot_models_variant_effects.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/58de93a3e57d893dde7350fa504c5b1b35061ac8/docs/plot_models_variant_effects.html" target="_blank">58de93a</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2022-02-23
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -801,6 +851,8 @@ library(kableExtra)
 library(cowplot)
 library(grid)
 library(RColorBrewer)
+library(staplr) # for removing blank page from saved PDF file
+
 font_add_google(name = &quot;Raleway&quot;, family = &quot;Raleway&quot;, regular.wt = 400, bold.wt = 700) # Install font from Google Fonts
 showtext_auto()
 
@@ -1578,19 +1630,18 @@ manhattan_data &lt;- manhattan_data %&gt;%
     left_join(max_pos, by = &quot;chr&quot;) %&gt;%
     mutate(position = position + max_pos) 
 
+# left_axis_label &lt;- expression(paste(&quot;Effect on female early-life fitness (-&quot;, Log[10], &quot; p)&quot;))
+
 
 p1 &lt;- manhattan_data %&gt;%
   ggplot(aes(position, -1 * log10(pvalue_female_early_raw), group = chr, colour = chr, stroke = 0.2)) + 
   geom_point(size = 0.5) +
-  # geom_point(data = manhattan_data %&gt;% filter(top_SA), 
-  #            aes(y = 8), size = 3, pch = 6) +
   scale_colour_brewer(palette = &quot;Paired&quot;, name = &quot;Chromosome&quot;) + 
   scale_y_continuous(limits = c(0,8)) +
-  ylab(expression(paste(&quot;Effect on female early-life fitness (-&quot;, Log[10], &quot; p)&quot;))) + 
-  xlab(&quot;&quot;) +
+  ylab(&quot;&quot;) +  xlab(&quot;&quot;) +
   theme_bw() + 
   theme(axis.text.x = element_blank(),
-        # text = element_text(family = &quot;Raleway&quot;, size = 12),
+        text = element_text(family = &quot;Raleway&quot;, size = 12),
         panel.border = element_blank(),
         axis.ticks.x = element_blank())
 
@@ -1598,12 +1649,11 @@ p2 &lt;- manhattan_data %&gt;%
   ggplot(aes(position, -1 * log10(pvalue_male_early_raw), group = chr, colour = chr, stroke = 0.2)) + 
   geom_point(size = 0.5) +
   scale_colour_brewer(palette = &quot;Paired&quot;, name = &quot;Chromosome&quot;) + 
-  ylab(expression(paste(&quot;Effect on male early-life fitness (-&quot;, Log[10], &quot; p)&quot;))) + 
-  xlab(&quot;Position&quot;) +
+  xlab(&quot;Position&quot;) + ylab(&quot;&quot;) +
   scale_y_reverse(limits = c(8,0)) +
   theme_bw() + 
   theme(axis.text.x = element_blank(),
-        # text = element_text(family = &quot;Raleway&quot;, size = 12),
+        text = element_text(family = &quot;Raleway&quot;, size = 12),
         panel.border = element_blank(),
         axis.ticks.x = element_blank())
 
@@ -1615,20 +1665,64 @@ grid_arrange_shared_legend &lt;- function(..., ncol = length(list(...)), nrow = 
   legend &lt;- g[[which(sapply(g, function(x) x$name) == &quot;guide-box&quot;)]]
   lheight &lt;- sum(legend$height)
   lwidth &lt;- sum(legend$width)
-  gl &lt;- lapply(plots, function(x) x + theme(legend.position=&quot;none&quot;))
+  gl &lt;- lapply(plots, function(x) x + theme(legend.position = &quot;none&quot;))
   gl &lt;- c(gl, ncol = ncol, nrow = nrow)
   
-  combined &lt;- arrangeGrob(arrangeGrob(gl[[1]], gl[[2]], nrow = 2),
+  combined &lt;- arrangeGrob(arrangeGrob(gl[[1]], gl[[2]], nrow = 2, left = &quot;Effect on early-life fitness\n(-Log10 p)&quot;),
                           legend,
                           ncol = 2,
                           widths = unit.c(unit(1, &quot;npc&quot;) - lwidth, lwidth))
-  
-  grid.newpage()
-  grid.draw(combined)
-  invisible(combined) # return gtable invisibly
+  return(combined)
+  # grid.newpage()
+  # grid.draw(combined)
+  # invisible(combined) # return gtable invisibly
 }
 
 grid_arrange_shared_legend(p1, p2)</code></pre>
+<pre><code>TableGrob (1 x 2) &quot;arrange&quot;: 2 grobs
+  z     cells    name              grob
+1 1 (1-1,1-1) arrange   gtable[arrange]
+2 2 (1-1,2-2) arrange gtable[guide-box]</code></pre>
+</div>
+<div id="investigating-pleiotropy-and-polygenicity-of-fitness" class="section level2">
+<h2>Investigating pleiotropy and polygenicity of fitness</h2>
+<p>Inspired by Boyle et al. 2017 (<em>Cell</em>, specifically the analysis in their Figure 1C), we sorted all the variants in order of effect size on female fitness, placed the variants in bins of 1000, and then calculated the average effect size for each bin for both male and female fitness. This analysis was performed on the raw SNP effect sizes from GEMMA, pruned to a set of SNPs in approximate LD with one another.</p>
+<p>If there is pleiotropy between male and female fitness, we would predict a correlation between the effect sizes for male and female fitness; on the contrary if there were no pleiotropy, we would see no correlation.</p>
+<p>Moreover, if fitness is highly polygenic (‘omnigenic’; Boyle et al. 2017), we predict a tight, straight line relationship, because each bin would contain some variants with small but genuine associations with fitness, and these effects would replicate in the other fitness trait. On the contrary if genetic variance in fitness stems from just a few genes with larger effects, the relationship between male and female fitness would be flat in the center and sloped at the extremes.</p>
+<p>Figure 4 shows that there was a very tight correlation between the average effects of the variants in each bin on male and female fitness. The data therefore suggest that variants associated with male fitness tend to also affect female fitness (in the same direction), and that a very large number of loci have small, concordant effects on fitness in both sexes.</p>
+<p>Interestingly there appears to be a curve in Figure 4A to the left of the x-axis, indicating that variants where the minor allele is strongly, negatively associated with female fitness are (on average) less negatively associated with male fitness than expected based on predictions from variants with weaker effects on female fitness. One possible explanation is that alleles that are highly highly detrimental to both sexes are usually purged by selection (or at least kept below the 5% MAF threshold that we used), whereas female-harming alleles that are neutral or beneficial in males are purged less often, resulting a greater proportion of female-limited or sexually antagonistic alleles towards the left of the x-axis.</p>
+<pre class="r"><code>p1_data &lt;- SNP_clumps %&gt;%
+  filter(LD_subset) %&gt;% # The figure looks the same whether or not the data are thinned to the LD set of SNPs
+  arrange(beta_female_early_raw) %&gt;%
+  mutate(bin = c(rep(1:floor(n()/1000), each = 1000), 
+                 rep(floor(n()/1000) + 1, each = n() %% 1000)),
+         facet = &quot;A. Early-life fitness&quot;) %&gt;%
+  group_by(bin, facet) %&gt;%
+  summarise(females = mean(beta_female_early_raw), males = mean(beta_male_early_raw)) 
+
+p2_data &lt;- SNP_clumps %&gt;%
+  filter(LD_subset) %&gt;% 
+  arrange(beta_female_late_raw) %&gt;%
+  mutate(bin = c(rep(1:floor(n()/1000), each = 1000), 
+                 rep(floor(n()/1000) + 1, each = n() %% 1000)),
+         facet = &quot;B. Late-life fitness&quot;) %&gt;%
+  group_by(bin, facet) %&gt;%
+  summarise(females = mean(beta_female_late_raw), males = mean(beta_male_late_raw))
+
+boyle_plot &lt;- bind_rows(p1_data, p2_data) %&gt;% 
+  ggplot(aes(females, males)) +
+  geom_hline(yintercept = 0, linetype = 2) +
+  geom_vline(xintercept = 0, linetype = 2) +
+  geom_point(alpha = 0.8) +
+  stat_smooth(method = &quot;lm&quot;, formula = y ~ x + I(x^2), size = 0.6) +
+  facet_wrap(~ facet) +
+  xlab(&quot;Mean effect size on female fitness&quot;) + ylab(&quot;Mean effect size on male fitness&quot;) + 
+  theme_bw() +
+  theme(strip.background = element_blank(),
+        strip.text = element_text(hjust=0)) + 
+  theme(text = element_text(family = &quot;Raleway&quot;, size = 12))
+
+boyle_plot</code></pre>
 <p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-10-1">
@@ -1661,107 +1755,6 @@ lukeholman
 </td>
 <td>
 2022-02-22
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-<div id="investigating-pleiotropy-and-polygenicity-of-fitness" class="section level2">
-<h2>Investigating pleiotropy and polygenicity of fitness</h2>
-<p>Inspired by Boyle et al. 2017 (<em>Cell</em>, specifically the analysis in their Figure 1C), we sorted all the variants in order of effect size on female fitness, placed the variants in bins of 1000, and then calculated the average effect size for each bin for both male and female fitness. This analysis was performed on the raw SNP effect sizes from GEMMA, pruned to a set of SNPs in approximate LD with one another.</p>
-<p>If there is pleiotropy between male and female fitness, we would predict a correlation between the effect sizes for male and female fitness; on the contrary if there were no pleiotropy, we would see no correlation.</p>
-<p>Moreover, if fitness is highly polygenic (‘omnigenic’; Boyle et al. 2017), we predict a tight, straight line relationship, because each bin would contain some variants with small but genuine associations with fitness, and these effects would replicate in the other fitness trait. On the contrary if genetic variance in fitness stems from just a few genes with larger effects, the relationship between male and female fitness would be flat in the center and sloped at the extremes.</p>
-<p>Figure 4 shows that there was a very tight correlation between the average effects of the variants in each bin on male and female fitness. The data therefore suggest that variants associated with male fitness tend to also affect female fitness (in the same direction), and that a very large number of loci have small, concordant effects on fitness in both sexes.</p>
-<p>Interestingly there appears to be a curve in Figure 4A to the left of the x-axis, indicating that variants where the minor allele is strongly, negatively associated with female fitness are (on average) less negatively associated with male fitness than expected based on predictions from variants with weaker effects on female fitness. One possible explanation is that alleles that are highly highly detrimental to both sexes are usually purged by selection (or at least kept below the 5% MAF threshold that we used), whereas female-harming alleles that are neutral or beneficial in males are purged less often, resulting a greater proportion of female-limited or sexually antagonistic alleles towards the left of the x-axis.</p>
-<pre class="r"><code>p1 &lt;- SNP_clumps %&gt;%
-  filter(LD_subset) %&gt;% # The figure looks the same whether or not the data are thinned to the LD set of SNPs
-  arrange(beta_female_early_raw) %&gt;%
-  mutate(bin = c(rep(1:floor(n()/1000), each = 1000), 
-                 rep(floor(n()/1000) + 1, each = n() %% 1000)),
-         age = &quot;A. Early life&quot;) %&gt;%
-  group_by(bin, age) %&gt;%
-  summarise(females = mean(beta_female_early_raw), males = mean(beta_male_early_raw)) %&gt;%
-  ggplot(aes(females, males)) +
-  geom_hline(yintercept = 0, linetype = 2) +
-  geom_vline(xintercept = 0, linetype = 2) +
-  geom_point() +
-  stat_smooth(method = &quot;lm&quot;, formula = y ~ x + I(x^2), size = 0.6) +
-  facet_wrap(~ age) +
-  scale_y_continuous(limits = c(-0.1, 0.2)) +
-  xlab(NULL) + ylab(NULL) + 
-  theme_bw() +
-  theme(strip.background = element_blank(),
-        strip.text = element_text(hjust=0))   + 
-  theme(text = element_text(family = &quot;Raleway&quot;, size = 12))
-
-p2 &lt;- SNP_clumps %&gt;%
-  filter(LD_subset) %&gt;% 
-  arrange(beta_female_late_raw) %&gt;%
-  mutate(bin = c(rep(1:floor(n()/1000), each = 1000), 
-                 rep(floor(n()/1000) + 1, each = n() %% 1000)),
-         age = &quot;B. Late life&quot;) %&gt;%
-  group_by(bin, age) %&gt;%
-  summarise(females = mean(beta_female_late_raw), males = mean(beta_male_late_raw)) %&gt;%
-  ggplot(aes(females, males)) +
-  geom_hline(yintercept = 0, linetype = 2) +
-  geom_vline(xintercept = 0, linetype = 2) +
-  geom_point() +
-  stat_smooth(method = &quot;lm&quot;, formula = y ~ x + I(x^2), size = 0.6) +
-  facet_wrap(~ age) +
-  scale_y_continuous(limits = c(-0.1, 0.2)) +
-  xlab(NULL) + ylab(NULL) + 
-  theme_bw() +
-  theme(strip.background = element_blank(),
-        strip.text = element_text(hjust=0))   + 
-  theme(text = element_text(family = &quot;Raleway&quot;, size = 12))
-
-grid.arrange(p1, p2, nrow = 1, bottom = &quot;Mean effect size on female fitness&quot;, 
-  left = &quot;Mean effect size on male fitness&quot;)</code></pre>
-<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-11-1">
-Past versions of unnamed-chunk-11-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-11-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/5a59d9f982db9a933d0cea448822677a000087c9/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-11-1.png" target="_blank">5a59d9f</a>
-</td>
-<td>
-lukeholman
-</td>
-<td>
-2021-11-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/8d14298b4d59c2198b6f9c62d415e6adc9b7e658/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-11-1.png" target="_blank">8d14298</a>
-</td>
-<td>
-lukeholman
-</td>
-<td>
-2021-09-26
 </td>
 </tr>
 </tbody>
@@ -1992,20 +1985,20 @@ fig_4_top_row &lt;- focal_dat %&gt;%
   theme_bw() + 
   theme(panel.grid.major.x = element_blank(),
         strip.background = element_blank(),
-        #strip.text = element_text(hjust = 0, family = &quot;Raleway&quot;, size = 12))
-        strip.text = element_text(hjust = 0, size = 12))
+        text = element_text(family = &quot;Raleway&quot;, size = 12),
+        strip.text = element_text(hjust = 0))
 
 # To count the total number of transcripts tested:
 # focal_dat$Freq[focal_dat$pp == &quot;C. Early-life fitness&quot;] %&gt;% sum()
 
 fig_4_top_row</code></pre>
-<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-12-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-11-1.png" width="768" style="display: block; margin: auto;" /></p>
 <p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-12-1">
-Past versions of unnamed-chunk-12-1.png
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-11-1">
+Past versions of unnamed-chunk-11-1.png
 </button>
 </p>
-<div id="fig-unnamed-chunk-12-1" class="collapse">
+<div id="fig-unnamed-chunk-11-1" class="collapse">
 <div class="table-responsive">
 <table class="table table-condensed table-hover">
 <thead>
@@ -2024,13 +2017,24 @@ Date
 <tbody>
 <tr>
 <td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/652106368c95ac4a04b2383d560d3c8073990f18/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-12-1.png" target="_blank">6521063</a>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/5a59d9f982db9a933d0cea448822677a000087c9/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-11-1.png" target="_blank">5a59d9f</a>
 </td>
 <td>
 lukeholman
 </td>
 <td>
-2022-02-22
+2021-11-12
+</td>
+</tr>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/8d14298b4d59c2198b6f9c62d415e6adc9b7e658/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-11-1.png" target="_blank">8d14298</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2021-09-26
 </td>
 </tr>
 </tbody>
@@ -2740,44 +2744,7 @@ focal_dat %&gt;%
   theme(panel.grid.major.x = element_blank(),
         strip.background = element_blank(),
         strip.text = element_text(hjust = 0, family = &quot;Raleway&quot;, size = 12))</code></pre>
-<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-14-1.png" width="768" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-14-1">
-Past versions of unnamed-chunk-14-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-14-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/652106368c95ac4a04b2383d560d3c8073990f18/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-14-1.png" target="_blank">6521063</a>
-</td>
-<td>
-lukeholman
-</td>
-<td>
-2022-02-22
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-13-1.png" width="768" style="display: block; margin: auto;" /></p>
 </div>
 <div id="table-1" class="section level5">
 <h5>Table</h5>
@@ -3531,86 +3498,12 @@ fig_4_bottom_row &lt;- focal_dat %&gt;%
   theme_bw() + 
   theme(panel.grid.major.x = element_blank(),
         strip.background = element_blank(),
-        #strip.text = element_text(hjust = 0, family = &quot;Raleway&quot;, size = 12))
-        strip.text = element_text(hjust = 0, size = 12))
+        text = element_text(family = &quot;Raleway&quot;, size = 12),
+        strip.text = element_text(hjust = 0))
+        # strip.text = element_text(hjust = 0, size = 12))
 
 fig_4_bottom_row</code></pre>
-<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-17-1.png" width="768" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-17-1">
-Past versions of unnamed-chunk-17-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-17-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/652106368c95ac4a04b2383d560d3c8073990f18/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-17-1.png" target="_blank">6521063</a>
-</td>
-<td>
-lukeholman
-</td>
-<td>
-2022-02-22
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-18-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-18-1">
-Past versions of unnamed-chunk-18-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-18-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/652106368c95ac4a04b2383d560d3c8073990f18/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-18-1.png" target="_blank">6521063</a>
-</td>
-<td>
-lukeholman
-</td>
-<td>
-2022-02-22
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-16-1.png" width="768" style="display: block; margin: auto;" /></p>
 </div>
 <div id="table-2" class="section level5">
 <h5>Table</h5>
@@ -4332,44 +4225,7 @@ focal_dat %&gt;%
   theme(panel.grid.major.x = element_blank(),
         strip.background = element_blank(),
         strip.text = element_text(hjust = 0, family = &quot;Raleway&quot;, size = 12))</code></pre>
-<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-21-1.png" width="1056" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-21-1">
-Past versions of unnamed-chunk-21-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-21-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/652106368c95ac4a04b2383d560d3c8073990f18/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-21-1.png" target="_blank">6521063</a>
-</td>
-<td>
-lukeholman
-</td>
-<td>
-2022-02-22
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-20-1.png" width="1056" style="display: block; margin: auto;" /></p>
 </div>
 <div id="table-3" class="section level5">
 <h5>Table</h5>
@@ -5195,7 +5051,7 @@ pp &lt;- plot_grid(GWAS_ratios_plot, TWAS_ratios_plot,
 # ggdraw(add_sub(pp, &quot;Evidence ratio (log scale)&quot;, 
 #                vpadding=grid::unit(0,&quot;lines&quot;), 
 #                y=6.3, x=0.5, vjust=6))
-ggsave(&quot;figures/antagonism_ratios.pdf&quot;, pp, width = 8.5, height = 4.9)
+ggsave(&quot;figures/fig5_antagonism_ratios.pdf&quot;, pp, width = 8.5, height = 4.9)
 
 pp</code></pre>
 <p><img src="figure/plot_models_variant_effects.Rmd/evidence_ratio_plot-1.png" width="672" style="display: block; margin: auto;" /></p>
@@ -5559,104 +5415,7 @@ blank &lt;- ggplot() + theme_void()
 
 fig_6_models &lt;- grid.arrange(
 grid.arrange(p1, p2, ncol = 2), grid.arrange(blank, p3, blank, nrow = 1, widths = c(0.2,0.6,0.2)))</code></pre>
-<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-28-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-28-1">
-Past versions of unnamed-chunk-28-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-28-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/652106368c95ac4a04b2383d560d3c8073990f18/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-28-1.png" target="_blank">6521063</a>
-</td>
-<td>
-lukeholman
-</td>
-<td>
-2022-02-22
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/8d14298b4d59c2198b6f9c62d415e6adc9b7e658/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-28-1.png" target="_blank">8d14298</a>
-</td>
-<td>
-lukeholman
-</td>
-<td>
-2021-09-26
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/e112260eb7edb940edc701a4180d2cf98f9d1145/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-28-1.png" target="_blank">e112260</a>
-</td>
-<td>
-lukeholman
-</td>
-<td>
-2021-03-04
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-28-2.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-28-2">
-Past versions of unnamed-chunk-28-2.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-28-2" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/652106368c95ac4a04b2383d560d3c8073990f18/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-28-2.png" target="_blank">6521063</a>
-</td>
-<td>
-lukeholman
-</td>
-<td>
-2022-02-22
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-27-1.png" width="672" style="display: block; margin: auto;" /><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-27-2.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>ggsave(&quot;figures/fig6_models.pdf&quot;, fig_6_models, width = 6, height = 7)</code></pre>
 <br>
 <p>
@@ -5682,53 +5441,54 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] RColorBrewer_1.1-2 cowplot_1.0.0      kableExtra_1.3.4   mashr_0.2.38      
- [5] ashr_2.2-47        showtext_0.9-5     showtextdb_3.0     sysfonts_0.8.3    
- [9] Hmisc_4.4-0        Formula_1.2-3      survival_3.2-7     lattice_0.20-41   
-[13] ggbeeswarm_0.6.0   qqman_0.1.4        gridExtra_2.3      forcats_0.5.1     
-[17] stringr_1.4.0      dplyr_1.0.7        purrr_0.3.4        readr_2.0.0       
-[21] tidyr_1.1.4        tibble_3.1.6       ggplot2_3.3.5      tidyverse_1.3.1   
-[25] workflowr_1.7.0   
+ [1] staplr_3.1.1       RColorBrewer_1.1-2 cowplot_1.0.0      kableExtra_1.3.4  
+ [5] mashr_0.2.38       ashr_2.2-47        showtext_0.9-5     showtextdb_3.0    
+ [9] sysfonts_0.8.3     Hmisc_4.4-0        Formula_1.2-3      survival_3.2-7    
+[13] lattice_0.20-41    ggbeeswarm_0.6.0   qqman_0.1.4        gridExtra_2.3     
+[17] forcats_0.5.1      stringr_1.4.0      dplyr_1.0.7        purrr_0.3.4       
+[21] readr_2.0.0        tidyr_1.1.4        tibble_3.1.6       ggplot2_3.3.5     
+[25] tidyverse_1.3.1    workflowr_1.7.0   
 
 loaded via a namespace (and not attached):
-  [1] colorspace_1.4-1    rio_0.5.16          ellipsis_0.3.2     
-  [4] rprojroot_1.3-2     htmlTable_1.13.3    base64enc_0.1-3    
-  [7] fs_1.4.1            rstudioapi_0.13     hexbin_1.28.1      
- [10] farver_2.0.3        bit64_0.9-7         fansi_0.4.1        
- [13] mvtnorm_1.1-0       lubridate_1.7.10    xml2_1.3.2         
- [16] splines_4.0.3       knitr_1.32          jsonlite_1.7.3     
- [19] broom_0.7.11        cluster_2.1.0       dbplyr_2.1.1       
- [22] png_0.1-7           compiler_4.0.3      httr_1.4.2         
- [25] backports_1.1.7     assertthat_0.2.1    Matrix_1.2-18      
- [28] cli_3.1.0           later_1.0.0         acepack_1.4.1      
- [31] htmltools_0.5.0     tools_4.0.3         gtable_0.3.0       
- [34] glue_1.4.2          Rcpp_1.0.4.6        carData_3.0-4      
- [37] cellranger_1.1.0    jquerylib_0.1.1     vctrs_0.3.8        
- [40] nlme_3.1-149        svglite_1.2.3       xfun_0.26          
- [43] ps_1.3.3            openxlsx_4.1.5      rvest_1.0.2        
- [46] lifecycle_1.0.1     irlba_2.3.3         getPass_0.2-2      
- [49] MASS_7.3-53         scales_1.1.1        vroom_1.5.3        
- [52] hms_1.1.1           promises_1.1.0      parallel_4.0.3     
- [55] curl_4.3            yaml_2.2.1          memoise_1.1.0      
- [58] gdtools_0.2.2       rpart_4.1-15        RSQLite_2.2.0      
- [61] latticeExtra_0.6-29 calibrate_1.7.7     stringi_1.5.3      
- [64] SQUAREM_2020.2      rmeta_3.0           highr_0.8          
- [67] checkmate_2.0.0     zip_2.1.1           truncnorm_1.0-8    
- [70] systemfonts_0.2.2   rlang_0.4.12        pkgconfig_2.0.3    
- [73] evaluate_0.14       invgamma_1.1        labeling_0.3       
- [76] htmlwidgets_1.5.1   bit_1.1-15.2        processx_3.5.2     
- [79] tidyselect_1.1.0    plyr_1.8.6          magrittr_2.0.1     
- [82] R6_2.4.1            generics_0.0.2      DBI_1.1.0          
- [85] mgcv_1.8-33         pillar_1.6.4.9003   haven_2.3.1        
- [88] whisker_0.4         foreign_0.8-80      withr_2.4.3        
- [91] abind_1.4-5         mixsqp_0.3-43       nnet_7.3-14        
- [94] car_3.0-8           modelr_0.1.8        crayon_1.4.2       
- [97] utf8_1.1.4          tzdb_0.1.2          rmarkdown_2.11     
-[100] jpeg_0.1-8.1        isoband_0.2.1       readxl_1.3.1       
-[103] data.table_1.14.2   blob_1.2.1          callr_3.7.0        
-[106] git2r_0.27.1        webshot_0.5.2       reprex_2.0.1       
-[109] digest_0.6.25       httpuv_1.5.3.1      munsell_0.5.0      
-[112] viridisLite_0.3.0   beeswarm_0.4.0      vipor_0.4.5        </code></pre>
+  [1] readxl_1.3.1        backports_1.1.7     systemfonts_0.2.2  
+  [4] plyr_1.8.6          splines_4.0.3       digest_0.6.25      
+  [7] invgamma_1.1        htmltools_0.5.0     SQUAREM_2020.2     
+ [10] fansi_0.4.1         magrittr_2.0.1      checkmate_2.0.0    
+ [13] memoise_1.1.0       cluster_2.1.0       tzdb_0.1.2         
+ [16] openxlsx_4.1.5      modelr_0.1.8        vroom_1.5.3        
+ [19] svglite_1.2.3       jpeg_0.1-8.1        colorspace_1.4-1   
+ [22] blob_1.2.1          rvest_1.0.2         haven_2.3.1        
+ [25] xfun_0.26           tcltk_4.0.3         callr_3.7.0        
+ [28] crayon_1.4.2        jsonlite_1.7.3      hexbin_1.28.1      
+ [31] glue_1.4.2          gtable_0.3.0        webshot_0.5.2      
+ [34] car_3.0-8           abind_1.4-5         scales_1.1.1       
+ [37] mvtnorm_1.1-0       DBI_1.1.0           Rcpp_1.0.4.6       
+ [40] isoband_0.2.1       viridisLite_0.3.0   htmlTable_1.13.3   
+ [43] foreign_0.8-80      bit_1.1-15.2        truncnorm_1.0-8    
+ [46] htmlwidgets_1.5.1   httr_1.4.2          calibrate_1.7.7    
+ [49] acepack_1.4.1       ellipsis_0.3.2      pkgconfig_2.0.3    
+ [52] rJava_0.9-12        farver_2.0.3        nnet_7.3-14        
+ [55] dbplyr_2.1.1        utf8_1.1.4          tidyselect_1.1.0   
+ [58] labeling_0.3        rlang_0.4.12        later_1.0.0        
+ [61] munsell_0.5.0       cellranger_1.1.0    tools_4.0.3        
+ [64] cli_3.1.0           generics_0.0.2      RSQLite_2.2.0      
+ [67] broom_0.7.11        evaluate_0.14       yaml_2.2.1         
+ [70] processx_3.5.2      knitr_1.32          bit64_0.9-7        
+ [73] fs_1.4.1            zip_2.1.1           nlme_3.1-149       
+ [76] whisker_0.4         xml2_1.3.2          compiler_4.0.3     
+ [79] rstudioapi_0.13     beeswarm_0.4.0      curl_4.3           
+ [82] png_0.1-7           reprex_2.0.1        stringi_1.5.3      
+ [85] highr_0.8           ps_1.3.3            gdtools_0.2.2      
+ [88] Matrix_1.2-18       vctrs_0.3.8         pillar_1.6.4.9003  
+ [91] lifecycle_1.0.1     jquerylib_0.1.1     data.table_1.14.2  
+ [94] irlba_2.3.3         httpuv_1.5.3.1      R6_2.4.1           
+ [97] latticeExtra_0.6-29 promises_1.1.0      rio_0.5.16         
+[100] vipor_0.4.5         MASS_7.3-53         assertthat_0.2.1   
+[103] rprojroot_1.3-2     withr_2.4.3         mgcv_1.8-33        
+[106] parallel_4.0.3      hms_1.1.1           rpart_4.1-15       
+[109] rmarkdown_2.11      carData_3.0-4       git2r_0.27.1       
+[112] mixsqp_0.3-43       getPass_0.2-2       lubridate_1.7.10   
+[115] base64enc_0.1-3     rmeta_3.0          </code></pre>
 </div>
 </div>
 </div>

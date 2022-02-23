@@ -22,6 +22,8 @@ library(kableExtra)
 library(cowplot)
 library(grid)
 library(RColorBrewer)
+library(staplr) # for removing blank page from saved PDF file
+
 font_add_google(name = "Raleway", family = "Raleway", regular.wt = 400, bold.wt = 700) # Install font from Google Fonts
 showtext_auto()
 
@@ -146,10 +148,6 @@ grid.arrange(p1, p2, ncol = 2, left = "Effect on male fitness")
 
 ```{r echo=FALSE, fig.showtext=TRUE, results='hide'}
 fig2_top <- grid.arrange(p1, p2, ncol = 2, left = "Effect on male fitness")
-
-# ggsave("figures/SNP_effect_ED.pdf",
-#        grid.arrange(p1, p2, ncol = 2, left = "Effect on male fitness"),
-#   height = 4, width = 8)
 ```
 
 
@@ -277,7 +275,7 @@ summary(lm(beta_male_late_raw ~ 1,
 
 **Figure legend**: Manhattan plot showing the p-values (-log_{10} transformed) for each variant, from mixed model GWAS of female (top) and male (bottom) early-life fitness testing the null hypothesis that the two alleles are associated with equal fitness values.  
 
-```{r fig.height=12}
+```{r manhattan, fig.height=12, fig.showtext=TRUE}
 manhattan_data <- tbl(db, "univariate_lmm_results") %>% 
   select(SNP, starts_with("P_"),
          pvalue_female_early_raw, pvalue_male_early_raw) %>%
@@ -301,19 +299,18 @@ manhattan_data <- manhattan_data %>%
     left_join(max_pos, by = "chr") %>%
     mutate(position = position + max_pos) 
 
+# left_axis_label <- expression(paste("Effect on female early-life fitness (-", Log[10], " p)"))
+
 
 p1 <- manhattan_data %>%
   ggplot(aes(position, -1 * log10(pvalue_female_early_raw), group = chr, colour = chr, stroke = 0.2)) + 
   geom_point(size = 0.5) +
-  # geom_point(data = manhattan_data %>% filter(top_SA), 
-  #            aes(y = 8), size = 3, pch = 6) +
   scale_colour_brewer(palette = "Paired", name = "Chromosome") + 
   scale_y_continuous(limits = c(0,8)) +
-  ylab(expression(paste("Effect on female early-life fitness (-", Log[10], " p)"))) + 
-  xlab("") +
+  ylab("") +  xlab("") +
   theme_bw() + 
   theme(axis.text.x = element_blank(),
-        # text = element_text(family = "Raleway", size = 12),
+        text = element_text(family = "Raleway", size = 12),
         panel.border = element_blank(),
         axis.ticks.x = element_blank())
 
@@ -321,12 +318,11 @@ p2 <- manhattan_data %>%
   ggplot(aes(position, -1 * log10(pvalue_male_early_raw), group = chr, colour = chr, stroke = 0.2)) + 
   geom_point(size = 0.5) +
   scale_colour_brewer(palette = "Paired", name = "Chromosome") + 
-  ylab(expression(paste("Effect on male early-life fitness (-", Log[10], " p)"))) + 
-  xlab("Position") +
+  xlab("Position") + ylab("") +
   scale_y_reverse(limits = c(8,0)) +
   theme_bw() + 
   theme(axis.text.x = element_blank(),
-        # text = element_text(family = "Raleway", size = 12),
+        text = element_text(family = "Raleway", size = 12),
         panel.border = element_blank(),
         axis.ticks.x = element_blank())
 
@@ -338,17 +334,17 @@ grid_arrange_shared_legend <- function(..., ncol = length(list(...)), nrow = 1) 
   legend <- g[[which(sapply(g, function(x) x$name) == "guide-box")]]
   lheight <- sum(legend$height)
   lwidth <- sum(legend$width)
-  gl <- lapply(plots, function(x) x + theme(legend.position="none"))
+  gl <- lapply(plots, function(x) x + theme(legend.position = "none"))
   gl <- c(gl, ncol = ncol, nrow = nrow)
   
-  combined <- arrangeGrob(arrangeGrob(gl[[1]], gl[[2]], nrow = 2),
+  combined <- arrangeGrob(arrangeGrob(gl[[1]], gl[[2]], nrow = 2, left = "Effect on early-life fitness\n(-Log10 p)"),
                           legend,
                           ncol = 2,
                           widths = unit.c(unit(1, "npc") - lwidth, lwidth))
-  
-  grid.newpage()
-  grid.draw(combined)
-  invisible(combined) # return gtable invisibly
+  return(combined)
+  # grid.newpage()
+  # grid.draw(combined)
+  # invisible(combined) # return gtable invisibly
 }
 
 grid_arrange_shared_legend(p1, p2)
@@ -358,9 +354,9 @@ grid_arrange_shared_legend(p1, p2)
 ```{r make_fig2, echo=FALSE, results='hide', message=F, warning=F, fig.showtext=TRUE}
 # Make composite figure 2, with SNP effects and Manhattan plot
 
-try(png("figures/fig2_SNPs_manhattan_plot.png", height = 8, width = 8, units = "in", res = 300))
-try(grid.arrange(fig2_top, grid_arrange_shared_legend(p1, p2)))
-try(dev.off())
+png("figures/fig2_SNPs_manhattan_plot.png", height = 8, width = 8, res = 300, units = "in")
+grid.arrange(fig2_top, grid_arrange_shared_legend(p1, p2))
+dev.off()
 ```
 
 
@@ -378,66 +374,44 @@ Figure 4 shows that there was a very tight correlation between the average effec
 Interestingly there appears to be a curve in Figure 4A to the left of the x-axis, indicating that variants where the minor allele is strongly, negatively associated with female fitness are (on average) less negatively associated with male fitness than expected based on predictions from variants with weaker effects on female fitness. One possible explanation is that alleles that are highly highly detrimental to both sexes are usually purged by selection (or at least kept below the 5% MAF threshold that we used), whereas female-harming alleles that are neutral or beneficial in males are purged less often, resulting a greater proportion of female-limited or sexually antagonistic alleles towards the left of the x-axis.
 
 ```{r}
-p1 <- SNP_clumps %>%
+p1_data <- SNP_clumps %>%
   filter(LD_subset) %>% # The figure looks the same whether or not the data are thinned to the LD set of SNPs
   arrange(beta_female_early_raw) %>%
   mutate(bin = c(rep(1:floor(n()/1000), each = 1000), 
                  rep(floor(n()/1000) + 1, each = n() %% 1000)),
-         age = "A. Early life") %>%
-  group_by(bin, age) %>%
-  summarise(females = mean(beta_female_early_raw), males = mean(beta_male_early_raw)) %>%
-  ggplot(aes(females, males)) +
-  geom_hline(yintercept = 0, linetype = 2) +
-  geom_vline(xintercept = 0, linetype = 2) +
-  geom_point() +
-  stat_smooth(method = "lm", formula = y ~ x + I(x^2), size = 0.6) +
-  facet_wrap(~ age) +
-  scale_y_continuous(limits = c(-0.1, 0.2)) +
-  xlab(NULL) + ylab(NULL) + 
-  theme_bw() +
-  theme(strip.background = element_blank(),
-        strip.text = element_text(hjust=0))   + 
-  theme(text = element_text(family = "Raleway", size = 12))
+         facet = "A. Early-life fitness") %>%
+  group_by(bin, facet) %>%
+  summarise(females = mean(beta_female_early_raw), males = mean(beta_male_early_raw)) 
 
-p2 <- SNP_clumps %>%
+p2_data <- SNP_clumps %>%
   filter(LD_subset) %>% 
   arrange(beta_female_late_raw) %>%
   mutate(bin = c(rep(1:floor(n()/1000), each = 1000), 
                  rep(floor(n()/1000) + 1, each = n() %% 1000)),
-         age = "B. Late life") %>%
-  group_by(bin, age) %>%
-  summarise(females = mean(beta_female_late_raw), males = mean(beta_male_late_raw)) %>%
+         facet = "B. Late-life fitness") %>%
+  group_by(bin, facet) %>%
+  summarise(females = mean(beta_female_late_raw), males = mean(beta_male_late_raw))
+
+boyle_plot <- bind_rows(p1_data, p2_data) %>% 
   ggplot(aes(females, males)) +
   geom_hline(yintercept = 0, linetype = 2) +
   geom_vline(xintercept = 0, linetype = 2) +
-  geom_point() +
+  geom_point(alpha = 0.8) +
   stat_smooth(method = "lm", formula = y ~ x + I(x^2), size = 0.6) +
-  facet_wrap(~ age) +
-  scale_y_continuous(limits = c(-0.1, 0.2)) +
-  xlab(NULL) + ylab(NULL) + 
+  facet_wrap(~ facet) +
+  xlab("Mean effect size on female fitness") + ylab("Mean effect size on male fitness") + 
   theme_bw() +
   theme(strip.background = element_blank(),
-        strip.text = element_text(hjust=0))   + 
+        strip.text = element_text(hjust=0)) + 
   theme(text = element_text(family = "Raleway", size = 12))
 
-grid.arrange(p1, p2, nrow = 1, bottom = "Mean effect size on female fitness", 
-  left = "Mean effect size on male fitness")
+boyle_plot
 ```
 
 ```{r save_boyle_plot, echo=FALSE, fig.showtext=TRUE}
-# ggsave("figures/boyle_plot.pdf", 
-#        grid.arrange(p1, p2, nrow = 1, 
-#                     bottom = "Mean effect size on female fitness", 
-#                     left = "Mean effect size on male fitness"),
-#        height = 3, width = 6)
-
-try(png("figures/boyle_plot.png", height = 3, width = 6, units = "in", res = 300))
-try(grid.arrange(p1, p2, nrow = 1, 
-                    bottom = "Mean effect size on female fitness", 
-                    left = "Mean effect size on male fitness"))
-try(dev.off())
-
-
+pdf("figures/fig3_boyle_plot.pdf", height = 3.5, width = 6)
+boyle_plot
+dev.off()
 ```
 
 
@@ -699,8 +673,8 @@ fig_4_top_row <- focal_dat %>%
   theme_bw() + 
   theme(panel.grid.major.x = element_blank(),
         strip.background = element_blank(),
-        #strip.text = element_text(hjust = 0, family = "Raleway", size = 12))
-        strip.text = element_text(hjust = 0, size = 12))
+        text = element_text(family = "Raleway", size = 12),
+        strip.text = element_text(hjust = 0))
 
 # To count the total number of transcripts tested:
 # focal_dat$Freq[focal_dat$pp == "C. Early-life fitness"] %>% sum()
@@ -832,8 +806,9 @@ fig_4_bottom_row <- focal_dat %>%
   theme_bw() + 
   theme(panel.grid.major.x = element_blank(),
         strip.background = element_blank(),
-        #strip.text = element_text(hjust = 0, family = "Raleway", size = 12))
-        strip.text = element_text(hjust = 0, size = 12))
+        text = element_text(family = "Raleway", size = 12),
+        strip.text = element_text(hjust = 0))
+        # strip.text = element_text(hjust = 0, size = 12))
 
 fig_4_bottom_row
 ```
@@ -861,7 +836,7 @@ grid_arrange_shared_legend <- function(..., ncol = 1, nrow = 2, position = c("bo
                                            legend,
                                            ncol = 2,
                                            widths = unit.c(unit(1, "npc") - lwidth, lwidth)))
-
+  
   grid.newpage()
   grid.draw(combined)
 
@@ -870,14 +845,23 @@ grid_arrange_shared_legend <- function(..., ncol = 1, nrow = 2, position = c("bo
 
 }
 
+# 
+# ggsave("figures/fig4_quartiles_plot.png", 
+#        grid_arrange_shared_legend(fig_4_top_row + 
+#                                     theme(axis.text.x = element_blank(),
+#                                           axis.ticks.x = element_blank()) +
+#                                     xlab(" "), 
+#                                   fig_4_bottom_row, position = "right"), 
+#        height = 6, width = 7)
 
-ggsave("figures/fig4_quartiles_plot.png", 
-       grid_arrange_shared_legend(fig_4_top_row + 
-                                    theme(axis.text.x = element_blank(),
-                                          axis.ticks.x = element_blank()) +
-                                    xlab(" "), 
-                                  fig_4_bottom_row, position = "right"), 
-       height = 6, width = 7)
+pdf("figures/fig4_quartiles_plot.pdf", height = 6, width = 7)
+grid_arrange_shared_legend(fig_4_top_row + 
+                             theme(axis.text.x = element_blank(),
+                                   axis.ticks.x = element_blank()) +
+                             xlab(" "), 
+                           fig_4_bottom_row, position = "right")
+dev.off()
+remove_pages(1, "figures/fig4_quartiles_plot.pdf", "figures/fig4_quartiles_plot.pdf")
 ```
 
 
@@ -1094,7 +1078,7 @@ pp <- plot_grid(GWAS_ratios_plot, TWAS_ratios_plot,
 # ggdraw(add_sub(pp, "Evidence ratio (log scale)", 
 #                vpadding=grid::unit(0,"lines"), 
 #                y=6.3, x=0.5, vjust=6))
-ggsave("figures/antagonism_ratios.pdf", pp, width = 8.5, height = 4.9)
+ggsave("figures/fig5_antagonism_ratios.pdf", pp, width = 8.5, height = 4.9)
 
 pp
 ```

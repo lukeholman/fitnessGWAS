@@ -144,7 +144,7 @@ grid.arrange(p1, p2, ncol = 2, left = "Effect on male fitness")
 
 **Figure 2**: Effect sizes of `r nrow(SNP_clumps)` loci (i.e. groups of one or more polymorphic sites in complete linkage disequilibrium) on male and female fitness, plotted separately for the early-life and late-life estimates. The effect sizes estimated using GEMMA have been corrected using `mashr`, using the data-driven method to apply shrinkage (Figure SX shows the raw estimates). The data have been binned into hexagons, with the colour and contour lines indicating the number of loci. The diagonal line represents $y=x$. Positive effect sizes indicate that the minor allele is associated with higher fitness.
 
-```{r echo=FALSE, fig.showtext=TRUE}
+```{r echo=FALSE, fig.showtext=TRUE, results='hide'}
 fig2_top <- grid.arrange(p1, p2, ncol = 2, left = "Effect on male fitness")
 
 # ggsave("figures/SNP_effect_ED.pdf",

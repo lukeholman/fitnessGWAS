@@ -105,50 +105,74 @@ qqman::qq(univariate_lmm_pvals$pvalue_male_late_raw)
 #### Plot
 
 ```{r hex1, message=FALSE, warning=FALSE, fig.showtext=TRUE, fig.height = 5, fig.width = 9}
-hex_plot <- function(x, y, xlab, ylab, title,
-                     xlim = c(-0.5, 0.5),
-                     ylim = c(-0.3, 0.3)
-                     ){
-  dat <- SNP_clumps %>%
-    mutate(facet = title) %>% 
-    filter(LD_subset) # ensure only the LD SNPs from mashr are plotted
-  ggplot(dat, aes_string(x, y)) + 
-    geom_abline(linetype = 2) + 
-    geom_vline(xintercept = 0, linetype = 3) +
-    geom_hline(yintercept = 0, linetype = 3) +
-    stat_binhex(bins = 50)  +
-    geom_density_2d(colour = "white", alpha = 0.6) + 
-    scale_fill_viridis_c() + 
-    coord_cartesian(xlim = xlim, ylim = ylim) + 
-    facet_wrap(~ facet) +
-    theme_bw() + xlab(xlab) + ylab(ylab) +
-    theme(legend.position = "none",
-          strip.background = element_blank(),
-          strip.text = element_text(hjust=0))   + 
-    theme(text = element_text(family = "Raleway", size = 12))
+# hex_plot <- function(x, y, xlab, ylab, title,
+#                      xlim = c(-0.45, 0.3),
+#                      ylim = c(-0.27, 0.27)
+#                      ){
+#   dat <- SNP_clumps %>%
+#     mutate(facet = title) %>% 
+#     filter(LD_subset) # ensure only the LD SNPs from mashr are plotted
+#   ggplot(dat, aes_string(x, y)) + 
+#     geom_abline(linetype = 2) + 
+#     geom_vline(xintercept = 0, linetype = 3) +
+#     geom_hline(yintercept = 0, linetype = 3) +
+#     stat_binhex(bins = 50)  +
+#     geom_density_2d(colour = "white", alpha = 0.6) + 
+#     scale_fill_viridis_c() + 
+#     # coord_cartesian(xlim = xlim, ylim = ylim) + 
+#     facet_wrap(~ facet) +
+#     theme_bw() + xlab(xlab) + ylab(ylab) +
+#     theme(legend.position = "none",
+#           strip.background = element_blank(),
+#           strip.text = element_text(hjust=0))   + 
+#     theme(text = element_text(family = "Raleway", size = 12))
+# 
+# }
+# 
+# p1 <- hex_plot("beta_female_early_mashr_ED", 
+#                "beta_male_early_mashr_ED", 
+#                "Effect on female fitness", 
+#                NULL,
+#                "A. Early life fitness")
+# 
+# p2 <- hex_plot("beta_female_late_mashr_ED", 
+#                "beta_male_late_mashr_ED", 
+#                "Effect on female fitness", 
+#                NULL,
+#                "B. Late life fitness")
+# 
+# grid.arrange(p1, p2, ncol = 2, left = "Effect on male fitness")
 
-}
 
-p1 <- hex_plot("beta_female_early_mashr_ED", 
-               "beta_male_early_mashr_ED", 
-               "Effect on female fitness", 
-               NULL,
-               "A. Early life fitness")
+snp_effect_fig <- bind_rows(
+  SNP_clumps %>%
+    filter(LD_subset) %>%  # ensure only the LD SNPs from mashr are plotted
+    select(female = beta_female_early_mashr_ED, male = beta_male_early_mashr_ED) %>% 
+    mutate(age_class = "A. Early-life fitness"),
+  SNP_clumps %>%
+    filter(LD_subset) %>%  # ensure only the LD SNPs from mashr are plotted
+    select(female = beta_female_late_mashr_ED, male = beta_male_late_mashr_ED) %>% 
+    mutate(age_class = "B. Late-life fitness")) %>% 
+  ggplot(aes(female, male)) + 
+  geom_abline(linetype = 2) + 
+  geom_vline(xintercept = 0, linetype = 3) +
+  geom_hline(yintercept = 0, linetype = 3) +
+  stat_binhex(bins = 50)  +
+  geom_density_2d(colour = "white", alpha = 0.6) + 
+  scale_fill_viridis_c() + 
+  facet_wrap(~ age_class) +
+  theme_bw() + xlab("Effect on female fitness") + ylab("Effect on male fitness") +
+  theme(legend.position = "none",
+        strip.background = element_blank(),
+        strip.text = element_text(hjust=0)) + 
+  theme(text = element_text(family = "Raleway", size = 12))
 
-p2 <- hex_plot("beta_female_late_mashr_ED", 
-               "beta_male_late_mashr_ED", 
-               "Effect on female fitness", 
-               NULL,
-               "B. Late life fitness")
+fig2_top <- snp_effect_fig
 
-grid.arrange(p1, p2, ncol = 2, left = "Effect on male fitness")
+snp_effect_fig
 ```
 
-**Figure 2**: Effect sizes of `r nrow(SNP_clumps)` loci (i.e. groups of one or more polymorphic sites in complete linkage disequilibrium) on male and female fitness, plotted separately for the early-life and late-life estimates. The effect sizes estimated using GEMMA have been corrected using `mashr`, using the data-driven method to apply shrinkage (Figure SX shows the raw estimates). The data have been binned into hexagons, with the colour and contour lines indicating the number of loci. The diagonal line represents $y=x$. Positive effect sizes indicate that the minor allele is associated with higher fitness.
-
-```{r echo=FALSE, fig.showtext=TRUE, results='hide'}
-fig2_top <- grid.arrange(p1, p2, ncol = 2, left = "Effect on male fitness")
-```
+**Top part of Figure 2**: `mashr`-adjusted effect sizes of `r nrow(SNP_clumps)` loci (i.e. groups of one or more polymorphic sites in complete linkage disequilibrium) on male and female early- and late-life fitness. The data have been binned into hexagons, with the colour and contour lines indicating the number of loci. The diagonal line represents $y=x$. Positive effect sizes indicate that the minor allele is associated with higher fitness.
 
 
 #### Pearson correlation
@@ -204,26 +228,31 @@ SNP_clumps %>%
 
 #### Plot
 
-Uses the variant effect sizes output by GEMMA, without applying any shrinkage (i.e. this is the data that was adjusted using `mashr`). 
+Uses the variant effect sizes output by GEMMA, without applying any shrinkage (i.e. this is the input data that was adjusted using `mashr`). 
 
 ```{r hex3, message=FALSE, warning=FALSE, fig.showtext=TRUE, fig.height = 5, fig.width = 9}
-p1 <- hex_plot("beta_female_early_raw", 
-           "beta_male_early_raw", 
-           "Effect on female fitness", 
-           NULL,
-           "A. Early life fitness",
-           xlim = c(-1, 1),
-           ylim = c(-1, 1))
-
-p2 <- hex_plot("beta_female_late_raw", 
-           "beta_male_late_raw", 
-           "Effect on female fitness", 
-           NULL,
-           "B. Late life fitness",
-           xlim = c(-1, 1),
-           ylim = c(-1, 1))
-
-grid.arrange(p1, p2, ncol = 2, left = "Effect on male fitness")
+bind_rows(
+  SNP_clumps %>%
+    filter(LD_subset) %>%  # ensure only the LD SNPs from mashr are plotted
+    select(female = beta_female_early_raw, male = beta_male_early_raw) %>% 
+    mutate(age_class = "A. Early-life fitness"),
+  SNP_clumps %>%
+    filter(LD_subset) %>%  # ensure only the LD SNPs from mashr are plotted
+    select(female = beta_female_late_raw, male = beta_male_late_raw) %>% 
+    mutate(age_class = "B. Late-life fitness")) %>% 
+  ggplot(aes(female, male)) + 
+  geom_abline(linetype = 2) + 
+  geom_vline(xintercept = 0, linetype = 3) +
+  geom_hline(yintercept = 0, linetype = 3) +
+  stat_binhex(bins = 50)  +
+  geom_density_2d(colour = "white", alpha = 0.6) + 
+  scale_fill_viridis_c() + 
+  facet_wrap(~ age_class) +
+  theme_bw() + xlab("Effect on female fitness") + ylab("Effect on male fitness") +
+  theme(legend.position = "none",
+        strip.background = element_blank(),
+        strip.text = element_text(hjust=0)) + 
+  theme(text = element_text(family = "Raleway", size = 12))
 ```
 
 #### Pearson correlation
@@ -239,7 +268,7 @@ SNP_clumps %>%
 ```
 
 ## Average effect sizes are negative {.tabset}
-Each of the following four tests is an intercept-only linear model, weighted by the inverse of the standard error for the focal variant's effect size (so, loci where the effect effect size was measured with more precision are weighted more heavily). The tests are run on the LD-pruned subset of SNPs, minimising pseudoreplication. A non-zero intercept term indicates that major (or minor) alleles tend to have consistently positive or negative associations with the focal fitness trait.
+Each of the following four tests is an intercept-only linear model, weighted by the inverse of the standard error for the focal variant's effect size (so, loci where the effect effect size was measured with more precision are weighted more heavily). The tests are run on the LD-pruned subset of SNPs, minimising pseudoreplication. An intercept term less than zero indicates that on average, the minor allele tends to be associated with lower values of the focal fitness trait (compared to the major allele).
 
 These results indicate that the minor allele tends to _reduce_ fitness, relative to the major allele. It's a weak effect (note the small value in the Estimate column), this may reflect the large uncertainty with which the effect sizes are measured, in addition to a true biological result that most loci have little or no relationship with the fitness traits we measured. 
 
@@ -363,15 +392,15 @@ dev.off()
 
 ## Investigating pleiotropy and polygenicity of fitness
 
-Inspired by Boyle et al. 2017 (_Cell_, specifically the analysis in their Figure 1C), we sorted all the variants in order of effect size on female fitness, placed the variants in bins of 1000, and then calculated the average effect size for each bin for both male and female fitness. This analysis was performed on the raw SNP effect sizes from GEMMA, pruned to a set of SNPs in approximate LD with one another. 
+Inspired by Boyle et al. 2017 (_Cell_, specifically the analysis in their Figure 1C), we sorted all the variants in order of effect size on female fitness, placed the variants in bins of 1000, and then calculated the average effect size for each bin for both male and female fitness. This analysis was performed on the raw SNP effect sizes from GEMMA, pruned to a set of `r sum(LD_subset)` SNPs in approximate LD with one another. 
 
 If there is pleiotropy between male and female fitness, we would predict a correlation between the effect sizes for male and female fitness; on the contrary if there were no pleiotropy, we would see no correlation. 
 
 Moreover, if fitness is highly polygenic ('omnigenic'; Boyle et al. 2017), we predict a tight, straight line relationship, because each bin would contain some variants with small but genuine associations with fitness, and these effects would replicate in the other fitness trait. On the contrary if genetic variance in fitness stems from just a few genes with larger effects, the relationship between male and female fitness would be flat in the center and sloped at the extremes.
 
-Figure 4 shows that there was a very tight correlation between the average effects of the variants in each bin on male and female fitness. The data therefore suggest that variants associated with male fitness tend to also affect female fitness (in the same direction), and that a very large number of loci have small, concordant effects on fitness in both sexes. 
+Figure 3 shows that there was a very tight correlation between the average effects of the variants in each bin on male and female fitness. The data therefore suggest that variants associated with male fitness tend to also affect female fitness (in the same direction), and that a very large number of loci have small, concordant effects on fitness in both sexes. 
 
-Interestingly there appears to be a curve in Figure 4A to the left of the x-axis, indicating that variants where the minor allele is strongly, negatively associated with female fitness are (on average) less negatively associated with male fitness than expected based on predictions from variants with weaker effects on female fitness. One possible explanation is that alleles that are highly highly detrimental to both sexes are usually purged by selection (or at least kept below the 5% MAF threshold that we used), whereas female-harming alleles that are neutral or beneficial in males are purged less often, resulting a greater proportion of female-limited or sexually antagonistic alleles towards the left of the x-axis.
+Interestingly there appears to be a curve in Figure 3A to the left of the x-axis, indicating that variants where the minor allele is strongly, negatively associated with female fitness are (on average) less negatively associated with male fitness than expected based on predictions from variants with weaker effects on female fitness. One possible explanation is that alleles that are highly highly detrimental to both sexes are usually purged by selection (or at least kept below the 5% MAF threshold that we used), whereas female-harming alleles that are neutral or beneficial in males are purged less often, resulting a greater proportion of female-limited or sexually antagonistic alleles towards the left of the x-axis.
 
 ```{r}
 p1_data <- SNP_clumps %>%
@@ -663,11 +692,14 @@ focal_dat <- rbind(
     as.data.frame(mat_list[[2]]) %>% 
       mutate(pp = "B. Late-life fitness")) 
 
+labs <- c("Negative", "Weakly negative", "Weakly positive", "Positive")
+
 fig_4_top_row <- focal_dat %>% 
   ggplot(aes(Var1, Freq, fill = Var2)) + 
   facet_wrap(~ pp) + 
   geom_bar(stat="identity", colour = "grey20") +
-  scale_fill_manual(values = cols, name = "Association with\nmale fitness") + 
+  scale_fill_manual(values = cols, name = "Association with\nmale fitness",
+                    labels = labs) + 
   xlab("Association with female fitness") + 
   ylab("Number of variants") + 
   theme_bw() + 
@@ -714,7 +746,8 @@ focal_dat %>%
   ggplot(aes(Var1, Freq, fill = Var2)) + 
   facet_wrap(~ pp) + 
   geom_bar(stat="identity", colour = "grey20") +
-  scale_fill_manual(values = cols, name = "Association with\nlate-life fitness") + 
+  scale_fill_manual(values = cols, name = "Association with\nlate-life fitness",
+                    labels = labs) + 
   xlab("Association with early-life fitness") + 
   ylab("Number of variants") + 
   theme_bw() + 
@@ -800,7 +833,8 @@ fig_4_bottom_row <- focal_dat %>%
   ggplot(aes(Var1, Freq, fill = Var2)) + 
   facet_wrap(~ pp) + 
   geom_bar(stat="identity", colour = "grey20") +
-  scale_fill_manual(values = cols, name = "Association with\nmale fitness") + 
+  scale_fill_manual(values = cols, name = "Association with\nmale fitness",
+                    labels = labs) + 
   xlab("Association with female fitness") + 
   ylab("Number of transcripts") + 
   theme_bw() + 
@@ -909,7 +943,8 @@ focal_dat %>%
   ggplot(aes(Var1, Freq, fill = Var2)) + 
   facet_wrap(~ pp) + 
   geom_bar(stat="identity", colour = "grey20") +
-  scale_fill_manual(values = cols, name = "Association with\nlate-life fitness") + 
+  scale_fill_manual(values = cols, name = "Association with\nlate-life fitness",
+                    labels = labs) + 
   xlab("Association with early-life fitness") + 
   ylab("Number of transcripts") + 
   theme_bw() + 
@@ -1075,9 +1110,7 @@ TWAS_ratios_plot <- antagonism_evidence_ratios_twas %>%
 
 pp <- plot_grid(GWAS_ratios_plot, TWAS_ratios_plot, 
                    labels = c('A', 'B'), label_size = 12)
-# ggdraw(add_sub(pp, "Evidence ratio (log scale)", 
-#                vpadding=grid::unit(0,"lines"), 
-#                y=6.3, x=0.5, vjust=6))
+
 ggsave("figures/fig5_antagonism_ratios.pdf", pp, width = 8.5, height = 4.9)
 
 pp

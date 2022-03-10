@@ -144,6 +144,7 @@ qqman::qq(univariate_lmm_pvals$pvalue_male_late_raw)
 # grid.arrange(p1, p2, ncol = 2, left = "Effect on male fitness")
 
 
+
 snp_effect_fig <- bind_rows(
   SNP_clumps %>%
     filter(LD_subset) %>%  # ensure only the LD SNPs from mashr are plotted
@@ -154,7 +155,6 @@ snp_effect_fig <- bind_rows(
     select(female = beta_female_late_mashr_ED, male = beta_male_late_mashr_ED) %>% 
     mutate(age_class = "B. Late-life fitness")) %>% 
   ggplot(aes(female, male)) + 
-  geom_abline(linetype = 2) + 
   geom_vline(xintercept = 0, linetype = 3) +
   geom_hline(yintercept = 0, linetype = 3) +
   stat_binhex(bins = 50)  +
@@ -172,7 +172,7 @@ fig2_top <- snp_effect_fig
 snp_effect_fig
 ```
 
-**Top part of Figure 2**: `mashr`-adjusted effect sizes of `r nrow(SNP_clumps)` loci (i.e. groups of one or more polymorphic sites in complete linkage disequilibrium) on male and female early- and late-life fitness. The data have been binned into hexagons, with the colour and contour lines indicating the number of loci. The diagonal line represents $y=x$. Positive effect sizes indicate that the minor allele is associated with higher fitness.
+**Top part of Figure 2**: `mashr`-adjusted effect sizes of `r nrow(SNP_clumps)` loci (i.e. groups of one or more polymorphic sites in complete linkage disequilibrium) on male and female early- and late-life fitness. The data have been binned into hexagons, with the colour and contour lines indicating the number of loci. The diagonal line represents $y=x$. Positive effect sizes indicate that the minor allele is associated with higher fitness, while negative effects indicate that the major allele is associated with higher fitness.
 
 
 #### Pearson correlation
@@ -241,7 +241,6 @@ bind_rows(
     select(female = beta_female_late_raw, male = beta_male_late_raw) %>% 
     mutate(age_class = "B. Late-life fitness")) %>% 
   ggplot(aes(female, male)) + 
-  geom_abline(linetype = 2) + 
   geom_vline(xintercept = 0, linetype = 3) +
   geom_hline(yintercept = 0, linetype = 3) +
   stat_binhex(bins = 50)  +
@@ -1210,7 +1209,7 @@ summary(intersex_late_model_twas)
 
 
 
-```{r} 
+```{r fig.showtext=T, fig.height=7, fig.width=7} 
 # plotting models
 new <- data.frame(MAF = seq(from = 0.05, to = 0.5, by = 0.01), chr = "X")
 inv_logit <- function(x) exp(x)/(1+exp(x))
@@ -1218,13 +1217,17 @@ preds <- data.frame(new, prop = predict(intersex_early_model_gwas, newdata = new
   mutate(y = prop.fit, lwr = prop.fit - 1.96*prop.se.fit, upr = prop.fit + 1.96*prop.se.fit,
          y = inv_logit(y), lwr = inv_logit(lwr), upr = inv_logit(upr))
 p1 <- preds %>% 
+  mutate(panel = "A.") %>% 
   ggplot(aes(MAF,  y)) + geom_line() + 
   geom_hline(yintercept = .01, linetype = 3) + 
   geom_line(aes(y = upr), linetype = 2) + 
   geom_line(aes(y = lwr), linetype = 2) + 
   scale_x_continuous(limits = c(0, 0.5)) + 
   scale_y_continuous(limits = c(0, max(preds$y))) + 
-  theme_bw() +#+ theme(text = element_text(family = "Raleway", size = 12)) 
+  facet_wrap( ~ panel) + 
+  theme_bw() + 
+  theme(text = element_text(family = "Raleway", size = 12)) +
+  theme(strip.background = element_blank(), strip.text = element_text(hjust = 0)) +
   ylab("Probability of being in the top 1%\nsexually antagonistic loci (\u00B1 95% CIs)") +
   xlab("Minor allele frequency")
 
@@ -1234,10 +1237,14 @@ preds2 <- data.frame(new2, prop = predict(intersex_early_model_gwas, newdata = n
   mutate(y = prop.fit, lwr = prop.fit - 1.96*prop.se.fit, upr = prop.fit + 1.96*prop.se.fit,
          y = inv_logit(y), lwr = inv_logit(lwr), upr = inv_logit(upr))
 p2 <- preds2 %>% 
+  mutate(panel = "B.") %>%
   ggplot(aes(chr,  y)) + 
   geom_point(size = 3) + 
   geom_errorbar(aes(ymin = lwr, ymax = upr), width = 0) + 
-  theme_bw() +#+ theme(text = element_text(family = "Raleway", size = 12)) 
+  facet_wrap( ~ panel) + 
+  theme_bw() +
+  theme(text = element_text(family = "Raleway", size = 12)) +
+  theme(strip.background = element_blank(), strip.text = element_text(hjust = 0)) +
   ylab(" \n ") +
   xlab("Chromosome arm")
 
@@ -1252,20 +1259,58 @@ preds <- data.frame(new, prop = predict(intersex_early_twas, newdata = new, se.f
   mutate(y = prop.fit, lwr = prop.fit - 1.96*prop.se.fit, upr = prop.fit + 1.96*prop.se.fit,
          y = inv_logit(y), lwr = inv_logit(lwr), upr = inv_logit(upr))
 p3 <- preds %>% 
+  mutate(panel = "C.") %>%
   ggplot(aes(mean_expression_level,  y)) + geom_line() + 
   geom_hline(yintercept = .01, linetype = 3) + 
   geom_line(aes(y = upr), linetype = 2) + 
   geom_line(aes(y = lwr), linetype = 2) + 
   ylab("Probability of being in the top 1%\nsexually antagonistic transcripts (\u00B1 95% CIs)") +
   xlab("Average expression level") + 
-  theme_bw() #+ theme(text = element_text(family = "Raleway", size = 12)) 
+  facet_wrap( ~ panel) + 
+  theme_bw() + 
+  theme(text = element_text(family = "Raleway", size = 12)) +
+  theme(strip.background = element_blank(), strip.text = element_text(hjust = 0)) 
 
 
 blank <- ggplot() + theme_void()
 
+grid.arrange(arrangeGrob(p1, p2, ncol = 2), 
+             arrangeGrob(blank, p3, blank, nrow = 1, widths = c(0.2,0.6,0.2)))
 
-fig_6_models <- grid.arrange(
-grid.arrange(p1, p2, ncol = 2), grid.arrange(blank, p3, blank, nrow = 1, widths = c(0.2,0.6,0.2)))
-ggsave("figures/fig6_models.pdf", fig_6_models, width = 6, height = 7)
+
+pdf("figures/fig6_models.pdf", height = 7, width = 7)
+grid.arrange(arrangeGrob(p1, p2, ncol = 2), 
+             arrangeGrob(blank, p3, blank, nrow = 1, widths = c(0.2,0.6,0.2)))
+dev.off()
+```
+
+
+## GO enrichment of top 1% sexually antagonistic transcripts
+
+```{r}
+library(GOfuncR) # BiocManager::install("GOfuncR")
+library(org.Dm.eg.db) 
+
+# This code labels the transcripts we analysed as either in or not-in the top 1%,
+# and gets their gene symbols, setting up the data in the format required by GOfuncR
+# as described in the vignette here https://bioconductor.org/packages/devel/bioc/vignettes/GOfuncR/inst/doc/GOfuncR.html
+go_data <- antagonism_evidence_ratios_twas %>% 
+  arrange(inter_sex_early) %>% 
+  mutate(row = 1:n(),
+         is_candidate = as.numeric(row < (n() / 100))) %>% 
+  dplyr::select(FLYBASE = FBID, is_candidate) %>% 
+  left_join(select(org.Dm.eg.db, keys = keys(org.Dm.eg.db), columns = c("SYMBOL","FLYBASE")), by = "FLYBASE") %>% 
+  dplyr::select(SYMBOL, is_candidate) %>% 
+  as.data.frame()
+
+# Run a hypergeometric test onn the BP intology. This uses the software FUNC for the GO test:
+# Pruefer, K. et al. (2007). FUNC: A package for detecting significant associations between gene sets and ontological annotations, BMC Bioinformatics 8: 41. [https://doi.org/10.1186/1471-2105-8-41]
+
+res_hyper_fly <- go_enrich(go_data, orgDb='org.Dm.eg.db', test = "hyper", n_randsets = 10000,
+                           silent = T, domains = "biological_process")
+res_hyper_fly$results %>% 
+  filter(raw_p_overrep < 0.01) %>% 
+  dplyr::select(node_id, node_name, raw_p_overrep, FWER_overrep) %>% 
+  kable() %>% kable_styling(full_width = F)
 ```
 

@@ -388,7 +388,7 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2022-02-23
+<strong>Last updated:</strong> 2022-03-10
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -479,16 +479,16 @@ This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a> analysi
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree17a62a70f2650bc75ac9272083bbd22fb6acb667targetblank17a62a7a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/lukeholman/fitnessGWAS/tree/17a62a70f2650bc75ac9272083bbd22fb6acb667" target="_blank">17a62a7</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreeffbefdd67333798c444ca43781dcd651a1318842targetblankffbefdda"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/lukeholman/fitnessGWAS/tree/ffbefdd67333798c444ca43781dcd651a1318842" target="_blank">ffbefdd</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree17a62a70f2650bc75ac9272083bbd22fb6acb667targetblank17a62a7a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreeffbefdd67333798c444ca43781dcd651a1318842targetblankffbefdda" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/lukeholman/fitnessGWAS/tree/17a62a70f2650bc75ac9272083bbd22fb6acb667" target="_blank">17a62a7</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/lukeholman/fitnessGWAS/tree/ffbefdd67333798c444ca43781dcd651a1318842" target="_blank">ffbefdd</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -503,7 +503,6 @@ Ignored files:
     Ignored:    .pversion
     Ignored:    analysis/.DS_Store
     Ignored:    analysis/correlations_SNP_effects_cache/
-    Ignored:    analysis/figure/
     Ignored:    code/.DS_Store
     Ignored:    code/Drosophila_GWAS.Rmd
     Ignored:    data/.DS_Store
@@ -581,6 +580,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/ffbefdd67333798c444ca43781dcd651a1318842/analysis/plot_models_variant_effects.Rmd" target="_blank">ffbefdd</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2022-03-10
+</td>
+<td>
+wflow_publish(“analysis/plot_models_variant_effects.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/e4f2f4f17ad066aea2499537ec7bd625b587cbdf/docs/plot_models_variant_effects.html" target="_blank">e4f2f4f</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2022-02-23
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1149,6 +1182,7 @@ lukeholman
 # grid.arrange(p1, p2, ncol = 2, left = &quot;Effect on male fitness&quot;)
 
 
+
 snp_effect_fig &lt;- bind_rows(
   SNP_clumps %&gt;%
     filter(LD_subset) %&gt;%  # ensure only the LD SNPs from mashr are plotted
@@ -1159,7 +1193,6 @@ snp_effect_fig &lt;- bind_rows(
     select(female = beta_female_late_mashr_ED, male = beta_male_late_mashr_ED) %&gt;% 
     mutate(age_class = &quot;B. Late-life fitness&quot;)) %&gt;% 
   ggplot(aes(female, male)) + 
-  geom_abline(linetype = 2) + 
   geom_vline(xintercept = 0, linetype = 3) +
   geom_hline(yintercept = 0, linetype = 3) +
   stat_binhex(bins = 50)  +
@@ -1200,6 +1233,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/e4f2f4f17ad066aea2499537ec7bd625b587cbdf/docs/figure/plot_models_variant_effects.Rmd/hex1-1.png" target="_blank">e4f2f4f</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2022-02-23
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/lukeholman/fitnessGWAS/blob/8d14298b4d59c2198b6f9c62d415e6adc9b7e658/docs/figure/plot_models_variant_effects.Rmd/hex1-1.png" target="_blank">8d14298</a>
 </td>
 <td>
@@ -1224,7 +1268,7 @@ lukeholman
 </table>
 </div>
 </div>
-<p><strong>Top part of Figure 2</strong>: <code>mashr</code>-adjusted effect sizes of 1207357 loci (i.e. groups of one or more polymorphic sites in complete linkage disequilibrium) on male and female early- and late-life fitness. The data have been binned into hexagons, with the colour and contour lines indicating the number of loci. The diagonal line represents <span class="math inline">\(y=x\)</span>. Positive effect sizes indicate that the minor allele is associated with higher fitness.</p>
+<p><strong>Top part of Figure 2</strong>: <code>mashr</code>-adjusted effect sizes of 1207357 loci (i.e. groups of one or more polymorphic sites in complete linkage disequilibrium) on male and female early- and late-life fitness. The data have been binned into hexagons, with the colour and contour lines indicating the number of loci. The diagonal line represents <span class="math inline">\(y=x\)</span>. Positive effect sizes indicate that the minor allele is associated with higher fitness, while negative effects indicate that the major allele is associated with higher fitness.</p>
 </div>
 <div id="pearson-correlation" class="section level4">
 <h4>Pearson correlation</h4>
@@ -1368,7 +1412,6 @@ Male late
     select(female = beta_female_late_raw, male = beta_male_late_raw) %&gt;% 
     mutate(age_class = &quot;B. Late-life fitness&quot;)) %&gt;% 
   ggplot(aes(female, male)) + 
-  geom_abline(linetype = 2) + 
   geom_vline(xintercept = 0, linetype = 3) +
   geom_hline(yintercept = 0, linetype = 3) +
   stat_binhex(bins = 50)  +
@@ -1403,6 +1446,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/e4f2f4f17ad066aea2499537ec7bd625b587cbdf/docs/figure/plot_models_variant_effects.Rmd/hex3-1.png" target="_blank">e4f2f4f</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2022-02-23
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/lukeholman/fitnessGWAS/blob/652106368c95ac4a04b2383d560d3c8073990f18/docs/figure/plot_models_variant_effects.Rmd/hex3-1.png" target="_blank">6521063</a>
@@ -1756,6 +1810,43 @@ boyle_plot &lt;- bind_rows(p1_data, p2_data) %&gt;%
 
 boyle_plot</code></pre>
 <p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-9-1">
+Past versions of unnamed-chunk-9-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-9-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/e4f2f4f17ad066aea2499537ec7bd625b587cbdf/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-9-1.png" target="_blank">e4f2f4f</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2022-02-23
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre><code>quartz_off_screen 
                 2 </code></pre>
 <!-- ## Effect of the minor allele -->
@@ -2013,6 +2104,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/e4f2f4f17ad066aea2499537ec7bd625b587cbdf/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-10-1.png" target="_blank">e4f2f4f</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2022-02-23
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/lukeholman/fitnessGWAS/blob/1bb603c18144f3ad95844a63f1f0dedcab9e2d0b/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-10-1.png" target="_blank">1bb603c</a>
@@ -2766,6 +2868,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/e4f2f4f17ad066aea2499537ec7bd625b587cbdf/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-12-1.png" target="_blank">e4f2f4f</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2022-02-23
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/lukeholman/fitnessGWAS/blob/1bb603c18144f3ad95844a63f1f0dedcab9e2d0b/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-12-1.png" target="_blank">1bb603c</a>
@@ -3552,6 +3665,43 @@ fig_4_bottom_row &lt;- focal_dat %&gt;%
 
 fig_4_bottom_row</code></pre>
 <p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-15-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-15-1">
+Past versions of unnamed-chunk-15-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-15-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/e4f2f4f17ad066aea2499537ec7bd625b587cbdf/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-15-1.png" target="_blank">e4f2f4f</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2022-02-23
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="table-2" class="section level5">
 <h5>Table</h5>
@@ -4275,6 +4425,43 @@ focal_dat %&gt;%
         strip.background = element_blank(),
         strip.text = element_text(hjust = 0, family = &quot;Raleway&quot;, size = 12))</code></pre>
 <p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-19-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-19-1">
+Past versions of unnamed-chunk-19-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-19-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/e4f2f4f17ad066aea2499537ec7bd625b587cbdf/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-19-1.png" target="_blank">e4f2f4f</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2022-02-23
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="table-3" class="section level5">
 <h5>Table</h5>
@@ -5425,13 +5612,17 @@ preds &lt;- data.frame(new, prop = predict(intersex_early_model_gwas, newdata = 
   mutate(y = prop.fit, lwr = prop.fit - 1.96*prop.se.fit, upr = prop.fit + 1.96*prop.se.fit,
          y = inv_logit(y), lwr = inv_logit(lwr), upr = inv_logit(upr))
 p1 &lt;- preds %&gt;% 
+  mutate(panel = &quot;A.&quot;) %&gt;% 
   ggplot(aes(MAF,  y)) + geom_line() + 
   geom_hline(yintercept = .01, linetype = 3) + 
   geom_line(aes(y = upr), linetype = 2) + 
   geom_line(aes(y = lwr), linetype = 2) + 
   scale_x_continuous(limits = c(0, 0.5)) + 
   scale_y_continuous(limits = c(0, max(preds$y))) + 
-  theme_bw() +#+ theme(text = element_text(family = &quot;Raleway&quot;, size = 12)) 
+  facet_wrap( ~ panel) + 
+  theme_bw() + 
+  theme(text = element_text(family = &quot;Raleway&quot;, size = 12)) +
+  theme(strip.background = element_blank(), strip.text = element_text(hjust = 0)) +
   ylab(&quot;Probability of being in the top 1%\nsexually antagonistic loci (\u00B1 95% CIs)&quot;) +
   xlab(&quot;Minor allele frequency&quot;)
 
@@ -5441,10 +5632,14 @@ preds2 &lt;- data.frame(new2, prop = predict(intersex_early_model_gwas, newdata 
   mutate(y = prop.fit, lwr = prop.fit - 1.96*prop.se.fit, upr = prop.fit + 1.96*prop.se.fit,
          y = inv_logit(y), lwr = inv_logit(lwr), upr = inv_logit(upr))
 p2 &lt;- preds2 %&gt;% 
+  mutate(panel = &quot;B.&quot;) %&gt;%
   ggplot(aes(chr,  y)) + 
   geom_point(size = 3) + 
   geom_errorbar(aes(ymin = lwr, ymax = upr), width = 0) + 
-  theme_bw() +#+ theme(text = element_text(family = &quot;Raleway&quot;, size = 12)) 
+  facet_wrap( ~ panel) + 
+  theme_bw() +
+  theme(text = element_text(family = &quot;Raleway&quot;, size = 12)) +
+  theme(strip.background = element_blank(), strip.text = element_text(hjust = 0)) +
   ylab(&quot; \n &quot;) +
   xlab(&quot;Chromosome arm&quot;)
 
@@ -5459,20 +5654,23 @@ preds &lt;- data.frame(new, prop = predict(intersex_early_twas, newdata = new, s
   mutate(y = prop.fit, lwr = prop.fit - 1.96*prop.se.fit, upr = prop.fit + 1.96*prop.se.fit,
          y = inv_logit(y), lwr = inv_logit(lwr), upr = inv_logit(upr))
 p3 &lt;- preds %&gt;% 
+  mutate(panel = &quot;C.&quot;) %&gt;%
   ggplot(aes(mean_expression_level,  y)) + geom_line() + 
   geom_hline(yintercept = .01, linetype = 3) + 
   geom_line(aes(y = upr), linetype = 2) + 
   geom_line(aes(y = lwr), linetype = 2) + 
   ylab(&quot;Probability of being in the top 1%\nsexually antagonistic transcripts (\u00B1 95% CIs)&quot;) +
   xlab(&quot;Average expression level&quot;) + 
-  theme_bw() #+ theme(text = element_text(family = &quot;Raleway&quot;, size = 12)) 
+  facet_wrap( ~ panel) + 
+  theme_bw() + 
+  theme(text = element_text(family = &quot;Raleway&quot;, size = 12)) +
+  theme(strip.background = element_blank(), strip.text = element_text(hjust = 0)) 
 
 
 blank &lt;- ggplot() + theme_void()
 
-
-fig_6_models &lt;- grid.arrange(
-grid.arrange(p1, p2, ncol = 2), grid.arrange(blank, p3, blank, nrow = 1, widths = c(0.2,0.6,0.2)))</code></pre>
+grid.arrange(arrangeGrob(p1, p2, ncol = 2), 
+             arrangeGrob(blank, p3, blank, nrow = 1, widths = c(0.2,0.6,0.2)))</code></pre>
 <p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-26-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-26-1">
@@ -5496,6 +5694,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/e4f2f4f17ad066aea2499537ec7bd625b587cbdf/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-26-1.png" target="_blank">e4f2f4f</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2022-02-23
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/lukeholman/fitnessGWAS/blob/8d14298b4d59c2198b6f9c62d415e6adc9b7e658/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-26-1.png" target="_blank">8d14298</a>
@@ -5522,8 +5731,354 @@ lukeholman
 </table>
 </div>
 </div>
-<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-26-2.png" width="672" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>ggsave(&quot;figures/fig6_models.pdf&quot;, fig_6_models, width = 6, height = 7)</code></pre>
+<pre class="r"><code>pdf(&quot;figures/fig6_models.pdf&quot;, height = 7, width = 7)
+grid.arrange(arrangeGrob(p1, p2, ncol = 2), 
+             arrangeGrob(blank, p3, blank, nrow = 1, widths = c(0.2,0.6,0.2)))
+dev.off()</code></pre>
+<pre><code>quartz_off_screen 
+                2 </code></pre>
+</div>
+</div>
+<div id="go-enrichment-of-top-1-sexually-antagonistic-transcripts" class="section level2">
+<h2>GO enrichment of top 1% sexually antagonistic transcripts</h2>
+<pre class="r"><code>library(GOfuncR) # BiocManager::install(&quot;GOfuncR&quot;)
+library(org.Dm.eg.db) 
+
+# This code labels the transcripts we analysed as either in or not-in the top 1%,
+# and gets their gene symbols, setting up the data in the format required by GOfuncR
+# as described in the vignette here https://bioconductor.org/packages/devel/bioc/vignettes/GOfuncR/inst/doc/GOfuncR.html
+go_data &lt;- antagonism_evidence_ratios_twas %&gt;% 
+  arrange(inter_sex_early) %&gt;% 
+  mutate(row = 1:n(),
+         is_candidate = as.numeric(row &lt; (n() / 100))) %&gt;% 
+  dplyr::select(FLYBASE = FBID, is_candidate) %&gt;% 
+  left_join(select(org.Dm.eg.db, keys = keys(org.Dm.eg.db), columns = c(&quot;SYMBOL&quot;,&quot;FLYBASE&quot;)), by = &quot;FLYBASE&quot;) %&gt;% 
+  dplyr::select(SYMBOL, is_candidate) %&gt;% 
+  as.data.frame()
+
+# Run a hypergeometric test onn the BP intology. This uses the software FUNC for the GO test:
+# Pruefer, K. et al. (2007). FUNC: A package for detecting significant associations between gene sets and ontological annotations, BMC Bioinformatics 8: 41. [https://doi.org/10.1186/1471-2105-8-41]
+
+res_hyper_fly &lt;- go_enrich(go_data, orgDb=&#39;org.Dm.eg.db&#39;, test = &quot;hyper&quot;, n_randsets = 10000,
+                           silent = T, domains = &quot;biological_process&quot;)
+res_hyper_fly$results %&gt;% 
+  filter(raw_p_overrep &lt; 0.01) %&gt;% 
+  dplyr::select(node_id, node_name, raw_p_overrep, FWER_overrep) %&gt;% 
+  kable() %&gt;% kable_styling(full_width = F)</code></pre>
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+node_id
+</th>
+<th style="text-align:left;">
+node_name
+</th>
+<th style="text-align:right;">
+raw_p_overrep
+</th>
+<th style="text-align:right;">
+FWER_overrep
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="GO:0034227" class="uri">GO:0034227</a>
+</td>
+<td style="text-align:left;">
+tRNA thio-modification
+</td>
+<td style="text-align:right;">
+0.0010373
+</td>
+<td style="text-align:right;">
+0.5860
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="GO:0000963" class="uri">GO:0000963</a>
+</td>
+<td style="text-align:left;">
+mitochondrial RNA processing
+</td>
+<td style="text-align:right;">
+0.0037000
+</td>
+<td style="text-align:right;">
+0.9025
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="GO:0009266" class="uri">GO:0009266</a>
+</td>
+<td style="text-align:left;">
+response to temperature stimulus
+</td>
+<td style="text-align:right;">
+0.0053125
+</td>
+<td style="text-align:right;">
+0.9465
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="GO:0009408" class="uri">GO:0009408</a>
+</td>
+<td style="text-align:left;">
+response to heat
+</td>
+<td style="text-align:right;">
+0.0057446
+</td>
+<td style="text-align:right;">
+0.9495
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="GO:0034614" class="uri">GO:0034614</a>
+</td>
+<td style="text-align:left;">
+cellular response to reactive oxygen species
+</td>
+<td style="text-align:right;">
+0.0069102
+</td>
+<td style="text-align:right;">
+0.9693
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="GO:0000957" class="uri">GO:0000957</a>
+</td>
+<td style="text-align:left;">
+mitochondrial RNA catabolic process
+</td>
+<td style="text-align:right;">
+0.0084553
+</td>
+<td style="text-align:right;">
+0.9999
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="GO:0000958" class="uri">GO:0000958</a>
+</td>
+<td style="text-align:left;">
+mitochondrial mRNA catabolic process
+</td>
+<td style="text-align:right;">
+0.0084553
+</td>
+<td style="text-align:right;">
+0.9999
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="GO:0009082" class="uri">GO:0009082</a>
+</td>
+<td style="text-align:left;">
+branched-chain amino acid biosynthetic process
+</td>
+<td style="text-align:right;">
+0.0084553
+</td>
+<td style="text-align:right;">
+0.9999
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="GO:0009085" class="uri">GO:0009085</a>
+</td>
+<td style="text-align:left;">
+lysine biosynthetic process
+</td>
+<td style="text-align:right;">
+0.0084553
+</td>
+<td style="text-align:right;">
+0.9999
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="GO:0009098" class="uri">GO:0009098</a>
+</td>
+<td style="text-align:left;">
+leucine biosynthetic process
+</td>
+<td style="text-align:right;">
+0.0084553
+</td>
+<td style="text-align:right;">
+0.9999
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="GO:0009099" class="uri">GO:0009099</a>
+</td>
+<td style="text-align:left;">
+valine biosynthetic process
+</td>
+<td style="text-align:right;">
+0.0084553
+</td>
+<td style="text-align:right;">
+0.9999
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="GO:0016038" class="uri">GO:0016038</a>
+</td>
+<td style="text-align:left;">
+absorption of visible light
+</td>
+<td style="text-align:right;">
+0.0084553
+</td>
+<td style="text-align:right;">
+0.9999
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="GO:0019323" class="uri">GO:0019323</a>
+</td>
+<td style="text-align:left;">
+pentose catabolic process
+</td>
+<td style="text-align:right;">
+0.0084553
+</td>
+<td style="text-align:right;">
+0.9999
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="GO:0019878" class="uri">GO:0019878</a>
+</td>
+<td style="text-align:left;">
+lysine biosynthetic process via aminoadipic acid
+</td>
+<td style="text-align:right;">
+0.0084553
+</td>
+<td style="text-align:right;">
+0.9999
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="GO:0044205" class="uri">GO:0044205</a>
+</td>
+<td style="text-align:left;">
+‘de novo’ UMP biosynthetic process
+</td>
+<td style="text-align:right;">
+0.0084553
+</td>
+<td style="text-align:right;">
+0.9999
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="GO:0070903" class="uri">GO:0070903</a>
+</td>
+<td style="text-align:left;">
+mitochondrial tRNA thio-modification
+</td>
+<td style="text-align:right;">
+0.0084553
+</td>
+<td style="text-align:right;">
+0.9999
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="GO:1904785" class="uri">GO:1904785</a>
+</td>
+<td style="text-align:left;">
+regulation of asymmetric protein localization involved in cell fate determination
+</td>
+<td style="text-align:right;">
+0.0084553
+</td>
+<td style="text-align:right;">
+0.9999
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="GO:1904812" class="uri">GO:1904812</a>
+</td>
+<td style="text-align:left;">
+rRNA acetylation involved in maturation of SSU-rRNA
+</td>
+<td style="text-align:right;">
+0.0084553
+</td>
+<td style="text-align:right;">
+0.9999
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="GO:1905933" class="uri">GO:1905933</a>
+</td>
+<td style="text-align:left;">
+regulation of cell fate determination
+</td>
+<td style="text-align:right;">
+0.0084553
+</td>
+<td style="text-align:right;">
+0.9999
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="GO:1990882" class="uri">GO:1990882</a>
+</td>
+<td style="text-align:left;">
+rRNA acetylation
+</td>
+<td style="text-align:right;">
+0.0084553
+</td>
+<td style="text-align:right;">
+0.9999
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="GO:1990884" class="uri">GO:1990884</a>
+</td>
+<td style="text-align:left;">
+RNA acetylation
+</td>
+<td style="text-align:right;">
+0.0084553
+</td>
+<td style="text-align:right;">
+0.9999
+</td>
+</tr>
+</tbody>
+</table>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -5544,59 +6099,66 @@ locale:
 [1] en_GB.UTF-8/en_GB.UTF-8/en_GB.UTF-8/C/en_GB.UTF-8/en_GB.UTF-8
 
 attached base packages:
-[1] grid      stats     graphics  grDevices utils     datasets  methods  
-[8] base     
+ [1] parallel  stats4    grid      stats     graphics  grDevices utils    
+ [8] datasets  methods   base     
 
 other attached packages:
- [1] staplr_3.1.1       RColorBrewer_1.1-2 cowplot_1.0.0      kableExtra_1.3.4  
- [5] mashr_0.2.38       ashr_2.2-47        showtext_0.9-5     showtextdb_3.0    
- [9] sysfonts_0.8.3     Hmisc_4.4-0        Formula_1.2-3      survival_3.2-7    
-[13] lattice_0.20-41    ggbeeswarm_0.6.0   qqman_0.1.4        gridExtra_2.3     
-[17] forcats_0.5.1      stringr_1.4.0      dplyr_1.0.7        purrr_0.3.4       
-[21] readr_2.0.0        tidyr_1.1.4        tibble_3.1.6       ggplot2_3.3.5     
-[25] tidyverse_1.3.1    workflowr_1.7.0   
+ [1] org.Dm.eg.db_3.11.4  AnnotationDbi_1.50.0 IRanges_2.22.2      
+ [4] S4Vectors_0.26.1     Biobase_2.48.0       BiocGenerics_0.34.0 
+ [7] GOfuncR_1.8.0        vioplot_0.3.5        zoo_1.8-8           
+[10] sm_2.2-5.6           staplr_3.1.1         RColorBrewer_1.1-2  
+[13] cowplot_1.0.0        kableExtra_1.3.4     mashr_0.2.38        
+[16] ashr_2.2-47          showtext_0.9-5       showtextdb_3.0      
+[19] sysfonts_0.8.3       Hmisc_4.4-0          Formula_1.2-3       
+[22] survival_3.2-7       lattice_0.20-41      ggbeeswarm_0.6.0    
+[25] qqman_0.1.4          gridExtra_2.3        forcats_0.5.1       
+[28] stringr_1.4.0        dplyr_1.0.7          purrr_0.3.4         
+[31] readr_2.0.0          tidyr_1.1.4          tibble_3.1.6        
+[34] ggplot2_3.3.5        tidyverse_1.3.1      workflowr_1.7.0     
 
 loaded via a namespace (and not attached):
-  [1] readxl_1.3.1        backports_1.1.7     systemfonts_0.2.2  
-  [4] plyr_1.8.6          splines_4.0.3       digest_0.6.25      
-  [7] invgamma_1.1        htmltools_0.5.0     SQUAREM_2020.2     
- [10] fansi_0.4.1         magrittr_2.0.1      checkmate_2.0.0    
- [13] memoise_1.1.0       cluster_2.1.0       tzdb_0.1.2         
- [16] openxlsx_4.1.5      modelr_0.1.8        vroom_1.5.3        
- [19] svglite_1.2.3       jpeg_0.1-8.1        colorspace_1.4-1   
- [22] blob_1.2.1          rvest_1.0.2         haven_2.3.1        
- [25] xfun_0.26           tcltk_4.0.3         callr_3.7.0        
- [28] crayon_1.4.2        jsonlite_1.7.3      hexbin_1.28.1      
- [31] glue_1.4.2          gtable_0.3.0        webshot_0.5.2      
- [34] car_3.0-8           abind_1.4-5         scales_1.1.1       
- [37] mvtnorm_1.1-0       DBI_1.1.0           Rcpp_1.0.4.6       
- [40] isoband_0.2.1       viridisLite_0.3.0   htmlTable_1.13.3   
- [43] foreign_0.8-80      bit_1.1-15.2        truncnorm_1.0-8    
- [46] htmlwidgets_1.5.1   httr_1.4.2          calibrate_1.7.7    
- [49] acepack_1.4.1       ellipsis_0.3.2      pkgconfig_2.0.3    
- [52] rJava_0.9-12        farver_2.0.3        nnet_7.3-14        
- [55] dbplyr_2.1.1        utf8_1.1.4          tidyselect_1.1.0   
- [58] labeling_0.3        rlang_0.4.12        later_1.0.0        
- [61] munsell_0.5.0       cellranger_1.1.0    tools_4.0.3        
- [64] cli_3.1.0           generics_0.0.2      RSQLite_2.2.0      
- [67] broom_0.7.11        evaluate_0.14       yaml_2.2.1         
- [70] processx_3.5.2      knitr_1.32          bit64_0.9-7        
- [73] fs_1.4.1            zip_2.1.1           nlme_3.1-149       
- [76] whisker_0.4         xml2_1.3.2          compiler_4.0.3     
- [79] rstudioapi_0.13     beeswarm_0.4.0      curl_4.3           
- [82] png_0.1-7           reprex_2.0.1        stringi_1.5.3      
- [85] highr_0.8           ps_1.3.3            gdtools_0.2.2      
- [88] Matrix_1.2-18       vctrs_0.3.8         pillar_1.6.4.9003  
- [91] lifecycle_1.0.1     jquerylib_0.1.1     data.table_1.14.2  
- [94] irlba_2.3.3         httpuv_1.5.3.1      R6_2.4.1           
- [97] latticeExtra_0.6-29 promises_1.1.0      rio_0.5.16         
-[100] vipor_0.4.5         MASS_7.3-53         assertthat_0.2.1   
-[103] rprojroot_1.3-2     withr_2.4.3         mgcv_1.8-33        
-[106] parallel_4.0.3      hms_1.1.1           rpart_4.1-15       
-[109] rmarkdown_2.11      carData_3.0-4       git2r_0.27.1       
-[112] mixsqp_0.3-43       getPass_0.2-2       lubridate_1.7.10   
-[115] base64enc_0.1-3     rmeta_3.0          </code></pre>
-</div>
+  [1] readxl_1.3.1           backports_1.1.7        systemfonts_0.2.2     
+  [4] plyr_1.8.6             splines_4.0.3          GenomeInfoDb_1.24.0   
+  [7] digest_0.6.25          invgamma_1.1           htmltools_0.5.0       
+ [10] SQUAREM_2020.2         fansi_0.4.1            magrittr_2.0.1        
+ [13] checkmate_2.0.0        memoise_1.1.0          cluster_2.1.0         
+ [16] tzdb_0.1.2             openxlsx_4.1.5         modelr_0.1.8          
+ [19] vroom_1.5.3            svglite_1.2.3          jpeg_0.1-8.1          
+ [22] colorspace_1.4-1       blob_1.2.1             rvest_1.0.2           
+ [25] haven_2.3.1            xfun_0.26              RCurl_1.98-1.2        
+ [28] tcltk_4.0.3            callr_3.7.0            crayon_1.4.2          
+ [31] jsonlite_1.7.3         hexbin_1.28.1          glue_1.4.2            
+ [34] gtable_0.3.0           zlibbioc_1.34.0        XVector_0.28.0        
+ [37] webshot_0.5.2          car_3.0-8              abind_1.4-5           
+ [40] scales_1.1.1           mvtnorm_1.1-0          DBI_1.1.0             
+ [43] Rcpp_1.0.4.6           isoband_0.2.1          viridisLite_0.3.0     
+ [46] htmlTable_1.13.3       foreign_0.8-80         bit_1.1-15.2          
+ [49] truncnorm_1.0-8        htmlwidgets_1.5.1      httr_1.4.2            
+ [52] calibrate_1.7.7        acepack_1.4.1          ellipsis_0.3.2        
+ [55] pkgconfig_2.0.3        rJava_0.9-12           farver_2.0.3          
+ [58] nnet_7.3-14            dbplyr_2.1.1           utf8_1.1.4            
+ [61] tidyselect_1.1.0       labeling_0.3           rlang_0.4.12          
+ [64] later_1.0.0            munsell_0.5.0          cellranger_1.1.0      
+ [67] tools_4.0.3            cli_3.1.0              generics_0.0.2        
+ [70] RSQLite_2.2.0          broom_0.7.11           evaluate_0.14         
+ [73] yaml_2.2.1             processx_3.5.2         knitr_1.32            
+ [76] bit64_0.9-7            fs_1.4.1               zip_2.1.1             
+ [79] nlme_3.1-149           whisker_0.4            xml2_1.3.2            
+ [82] compiler_4.0.3         rstudioapi_0.13        beeswarm_0.4.0        
+ [85] curl_4.3               png_0.1-7              reprex_2.0.1          
+ [88] mapplots_1.5.1         stringi_1.5.3          highr_0.8             
+ [91] ps_1.3.3               gdtools_0.2.2          Matrix_1.2-18         
+ [94] vctrs_0.3.8            pillar_1.6.4.9003      lifecycle_1.0.1       
+ [97] jquerylib_0.1.1        bitops_1.0-6           data.table_1.14.2     
+[100] irlba_2.3.3            GenomicRanges_1.40.0   httpuv_1.5.3.1        
+[103] R6_2.4.1               latticeExtra_0.6-29    promises_1.1.0        
+[106] rio_0.5.16             vipor_0.4.5            gtools_3.8.2          
+[109] MASS_7.3-53            assertthat_0.2.1       rprojroot_1.3-2       
+[112] withr_2.4.3            GenomeInfoDbData_1.2.3 mgcv_1.8-33           
+[115] hms_1.1.1              rpart_4.1-15           rmarkdown_2.11        
+[118] carData_3.0-4          git2r_0.27.1           mixsqp_0.3-43         
+[121] getPass_0.2-2          lubridate_1.7.10       base64enc_0.1-3       
+[124] rmeta_3.0             </code></pre>
 </div>
 </div>
 

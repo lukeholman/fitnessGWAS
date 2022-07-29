@@ -13,6 +13,7 @@
 
 <title>The genetic basis of fitness in Drosophila; A genome-wide association study</title>
 
+<script src="site_libs/header-attrs-2.11/header-attrs.js"></script>
 <script src="site_libs/jquery-3.5.0/jquery-3.5.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
@@ -34,13 +35,15 @@
 <link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
 
-<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
 <!-- Add a small amount of space between sections. -->
 <style type="text/css">
 div.section {
   padding-top: 12px;
 }
 </style>
+
+
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -273,14 +276,17 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">The genetic basis of fitness in <em>Drosophila</em>; A genome-wide association study</h1>
+<h1 class="title toc-ignore">The genetic basis of fitness in
+<em>Drosophila</em>; A genome-wide association study</h1>
 
 </div>
 
 
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
-<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span>
 </button>
 </p>
 <div id="workflowr-report" class="collapse">
@@ -289,7 +295,9 @@ $(document).ready(function () {
 <a data-toggle="tab" href="#summary">Summary</a>
 </li>
 <li>
-<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</a>
 </li>
 <li>
 <a data-toggle="tab" href="#versions">Past versions</a>
@@ -298,17 +306,27 @@ $(document).ready(function () {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2021-11-10
+<strong>Last updated:</strong> 2022-07-29
 </p>
 <p>
-<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 2 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 2
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 0
 </p>
 <p>
-<strong>Knit directory:</strong> <code>fitnessGWAS/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+<strong>Knit directory:</strong> <code>fitnessGWAS/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
 </p>
 <p>
-This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
-  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.2). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.0). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
 </p>
 <hr>
 </div>
@@ -317,31 +335,54 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date
+</a>
 </p>
 </div>
-<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div id="strongRMarkdownfilestronguptodate"
+class="panel-collapse collapse">
 <div class="panel-body">
-<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+<p>Great! Since the R Markdown file has been committed to the Git
+repository, you know the exact version of the code that produced these
+results.</p>
 </div>
 </div>
 </div>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree7449a9097af63aa27121cdc1dc12b529a29695catargetblank7449a90a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/lukeholman/fitnessGWAS/tree/7449a9097af63aa27121cdc1dc12b529a29695ca" target="_blank">7449a90</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree990336e0baf3283078cc939b762a0321aad84546targetblank990336ea">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/990336e0baf3283078cc939b762a0321aad84546" target="_blank">990336e</a>
+</a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree7449a9097af63aa27121cdc1dc12b529a29695catargetblank7449a90a" class="panel-collapse collapse">
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree990336e0baf3283078cc939b762a0321aad84546targetblank990336ea"
+class="panel-collapse collapse">
 <div class="panel-body">
 <p>
-Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/lukeholman/fitnessGWAS/tree/7449a9097af63aa27121cdc1dc12b529a29695ca" target="_blank">7449a90</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/990336e0baf3283078cc939b762a0321aad84546" target="_blank">990336e</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
 </p>
 <p>
-Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
 </p>
 <pre><code>
 Ignored files:
@@ -365,29 +406,45 @@ Ignored files:
     Ignored:    data/input/dgrp2.fam
     Ignored:    data/input/huang_transcriptome/
     Ignored:    figures/.DS_Store
-    Ignored:    figures/fig1_inkscape.svg
-    Ignored:    figures/figure1a.pdf
-    Ignored:    figures/figure1b.pdf
 
 Untracked files:
     Untracked:  big_model.rds
+    Untracked:  code/main_paper_figures.Rmd
+    Untracked:  code/main_paper_figures.docx
+    Untracked:  code/pdf_supp_material.Rmd
+    Untracked:  code/pdf_supp_material.pdf
     Untracked:  code/quant_gen_1.R
+    Untracked:  code/~$in_paper_figures.docx
     Untracked:  data/input/genomic_relatedness_matrix.rds
-    Untracked:  old_analyses/
+    Untracked:  figures/fig3_boyle_plot.pdf
+    Untracked:  figures/fig4_quartiles_plot.pdf
+    Untracked:  figures/fig5_antagonism_ratios.pdf
 
 Unstaged changes:
     Modified:   .gitignore
-    Modified:   figures/GWAS_stats_figure.pdf
-    Modified:   figures/SNP_effect_ED.pdf
-    Modified:   figures/TWAS_stats_figure.pdf
-    Modified:   figures/antagonism_ratios.pdf
-    Modified:   figures/boyle_plot.pdf
-    Modified:   figures/composite_mixture_figure.pdf
-    Modified:   figures/eff_size_histos.pdf
+    Modified:   analysis/GWAS_tables.Rmd
+    Modified:   analysis/TWAS_tables.Rmd
+    Modified:   analysis/gcta_quant_genetics.Rmd
+    Modified:   analysis/plot_models_variant_effects.Rmd
+    Deleted:    figures/GWAS_mixture_proportions.rds
+    Deleted:    figures/GWAS_stats_figure.pdf
+    Deleted:    figures/TWAS_mixture_proportions.rds
+    Deleted:    figures/TWAS_stats_figure.pdf
+    Deleted:    figures/antagonism_ratios.pdf
+    Deleted:    figures/boyle_plot.pdf
+    Deleted:    figures/boyle_plot.png
+    Deleted:    figures/composite_mixture_figure.pdf
+    Deleted:    figures/eff_size_histos.pdf
+    Modified:   figures/fig2_SNPs_manhattan_plot.png
+    Modified:   figures/fig4_quartiles_plot.png
+    Modified:   figures/fig6_models.pdf
+    Deleted:    figures/stats_figure.pdf
 
 </code></pre>
 <p>
-Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
 </p>
 </div>
 </div>
@@ -398,7 +455,11 @@ Note that any generated files, e.g. HTML, png, CSS, etc., are not included in t
 <div id="versions" class="tab-pane fade">
 
 <p>
-These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/index.Rmd</code>) and HTML (<code>docs/index.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+These are the previous versions of the repository in which changes were
+made to the R Markdown (<code>analysis/index.Rmd</code>) and HTML
+(<code>docs/index.html</code>) files. If you’ve configured a remote Git
+repository (see <code>?wflow_git_remote</code>), click on the hyperlinks
+in the table below to view the files as they were in that past version.
 </p>
 <div class="table-responsive">
 <table class="table table-condensed table-hover">
@@ -422,6 +483,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/990336e0baf3283078cc939b762a0321aad84546/analysis/index.Rmd" target="_blank">990336e</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2022-07-29
+</td>
+<td>
+wflow_publish("analysis/index.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/f04d7d31d8cf33da6cb948d0b26804b433d35fab/docs/index.html" target="_blank">f04d7d3</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2021-11-10
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 html
@@ -769,54 +864,131 @@ Initial commit
 </div>
 </div>
 </div>
-<p>This website relates to the forthcoming paper ‘A genome-wide scan for pleiotropic fitness effects on sexes and age classes in <em>Drosophila</em>’, by Wong and Holman.</p>
-<p>Click the headings below to see the code, results, plots, tables and figures associated with this study.</p>
-<div id="setting-up-a-database-to-hold-variantgene-annotations-and-gwas-results" class="section level3">
-<h3><a href="make_annotation_database.html">1. Setting up a database to hold variant/gene annotations and GWAS results</a></h3>
-<p>This script creates a SQLite3 database holding two tables: one with annotations for each variant (provided by the Mackay lab), and one with annotations for each gene (from annotation hub). In step 3, we also add the GWAS results to this database, allowing memory-efficient handling of the results. Using this database also avoids having to load Bioconductor packages that conflict with <code>dplyr::select()</code>, etc.</p>
+<p>This website relates to the forthcoming paper ‘A genome-wide scan for
+pleiotropic fitness effects on sexes and age classes in
+<em>Drosophila</em>’, by Wong and Holman (for contact info, see
+(lukeholman.org)[<a href="https://www.lukeholman.org/"
+class="uri">https://www.lukeholman.org/</a>])</p>
+<p>Click the headings below to see the code, results, plots, tables and
+figures associated with this study.</p>
+<div
+id="setting-up-a-database-to-hold-variantgene-annotations-and-gwas-results"
+class="section level3">
+<h3><a href="make_annotation_database.html">1. Setting up a database to
+hold variant/gene annotations and GWAS results</a></h3>
+<p>This script creates a SQLite3 database holding two tables: one with
+annotations for each variant (annotations created by the Mackay lab),
+and one with annotations for each gene (from annotation hub). In step 4
+below, we also add the GWAS results to this database, allowing
+memory-efficient handling of the results.</p>
 </div>
-<div id="estimating-line-mean-fitness-using-bayesian-models" class="section level3">
-<h3><a href="get_predicted_line_means.html">2. Estimating line mean fitness using Bayesian models</a></h3>
-<p>This script uses Bayesian mixed models implemented in <code>brms</code> to estimate the line means for our four fitness traits.</p>
+<div id="estimating-line-mean-fitness-using-bayesian-models"
+class="section level3">
+<h3><a href="get_predicted_line_means.html">2. Estimating line mean
+fitness using Bayesian models</a></h3>
+<p>This script uses Bayesian mixed models implemented in the package
+<code>brms</code> to estimate the line means for our four fitness
+traits, while imputing missing values and adjusting for block
+effects.</p>
 </div>
-<div id="calculating-quantitative-genetic-parameters" class="section level3">
-<h3><a href="gcta_quant_genetics.html">3. Calculating quantitative genetic parameters</a></h3>
-<p>We first present a table showing the proportion of variance in fitness explained by ‘DGRP line’, which was calculated using the models in Section 2. We then use <code>gcta64</code> software to estimate the genetics (co)variances for the four fitness metrics from the genomic relatedness matrix.</p>
+<div id="calculating-quantitative-genetic-parameters"
+class="section level3">
+<h3><a href="gcta_quant_genetics.html">3. Calculating quantitative
+genetic parameters</a></h3>
+<p>We first present a table showing the proportion of variance in
+fitness explained by ‘DGRP line’, which was calculated using the models
+in Section 2. We then use <code>gcta64</code> software to estimate the
+genetics (co)variances for the four fitness metrics from the genomic
+relatedness matrix.</p>
 </div>
 <div id="running-the-gwas" class="section level3">
 <h3><a href="perfom_gwas.html">4. Running the GWAS</a></h3>
-<p>This script first performs quality control and imputation on the dataset of SNPs and indels for the DGRP. Second, it runs mixed model association tests on our four phenotypes using the software <a href="http://www.xzlab.org/software/GEMMAmanual.pdf">GEMMA</a>. Third, it uses PLINK to identify groups of loci that are in complete linkage disequilibrium (‘SNP clumps’).</p>
+<p>This script first performs quality control and imputation on the
+dataset of SNPs and indels for the DGRP (e.g filtering by MAF). Second,
+it runs mixed model association tests on our four phenotypes using the
+software <a
+href="http://www.xzlab.org/software/GEMMAmanual.pdf">GEMMA</a>. Third,
+it uses PLINK to identify groups of loci that are in complete linkage
+disequilibrium (‘SNP clumps’), and to identify a subset of SNPs that are
+in approximate LD for downstream analyses.</p>
 </div>
-<div id="applying-adaptive-shrinkage-to-the-gwas-results" class="section level3">
-<h3><a href="gwas_adaptive_shrinkage.html">5. Applying adaptive shrinkage to the GWAS results</a></h3>
-<p>Here, we use the R package <code>mashr</code> to perform multivariate adaptive shrinkage on the results of the GWAS, for an LD-pruned subset of loci. This produces corrected estimates of each SNP’s effect size, and allows estimation of the frequencies of different types of loci (e.g. sexually- or age-antagonistic loci).</p>
+<div id="applying-adaptive-shrinkage-to-the-gwas-results"
+class="section level3">
+<h3><a href="gwas_adaptive_shrinkage.html">5. Applying adaptive
+shrinkage to the GWAS results</a></h3>
+<p>This script uses the R package <code>mashr</code> to perform
+multivariate adaptive shrinkage on the results of the GWAS, for an
+LD-pruned subset of loci. This produces corrected estimates of each
+SNP’s effect size, and allows estimation of the frequencies of different
+types of loci (e.g. sexually- or age-antagonistic loci).</p>
 </div>
-<div id="running-the-twas-and-applying-mashr-to-the-twas-results" class="section level3">
-<h3><a href="TWAS.html">6. Running the TWAS and applying mashr to the TWAS results</a></h3>
-<p>This script uses the transcriptomic data on the DGRP from Huang et al. 2015 <em>PNAS</em>. In this script, we</p>
+<div id="running-the-twas-and-applying-mashr-to-the-twas-results"
+class="section level3">
+<h3><a href="TWAS.html">6. Running the TWAS and applying mashr to the
+TWAS results</a></h3>
+<p>This script uses the transcriptomic data on the DGRP from Huang et
+al. 2015 <em>PNAS</em> to run a ‘transcriptome-wide association study’
+(TWAS). In this script, we</p>
 <ul>
-<li>Calculate the average expression and sex bias in expression for each transcript in Huang et al.</li>
-<li>Perform ‘TWAS’, i.e. searching for transcripts whose expression correlates with our fitness measures across lines</li>
-<li>Adjust the results of the TWAS linear models using <code>mashr</code> in canonical and data-driven modes.</li>
+<li>Calculate the average expression and sex bias in expression for each
+transcript in Huang et al.</li>
+<li>Perform ‘TWAS’, i.e. searching for transcripts whose expression
+correlates with our fitness measures across DGRP lines</li>
+<li>Adjust the results of the TWAS linear models using
+<code>mashr</code>.</li>
 </ul>
 </div>
-<div id="plots-tables-and-analyses-of-the-results" class="section level2">
+<div id="plots-tables-and-analyses-of-the-results"
+class="section level2">
 <h2>Plots, tables, and analyses of the results</h2>
 <div id="plots-showing-line-mean-fitness" class="section level3">
-<h3><a href="plot_line_means.html">8. Plots showing line mean fitness</a></h3>
-<p>This script plots the estimated line means for each of the four fitness metrics, i.e. Figure 1 in the paper.</p>
+<h3><a href="plot_line_means.html">8. Plots showing line mean
+fitness</a></h3>
+<p>This script plots the estimated line means for each of the four
+fitness metrics, i.e. Figure 1 in the paper.</p>
 </div>
 <div id="tables-of-gwas-results" class="section level3">
 <h3><a href="GWAS_tables.html">9. Tables of GWAS results</a></h3>
-<p>This script presents a searchable HTML table showing list of significant loci from the GWAS using GEMMA, with annotations, effect sizes, and <span class="math inline">\(p\)</span>-values for each one.</p>
+<p>This script presents a searchable HTML table showing a list of
+significant SNPs and indels from the GWAS, with annotations, effect
+sizes, and <span class="math inline">\(p\)</span>-values for each.</p>
 </div>
 <div id="tables-of-twas-results" class="section level3">
 <h3><a href="TWAS_tables.html">10. Tables of TWAS results</a></h3>
-<p>Text here</p>
+<p>This script presents a searchable HTML table showing a list of
+significant transcripts from the TWAS, with annotations, effect sizes,
+and <span class="math inline">\(p\)</span>-values for each.</p>
 </div>
-<div id="plot-and-model-the-variant-effect-sizes" class="section level3">
-<h3><a href="plot_models_variant_effects.html">11. Plot and model the variant effect sizes</a></h3>
-<p>Here, we plot the correlations in the estimated effects of each variant (or group of variants in perfect linkage disequilibrium with one another). For the GWAS results, we run linear models to test whether variants differ in their effect on fitness according to chromosome, site class, and minor allele frequency. For the TWAS results, we run linear models to test whether transcripts differ in their effect on fitness according to chromosome, average expression level, and the sex bias in expression.</p>
+<div id="plot-and-model-the-variant-effect-sizes"
+class="section level3">
+<h3><a href="plot_models_variant_effects.html">11. Plot and model the
+variant effect sizes</a></h3>
+<p>Here, we present various plots and statistical analyses of the GWAS
+and TWAS results, specifically:</p>
+<ul>
+<li>Q-Q plots of the GWAS results</li>
+<li>Hex bin plots showing the correlations in effect sizes from GWAS
+across the 4 fitness traits</li>
+<li>A statistical test showing that minor alleles tend to be associated
+with lower fitness</li>
+<li>A plot inspired by Boyle et al. 2017 (Cell) illustrating that
+fitness is highly polygenic (‘omnigenic’) and pleiotropy between male
+and female fitness is common.</li>
+<li>Bar plots showing an estimate of the frequencies of sexually
+antagonistic and sexually concordant SNPs/indels from GWAS, and
+transcripts from TWAS (plus the same for age concordant vs age
+antagonistic variants/transcripts)</li>
+<li>Statistics indicating that the frequency of sexually antagonistic
+loci declines with age</li>
+<li>Plots of the evidence ratio for each locus and transcript, where the
+ER compares evidence for the hypotheses that 1) the locus is concordant
+between sexes or ages, and B) the locus is antagonistic between sexes or
+ages. This plot avoids having to create a binary distinction between
+antagonistic and concordant loci, when in reality there is a continuum
+of evidence.</li>
+<li>GO enrichment of the top 1% most sexually antagonistic transcripts,
+implicating GO terms relating to mitochondria among other things.</li>
+</ul>
 <!-- Heritability -->
 <!--  - Correlated with selection experienced by the gene? Angatonism? -->
 <!--  - Correlated with sex-specificity in expression? -->
@@ -839,7 +1011,7 @@ Initial commit
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
 TeX fonts only; see
-http://docs.mathjax.org/en/latest/configuration.html.  This will make
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
 the presentation more consistent at the cost of the webpage sometimes
 taking slightly longer to load. Note that this only works because the
 footer is added to webpages before the MathJax javascript. -->
@@ -848,6 +1020,8 @@ footer is added to webpages before the MathJax javascript. -->
     "HTML-CSS": { availableFonts: ["TeX"] }
   });
 </script>
+
+
 
 
 

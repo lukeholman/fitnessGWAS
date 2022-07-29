@@ -527,15 +527,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree5cf7b5e0c3c867464a52080b33321eee78a82be8targetblank5cf7b5ea">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree70671b40e78088467dc1578d0514a00ee6f4fc48targetblank70671b4a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/5cf7b5e0c3c867464a52080b33321eee78a82be8" target="_blank">5cf7b5e</a>
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/70671b40e78088467dc1578d0514a00ee6f4fc48" target="_blank">70671b4</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree5cf7b5e0c3c867464a52080b33321eee78a82be8targetblank5cf7b5ea"
+id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree70671b40e78088467dc1578d0514a00ee6f4fc48targetblank70671b4a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -545,7 +545,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/5cf7b5e0c3c867464a52080b33321eee78a82be8" target="_blank">5cf7b5e</a>.
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/70671b40e78088467dc1578d0514a00ee6f4fc48" target="_blank">70671b4</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -590,13 +590,9 @@ Untracked files:
     Untracked:  code/quant_gen_1.R
     Untracked:  code/~$in_paper_figures.docx
     Untracked:  data/input/genomic_relatedness_matrix.rds
-    Untracked:  figures/fig3_boyle_plot.pdf
-    Untracked:  figures/fig4_quartiles_plot.pdf
-    Untracked:  figures/fig5_antagonism_ratios.pdf
 
 Unstaged changes:
     Modified:   .gitignore
-    Modified:   analysis/index.Rmd
     Deleted:    figures/GWAS_mixture_proportions.rds
     Deleted:    figures/GWAS_stats_figure.pdf
     Deleted:    figures/TWAS_mixture_proportions.rds
@@ -607,7 +603,10 @@ Unstaged changes:
     Deleted:    figures/composite_mixture_figure.pdf
     Deleted:    figures/eff_size_histos.pdf
     Modified:   figures/fig2_SNPs_manhattan_plot.png
+    Modified:   figures/fig3_boyle_plot.pdf
+    Modified:   figures/fig4_quartiles_plot.pdf
     Modified:   figures/fig4_quartiles_plot.png
+    Modified:   figures/fig5_antagonism_ratios.pdf
     Modified:   figures/fig6_models.pdf
     Deleted:    figures/stats_figure.pdf
 
@@ -656,6 +655,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/70671b40e78088467dc1578d0514a00ee6f4fc48/analysis/plot_models_variant_effects.Rmd" target="_blank">70671b4</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2022-07-29
+</td>
+<td>
+wflow_publish("analysis/plot_models_variant_effects.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/45e139cecb4ad369f4d31ff28f1ec19a3fb391f0/docs/plot_models_variant_effects.html" target="_blank">45e139c</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2022-07-29
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -5438,7 +5471,7 @@ class="section level2">
 <pre class="r"><code>get_antagonism_ratios &lt;- function(dat){
   dat %&gt;%
     
-    # Convert the LFSR to the probability that effect size is positive
+    # Convert the LFSR to the probability that the effect size is positive
     mutate(pp_female_early = ifelse(pheno1 &gt; 0, LFSR1, 1 - LFSR1),
            pp_female_late  = ifelse(pheno2 &gt; 0, LFSR2, 1 - LFSR2),
            pp_male_early   = ifelse(pheno3 &gt; 0, LFSR3, 1 - LFSR3),
@@ -5460,7 +5493,7 @@ class="section level2">
            p_age_concord_males = pp_male_early * pp_male_late + (1 - pp_male_early) * (1 - pp_male_late),
            p_age_antag_males = pp_male_early * (1 - pp_male_late) + (1 - pp_male_early) * pp_male_late) %&gt;%
     
-    # Find the ratios of some of these probabilities (i.e. &quot;evidence ratios&quot;)
+    # Find the ratios of some of these two probabilities (i.e. the &quot;evidence ratios&quot;)
     mutate(inter_sex_early = p_sex_concord_early / p_sex_antag_early,
            inter_sex_late = p_sex_concord_late / p_sex_antag_late,
            inter_age_females = p_age_concord_females / p_age_antag_females,
@@ -6033,51 +6066,113 @@ dev.off()</code></pre>
                 2 </code></pre>
 </div>
 </div>
-<div id="go-enrichment-of-top-1-sexually-antagonistic-transcripts"
-class="section level2">
-<h2>GO enrichment of top 1% sexually antagonistic transcripts</h2>
+<div id="go-enrichment-of-transcripts-with-extreme-evidence-ratios"
+class="section level2 tabset">
+<h2 class="tabset">GO enrichment of transcripts with extreme evidence
+ratios</h2>
+<p>The following code performs a GO enrichment test using the Wilcoxon
+method, which tests for enrichment of GO terms at the top and the bottom
+of a gene list that has been ordered by some variable. In this case, the
+ordering variable is the evidence ratio for early-life sexual
+antagonism/concordance that is plotted in the top left of panel B in the
+previous figure. Transcripts with a more negative evidence ratio are
+more likely to be sexually antagonistic, while those with a more
+positive evidence ratio are more likely to be sexually concordant. The
+two tables below (accessible by clicking the tabs) illustrate the GO:
+Biological Process terms that are most associated with the most sexually
+antagonistic and sexually concordant transcripts, according to the
+Wilcoxon method. The <code>GOfuncR::go_enrich()</code> function uses
+permutation to calculate the ‘family wise error rate’ (FWER) to correct
+for multiple testing, and we define significantly enriched GO terms as
+those with FWER &lt; 0.05. See the <code>GOfuncR</code> <a
+href="https://bioconductor.org/packages/devel/bioc/vignettes/GOfuncR/inst/doc/GOfuncR.html">vignette</a>
+for more information on this method.</p>
 <pre class="r"><code>library(GOfuncR) # BiocManager::install(&quot;GOfuncR&quot;)
 library(org.Dm.eg.db) 
 
-# This code labels the transcripts we analysed as either in or not-in the top 1%,
-# and gets their gene symbols, setting up the data in the format required by GOfuncR
-# as described in the vignette here https://bioconductor.org/packages/devel/bioc/vignettes/GOfuncR/inst/doc/GOfuncR.html
-go_data &lt;- antagonism_evidence_ratios_twas %&gt;% 
-  arrange(inter_sex_early) %&gt;% 
-  mutate(row = 1:n(),
-         is_candidate = as.numeric(row &lt; (n() / 100))) %&gt;% 
-  dplyr::select(FLYBASE = FBID, is_candidate) %&gt;% 
-  left_join(select(org.Dm.eg.db, keys = keys(org.Dm.eg.db), columns = c(&quot;SYMBOL&quot;,&quot;FLYBASE&quot;)), by = &quot;FLYBASE&quot;) %&gt;% 
-  dplyr::select(SYMBOL, is_candidate) %&gt;% 
-  as.data.frame()
+# Get a list of Drosophila genes that have GO terms (can&#39;t analyse genes that do not)
+genes_with_GO &lt;- select(org.Dm.eg.db, 
+                        keys = keys(org.Dm.eg.db), 
+                        columns = c(&quot;SYMBOL&quot;,&quot;GO&quot;)) %&gt;% 
+  filter(GO != &quot;&lt;NA&gt;&quot;) %&gt;% dplyr::pull(SYMBOL)
 
-# Run a hypergeometric test onn the BP intology. This uses the software FUNC for the GO test:
-# Pruefer, K. et al. (2007). FUNC: A package for detecting significant associations between gene sets and ontological annotations, BMC Bioinformatics 8: 41. [https://doi.org/10.1186/1471-2105-8-41]
+# This code gets the gene symbols for each transcript and sets up the data in the format required by GOfuncR
+# for the Wilcoxon test, which works on a gene list that is ordered by a variable 
+# (here, the variable is the evidence ratio for early-life sexual antagonism/concordance)
+wilcoxon_input &lt;- antagonism_evidence_ratios_twas %&gt;% 
+  dplyr::select(FLYBASE = FBID, gene_score = inter_sex_early) %&gt;% 
+  left_join(select(org.Dm.eg.db, 
+                   keys = keys(org.Dm.eg.db), 
+                   columns = c(&quot;SYMBOL&quot;,&quot;FLYBASE&quot;)), by = &quot;FLYBASE&quot;) %&gt;% 
+  mutate(gene_score = log2(gene_score)) %&gt;% 
+  dplyr::select(SYMBOL, gene_score) %&gt;% 
+  dplyr::filter(SYMBOL %in% genes_with_GO) %&gt;% 
+  dplyr::arrange(gene_score) %&gt;% as.data.frame()
 
-res_hyper_fly &lt;- go_enrich(go_data, orgDb=&#39;org.Dm.eg.db&#39;, test = &quot;hyper&quot;, n_randsets = 10000,
-                           silent = T, domains = &quot;biological_process&quot;)
-res_hyper_fly$results %&gt;% 
-  filter(raw_p_overrep &lt; 0.01) %&gt;% 
-  dplyr::select(node_id, node_name, raw_p_overrep, FWER_overrep) %&gt;% 
+# Run the GO enrichment test
+GO_results_wilcoxon &lt;- go_enrich(wilcoxon_input, orgDb=&#39;org.Dm.eg.db&#39;, test=&#39;wilcoxon&#39;, 
+                                 silent = T, domains = &quot;biological_process&quot;,
+                                 n_randsets = 1000)
+
+
+most_antagonistic_genes_GO &lt;- GO_results_wilcoxon$results %&gt;% # most antagonistic
+  arrange(FWER_low_rank) %&gt;% 
+  filter(raw_p_low_rank &lt; 0.001) %&gt;% 
+  dplyr::select(node_id, node_name, raw_p_low_rank, FWER_low_rank) %&gt;% 
+  dplyr::rename(GO = node_id, Meaning = node_name, `-log10 p` = raw_p_low_rank, FWER = FWER_low_rank) %&gt;% 
+  mutate(`-log10 p` = format(round(-1 * log10(`-log10 p`), 1), nsmall = 1))
+
+
+most_concordant_genes_GO &lt;- GO_results_wilcoxon$results %&gt;% # most concordant
+  filter(FWER_high_rank &lt; 0.05) %&gt;% 
+  dplyr::select(node_id, node_name, raw_p_high_rank, FWER_high_rank)  %&gt;% 
+  dplyr::rename(GO = node_id, Meaning = node_name, `-log10 p` = raw_p_high_rank, FWER = FWER_high_rank) %&gt;% 
+  mutate(`-log10 p` = format(round(-1 * log10(`-log10 p`), 1), nsmall = 1))</code></pre>
+<div id="go-enrichment-among-most-anatagonistic-transcripts"
+class="section level3">
+<h3>GO enrichment among most anatagonistic transcripts</h3>
+<p><strong><em>Table</em></strong>: The table shows all the GO terms
+with a Wilcoxon test p-value below 0.001, when testing for GO enrichment
+among genes whose transcripts had a low evidence ratio (indicating
+greater likelihood of being sexually antagonistic, as measured in the
+early-life fitness assay). However, no GO terms were significantly
+enriched among the most sexually antagonistic genes using family wise
+error rate (FWER) threshold of FWER &lt; 0.05, and so these enrichment
+results may represent false positives due to multiple testing.</p>
+<pre class="r"><code>most_antagonistic_genes_GO %&gt;% 
   kable() %&gt;% kable_styling(full_width = F)</code></pre>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
 <th style="text-align:left;">
-node_id
+GO
 </th>
 <th style="text-align:left;">
-node_name
+Meaning
+</th>
+<th style="text-align:left;">
+-log10 p
 </th>
 <th style="text-align:right;">
-raw_p_overrep
-</th>
-<th style="text-align:right;">
-FWER_overrep
+FWER
 </th>
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+<a href="GO:0034329" class="uri">GO:0034329</a>
+</td>
+<td style="text-align:left;">
+cell junction assembly
+</td>
+<td style="text-align:left;">
+3.7
+</td>
+<td style="text-align:right;">
+0.253
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 <a href="GO:0034227" class="uri">GO:0034227</a>
@@ -6085,292 +6180,270 @@ FWER_overrep
 <td style="text-align:left;">
 tRNA thio-modification
 </td>
-<td style="text-align:right;">
-0.0010373
+<td style="text-align:left;">
+3.3
 </td>
 <td style="text-align:right;">
-0.5860
+0.532
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-<a href="GO:0000963" class="uri">GO:0000963</a>
+<a href="GO:0007423" class="uri">GO:0007423</a>
 </td>
 <td style="text-align:left;">
-mitochondrial RNA processing
+sensory organ development
+</td>
+<td style="text-align:left;">
+3.2
 </td>
 <td style="text-align:right;">
-0.0037000
-</td>
-<td style="text-align:right;">
-0.9025
+0.630
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-<a href="GO:0009266" class="uri">GO:0009266</a>
+<a href="GO:0007416" class="uri">GO:0007416</a>
 </td>
 <td style="text-align:left;">
-response to temperature stimulus
+synapse assembly
+</td>
+<td style="text-align:left;">
+3.2
 </td>
 <td style="text-align:right;">
-0.0053125
-</td>
-<td style="text-align:right;">
-0.9465
+0.663
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-<a href="GO:0009408" class="uri">GO:0009408</a>
+<a href="GO:0042326" class="uri">GO:0042326</a>
 </td>
 <td style="text-align:left;">
-response to heat
+negative regulation of phosphorylation
+</td>
+<td style="text-align:left;">
+3.1
 </td>
 <td style="text-align:right;">
-0.0057446
+0.705
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="go-enrichment-among-most-concordant-transcripts"
+class="section level3">
+<h3>GO enrichment among most concordant transcripts</h3>
+<p><strong><em>Table</em></strong>: The table shows all the GO terms
+with a family wise error rate (FWER) threshold of FWER &lt; 0.05, when
+testing for GO enrichment among genes whose transcripts had a high
+evidence ratio (indicating greater likelihood of being sexually
+concordant, as measured in the early-life fitness assay). GO terms
+related to gene expression and translation were enriched, which suggests
+that there is strong, sexually concordant selection on the expression
+levels of genes involved in gene expression and translation.</p>
+<pre class="r"><code>most_concordant_genes_GO %&gt;% 
+  kable() %&gt;% kable_styling(full_width = F)</code></pre>
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+GO
+</th>
+<th style="text-align:left;">
+Meaning
+</th>
+<th style="text-align:left;">
+-log10 p
+</th>
+<th style="text-align:right;">
+FWER
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="GO:0002181" class="uri">GO:0002181</a>
+</td>
+<td style="text-align:left;">
+cytoplasmic translation
+</td>
+<td style="text-align:left;">
+13.9
 </td>
 <td style="text-align:right;">
-0.9495
+0.000
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-<a href="GO:0034614" class="uri">GO:0034614</a>
+<a href="GO:0043603" class="uri">GO:0043603</a>
 </td>
 <td style="text-align:left;">
-cellular response to reactive oxygen species
+cellular amide metabolic process
+</td>
+<td style="text-align:left;">
+13.0
 </td>
 <td style="text-align:right;">
-0.0069102
-</td>
-<td style="text-align:right;">
-0.9693
+0.000
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-<a href="GO:0000957" class="uri">GO:0000957</a>
+<a href="GO:0006518" class="uri">GO:0006518</a>
 </td>
 <td style="text-align:left;">
-mitochondrial RNA catabolic process
+peptide metabolic process
+</td>
+<td style="text-align:left;">
+12.9
 </td>
 <td style="text-align:right;">
-0.0084553
-</td>
-<td style="text-align:right;">
-0.9999
+0.000
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-<a href="GO:0000958" class="uri">GO:0000958</a>
+<a href="GO:0043043" class="uri">GO:0043043</a>
 </td>
 <td style="text-align:left;">
-mitochondrial mRNA catabolic process
+peptide biosynthetic process
+</td>
+<td style="text-align:left;">
+10.8
 </td>
 <td style="text-align:right;">
-0.0084553
-</td>
-<td style="text-align:right;">
-0.9999
+0.000
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-<a href="GO:0009082" class="uri">GO:0009082</a>
+<a href="GO:0006412" class="uri">GO:0006412</a>
 </td>
 <td style="text-align:left;">
-branched-chain amino acid biosynthetic process
+translation
+</td>
+<td style="text-align:left;">
+10.7
 </td>
 <td style="text-align:right;">
-0.0084553
-</td>
-<td style="text-align:right;">
-0.9999
+0.000
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-<a href="GO:0009085" class="uri">GO:0009085</a>
+<a href="GO:0043604" class="uri">GO:0043604</a>
 </td>
 <td style="text-align:left;">
-lysine biosynthetic process
+amide biosynthetic process
+</td>
+<td style="text-align:left;">
+10.1
 </td>
 <td style="text-align:right;">
-0.0084553
-</td>
-<td style="text-align:right;">
-0.9999
+0.000
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-<a href="GO:0009098" class="uri">GO:0009098</a>
+<a href="GO:0034641" class="uri">GO:0034641</a>
 </td>
 <td style="text-align:left;">
-leucine biosynthetic process
+cellular nitrogen compound metabolic process
+</td>
+<td style="text-align:left;">
+8.3
 </td>
 <td style="text-align:right;">
-0.0084553
-</td>
-<td style="text-align:right;">
-0.9999
+0.000
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-<a href="GO:0009099" class="uri">GO:0009099</a>
+<a href="GO:0042273" class="uri">GO:0042273</a>
 </td>
 <td style="text-align:left;">
-valine biosynthetic process
+ribosomal large subunit biogenesis
+</td>
+<td style="text-align:left;">
+5.5
 </td>
 <td style="text-align:right;">
-0.0084553
-</td>
-<td style="text-align:right;">
-0.9999
+0.001
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-<a href="GO:0016038" class="uri">GO:0016038</a>
+<a href="GO:0010467" class="uri">GO:0010467</a>
 </td>
 <td style="text-align:left;">
-absorption of visible light
+gene expression
+</td>
+<td style="text-align:left;">
+5.2
 </td>
 <td style="text-align:right;">
-0.0084553
-</td>
-<td style="text-align:right;">
-0.9999
+0.007
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-<a href="GO:0019323" class="uri">GO:0019323</a>
+<a href="GO:0044271" class="uri">GO:0044271</a>
 </td>
 <td style="text-align:left;">
-pentose catabolic process
+cellular nitrogen compound biosynthetic process
+</td>
+<td style="text-align:left;">
+5.1
 </td>
 <td style="text-align:right;">
-0.0084553
-</td>
-<td style="text-align:right;">
-0.9999
+0.007
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-<a href="GO:0019878" class="uri">GO:0019878</a>
+<a href="GO:0022613" class="uri">GO:0022613</a>
 </td>
 <td style="text-align:left;">
-lysine biosynthetic process via aminoadipic acid
+ribonucleoprotein complex biogenesis
+</td>
+<td style="text-align:left;">
+4.7
 </td>
 <td style="text-align:right;">
-0.0084553
-</td>
-<td style="text-align:right;">
-0.9999
+0.013
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-<a href="GO:0044205" class="uri">GO:0044205</a>
+<a href="GO:0034645" class="uri">GO:0034645</a>
 </td>
 <td style="text-align:left;">
-‘de novo’ UMP biosynthetic process
+cellular macromolecule biosynthetic process
+</td>
+<td style="text-align:left;">
+4.5
 </td>
 <td style="text-align:right;">
-0.0084553
-</td>
-<td style="text-align:right;">
-0.9999
+0.030
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-<a href="GO:0070903" class="uri">GO:0070903</a>
+<a href="GO:0000463" class="uri">GO:0000463</a>
 </td>
 <td style="text-align:left;">
-mitochondrial tRNA thio-modification
-</td>
-<td style="text-align:right;">
-0.0084553
-</td>
-<td style="text-align:right;">
-0.9999
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-<a href="GO:1904785" class="uri">GO:1904785</a>
+maturation of LSU-rRNA from tricistronic rRNA transcript (SSU-rRNA, 5.8S
+rRNA, LSU-rRNA)
 </td>
 <td style="text-align:left;">
-regulation of asymmetric protein localization involved in cell fate
-determination
+4.4
 </td>
 <td style="text-align:right;">
-0.0084553
-</td>
-<td style="text-align:right;">
-0.9999
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-<a href="GO:1904812" class="uri">GO:1904812</a>
-</td>
-<td style="text-align:left;">
-rRNA acetylation involved in maturation of SSU-rRNA
-</td>
-<td style="text-align:right;">
-0.0084553
-</td>
-<td style="text-align:right;">
-0.9999
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-<a href="GO:1905933" class="uri">GO:1905933</a>
-</td>
-<td style="text-align:left;">
-regulation of cell fate determination
-</td>
-<td style="text-align:right;">
-0.0084553
-</td>
-<td style="text-align:right;">
-0.9999
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-<a href="GO:1990882" class="uri">GO:1990882</a>
-</td>
-<td style="text-align:left;">
-rRNA acetylation
-</td>
-<td style="text-align:right;">
-0.0084553
-</td>
-<td style="text-align:right;">
-0.9999
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-<a href="GO:1990884" class="uri">GO:1990884</a>
-</td>
-<td style="text-align:left;">
-RNA acetylation
-</td>
-<td style="text-align:right;">
-0.0084553
-</td>
-<td style="text-align:right;">
-0.9999
+0.036
 </td>
 </tr>
 </tbody>
@@ -6457,6 +6530,7 @@ loaded via a namespace (and not attached):
 [121] carData_3.0-4          googledrive_2.0.0      git2r_0.27.1          
 [124] mixsqp_0.3-43          getPass_0.2-2          lubridate_1.8.0       
 [127] base64enc_0.1-3        rmeta_3.0             </code></pre>
+</div>
 </div>
 </div>
 

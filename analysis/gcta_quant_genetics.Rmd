@@ -48,7 +48,10 @@ read.csv('data/derived/ICC.csv') %>%
 ### Correlations in the line means
 
 ```{r}
-line_means %>% select(contains(" ")) %>% cor() %>% kable(digits =3) %>% kable_styling()
+line_mean_corrs <- line_means %>% select(contains(" ")) %>% cor() %>% as.data.frame() 
+saveRDS(line_mean_corrs, "data/derived/line_mean_corrs.rds")
+
+line_mean_corrs %>% kable(digits =3) %>% kable_styling()
 ```
 
 
@@ -134,13 +137,15 @@ do_univariate_greml <- function(trait1){
     mutate(Trait = trait1) %>% select(Trait, everything())
 }
 
-bind_rows(do_univariate_greml("Female fitness early"),
+univariate_table <- bind_rows(do_univariate_greml("Female fitness early"),
           do_univariate_greml("Female fitness late"),
           do_univariate_greml("Male fitness early"),
           do_univariate_greml("Male fitness late")) %>% 
   filter(Source %in% c("V(G)", "V(e)", "Vp", "V(G)/Vp")) %>% 
   mutate(Variance = as.numeric(Variance)) %>% 
-  rename(Parameter = Source) %>% 
+  rename(Parameter = Source) 
+
+univariate_table %>% 
   kable(digits = 3) %>% 
   kable_styling(full_width = FALSE)
 ```
@@ -188,17 +193,36 @@ results <- bind_rows(do_bivar_greml("Female fitness early", "Female fitness late
           do_bivar_greml("Female fitness early", "Male fitness early"),
           do_bivar_greml("Female fitness late", "Male fitness late"),
           do_bivar_greml("Female fitness early", "Male fitness late"),
-          do_bivar_greml("Female fitness late", "Male fitness early"))
+          do_bivar_greml("Female fitness late", "Male fitness early")) %>% 
+  filter(Source %in% c("V(G)_tr1", "V(e)_tr1", "Vp_tr1", "V(G)/Vp_tr1",
+                       "V(G)_tr2", "V(e)_tr2", "Vp_tr2", "V(G)/Vp_tr2",
+                       "C(G)_tr12", "rG")) %>% 
+  mutate(Variance = as.numeric(Variance)) %>% 
+  rename(Parameter = Source)
 
 unlink(c("data/derived/delete_me.log", "data/derived/phenotype_pair.txt", "data/derived/delete_me.hsq"))
 unlink(list.files("data/derived/", pattern = "gcta_GRM", full.names = TRUE))
 
 results %>% 
-  filter(Source %in% c("V(G)_tr1", "V(e)_tr1", "Vp_tr1", "V(G)/Vp_tr1",
-                       "V(G)_tr2", "V(e)_tr2", "Vp_tr2", "V(G)/Vp_tr2",
-                       "C(G)_tr12", "rG")) %>% 
-  mutate(Variance = as.numeric(Variance)) %>% 
-  rename(Parameter = Source) %>% 
   kable(digit = 3) %>% 
   kable_styling(full_width = FALSE)
 ```
+
+### Set up the G-matrix shown in the supplementary table
+
+```{r}
+G_mat <- bind_rows(
+  univariate_table %>% filter(Parameter == "V(G)") %>% mutate(`Trait 1` = Trait, `Trait 2` = Trait) %>% select(`Trait 1`, `Trait 2`, vcov = Variance, SE),
+  results %>% filter(Parameter == "C(G)_tr12") %>% select(`Trait 1`, `Trait 2`, vcov = Variance, SE)) %>% 
+  mutate(text = paste(format(round(vcov, 2), nsmall = 2), " (", format(round(SE, 2), nsmall = 2), ")", sep = "")) %>% 
+  select(-vcov, -SE) %>% 
+  spread(`Trait 1`, text)
+rownames(G_mat) <- G_mat[,1]
+G_mat <- G_mat[,-1]
+G_mat[is.na(G_mat)] <- ""
+
+saveRDS(G_mat, "data/derived/G_mat.rds")
+
+G_mat %>% kable() %>% kable_styling()
+```
+

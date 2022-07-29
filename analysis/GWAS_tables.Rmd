@@ -89,14 +89,14 @@ write_csv(GWAS_table, "data/derived/GWAS_significant_snps.csv")
 
 ## Table showing significant loci from the GWAS
 
-*Table SX*: This table shows variants (either individual SNPs or indels, or clumps of variants in complete linkage disequilibrium) that passed the statistical significance threshold of $p < 10^{-5}$ for at least one of the four phenotypes, in a linear mixed model GWAS implemented in GEMMA. Column 3 gives the minor allele frequency, columns 4-5 identify genes that overlap the variant, and column 6 shows the site class. Columns 7-10 show the estimated effect size of the variant on the four phenotypes (where positive values mean that the minor allele is associated with higher fitness, and negative values that the minor allele is associated with lower fitness), and the final columns show the corresponding $p$-values.
+This table shows variants (either individual SNPs or indels, or clumps of variants in complete linkage disequilibrium) that passed the statistical significance threshold of $p < 10^{-5}$ for at least one of the four phenotypes, in a linear mixed model GWAS implemented in GEMMA. Column 3 gives the minor allele frequency, columns 4-5 identify genes that overlap the variant, and column 6 shows the site class. Columns 7-10 show the estimated effect size of the variant on the four phenotypes (where positive values mean that the minor allele is associated with higher fitness, and negative values that the minor allele is associated with lower fitness), and the final columns show the corresponding $p$-values.
 
 ```{r}
 GWAS_table %>% my_data_table()
 ```
 
 ### Table showing the numbers of loci related to fitness
-The table tallies up the numbers of clumps of perfectly linked loci showing a particular significant relationship with fitness (rows) for various different $p$-value thresholds (columns). For example, 'Female early only' counts the number of loci whose expression significantly correlated with mean female early life fitness across lines. 'Age concordant, males' counts loci whose expression correlated with early- _and_ late-life fitness in males, in the same direction, while 'Age antagonistic, males' counts loci showing a significant, opposite relationships with male early- and male late-life fitness. Similarly, 'Sex concordant, early' counts loci showing a concordant effect on early life fitness in both males and females, and 'Sex antagonistic, late' counts those showing opposing effects on late-life fitness in males and females. The categories are all mutually exclusive, such that loci are only counted towards the most specific category that applies to them. Note that this method has low power to detect loci that correlate with two or more fitness metrics, because there are two or more opportunities to make a 'false negative' error, and the power is low for any given locus (this is why we use a range of p-values, including some low ones).
+The table tallies the numbers of loci showing a particular significant relationship with fitness (rows) for various different $p$-value thresholds (columns). For example, 'Female early only' counts the number of loci whose genotype significantly correlated with mean female early life fitness across lines. 'Age concordant, males' counts loci whose genotype correlated with early- _and_ late-life fitness in males, in the same direction, while 'Age antagonistic, males' counts loci showing significant, opposite relationships with male early- and male late-life fitness. Similarly, 'Sex concordant, early' counts loci showing a concordant relationship with early life fitness in both males and females, and 'Sex antagonistic, late' counts those showing opposing relationships with late-life fitness in males and females. All categories are mutually exclusive, such that loci are only counted towards the most specific category that applies to them. Note that this method has low power to detect loci that correlate with two or more fitness metrics, because there are two or more opportunities to make a 'false negative' error, and the power is low for any given locus (we therefore use a range of $p$-value thresholds, including some permissive ones, to illustrate general patterns of genetic covariance).
 
 ```{r make_tally_table}
 make_tally <- function(p_cutoff){
@@ -154,7 +154,7 @@ make_tally <- function(p_cutoff){
   tally
 }
 
-tally_table <- make_tally(0.01) %>% 
+GWAS_tally_table <- make_tally(0.01) %>% 
   left_join(make_tally(0.001), by = "name") %>% 
   left_join(make_tally(0.0001), by = "name") %>% 
   left_join(make_tally(0.00001), by = "name") %>% 
@@ -162,7 +162,9 @@ tally_table <- make_tally(0.01) %>%
   left_join(make_tally(0.0000001), by = "name") %>% 
   rename(`Relationship to fitness` = name)
 
-tally_table %>% kable_table()
+saveRDS(GWAS_tally_table, "data/derived/GWAS_tally_table.rds")
+
+GWAS_tally_table %>% kable_table()
 ```
 
 

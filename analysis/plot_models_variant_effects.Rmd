@@ -273,30 +273,57 @@ These results indicate that the minor allele tends to _reduce_ fitness, relative
 
 ### Female early-life
 ```{r}
-summary(lm(beta_female_early_raw ~ 1, 
+mod1 <- summary(lm(beta_female_early_raw ~ 1, 
            data = SNP_clumps %>% filter(LD_subset), 
            weights = 1 / SE_female_early_raw))
+mod1
 ```
 
 ### Female late-life
 ```{r}
-summary(lm(beta_female_late_raw ~ 1, 
+mod2 <- summary(lm(beta_female_late_raw ~ 1, 
            data = SNP_clumps %>% filter(LD_subset), 
            weights = 1 / SE_female_late_raw))
+mod2
 ```
 
 ### Male early-life
 ```{r}
-summary(lm(beta_male_early_raw ~ 1, 
+mod3 <- summary(lm(beta_male_early_raw ~ 1, 
            data = SNP_clumps %>% filter(LD_subset), 
            weights = 1 / SE_male_early_raw))
+mod3
 ```
 
 ### Male late-life
 ```{r}
-summary(lm(beta_male_late_raw ~ 1, 
+mod4 <- summary(lm(beta_male_late_raw ~ 1, 
            data = SNP_clumps %>% filter(LD_subset), 
            weights = 1 / SE_male_late_raw))
+mod4
+
+medians <- SNP_clumps %>% filter(LD_subset) %>% 
+  summarise(beta_female_early_raw = mean(beta_female_early_raw),
+            beta_female_late_raw = mean(beta_female_late_raw),
+            beta_male_early_raw = mean(beta_male_early_raw),
+            beta_male_late_raw = mean(beta_male_late_raw)) %>% 
+  unlist() %>% unname()
+
+rbind(mod1$coefficients,
+      mod2$coefficients,
+      mod3$coefficients,
+      mod4$coefficients) %>% as_tibble() %>% 
+  mutate(`Fitness component` = 
+           c("Female fitness early", "Female fitness late", 
+             "Male fitness early", "Male fitness late"), 
+         .before = names(.)[1]) %>% 
+  mutate(Estimate = paste(format(round(Estimate, 5), nsmall = 5), 
+                          " (", format(round(`Std. Error`, 5), nsmall = 5), ")", sep = "")) %>% 
+  mutate(`Median variant effect` = format(round(medians, 5), nsmall = 5), .after = "Estimate") %>% 
+  rename(p = `Pr(>|t|)`, `Mean (SE) variant effect` = Estimate) %>% 
+  mutate(p = formatC(p, format = "e", digits = 2)) %>% 
+  select(-`Std. Error`) %>% 
+  saveRDS("data/derived/supp_table_of_variant_effect_means.rds")
 ```
 
 ## Manhattan plot
@@ -716,16 +743,20 @@ fig_4_top_row
 ##### Table
 
 ```{r}
-focal_dat %>% 
+supp_tabl_gwas_intersex <- focal_dat %>% 
   split(.$pp) %>% 
   map_df(~ .x %>% mutate(`Percentage (overall)` = round(100 * Freq / sum(Freq), 2))) %>% 
   split(paste((.$Var1), .$pp)) %>% 
-  map_df(~ .x %>% mutate(`Percentage (given effect on females)` = round(100 * Freq / sum(Freq), 2))) %>% 
+  map_df(~ .x %>% mutate(`Percentage (given association with female fitness)` = round(100 * Freq / sum(Freq), 2))) %>% 
   arrange(pp, Var1, Var2) %>% 
   select(pp, everything()) %>% 
   rename(`Age class` = pp, `Association with female fitness` = Var1, 
          `Association with male fitness` = Var2, 
-         `Number of variants` = Freq) %>% 
+         `Number of variants` = Freq) 
+
+saveRDS(supp_tabl_gwas_intersex, "data/derived/supp_tabl_gwas_intersex.rds")
+
+supp_tabl_gwas_intersex %>% 
   kable() %>% kable_styling(full_width = FALSE)
 ```
 
@@ -758,16 +789,20 @@ focal_dat %>%
 ##### Table
 
 ```{r}
-focal_dat %>% 
+supp_tabl_gwas_interage <- focal_dat %>% 
   split(.$pp) %>% 
   map_df(~ .x %>% mutate(`Percentage (overall)` = round(100 * Freq / sum(Freq), 2))) %>% 
   split(paste((.$Var1), .$pp)) %>% 
-  map_df(~ .x %>% mutate(`Percentage (given effect on females)` = round(100 * Freq / sum(Freq), 2))) %>% 
+  map_df(~ .x %>% mutate(`Percentage (given association with early-life fitness)` = round(100 * Freq / sum(Freq), 2))) %>% 
   arrange(pp, Var1, Var2) %>% 
   select(pp, everything()) %>% 
   rename(`Sex` = pp, `Association with early-life fitness` = Var1, 
          `Association with late-life fitness` = Var2, 
-         `Number of variants` = Freq) %>% 
+         `Number of variants` = Freq)
+
+saveRDS(supp_tabl_gwas_interage, "data/derived/supp_tabl_gwas_interage.rds")
+
+supp_tabl_gwas_interage %>% 
   kable() %>% kable_styling(full_width = FALSE)
 ```
 
@@ -901,16 +936,20 @@ remove_pages(1, "figures/fig4_quartiles_plot.pdf", "figures/fig4_quartiles_plot.
 ##### Table
 
 ```{r}
-focal_dat %>% 
+supp_tabl_twas_intersex <- focal_dat %>% 
   split(.$pp) %>% 
   map_df(~ .x %>% mutate(`Percentage (overall)` = round(100 * Freq / sum(Freq), 2))) %>% 
   split(paste((.$Var1), .$pp)) %>% 
-  map_df(~ .x %>% mutate(`Percentage (given effect on females)` = round(100 * Freq / sum(Freq), 2))) %>% 
+  map_df(~ .x %>% mutate(`Percentage (given association with female fitness)` = round(100 * Freq / sum(Freq), 2))) %>% 
   arrange(pp, Var1, Var2) %>% 
   select(pp, everything()) %>% 
   rename(`Age class` = pp, `Association with female fitness` = Var1, 
          `Association with male fitness` = Var2, 
-         `Number of transcripts` = Freq) %>% 
+         `Number of transcripts` = Freq)
+
+saveRDS(supp_tabl_twas_intersex, "data/derived/supp_tabl_twas_intersex.rds")
+
+supp_tabl_twas_intersex %>% 
   kable() %>% kable_styling(full_width = FALSE)
 ```
 
@@ -955,16 +994,20 @@ focal_dat %>%
 ##### Table
 
 ```{r}
-focal_dat %>% 
+supp_tabl_twas_interage <- focal_dat %>% 
   split(.$pp) %>% 
   map_df(~ .x %>% mutate(`Percentage (overall)` = round(100 * Freq / sum(Freq), 2))) %>% 
   split(paste((.$Var1), .$pp)) %>% 
-  map_df(~ .x %>% mutate(`Percentage (given effect on females)` = round(100 * Freq / sum(Freq), 2))) %>% 
+  map_df(~ .x %>% mutate(`Percentage (given association with early-life fitness)` = round(100 * Freq / sum(Freq), 2))) %>% 
   arrange(pp, Var1, Var2) %>% 
   select(pp, everything()) %>% 
   rename(`Sex` = pp, `Association with early-life fitness` = Var1, 
          `Association with late-life fitness` = Var2, 
-         `Number of transcripts` = Freq) %>% 
+         `Number of transcripts` = Freq)
+
+saveRDS(supp_tabl_twas_interage, "data/derived/supp_tabl_twas_interage.rds")
+
+supp_tabl_twas_interage %>% 
   kable() %>% kable_styling(full_width = FALSE)
 ```
 

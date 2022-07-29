@@ -6,37 +6,37 @@ output:
     toc: false
 ---
 
-This website relates to the forthcoming paper 'A genome-wide scan for pleiotropic fitness effects on sexes and age classes in _Drosophila_', by Wong and Holman. 
+This website relates to the forthcoming paper 'A genome-wide scan for pleiotropic fitness effects on sexes and age classes in _Drosophila_', by Wong and Holman (for contact info, see (lukeholman.org)[https://www.lukeholman.org/])
 
 Click the headings below to see the code, results, plots, tables and figures associated with this study. 
 
 ### [1. Setting up a database to hold variant/gene annotations and GWAS results](make_annotation_database.html)
 
-This script creates a SQLite3 database holding two tables: one with annotations for each variant (provided by the Mackay lab), and one with annotations for each gene (from annotation hub). In step 3, we also add the GWAS results to this database, allowing memory-efficient handling of the results. Using this database also avoids having to load Bioconductor packages that conflict with `dplyr::select()`, etc.
+This script creates a SQLite3 database holding two tables: one with annotations for each variant (annotations created by the Mackay lab), and one with annotations for each gene (from annotation hub). In step 4 below, we also add the GWAS results to this database, allowing memory-efficient handling of the results. 
 
 ### [2. Estimating line mean fitness using Bayesian models](get_predicted_line_means.html)
 
-This script uses Bayesian mixed models implemented in `brms` to estimate the line means for our four fitness traits.
+This script uses Bayesian mixed models implemented in the package `brms` to estimate the line means for our four fitness traits, while imputing missing values and adjusting for block effects.
 
 ### [3. Calculating quantitative genetic parameters](gcta_quant_genetics.html)
 
-We first present a table showing the proportion of variance in fitness explained by ‘DGRP line’, which was calculated using the models in Section 2. We then use `gcta64` software to estimate the genetics (co)variances for the four fitness metrics from the genomic relatedness matrix.
+We first present a table showing the proportion of variance in fitness explained by 'DGRP line', which was calculated using the models in Section 2. We then use `gcta64` software to estimate the genetics (co)variances for the four fitness metrics from the genomic relatedness matrix.
 
 ### [4. Running the GWAS](perfom_gwas.html)
 
-This script first performs quality control and imputation on the dataset of SNPs and indels for the DGRP. Second, it runs mixed model association tests on our four phenotypes using the software [GEMMA](http://www.xzlab.org/software/GEMMAmanual.pdf). Third, it uses PLINK to identify groups of loci that are in complete linkage disequilibrium ('SNP clumps'). 
+This script first performs quality control and imputation on the dataset of SNPs and indels for the DGRP (e.g filtering by MAF). Second, it runs mixed model association tests on our four phenotypes using the software [GEMMA](http://www.xzlab.org/software/GEMMAmanual.pdf). Third, it uses PLINK to identify groups of loci that are in complete linkage disequilibrium ('SNP clumps'), and to identify a subset of SNPs that are in approximate LD for downstream analyses.
 
 ### [5. Applying adaptive shrinkage to the GWAS results](gwas_adaptive_shrinkage.html)
 
-Here, we use the R package `mashr` to perform multivariate adaptive shrinkage on the results of the GWAS, for an LD-pruned subset of loci. This produces corrected estimates of each SNP's effect size, and allows estimation of the frequencies of different types of loci (e.g. sexually- or age-antagonistic loci).
+This script uses the R package `mashr` to perform multivariate adaptive shrinkage on the results of the GWAS, for an LD-pruned subset of loci. This produces corrected estimates of each SNP's effect size, and allows estimation of the frequencies of different types of loci (e.g. sexually- or age-antagonistic loci).
 
 ### [6. Running the TWAS and applying mashr to the TWAS results](TWAS.html)
 
-This script uses the transcriptomic data on the DGRP from Huang et al. 2015 _PNAS_. In this script, we
+This script uses the transcriptomic data on the DGRP from Huang et al. 2015 _PNAS_ to run a 'transcriptome-wide association study' (TWAS). In this script, we
 
 - Calculate the average expression and sex bias in expression for each transcript in Huang et al.
-- Perform 'TWAS', i.e. searching for transcripts whose expression correlates with our fitness measures across lines
-- Adjust the results of the TWAS linear models using `mashr` in canonical and data-driven modes.
+- Perform 'TWAS', i.e. searching for transcripts whose expression correlates with our fitness measures across DGRP lines
+- Adjust the results of the TWAS linear models using `mashr`.
 
 
 ## Plots, tables, and analyses of the results
@@ -47,15 +47,27 @@ This script plots the estimated line means for each of the four fitness metrics,
 
 ### [9. Tables of GWAS results](GWAS_tables.html)
 
-This script presents a searchable HTML table showing list of significant loci from the GWAS using GEMMA, with annotations, effect sizes, and $p$-values for each one. 
+This script presents a searchable HTML table showing a list of significant SNPs and indels from the GWAS, with annotations, effect sizes, and $p$-values for each. 
 
 ### [10. Tables of TWAS results](TWAS_tables.html)
 
-Text here
+This script presents a searchable HTML table showing a list of significant transcripts from the TWAS, with annotations, effect sizes, and $p$-values for each. 
+
 
 ### [11. Plot and model the variant effect sizes](plot_models_variant_effects.html)
 
-Here, we plot the correlations in the estimated effects of each variant (or group of variants in perfect linkage disequilibrium with one another). For the GWAS results, we run linear models to test whether variants differ in their effect on fitness according to chromosome, site class, and minor allele frequency. For the TWAS results, we run linear models to test whether transcripts differ in their effect on fitness according to chromosome, average expression level, and the sex bias in expression.
+Here, we present various plots and statistical analyses of the GWAS and TWAS results, specifically:
+
+- Q-Q plots of the GWAS results
+- Hex bin plots showing the correlations in effect sizes from GWAS across the 4 fitness traits
+- A statistical test showing that minor alleles tend to be associated with lower fitness
+- A plot inspired by Boyle et al. 2017 (Cell) illustrating that fitness is highly polygenic ('omnigenic') and pleiotropy between male and female fitness is common. 
+- Bar plots showing an estimate of the frequencies of sexually antagonistic and sexually concordant SNPs/indels from GWAS, and transcripts from TWAS (plus the same for age concordant vs age antagonistic variants/transcripts)
+- Statistics indicating that the frequency of sexually antagonistic loci declines with age
+- Plots of the evidence ratio for each locus and transcript, where the ER compares evidence for the hypotheses that 1) the locus is concordant between sexes or ages, and B) the locus is antagonistic between sexes or ages. This plot avoids having to create a binary distinction between antagonistic and concordant loci, when in reality there is a continuum of evidence.
+- GO enrichment of the top 1% most sexually antagonistic transcripts, implicating GO terms relating to mitochondria among other things.  
+
+
 
 
 <!-- Heritability -->

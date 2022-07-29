@@ -95,12 +95,14 @@ make_tally <- function(p_cutoff){
   tally
 }
 
-tally_table <- make_tally(0.05) %>% 
+TWAS_tally_table <- make_tally(0.05) %>% 
   left_join(make_tally(0.01), by = "name") %>% 
   left_join(make_tally(0.001), by = "name") %>% 
   left_join(make_tally(0.0001), by = "name") %>% 
   left_join(make_tally(0.00001), by = "name") %>% 
   rename(`Relationship to fitness` = name)
+
+saveRDS(TWAS_tally_table, "data/derived/TWAS_tally_table.rds")
 
 p_cutoff <- 0.01
 sig_TWAS_results <- 
@@ -153,5 +155,5 @@ big_table %>% my_data_table()
 The table tallies up the numbers of transcripts showing a particular significant relationship with fitness (rows) for various different $p$-value thresholds (columns). For example, 'Female early only' counts the number of transcripts whose expression significantly correlated with mean female early life fitness across lines. 'Age concordant, males' counts transcripts whose expression correlated with early- and late-life fitness in males, in the same direction, while 'Age antagonistic, males' counts transcripts showing a significant, opposite relationships with male early- and male late-life fitness. Similarly, 'Sex concordant, early' counts transcripts showing a concordant effect on early life fitness in both males and females, and 'Sex antagonistic, late' counts those showing opposing effects on late-life fitness in males and females. The categories are all mutually exclusive, such that transcripts are only counted towards the most specific category that applies to them. Note that this method has low power to detect transcripts that correlate with two or more fitness metrics, because there are two or more opportunities to make a 'false negative' error, and the power is low for any given transcripts (this is why we use a range of $p$-values, including some low ones).
 
 ```{r}
-tally_table %>% kable_table() 
+TWAS_tally_table %>% kable_table() 
 ```

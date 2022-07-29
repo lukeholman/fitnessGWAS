@@ -1021,7 +1021,7 @@ supp_tabl_twas_interage %>%
 get_antagonism_ratios <- function(dat){
   dat %>%
     
-    # Convert the LFSR to the probability that effect size is positive
+    # Convert the LFSR to the probability that the effect size is positive
     mutate(pp_female_early = ifelse(pheno1 > 0, LFSR1, 1 - LFSR1),
            pp_female_late  = ifelse(pheno2 > 0, LFSR2, 1 - LFSR2),
            pp_male_early   = ifelse(pheno3 > 0, LFSR3, 1 - LFSR3),
@@ -1043,7 +1043,7 @@ get_antagonism_ratios <- function(dat){
            p_age_concord_males = pp_male_early * pp_male_late + (1 - pp_male_early) * (1 - pp_male_late),
            p_age_antag_males = pp_male_early * (1 - pp_male_late) + (1 - pp_male_early) * pp_male_late) %>%
     
-    # Find the ratios of some of these probabilities (i.e. "evidence ratios")
+    # Find the ratios of some of these two probabilities (i.e. the "evidence ratios")
     mutate(inter_sex_early = p_sex_concord_early / p_sex_antag_early,
            inter_sex_late = p_sex_concord_late / p_sex_antag_late,
            inter_age_females = p_age_concord_females / p_age_antag_females,
@@ -1328,32 +1328,71 @@ dev.off()
 ```
 
 
-## GO enrichment of top 1% sexually antagonistic transcripts
+## GO enrichment of transcripts with extreme evidence ratios {.tabset}
+
+The following code performs a GO enrichment test using the Wilcoxon method, which tests for enrichment of GO terms at the top and the bottom of a gene list that has been ordered by some variable. In this case, the ordering variable is the evidence ratio for early-life sexual antagonism/concordance that is plotted in the top left of panel B in the previous figure. Transcripts with a more negative evidence ratio are more likely to be sexually antagonistic, while those with a more positive evidence ratio are more likely to be sexually concordant. The two tables below (accessible by clicking the tabs) illustrate the GO: Biological Process terms that are most associated with the most sexually antagonistic and sexually concordant transcripts, according to the Wilcoxon method. The `GOfuncR::go_enrich()` function uses permutation to calculate the 'family wise error rate' (FWER) to correct for multiple testing, and we define significantly enriched GO terms as those with FWER < 0.05. See the `GOfuncR` [vignette](https://bioconductor.org/packages/devel/bioc/vignettes/GOfuncR/inst/doc/GOfuncR.html) for more information on this method.
+
 
 ```{r}
 library(GOfuncR) # BiocManager::install("GOfuncR")
 library(org.Dm.eg.db) 
 
-# This code labels the transcripts we analysed as either in or not-in the top 1%,
-# and gets their gene symbols, setting up the data in the format required by GOfuncR
-# as described in the vignette here https://bioconductor.org/packages/devel/bioc/vignettes/GOfuncR/inst/doc/GOfuncR.html
-go_data <- antagonism_evidence_ratios_twas %>% 
-  arrange(inter_sex_early) %>% 
-  mutate(row = 1:n(),
-         is_candidate = as.numeric(row < (n() / 100))) %>% 
-  dplyr::select(FLYBASE = FBID, is_candidate) %>% 
-  left_join(select(org.Dm.eg.db, keys = keys(org.Dm.eg.db), columns = c("SYMBOL","FLYBASE")), by = "FLYBASE") %>% 
-  dplyr::select(SYMBOL, is_candidate) %>% 
-  as.data.frame()
+# Get a list of Drosophila genes that have GO terms (can't analyse genes that do not)
+genes_with_GO <- select(org.Dm.eg.db, 
+                        keys = keys(org.Dm.eg.db), 
+                        columns = c("SYMBOL","GO")) %>% 
+  filter(GO != "<NA>") %>% dplyr::pull(SYMBOL)
 
-# Run a hypergeometric test onn the BP intology. This uses the software FUNC for the GO test:
-# Pruefer, K. et al. (2007). FUNC: A package for detecting significant associations between gene sets and ontological annotations, BMC Bioinformatics 8: 41. [https://doi.org/10.1186/1471-2105-8-41]
+# This code gets the gene symbols for each transcript and sets up the data in the format required by GOfuncR
+# for the Wilcoxon test, which works on a gene list that is ordered by a variable 
+# (here, the variable is the evidence ratio for early-life sexual antagonism/concordance)
+wilcoxon_input <- antagonism_evidence_ratios_twas %>% 
+  dplyr::select(FLYBASE = FBID, gene_score = inter_sex_early) %>% 
+  left_join(select(org.Dm.eg.db, 
+                   keys = keys(org.Dm.eg.db), 
+                   columns = c("SYMBOL","FLYBASE")), by = "FLYBASE") %>% 
+  mutate(gene_score = log2(gene_score)) %>% 
+  dplyr::select(SYMBOL, gene_score) %>% 
+  dplyr::filter(SYMBOL %in% genes_with_GO) %>% 
+  dplyr::arrange(gene_score) %>% as.data.frame()
 
-res_hyper_fly <- go_enrich(go_data, orgDb='org.Dm.eg.db', test = "hyper", n_randsets = 10000,
-                           silent = T, domains = "biological_process")
-res_hyper_fly$results %>% 
-  filter(raw_p_overrep < 0.01) %>% 
-  dplyr::select(node_id, node_name, raw_p_overrep, FWER_overrep) %>% 
+# Run the GO enrichment test
+GO_results_wilcoxon <- go_enrich(wilcoxon_input, orgDb='org.Dm.eg.db', test='wilcoxon', 
+                                 silent = T, domains = "biological_process",
+                                 n_randsets = 1000)
+
+
+most_antagonistic_genes_GO <- GO_results_wilcoxon$results %>% # most antagonistic
+  arrange(FWER_low_rank) %>% 
+  filter(raw_p_low_rank < 0.001) %>% 
+  dplyr::select(node_id, node_name, raw_p_low_rank, FWER_low_rank) %>% 
+  dplyr::rename(GO = node_id, Meaning = node_name, `-log10 p` = raw_p_low_rank, FWER = FWER_low_rank) %>% 
+  mutate(`-log10 p` = format(round(-1 * log10(`-log10 p`), 1), nsmall = 1))
+
+
+most_concordant_genes_GO <- GO_results_wilcoxon$results %>% # most concordant
+  filter(FWER_high_rank < 0.05) %>% 
+  dplyr::select(node_id, node_name, raw_p_high_rank, FWER_high_rank)  %>% 
+  dplyr::rename(GO = node_id, Meaning = node_name, `-log10 p` = raw_p_high_rank, FWER = FWER_high_rank) %>% 
+  mutate(`-log10 p` = format(round(-1 * log10(`-log10 p`), 1), nsmall = 1))
+```
+
+### GO enrichment among most anatagonistic transcripts
+
+***Table***: The table shows all the GO terms with a Wilcoxon test p-value below 0.001, when testing for GO enrichment among genes whose transcripts had a low evidence ratio (indicating greater likelihood of being sexually antagonistic, as measured in the early-life fitness assay). However, no GO terms were significantly enriched among the most sexually antagonistic genes using family wise error rate (FWER) threshold of FWER < 0.05, and so these enrichment results may represent false positives due to multiple testing. 
+
+```{r}
+most_antagonistic_genes_GO %>% 
+  kable() %>% kable_styling(full_width = F)
+```
+
+### GO enrichment among most concordant transcripts
+
+***Table***: The table shows all the GO terms with a family wise error rate (FWER) threshold of FWER < 0.05, when testing for GO enrichment among genes whose transcripts had a high evidence ratio (indicating greater likelihood of being sexually concordant, as measured in the early-life fitness assay). GO terms related to gene expression and translation were enriched, which suggests that there is strong, sexually concordant selection on the expression levels of genes involved in gene expression and translation.
+
+
+```{r}
+most_concordant_genes_GO %>% 
   kable() %>% kable_styling(full_width = F)
 ```
 

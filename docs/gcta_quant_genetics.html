@@ -13,12 +13,22 @@
 
 <title>Estimating genetic (co)variance and heritability</title>
 
-<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<script src="site_libs/header-attrs-2.11/header-attrs.js"></script>
+<script src="site_libs/jquery-3.5.0/jquery-3.5.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
 <script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
@@ -26,20 +36,20 @@
 <script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<link href="site_libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
-<script src="site_libs/anchor-sections-1.0/anchor-sections.js"></script>
 <script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
 <link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
 
-<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
 <!-- Add a small amount of space between sections. -->
 <style type="text/css">
 div.section {
   padding-top: 12px;
 }
 </style>
+
+
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -51,11 +61,6 @@ div.section {
     </style>
 
 <style type="text/css">code{white-space: pre;}</style>
-<style type="text/css">
-  pre:not([class]) {
-    background-color: white;
-  }
-</style>
 <script type="text/javascript">
 if (window.hljs) {
   hljs.configure({languages: []});
@@ -68,32 +73,7 @@ if (window.hljs) {
 
 
 
-<style type="text/css">
-h1 {
-  font-size: 34px;
-}
-h1.title {
-  font-size: 38px;
-}
-h2 {
-  font-size: 30px;
-}
-h3 {
-  font-size: 24px;
-}
-h4 {
-  font-size: 18px;
-}
-h5 {
-  font-size: 16px;
-}
-h6 {
-  font-size: 12px;
-}
-.table th:not([align]) {
-  text-align: left;
-}
-</style>
+
 
 
 
@@ -103,10 +83,6 @@ h6 {
   max-width: 940px;
   margin-left: auto;
   margin-right: auto;
-}
-code {
-  color: inherit;
-  background-color: rgba(0, 0, 0, 0.04);
 }
 img {
   max-width:100%;
@@ -123,40 +99,13 @@ button.code-folding-btn:focus {
 summary {
   display: list-item;
 }
+pre code {
+  padding: 0;
+}
 </style>
 
 
 <style type="text/css">
-/* padding for bootstrap navbar */
-body {
-  padding-top: 51px;
-  padding-bottom: 40px;
-}
-/* offset scroll position for anchor links (for fixed navbar)  */
-.section h1 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h2 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h3 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h4 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h5 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
-.section h6 {
-  padding-top: 56px;
-  margin-top: -56px;
-}
 .dropdown-submenu {
   position: relative;
 }
@@ -184,7 +133,7 @@ body {
   margin-right: -10px;
 }
 .dropdown-submenu:hover>a:after {
-  border-left-color: #ffffff;
+  border-left-color: #adb5bd;
 }
 .dropdown-submenu.pull-left {
   float: none;
@@ -196,7 +145,7 @@ body {
 }
 </style>
 
-<script>
+<script type="text/javascript">
 // manage active state of menu based on current page
 $(document).ready(function () {
   // active menu anchor
@@ -207,10 +156,23 @@ $(document).ready(function () {
   var menuAnchor = $('a[href="' + href + '"]');
 
   // mark it active
-  menuAnchor.parent().addClass('active');
+  menuAnchor.tab('show');
 
   // if it's got a parent navbar menu mark it active as well
   menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
 });
 </script>
 
@@ -222,7 +184,6 @@ $(document).ready(function () {
   max-height: 500px;
   min-height: 44px;
   overflow-y: auto;
-  background: white;
   border: 1px solid #ddd;
   border-radius: 4px;
 }
@@ -351,7 +312,7 @@ div.tocify {
 
 
 <!-- setup 3col/9col grid for toc_float and main content  -->
-<div class="row-fluid">
+<div class="row">
 <div class="col-xs-12 col-sm-4 col-md-3">
 <div id="TOC" class="tocify">
 </div>
@@ -393,11 +354,11 @@ div.tocify {
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-<div class="fluid-row" id="header">
+<div id="header">
 
-<div class="btn-group pull-right">
-<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
-<ul class="dropdown-menu" style="min-width: 50px;">
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
 <li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
 <li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
 </ul>
@@ -405,14 +366,17 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Estimating genetic (co)variance and heritability</h1>
+<h1 class="title toc-ignore">Estimating genetic (co)variance and
+heritability</h1>
 
 </div>
 
 
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
-<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span>
 </button>
 </p>
 <div id="workflowr-report" class="collapse">
@@ -421,7 +385,9 @@ div.tocify {
 <a data-toggle="tab" href="#summary">Summary</a>
 </li>
 <li>
-<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</a>
 </li>
 <li>
 <a data-toggle="tab" href="#versions">Past versions</a>
@@ -430,17 +396,27 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2021-10-01
+<strong>Last updated:</strong> 2022-07-29
 </p>
 <p>
-<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 0
 </p>
 <p>
-<strong>Knit directory:</strong> <code>fitnessGWAS/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+<strong>Knit directory:</strong> <code>fitnessGWAS/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
 </p>
 <p>
-This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
-  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.2). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.0). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
 </p>
 <hr>
 </div>
@@ -449,91 +425,138 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date
+</a>
 </p>
 </div>
-<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div id="strongRMarkdownfilestronguptodate"
+class="panel-collapse collapse">
 <div class="panel-body">
-<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+<p>Great! Since the R Markdown file has been committed to the Git
+repository, you know the exact version of the code that produced these
+results.</p>
 </div>
 </div>
 </div>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
 </p>
 </div>
 <div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
 <div class="panel-body">
-<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
 </div>
 </div>
 </div>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20180914code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20180914)</code> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20180914code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20180914)</code> </a>
 </p>
 </div>
-<div id="strongSeedstrongcodesetseed20180914code" class="panel-collapse collapse">
+<div id="strongSeedstrongcodesetseed20180914code"
+class="panel-collapse collapse">
 <div class="panel-body">
-<p>The command <code>set.seed(20180914)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+<p>The command <code>set.seed(20180914)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
 </div>
 </div>
 </div>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
 </p>
 </div>
-<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
 <div class="panel-body">
-<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
 </div>
 </div>
 </div>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
 </p>
 </div>
 <div id="strongCachestrongnone" class="panel-collapse collapse">
 <div class="panel-body">
-<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
 </div>
 </div>
 </div>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
 </p>
 </div>
 <div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
 <div class="panel-body">
-<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
 </div>
 </div>
 </div>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree01226ab272891d92a8444e19cac034c1b079d263targetblank01226aba"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/lukeholman/fitnessGWAS/tree/01226ab272891d92a8444e19cac034c1b079d263" target="_blank">01226ab</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreef9837794c1d345bab3df0172afec11366cc6366dtargetblankf983779a">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/f9837794c1d345bab3df0172afec11366cc6366d" target="_blank">f983779</a>
+</a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree01226ab272891d92a8444e19cac034c1b079d263targetblank01226aba" class="panel-collapse collapse">
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreef9837794c1d345bab3df0172afec11366cc6366dtargetblankf983779a"
+class="panel-collapse collapse">
 <div class="panel-body">
 <p>
-Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/lukeholman/fitnessGWAS/tree/01226ab272891d92a8444e19cac034c1b079d263" target="_blank">01226ab</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/f9837794c1d345bab3df0172afec11366cc6366d" target="_blank">f983779</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
 </p>
 <p>
-Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
 </p>
 <pre><code>
 Ignored files:
@@ -557,29 +580,43 @@ Ignored files:
     Ignored:    data/input/dgrp2.fam
     Ignored:    data/input/huang_transcriptome/
     Ignored:    figures/.DS_Store
-    Ignored:    figures/fig1_inkscape.svg
-    Ignored:    figures/figure1a.pdf
-    Ignored:    figures/figure1b.pdf
 
 Untracked files:
     Untracked:  big_model.rds
+    Untracked:  code/main_paper_figures.Rmd
+    Untracked:  code/main_paper_figures.docx
+    Untracked:  code/pdf_supp_material.Rmd
+    Untracked:  code/pdf_supp_material.pdf
     Untracked:  code/quant_gen_1.R
+    Untracked:  code/~$in_paper_figures.docx
     Untracked:  data/input/genomic_relatedness_matrix.rds
-    Untracked:  old_analyses/
+    Untracked:  figures/fig3_boyle_plot.pdf
+    Untracked:  figures/fig4_quartiles_plot.pdf
+    Untracked:  figures/fig5_antagonism_ratios.pdf
 
 Unstaged changes:
     Modified:   .gitignore
-    Modified:   figures/GWAS_stats_figure.pdf
-    Modified:   figures/SNP_effect_ED.pdf
-    Modified:   figures/TWAS_stats_figure.pdf
-    Modified:   figures/antagonism_ratios.pdf
-    Modified:   figures/boyle_plot.pdf
-    Modified:   figures/composite_mixture_figure.pdf
-    Modified:   figures/eff_size_histos.pdf
+    Modified:   analysis/index.Rmd
+    Modified:   analysis/plot_models_variant_effects.Rmd
+    Deleted:    figures/GWAS_mixture_proportions.rds
+    Deleted:    figures/GWAS_stats_figure.pdf
+    Deleted:    figures/TWAS_mixture_proportions.rds
+    Deleted:    figures/TWAS_stats_figure.pdf
+    Deleted:    figures/antagonism_ratios.pdf
+    Deleted:    figures/boyle_plot.pdf
+    Deleted:    figures/boyle_plot.png
+    Deleted:    figures/composite_mixture_figure.pdf
+    Deleted:    figures/eff_size_histos.pdf
+    Modified:   figures/fig2_SNPs_manhattan_plot.png
+    Modified:   figures/fig4_quartiles_plot.png
+    Modified:   figures/fig6_models.pdf
+    Deleted:    figures/stats_figure.pdf
 
 </code></pre>
 <p>
-Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
 </p>
 </div>
 </div>
@@ -590,7 +627,12 @@ Note that any generated files, e.g. HTML, png, CSS, etc., are not included in t
 <div id="versions" class="tab-pane fade">
 
 <p>
-These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/gcta_quant_genetics.Rmd</code>) and HTML (<code>docs/gcta_quant_genetics.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+These are the previous versions of the repository in which changes were
+made to the R Markdown (<code>analysis/gcta_quant_genetics.Rmd</code>)
+and HTML (<code>docs/gcta_quant_genetics.html</code>) files. If you’ve
+configured a remote Git repository (see <code>?wflow_git_remote</code>),
+click on the hyperlinks in the table below to view the files as they
+were in that past version.
 </p>
 <div class="table-responsive">
 <table class="table table-condensed table-hover">
@@ -614,6 +656,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/f9837794c1d345bab3df0172afec11366cc6366d/analysis/gcta_quant_genetics.Rmd" target="_blank">f983779</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2022-07-29
+</td>
+<td>
+wflow_publish("analysis/gcta_quant_genetics.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/7449a9097af63aa27121cdc1dc12b529a29695ca/docs/gcta_quant_genetics.html" target="_blank">7449a90</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2021-10-01
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 html
@@ -682,9 +758,17 @@ line_means &lt;- read_csv(&quot;data/derived/predicted_line_means.csv&quot;) %&g
          female_fitness_late = female.fitness.late,
          male_fitness_early = male.fitness.early,
          male_fitness_late = male.fitness.late)</code></pre>
-<div id="proportion-of-variance-in-fitness-explained-by-dgrp-line" class="section level2">
+<div id="proportion-of-variance-in-fitness-explained-by-dgrp-line"
+class="section level2">
 <h2>Proportion of variance in fitness explained by ‘DGRP line’:</h2>
-<p>The table shows the posterior estimate of the intra-class correlation coefficient (ICC, which measures the proportion of variance within and between lines), using the models in the script <code>get_predicted_line_means.Rmd</code> to adjust for block effects (and one covariate in the male late-life fitness analysis). ICC was calculated using <code>ICC::ICCbare</code>. This value approximates the broad-sense heritability; fitness appears highly heritable, except for male late-life fitness.</p>
+<p>The table shows the posterior estimate of the intra-class correlation
+coefficient (ICC, which measures the proportion of variance within and
+between lines), using the models in the script
+<code>get_predicted_line_means.Rmd</code> to adjust for block effects
+(and one covariate in the male late-life fitness analysis). ICC was
+calculated using <code>ICC::ICCbare</code>. This value approximates the
+broad-sense heritability; fitness appears highly heritable, except for
+male late-life fitness.</p>
 <pre class="r"><code>read.csv(&#39;data/derived/ICC.csv&#39;) %&gt;% 
   select(Fitness_trait, Estimate, Est.Error, Q2.5, Q97.5) %&gt;%
   rename(`Fitness trait` = Fitness_trait, `Est. Error` = Est.Error, `Lower 95% CI` = Q2.5, `Upper 95% CI` = Q97.5) %&gt;% 
@@ -782,7 +866,10 @@ Male late-life fitness
 </table>
 <div id="correlations-in-the-line-means" class="section level3">
 <h3>Correlations in the line means</h3>
-<pre class="r"><code>line_means %&gt;% select(contains(&quot; &quot;)) %&gt;% cor() %&gt;% kable(digits =3) %&gt;% kable_styling()</code></pre>
+<pre class="r"><code>line_mean_corrs &lt;- line_means %&gt;% select(contains(&quot; &quot;)) %&gt;% cor() %&gt;% as.data.frame() 
+saveRDS(line_mean_corrs, &quot;data/derived/line_mean_corrs.rds&quot;)
+
+line_mean_corrs %&gt;% kable(digits =3) %&gt;% kable_styling()</code></pre>
 <table class="table" style="margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -903,11 +990,17 @@ Male fitness late
 <!-- ``` -->
 </div>
 </div>
-<div id="use-gcta64-to-estimate-the-genetic-variances-and-heritabilities-for-each-fitness-trait" class="section level2">
-<h2>Use <code>gcta64</code> to estimate the genetic variances and heritabilities for each fitness trait</h2>
-<div id="make-a-genomic-relatedness-matrix-for-all-the-lines" class="section level3">
+<div
+id="use-gcta64-to-estimate-the-genetic-variances-and-heritabilities-for-each-fitness-trait"
+class="section level2">
+<h2>Use <code>gcta64</code> to estimate the genetic variances and
+heritabilities for each fitness trait</h2>
+<div id="make-a-genomic-relatedness-matrix-for-all-the-lines"
+class="section level3">
 <h3>Make a genomic relatedness matrix for all the lines</h3>
-<p>This uses the <code>gcta64</code> command <code>--make-grm</code> to make a genomic relatedness matrix (GRM) for the DGRP SNP data. This matrix is needed to run the GREML models below.</p>
+<p>This uses the <code>gcta64</code> command <code>--make-grm</code> to
+make a genomic relatedness matrix (GRM) for the DGRP SNP data. This
+matrix is needed to run the GREML models below.</p>
 <pre class="r"><code>run_command(glue(&quot;{gcta} --bfile dgrp2_QC_all_lines&quot;,
                  &quot; --make-grm&quot;,
                  &quot; --out gcta_GRM&quot;), path = &quot;/data/derived/&quot;)</code></pre>
@@ -917,7 +1010,7 @@ Male fitness late
 * (C) 2010-present, Jian Yang, The University of Queensland
 * Please report bugs to Jian Yang &lt;jian.yang.qt@gmail.com&gt;
 *******************************************************************
-Analysis started at 16:32:06 BST on Fri Oct 01 2021.
+Analysis started at 10:46:23 BST on Fri Jul 29 2022.
 Hostname: 6300D-132190-M.local
 
 Options: 
@@ -937,7 +1030,7 @@ Subset 1/1, no. subject 1-205
   205 samples, 1648723 markers, 21115 GRM elements
 IDs for the GRM file has been saved in the file [gcta_GRM.grm.id]
 Computing GRM...
-  100% finished in 3.2 sec
+  100% finished in 3.1 sec
 1648723 SNPs have been processed.
   Used 1648723 valid SNPs.
 The GRM computation is completed.
@@ -945,12 +1038,22 @@ Saving GRM...
 GRM has been saved in the file [gcta_GRM.grm.bin]
 Number of SNPs in each pair of individuals has been saved in the file [gcta_GRM.grm.N.bin]
 
-Analysis finished at 16:32:12 BST on Fri Oct 01 2021
-Overall computational time: 5.78 sec.</code></pre>
+Analysis finished at 10:46:29 BST on Fri Jul 29 2022
+Overall computational time: 5.76 sec.</code></pre>
 </div>
-<div id="run-4-univariate-greml-models-to-find-genetic-variances-and-heritabilities" class="section level3">
-<h3>Run 4 univariate GREML models to find genetic variances and heritabilities</h3>
-<p>The below uses the <code>gcta64</code> command <code>--reml</code> to estimate the genetic variance (<code>V(G)</code>), i.e. the variance explained by the GRM), environmental variance (<code>V(e)</code>), their sum (<code>Vp</code>), and the so-called “SNP heritability” (<code>V(G)/Vp</code>). Note that the genetic variance is very low for male late-life fitness. This is a bit puzzling because the same is not true for male early-life fitness, which is strongly correlated across lines with male late-life fitness.</p>
+<div
+id="run-4-univariate-greml-models-to-find-genetic-variances-and-heritabilities"
+class="section level3">
+<h3>Run 4 univariate GREML models to find genetic variances and
+heritabilities</h3>
+<p>The below uses the <code>gcta64</code> command <code>--reml</code> to
+estimate the genetic variance (<code>V(G)</code>), i.e. the variance
+explained by the GRM), environmental variance (<code>V(e)</code>), their
+sum (<code>Vp</code>), and the so-called “SNP heritability”
+(<code>V(G)/Vp</code>). Note that the genetic variance is very low for
+male late-life fitness. This is a bit puzzling because the same is not
+true for male early-life fitness, which is strongly correlated across
+lines with male late-life fitness.</p>
 <pre class="r"><code>do_univariate_greml &lt;- function(trait1){
 
   # First make &#39;focal_data&#39;, a 2-column data frame with the line and the focal phenotype value
@@ -982,13 +1085,15 @@ Overall computational time: 5.78 sec.</code></pre>
     mutate(Trait = trait1) %&gt;% select(Trait, everything())
 }
 
-bind_rows(do_univariate_greml(&quot;Female fitness early&quot;),
+univariate_table &lt;- bind_rows(do_univariate_greml(&quot;Female fitness early&quot;),
           do_univariate_greml(&quot;Female fitness late&quot;),
           do_univariate_greml(&quot;Male fitness early&quot;),
           do_univariate_greml(&quot;Male fitness late&quot;)) %&gt;% 
   filter(Source %in% c(&quot;V(G)&quot;, &quot;V(e)&quot;, &quot;Vp&quot;, &quot;V(G)/Vp&quot;)) %&gt;% 
   mutate(Variance = as.numeric(Variance)) %&gt;% 
-  rename(Parameter = Source) %&gt;% 
+  rename(Parameter = Source) 
+
+univariate_table %&gt;% 
   kable(digits = 3) %&gt;% 
   kable_styling(full_width = FALSE)</code></pre>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
@@ -1236,9 +1341,19 @@ V(G)/Vp
 </tbody>
 </table>
 </div>
-<div id="run-6-bivariate-greml-models-to-find-the-genetic-covariancescorrelations" class="section level3">
-<h3>Run 6 bivariate GREML models to find the genetic covariances/correlations</h3>
-<p>The below uses the <code>gcta64</code> command <code>--reml-bivar</code> to estimate the genetic covariances (<code>C(G)_tr12</code>), i.e. the co-variance explained by the GRM), and the genetic correlation (<code>rG</code>), in addition to the univariate parameters for trait 1 and trait 2 mentioned above. Note that because the genetic variance is low for male late-life fitness, the model cannot reliably estimate genetic covariance or correlations for pairs of traits that involve male late-life fitness.</p>
+<div
+id="run-6-bivariate-greml-models-to-find-the-genetic-covariancescorrelations"
+class="section level3">
+<h3>Run 6 bivariate GREML models to find the genetic
+covariances/correlations</h3>
+<p>The below uses the <code>gcta64</code> command
+<code>--reml-bivar</code> to estimate the genetic covariances
+(<code>C(G)_tr12</code>), i.e. the co-variance explained by the GRM),
+and the genetic correlation (<code>rG</code>), in addition to the
+univariate parameters for trait 1 and trait 2 mentioned above. Note that
+because the genetic variance is low for male late-life fitness, the
+model cannot reliably estimate genetic covariance or correlations for
+pairs of traits that involve male late-life fitness.</p>
 <pre class="r"><code>do_bivar_greml &lt;- function(trait1, trait2){
 
   # First make &#39;focal_data&#39;, a 2-column data frame with the line and the focal phenotype value
@@ -1277,17 +1392,17 @@ results &lt;- bind_rows(do_bivar_greml(&quot;Female fitness early&quot;, &quot;F
           do_bivar_greml(&quot;Female fitness early&quot;, &quot;Male fitness early&quot;),
           do_bivar_greml(&quot;Female fitness late&quot;, &quot;Male fitness late&quot;),
           do_bivar_greml(&quot;Female fitness early&quot;, &quot;Male fitness late&quot;),
-          do_bivar_greml(&quot;Female fitness late&quot;, &quot;Male fitness early&quot;))
+          do_bivar_greml(&quot;Female fitness late&quot;, &quot;Male fitness early&quot;)) %&gt;% 
+  filter(Source %in% c(&quot;V(G)_tr1&quot;, &quot;V(e)_tr1&quot;, &quot;Vp_tr1&quot;, &quot;V(G)/Vp_tr1&quot;,
+                       &quot;V(G)_tr2&quot;, &quot;V(e)_tr2&quot;, &quot;Vp_tr2&quot;, &quot;V(G)/Vp_tr2&quot;,
+                       &quot;C(G)_tr12&quot;, &quot;rG&quot;)) %&gt;% 
+  mutate(Variance = as.numeric(Variance)) %&gt;% 
+  rename(Parameter = Source)
 
 unlink(c(&quot;data/derived/delete_me.log&quot;, &quot;data/derived/phenotype_pair.txt&quot;, &quot;data/derived/delete_me.hsq&quot;))
 unlink(list.files(&quot;data/derived/&quot;, pattern = &quot;gcta_GRM&quot;, full.names = TRUE))
 
 results %&gt;% 
-  filter(Source %in% c(&quot;V(G)_tr1&quot;, &quot;V(e)_tr1&quot;, &quot;Vp_tr1&quot;, &quot;V(G)/Vp_tr1&quot;,
-                       &quot;V(G)_tr2&quot;, &quot;V(e)_tr2&quot;, &quot;Vp_tr2&quot;, &quot;V(G)/Vp_tr2&quot;,
-                       &quot;C(G)_tr12&quot;, &quot;rG&quot;)) %&gt;% 
-  mutate(Variance = as.numeric(Variance)) %&gt;% 
-  rename(Parameter = Source) %&gt;% 
   kable(digit = 3) %&gt;% 
   kable_styling(full_width = FALSE)</code></pre>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
@@ -2333,10 +2448,112 @@ rG
 </tr>
 </tbody>
 </table>
+</div>
+<div id="set-up-the-g-matrix-shown-in-the-supplementary-table"
+class="section level3">
+<h3>Set up the G-matrix shown in the supplementary table</h3>
+<pre class="r"><code>G_mat &lt;- bind_rows(
+  univariate_table %&gt;% filter(Parameter == &quot;V(G)&quot;) %&gt;% mutate(`Trait 1` = Trait, `Trait 2` = Trait) %&gt;% select(`Trait 1`, `Trait 2`, vcov = Variance, SE),
+  results %&gt;% filter(Parameter == &quot;C(G)_tr12&quot;) %&gt;% select(`Trait 1`, `Trait 2`, vcov = Variance, SE)) %&gt;% 
+  mutate(text = paste(format(round(vcov, 2), nsmall = 2), &quot; (&quot;, format(round(SE, 2), nsmall = 2), &quot;)&quot;, sep = &quot;&quot;)) %&gt;% 
+  select(-vcov, -SE) %&gt;% 
+  spread(`Trait 1`, text)
+rownames(G_mat) &lt;- G_mat[,1]
+G_mat &lt;- G_mat[,-1]
+G_mat[is.na(G_mat)] &lt;- &quot;&quot;
+
+saveRDS(G_mat, &quot;data/derived/G_mat.rds&quot;)
+
+G_mat %&gt;% kable() %&gt;% kable_styling()</code></pre>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+Female fitness early
+</th>
+<th style="text-align:left;">
+Female fitness late
+</th>
+<th style="text-align:left;">
+Male fitness early
+</th>
+<th style="text-align:left;">
+Male fitness late
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Female fitness early
+</td>
+<td style="text-align:left;">
+0.12 (0.22)
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female fitness late
+</td>
+<td style="text-align:left;">
+0.22 (0.17)
+</td>
+<td style="text-align:left;">
+0.39 (0.20)
+</td>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Male fitness early
+</td>
+<td style="text-align:left;">
+0.05 (0.15)
+</td>
+<td style="text-align:left;">
+0.27 (0.12)
+</td>
+<td style="text-align:left;">
+0.19 (0.19)
+</td>
+<td style="text-align:left;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Male fitness late
+</td>
+<td style="text-align:left;">
+-0.01 (0.16)
+</td>
+<td style="text-align:left;">
+0.16 (0.14)
+</td>
+<td style="text-align:left;">
+-0.01 (0.20)
+</td>
+<td style="text-align:left;">
+0.00 (0.23)
+</td>
+</tr>
+</tbody>
+</table>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
-<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
 </button>
 </p>
 <div id="workflowr-sessioninfo" class="collapse">
@@ -2356,56 +2573,59 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
- [1] brms_2.14.4      Rcpp_1.0.4.6     kableExtra_1.3.4 glue_1.4.2      
- [5] forcats_0.5.0    stringr_1.4.0    dplyr_1.0.0      purrr_0.3.4     
- [9] readr_2.0.0      tidyr_1.1.0      tibble_3.0.1     ggplot2_3.3.2   
-[13] tidyverse_1.3.0  workflowr_1.6.2 
+ [1] brms_2.16.3      Rcpp_1.0.4.6     kableExtra_1.3.4 glue_1.4.2      
+ [5] forcats_0.5.1    stringr_1.4.0    dplyr_1.0.7      purrr_0.3.4     
+ [9] readr_2.1.2      tidyr_1.1.4      tibble_3.1.6     ggplot2_3.3.6   
+[13] tidyverse_1.3.2  workflowr_1.7.0 
 
 loaded via a namespace (and not attached):
   [1] readxl_1.3.1         backports_1.1.7      systemfonts_0.2.2   
   [4] plyr_1.8.6           igraph_1.2.5         splines_4.0.3       
   [7] crosstalk_1.1.0.1    TH.data_1.0-10       rstantools_2.1.1    
- [10] inline_0.3.15        digest_0.6.25        htmltools_0.5.0     
+ [10] inline_0.3.15        digest_0.6.29        htmltools_0.5.2     
  [13] rsconnect_0.8.16     fansi_0.4.1          magrittr_2.0.1      
- [16] tzdb_0.1.2           modelr_0.1.8         RcppParallel_5.0.1  
- [19] matrixStats_0.56.0   vroom_1.5.3          xts_0.12-0          
- [22] sandwich_2.5-1       svglite_1.2.3        prettyunits_1.1.1   
- [25] colorspace_1.4-1     blob_1.2.1           rvest_0.3.5         
- [28] haven_2.3.1          xfun_0.22            callr_3.4.3         
- [31] crayon_1.3.4         jsonlite_1.7.0       lme4_1.1-23         
- [34] survival_3.2-7       zoo_1.8-8            gtable_0.3.0        
- [37] emmeans_1.4.7        webshot_0.5.2        V8_3.4.0            
- [40] pkgbuild_1.0.8       rstan_2.21.2         abind_1.4-5         
- [43] scales_1.1.1         mvtnorm_1.1-0        DBI_1.1.0           
- [46] miniUI_0.1.1.1       viridisLite_0.3.0    xtable_1.8-4        
- [49] bit_1.1-15.2         stats4_4.0.3         StanHeaders_2.21.0-3
- [52] DT_0.13              htmlwidgets_1.5.1    httr_1.4.1          
- [55] threejs_0.3.3        ellipsis_0.3.1       pkgconfig_2.0.3     
- [58] loo_2.3.1            dbplyr_1.4.4         tidyselect_1.1.0    
- [61] rlang_0.4.6          reshape2_1.4.4       later_1.0.0         
- [64] munsell_0.5.0        cellranger_1.1.0     tools_4.0.3         
- [67] cli_2.0.2            generics_0.0.2       broom_0.5.6         
- [70] ggridges_0.5.2       evaluate_0.14        fastmap_1.0.1       
- [73] yaml_2.2.1           bit64_0.9-7          processx_3.4.2      
- [76] knitr_1.32           fs_1.4.1             nlme_3.1-149        
- [79] whisker_0.4          mime_0.9             projpred_2.0.2      
- [82] xml2_1.3.2           compiler_4.0.3       bayesplot_1.7.2     
- [85] shinythemes_1.1.2    rstudioapi_0.11      gamm4_0.2-6         
- [88] curl_4.3             reprex_0.3.0         statmod_1.4.34      
- [91] stringi_1.5.3        highr_0.8            ps_1.3.3            
- [94] Brobdingnag_1.2-6    gdtools_0.2.2        lattice_0.20-41     
- [97] Matrix_1.2-18        nloptr_1.2.2.1       markdown_1.1        
-[100] shinyjs_1.1          vctrs_0.3.0          pillar_1.4.4        
-[103] lifecycle_0.2.0      bridgesampling_1.0-0 estimability_1.3    
-[106] httpuv_1.5.3.1       R6_2.4.1             promises_1.1.0      
-[109] gridExtra_2.3        codetools_0.2-16     boot_1.3-25         
-[112] colourpicker_1.0     MASS_7.3-53          gtools_3.8.2        
-[115] assertthat_0.2.1     rprojroot_1.3-2      withr_2.2.0         
-[118] shinystan_2.5.0      multcomp_1.4-13      mgcv_1.8-33         
-[121] parallel_4.0.3       hms_0.5.3            grid_4.0.3          
-[124] coda_0.19-3          minqa_1.2.4          rmarkdown_2.5       
-[127] git2r_0.27.1         shiny_1.4.0.2        lubridate_1.7.10    
-[130] base64enc_0.1-3      dygraphs_1.1.1.6    </code></pre>
+ [16] checkmate_2.0.0      googlesheets4_1.0.0  tzdb_0.1.2          
+ [19] modelr_0.1.8         RcppParallel_5.0.1   matrixStats_0.56.0  
+ [22] vroom_1.5.7          xts_0.12-0           sandwich_2.5-1      
+ [25] svglite_1.2.3        prettyunits_1.1.1    colorspace_2.0-3    
+ [28] rvest_1.0.2          haven_2.5.0          xfun_0.31           
+ [31] callr_3.7.0          crayon_1.4.2         jsonlite_1.8.0      
+ [34] lme4_1.1-23          survival_3.2-7       zoo_1.8-10          
+ [37] gtable_0.3.0         gargle_1.2.0         emmeans_1.4.7       
+ [40] webshot_0.5.2        V8_3.4.0             distributional_0.3.0
+ [43] pkgbuild_1.0.8       rstan_2.21.2         abind_1.4-5         
+ [46] scales_1.2.0         mvtnorm_1.1-0        DBI_1.1.0           
+ [49] miniUI_0.1.1.1       viridisLite_0.3.0    xtable_1.8-4        
+ [52] bit_1.1-15.2         stats4_4.0.3         StanHeaders_2.21.0-3
+ [55] DT_0.13              htmlwidgets_1.5.4    httr_1.4.2          
+ [58] threejs_0.3.3        posterior_1.2.0      ellipsis_0.3.2      
+ [61] pkgconfig_2.0.3      loo_2.3.1            farver_2.0.3        
+ [64] dbplyr_2.1.1         utf8_1.1.4           tidyselect_1.1.0    
+ [67] rlang_1.0.2          reshape2_1.4.4       later_1.0.0         
+ [70] munsell_0.5.0        cellranger_1.1.0     tools_4.0.3         
+ [73] cli_3.1.0            generics_0.0.2       broom_0.7.11        
+ [76] ggridges_0.5.2       evaluate_0.15        fastmap_1.1.0       
+ [79] yaml_2.3.5           bit64_0.9-7          processx_3.5.2      
+ [82] knitr_1.39           fs_1.4.1             nlme_3.1-149        
+ [85] projpred_2.0.2       whisker_0.4          mime_0.9            
+ [88] xml2_1.3.3           compiler_4.0.3       bayesplot_1.7.2     
+ [91] shinythemes_1.1.2    rstudioapi_0.13      gamm4_0.2-6         
+ [94] curl_4.3             reprex_2.0.1         statmod_1.4.34      
+ [97] stringi_1.5.3        highr_0.8            ps_1.3.3            
+[100] Brobdingnag_1.2-6    gdtools_0.2.2        lattice_0.20-41     
+[103] Matrix_1.2-18        nloptr_1.2.2.1       markdown_1.1        
+[106] shinyjs_1.1          tensorA_0.36.1       vctrs_0.3.8         
+[109] pillar_1.6.4.9003    lifecycle_1.0.1      jquerylib_0.1.1     
+[112] bridgesampling_1.0-0 estimability_1.3     httpuv_1.5.3.1      
+[115] R6_2.4.1             promises_1.1.0       gridExtra_2.3       
+[118] codetools_0.2-16     boot_1.3-25          MASS_7.3-53         
+[121] colourpicker_1.0     gtools_3.8.2         assertthat_0.2.1    
+[124] rprojroot_1.3-2      withr_2.4.3          shinystan_2.5.0     
+[127] multcomp_1.4-13      mgcv_1.8-33          parallel_4.0.3      
+[130] hms_1.1.1            grid_4.0.3           minqa_1.2.4         
+[133] coda_0.19-3          rmarkdown_2.11       googledrive_2.0.0   
+[136] git2r_0.27.1         getPass_0.2-2        shiny_1.4.0.2       
+[139] lubridate_1.8.0      base64enc_0.1-3      dygraphs_1.1.1.6    </code></pre>
 </div>
 </div>
 </div>
@@ -2413,7 +2633,7 @@ loaded via a namespace (and not attached):
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
 TeX fonts only; see
-http://docs.mathjax.org/en/latest/configuration.html.  This will make
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
 the presentation more consistent at the cost of the webpage sometimes
 taking slightly longer to load. Note that this only works because the
 footer is added to webpages before the MathJax javascript. -->
@@ -2422,6 +2642,8 @@ footer is added to webpages before the MathJax javascript. -->
     "HTML-CSS": { availableFonts: ["TeX"] }
   });
 </script>
+
+
 
 
 </div>
@@ -2451,7 +2673,7 @@ $(document).ready(function () {
 
 $(document).ready(function () {
   $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
+    $(this).parent().toggleClass('nav-tabs-open');
   });
 });
 </script>
@@ -2465,6 +2687,9 @@ $(document).ready(function () {
 
 <script>
 $(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
 
     // move toc-ignore selectors from section div to header
     $('div.section.toc-ignore')

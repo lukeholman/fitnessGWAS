@@ -396,7 +396,7 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2022-07-29
+<strong>Last updated:</strong> 2022-08-01
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -527,15 +527,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreef9837794c1d345bab3df0172afec11366cc6366dtargetblankf983779a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreed338b2b4fa684ef4f84c24406b8c29ae1a20cf76targetblankd338b2ba">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/f9837794c1d345bab3df0172afec11366cc6366d" target="_blank">f983779</a>
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/d338b2b4fa684ef4f84c24406b8c29ae1a20cf76" target="_blank">d338b2b</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreef9837794c1d345bab3df0172afec11366cc6366dtargetblankf983779a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreed338b2b4fa684ef4f84c24406b8c29ae1a20cf76targetblankd338b2ba"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -545,7 +545,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/f9837794c1d345bab3df0172afec11366cc6366d" target="_blank">f983779</a>.
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/d338b2b4fa684ef4f84c24406b8c29ae1a20cf76" target="_blank">d338b2b</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -590,14 +590,9 @@ Untracked files:
     Untracked:  code/quant_gen_1.R
     Untracked:  code/~$in_paper_figures.docx
     Untracked:  data/input/genomic_relatedness_matrix.rds
-    Untracked:  figures/fig3_boyle_plot.pdf
-    Untracked:  figures/fig4_quartiles_plot.pdf
-    Untracked:  figures/fig5_antagonism_ratios.pdf
 
 Unstaged changes:
     Modified:   .gitignore
-    Modified:   analysis/index.Rmd
-    Modified:   analysis/plot_models_variant_effects.Rmd
     Deleted:    figures/GWAS_mixture_proportions.rds
     Deleted:    figures/GWAS_stats_figure.pdf
     Deleted:    figures/TWAS_mixture_proportions.rds
@@ -608,7 +603,10 @@ Unstaged changes:
     Deleted:    figures/composite_mixture_figure.pdf
     Deleted:    figures/eff_size_histos.pdf
     Modified:   figures/fig2_SNPs_manhattan_plot.png
+    Modified:   figures/fig3_boyle_plot.pdf
+    Modified:   figures/fig4_quartiles_plot.pdf
     Modified:   figures/fig4_quartiles_plot.png
+    Modified:   figures/fig5_antagonism_ratios.pdf
     Modified:   figures/fig6_models.pdf
     Deleted:    figures/stats_figure.pdf
 
@@ -656,6 +654,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/d338b2b4fa684ef4f84c24406b8c29ae1a20cf76/analysis/gcta_quant_genetics.Rmd" target="_blank">d338b2b</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2022-08-01
+</td>
+<td>
+wflow_publish("analysis/gcta_quant_genetics.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/b4a76148f0e11633e5fe55d8f279e4f45c9d023e/docs/gcta_quant_genetics.html" target="_blank">b4a7614</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2022-07-29
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -866,10 +898,13 @@ Male late-life fitness
 </table>
 <div id="correlations-in-the-line-means" class="section level3">
 <h3>Correlations in the line means</h3>
+<p>The table shows the Pearson correlation coefficients (<span
+class="math inline">\(r\)</span>) between each pair of fitness traits,
+across the 125 DGRP lines.</p>
 <pre class="r"><code>line_mean_corrs &lt;- line_means %&gt;% select(contains(&quot; &quot;)) %&gt;% cor() %&gt;% as.data.frame() 
 saveRDS(line_mean_corrs, &quot;data/derived/line_mean_corrs.rds&quot;)
 
-line_mean_corrs %&gt;% kable(digits =3) %&gt;% kable_styling()</code></pre>
+line_mean_corrs %&gt;% kable(digits = 3) %&gt;% kable_styling()</code></pre>
 <table class="table" style="margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -960,6 +995,186 @@ Male fitness late
 </tr>
 </tbody>
 </table>
+<div id="difference-in-inter-sex-correlation-between-age-classes"
+class="section level4">
+<h4>Difference in inter-sex correlation between age classes</h4>
+<p>The inter-sex correlation for fitness was more positive when measured
+in the late-life age class (<span class="math inline">\(r\)</span> =
+0.317 as opposed to <span class="math inline">\(r\)</span> = 0.228), but
+this difference was not statistically significantly different from zero
+(bootstrapped 95% confidence interval of the difference in correlations:
+-0.057 to 0.233).</p>
+<pre class="r"><code>set.seed(1)
+
+female_w_early &lt;- line_means$female_fitness_early
+male_w_early &lt;- line_means$male_fitness_early
+female_w_late &lt;- line_means$female_fitness_late
+male_w_late &lt;- line_means$male_fitness_late
+cor1_actual &lt;- cor(female_w_early, male_w_early)
+cor2_actual &lt;- cor(female_w_late, male_w_late)
+
+n_bootstraps &lt;- 100000
+n_lines &lt;- length(female_w_early)
+cor1 &lt;- cor2 &lt;- rep(0, n_bootstraps)
+for(i in 1:n_bootstraps){
+  samp &lt;- sample(n_lines, n_lines, replace = TRUE)  
+  cor1[i] &lt;- cor(female_w_early[samp], male_w_early[samp])
+  cor2[i] &lt;- cor(female_w_late[samp], male_w_late[samp])
+}
+
+data.frame(diff = cor2 - cor1) %&gt;% 
+  summarise(`Inter-sex correlation (early life)` = cor1_actual,
+            `Inter-sex correlation (late life)` = cor2_actual,
+            `Difference in estimated correlations` = cor2_actual - cor1_actual,
+            `Difference, lower 95% CI (bootstrapped)` = 
+              as.numeric(quantile(diff, probs = c(0.025))),
+            `Difference, upper 95% CI (bootstrapped)` = 
+              as.numeric(quantile(diff, probs = c(0.975)))) %&gt;%
+  gather(Parameter, `Estimated value`) %&gt;% 
+  kable(digits = 3) %&gt;% kable_styling(full_width = F)</code></pre>
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Parameter
+</th>
+<th style="text-align:right;">
+Estimated value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Inter-sex correlation (early life)
+</td>
+<td style="text-align:right;">
+0.228
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Inter-sex correlation (late life)
+</td>
+<td style="text-align:right;">
+0.317
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Difference in estimated correlations
+</td>
+<td style="text-align:right;">
+0.089
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Difference, lower 95% CI (bootstrapped)
+</td>
+<td style="text-align:right;">
+-0.057
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Difference, upper 95% CI (bootstrapped)
+</td>
+<td style="text-align:right;">
+0.233
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="difference-in-inter-age-correlation-between-sexes"
+class="section level4">
+<h4>Difference in inter-age correlation between sexes</h4>
+<p>The inter-age correlation for fitness was more positive in males
+compared to females (<span class="math inline">\(r\)</span> = 0.864 as
+opposed to <span class="math inline">\(r\)</span> = 0.766), and this
+difference was statistically significantly different from zero
+(bootstrapped 95% confidence interval of the difference in correlations:
+0.006 to 0.213).</p>
+<pre class="r"><code>rm(cor1); rm(cor2)
+cor1_actual &lt;- cor(female_w_early, female_w_late)
+cor2_actual &lt;- cor(male_w_early, male_w_late)
+
+n_bootstraps &lt;- 10000
+n_lines &lt;- length(female_w_early)
+cor1 &lt;- cor2 &lt;- rep(0, n_bootstraps)
+for(i in 1:n_bootstraps){
+  samp &lt;- sample(n_lines, n_lines, replace = TRUE)  
+  cor1[i] &lt;- cor(female_w_early[samp], female_w_late[samp])
+  cor2[i] &lt;- cor(male_w_early[samp], male_w_late[samp])
+}
+
+
+data.frame(diff = cor2 - cor1) %&gt;% 
+  summarise(`Inter-age correlation (females)` = cor1_actual,
+            `Inter-age correlation (males)` = cor2_actual,
+            `Difference in estimated correlations` = cor2_actual - cor1_actual,
+            `Difference, lower 95% CI (bootstrapped)` = 
+              as.numeric(quantile(diff, probs = c(0.025))),
+            `Difference, upper 95% CI (bootstrapped)` = 
+              as.numeric(quantile(diff, probs = c(0.975)))) %&gt;% 
+  gather(Parameter, `Estimated value`) %&gt;% 
+  kable(digits = 3) %&gt;% kable_styling(full_width = F)</code></pre>
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Parameter
+</th>
+<th style="text-align:right;">
+Estimated value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Inter-age correlation (females)
+</td>
+<td style="text-align:right;">
+0.766
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Inter-age correlation (males)
+</td>
+<td style="text-align:right;">
+0.864
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Difference in estimated correlations
+</td>
+<td style="text-align:right;">
+0.098
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Difference, lower 95% CI (bootstrapped)
+</td>
+<td style="text-align:right;">
+0.006
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Difference, upper 95% CI (bootstrapped)
+</td>
+<td style="text-align:right;">
+0.213
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>rm(cor1); rm(cor2)</code></pre>
 <!-- ```{r} -->
 <!-- relatedness_matrix <- read_tsv("../DGRP_sexual_conflict/gwas_data/input/relatedness_matrix.txt") -->
 <!-- rownam <- relatedness_matrix %>% pull(var) -->
@@ -990,6 +1205,7 @@ Male fitness late
 <!-- ``` -->
 </div>
 </div>
+</div>
 <div
 id="use-gcta64-to-estimate-the-genetic-variances-and-heritabilities-for-each-fitness-trait"
 class="section level2">
@@ -1010,7 +1226,7 @@ matrix is needed to run the GREML models below.</p>
 * (C) 2010-present, Jian Yang, The University of Queensland
 * Please report bugs to Jian Yang &lt;jian.yang.qt@gmail.com&gt;
 *******************************************************************
-Analysis started at 10:46:23 BST on Fri Jul 29 2022.
+Analysis started at 10:57:56 BST on Mon Aug 01 2022.
 Hostname: 6300D-132190-M.local
 
 Options: 
@@ -1038,8 +1254,8 @@ Saving GRM...
 GRM has been saved in the file [gcta_GRM.grm.bin]
 Number of SNPs in each pair of individuals has been saved in the file [gcta_GRM.grm.N.bin]
 
-Analysis finished at 10:46:29 BST on Fri Jul 29 2022
-Overall computational time: 5.76 sec.</code></pre>
+Analysis finished at 10:58:02 BST on Mon Aug 01 2022
+Overall computational time: 5.64 sec.</code></pre>
 </div>
 <div
 id="run-4-univariate-greml-models-to-find-genetic-variances-and-heritabilities"

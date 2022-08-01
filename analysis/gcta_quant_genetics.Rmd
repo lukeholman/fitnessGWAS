@@ -47,11 +47,82 @@ read.csv('data/derived/ICC.csv') %>%
 
 ### Correlations in the line means
 
+The table shows the Pearson correlation coefficients ($r$) between each pair of fitness traits, across the 125 DGRP lines.
+
 ```{r}
 line_mean_corrs <- line_means %>% select(contains(" ")) %>% cor() %>% as.data.frame() 
 saveRDS(line_mean_corrs, "data/derived/line_mean_corrs.rds")
 
-line_mean_corrs %>% kable(digits =3) %>% kable_styling()
+line_mean_corrs %>% kable(digits = 3) %>% kable_styling()
+```
+
+#### Difference in inter-sex correlation between age classes
+
+The inter-sex correlation for fitness was more positive when measured in the late-life age class ($r$ = 0.317 as opposed to $r$ = 0.228), but this difference was not statistically significantly different from zero (bootstrapped 95% confidence interval of the difference in correlations: -0.057 to 0.233).
+
+```{r bootstrap1}
+set.seed(1)
+
+female_w_early <- line_means$female_fitness_early
+male_w_early <- line_means$male_fitness_early
+female_w_late <- line_means$female_fitness_late
+male_w_late <- line_means$male_fitness_late
+cor1_actual <- cor(female_w_early, male_w_early)
+cor2_actual <- cor(female_w_late, male_w_late)
+
+n_bootstraps <- 100000
+n_lines <- length(female_w_early)
+cor1 <- cor2 <- rep(0, n_bootstraps)
+for(i in 1:n_bootstraps){
+  samp <- sample(n_lines, n_lines, replace = TRUE)  
+  cor1[i] <- cor(female_w_early[samp], male_w_early[samp])
+  cor2[i] <- cor(female_w_late[samp], male_w_late[samp])
+}
+
+data.frame(diff = cor2 - cor1) %>% 
+  summarise(`Inter-sex correlation (early life)` = cor1_actual,
+            `Inter-sex correlation (late life)` = cor2_actual,
+            `Difference in estimated correlations` = cor2_actual - cor1_actual,
+            `Difference, lower 95% CI (bootstrapped)` = 
+              as.numeric(quantile(diff, probs = c(0.025))),
+            `Difference, upper 95% CI (bootstrapped)` = 
+              as.numeric(quantile(diff, probs = c(0.975)))) %>%
+  gather(Parameter, `Estimated value`) %>% 
+  kable(digits = 3) %>% kable_styling(full_width = F)
+```
+
+#### Difference in inter-age correlation between sexes
+
+The inter-age correlation for fitness was more positive in males compared to females ($r$ = 0.864 as opposed to $r$ = 0.766), and this difference was statistically significantly different from zero (bootstrapped 95% confidence interval of the difference in correlations: 0.006 to 0.213).
+
+
+```{r bootstrap2}
+rm(cor1); rm(cor2)
+cor1_actual <- cor(female_w_early, female_w_late)
+cor2_actual <- cor(male_w_early, male_w_late)
+
+n_bootstraps <- 10000
+n_lines <- length(female_w_early)
+cor1 <- cor2 <- rep(0, n_bootstraps)
+for(i in 1:n_bootstraps){
+  samp <- sample(n_lines, n_lines, replace = TRUE)  
+  cor1[i] <- cor(female_w_early[samp], female_w_late[samp])
+  cor2[i] <- cor(male_w_early[samp], male_w_late[samp])
+}
+
+
+data.frame(diff = cor2 - cor1) %>% 
+  summarise(`Inter-age correlation (females)` = cor1_actual,
+            `Inter-age correlation (males)` = cor2_actual,
+            `Difference in estimated correlations` = cor2_actual - cor1_actual,
+            `Difference, lower 95% CI (bootstrapped)` = 
+              as.numeric(quantile(diff, probs = c(0.025))),
+            `Difference, upper 95% CI (bootstrapped)` = 
+              as.numeric(quantile(diff, probs = c(0.975)))) %>% 
+  gather(Parameter, `Estimated value`) %>% 
+  kable(digits = 3) %>% kable_styling(full_width = F)
+
+rm(cor1); rm(cor2)
 ```
 
 

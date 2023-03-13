@@ -528,15 +528,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree8613e36860859c03cae8e109c3bac731215e8621targetblank8613e36a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreed16c98dea21fa40538307acfbf7fd5bf4d5cee89targetblankd16c98da">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/8613e36860859c03cae8e109c3bac731215e8621" target="_blank">8613e36</a>
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/d16c98dea21fa40538307acfbf7fd5bf4d5cee89" target="_blank">d16c98d</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree8613e36860859c03cae8e109c3bac731215e8621targetblank8613e36a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreed16c98dea21fa40538307acfbf7fd5bf4d5cee89targetblankd16c98da"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -546,7 +546,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/8613e36860859c03cae8e109c3bac731215e8621" target="_blank">8613e36</a>.
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/d16c98dea21fa40538307acfbf7fd5bf4d5cee89" target="_blank">d16c98d</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -664,6 +664,40 @@ Message
 Rmd
 </td>
 <td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/d16c98dea21fa40538307acfbf7fd5bf4d5cee89/analysis/quant_genetics.Rmd" target="_blank">d16c98d</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-03-13
+</td>
+<td>
+wflow_publish("analysis/quant_genetics.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/7fc071b186f5f9fbca000e6bd0f33fb63c23c5a4/docs/quant_genetics.html" target="_blank">7fc071b</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-03-13
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
 <a href="https://github.com/lukeholman/fitnessGWAS/blob/8613e36860859c03cae8e109c3bac731215e8621/analysis/quant_genetics.Rmd" target="_blank">8613e36</a>
 </td>
 <td>
@@ -686,11 +720,9 @@ wflow_publish("analysis/quant_genetics.Rmd")
 <pre class="r"><code>library(tidyverse)
 library(kableExtra)
 library(rptR)
-
-# library(glue)
-# library(brms)
 options(readr.show_col_types = FALSE)
 
+# Load the &#39;raw&#39; data, giving the fitness of each replicate vial
 fitness_data &lt;- bind_rows(
   read_csv(&quot;data/input/female_fitness_CLEANED.csv&quot;),
   read_csv(&quot;data/input/male_fitness_CLEANED.csv&quot;)) %&gt;% 
@@ -699,7 +731,7 @@ fitness_data &lt;- bind_rows(
   rename_all(~ str_replace_all(.x, &quot;[.]&quot;, &quot;_&quot;))
 
 
-# Load the line mean fitness values calculated by brms
+# Load the estimated line mean fitness values calculated by brms
 line_means &lt;- read_csv(&quot;data/derived/predicted_line_means.csv&quot;) %&gt;% 
   mutate(line = factor(str_remove_all(line, &quot;_&quot;))) %&gt;%
   filter(!is.na(male.fitness.early)) %&gt;%
@@ -733,8 +765,8 @@ four fitness traits, the GLMM we fitted had the model formula
 intercept for DGRP line and experimental block, and no fixed effects.
 Using a model with the block effect included is more conservative and
 more accurate, since not all lines were equally represented in every
-block; therefore, we artificially inflate the line-level repeatability
-it we ignored variation in fitness between blocks.</p>
+block; therefore, we would artificially inflate the line-level
+repeatability it we ignored variation in fitness between blocks.</p>
 <p>When calculating repeatability from models with a link function, one
 can calculate either the “Latent scale approximation” or the “Original
 scale approximation” (see the <a
@@ -745,9 +777,10 @@ the estimated fitness of each DGRP line on the latent scale.</p>
 <p>For simplicity, we present just the results of interest in the first
 table (which is the one discussed in the paper), and present all the
 results in a second table that can be viewed by clicking the tab. The
-“Simple tab” shows the line-level repeatability for each trait (the
-Latent scale approximation), along with the associated SE and CIs from
-parametric bootstrapping. The full table also shows the Original scale
+“Simple table” shows the line-level repeatability, <span
+class="math inline">\(R\)</span>, for each trait (the Latent scale
+approximation), along with the associated SE and CIs from parametric
+bootstrapping. The “Full table” also shows the Original scale
 approximation estimates and the block effects.</p>
 <pre class="r"><code>female_early_repeatability &lt;- rpt(female_fitness_early ~ (1 | line) + (1 | block),  
                                   grname = c(&quot;line&quot;, &quot;block&quot;),  
@@ -803,20 +836,6 @@ simple_repeatability_table &lt;- repeatability_table %&gt;%
   select(-Scale, -Predictor) 
 
 saveRDS(simple_repeatability_table, &quot;data/derived/simple_repeatability_table.rds&quot;)</code></pre>
-<div class="alert alert-warning">
-<p>
-<strong>Warning:</strong> The above code chunk cached its results, but
-it won’t be re-run if previous chunks it depends on are updated. If you
-need to use caching, it is highly recommended to also set
-<code>knitr::opts_chunk$set(autodep = TRUE)</code> at the top of the
-file (in a chunk that is not cached). Alternatively, you can customize
-the option <code>dependson</code> for each individual chunk that is
-cached. Using either <code>autodep</code> or <code>dependson</code> will
-remove this warning. See the
-<a href="https://yihui.name/knitr/options/#cache"
->knitr cache options</a> for more details.
-</p>
-</div>
 <div id="simple-table" class="section level3">
 <h3>Simple table</h3>
 <pre class="r"><code>simple_repeatability_table %&gt;% 
@@ -1315,11 +1334,15 @@ block
 </tbody>
 </table>
 </div>
-<div id="correlations-in-the-line-means" class="section level3">
-<h3>Correlations in the line means</h3>
+</div>
+<div id="correlations-in-the-line-means" class="section level2">
+<h2>Correlations in the line means</h2>
 <p>The table shows the Pearson correlation coefficients (<span
-class="math inline">\(r\)</span>) between each pair of fitness traits,
-across the 125 DGRP lines.</p>
+class="math inline">\(r\)</span>) between the DGRP line means (estimated
+from the two <code>brms</code> models in the script
+<code>get_predicted_line_means.Rmd</code>) for each pair of fitness
+traits, across our sample of DGRP lines. These correlations approximate
+the genetic correlations between each pair of fitness traits.</p>
 <pre class="r"><code>tidy_correlation_test &lt;- function(x, y){
   
   focal_dat &lt;- line_means %&gt;% 
@@ -1528,15 +1551,19 @@ male fitness late
 </tr>
 </tbody>
 </table>
+</div>
+<div
+id="testing-for-differences-in-genetic-correlations-between-sexes-and-ages"
+class="section level2">
+<h2>Testing for differences in genetic correlations between sexes and
+ages</h2>
+<p>We here use bootstrapping to test whether A) the inter-sex genetic
+correlation for fitness changes between the two age classes, and B) the
+genetic correlation between fitness in early- and late-life differs
+between males and females.</p>
 <div id="difference-in-inter-sex-correlation-between-age-classes"
-class="section level4">
-<h4>Difference in inter-sex correlation between age classes</h4>
-<p>The inter-sex correlation for fitness was more positive when measured
-in the late-life age class (<span class="math inline">\(r\)</span> =
-0.317 as opposed to <span class="math inline">\(r\)</span> = 0.228), but
-this difference was not statistically significantly different from zero
-(bootstrapped 95% confidence interval of the difference in correlations:
--0.057 to 0.233).</p>
+class="section level3">
+<h3>Difference in inter-sex correlation between age classes</h3>
 <pre class="r"><code>set.seed(1)
 
 female_w_early &lt;- line_means$female_fitness_early
@@ -1621,14 +1648,8 @@ Difference, upper 95% CI (bootstrapped)
 </table>
 </div>
 <div id="difference-in-inter-age-correlation-between-sexes"
-class="section level4">
-<h4>Difference in inter-age correlation between sexes</h4>
-<p>The inter-age correlation for fitness was more positive in males
-compared to females (<span class="math inline">\(r\)</span> = 0.864 as
-opposed to <span class="math inline">\(r\)</span> = 0.766), and this
-difference was statistically significantly different from zero
-(bootstrapped 95% confidence interval of the difference in correlations:
-0.006 to 0.213).</p>
+class="section level3">
+<h3>Difference in inter-age correlation between sexes</h3>
 <pre class="r"><code>rm(cor1); rm(cor2)
 cor1_actual &lt;- cor(female_w_early, female_w_late)
 cor2_actual &lt;- cor(male_w_early, male_w_late)
@@ -1753,11 +1774,10 @@ loaded via a namespace (and not attached):
 [49] tools_4.2.2       hms_1.1.2         lifecycle_1.0.3   munsell_0.5.0    
 [53] callr_3.7.3       compiler_4.2.2    jquerylib_0.1.4   systemfonts_1.0.4
 [57] rlang_1.0.6       grid_4.2.2        nloptr_2.0.3      rstudioapi_0.14  
-[61] rmarkdown_2.20    boot_1.3-28       gtable_0.3.1      codetools_0.2-18 
-[65] R6_2.5.1          knitr_1.42        fastmap_1.1.1     bit_4.0.5        
-[69] utf8_1.2.2        rprojroot_2.0.3   stringi_1.7.12    parallel_4.2.2   
-[73] Rcpp_1.0.10       vctrs_0.5.2       tidyselect_1.2.0  xfun_0.37        </code></pre>
-</div>
+[61] rmarkdown_2.20    boot_1.3-28       gtable_0.3.1      R6_2.5.1         
+[65] knitr_1.42        fastmap_1.1.1     bit_4.0.5         utf8_1.2.2       
+[69] rprojroot_2.0.3   stringi_1.7.12    parallel_4.2.2    Rcpp_1.0.10      
+[73] vctrs_0.5.2       tidyselect_1.2.0  xfun_0.37        </code></pre>
 </div>
 </div>
 </div>

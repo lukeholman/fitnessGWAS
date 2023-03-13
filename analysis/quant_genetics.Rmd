@@ -1,0 +1,243 @@
+---
+title: "Estimating genetic (co)variance and heritability"
+output: 
+  workflowr::wflow_html:
+    code_folding: hide 
+  
+---
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(kableExtra)
+library(rptR)
+
+# library(glue)
+# library(brms)
+options(readr.show_col_types = FALSE)
+
+fitness_data <- bind_rows(
+  read_csv("data/input/female_fitness_CLEANED.csv"),
+  read_csv("data/input/male_fitness_CLEANED.csv")) %>% 
+  mutate(male_fitness_early = early.male.focal / (early.male.focal + early.male.rival),
+         male_fitness_late = late.male.focal / (late.male.focal + late.male.rival)) %>% 
+  rename_all(~ str_replace_all(.x, "[.]", "_"))
+
+
+# Load the line mean fitness values calculated by brms
+line_means <- read_csv("data/derived/predicted_line_means.csv") %>% 
+  mutate(line = factor(str_remove_all(line, "_"))) %>%
+  filter(!is.na(male.fitness.early)) %>%
+  mutate(`Female fitness early` = female.fitness.early,
+         `Female fitness late` = female.fitness.late,
+         `Male fitness early` = male.fitness.early,
+         `Male fitness late` = male.fitness.late) %>%
+  rename(female_fitness_early = female.fitness.early,
+         female_fitness_late = female.fitness.late,
+         male_fitness_early = male.fitness.early,
+         male_fitness_late = male.fitness.late)
+```
+
+## Proportion of variance in fitness explained by DGRP line {.tabset}
+
+Here, we calculate the proportion of variance in each fitness trait that is explained by DGRP line. The proportion of explained variance (also called "repeatability") for DGRP line is approximately equal to the broad sense heritability, since in our study flies from the same line have identical genotypes. 
+
+To calculate repeatability, we use the approach recommended by Nakagawa & Schielzeth (2010, _Biological Reviews_ 85: 935-956), which is implemented in the function `rpt` from the package `rptR`. In short, in the code below, `rpt` fits either a Poisson GLMM (for the two female fitness traits) or a Binomial GLMM (for the two male fitness traits) using the `lme4` package, and estimates the proportion of the total variance that is explained for each random effect in the model. For all four fitness traits, the GLMM we fitted had the model formula `Y ~ (1 | line) + (1 | block)`, i.e. we fit a random intercept for DGRP line and experimental block, and no fixed effects. Using a model with the block effect included is more conservative and more accurate, since not all lines were equally represented in every block; therefore, we artificially inflate the line-level repeatability it we ignored variation in fitness between blocks. 
+
+When calculating repeatability from models with a link function, one can calculate either the "Latent scale approximation" or the "Original scale approximation" (see the ['rptR' vignette](https://rdrr.io/cran/rptR/f/vignettes/rptR.Rmd)). We focus on the former, though the repeatability estimates are very similar, since in most of our analyses we focused on the estimated fitness of each DGRP line on the latent scale. 
+
+For simplicity, we present just the results of interest in the first table (which is the one discussed in the paper), and present all the results in a second table that can be viewed by clicking the tab. The "Simple tab" shows the line-level repeatability for each trait (the Latent scale approximation), along with the associated SE and CIs from parametric bootstrapping. The full table also shows the Original scale approximation estimates and the block effects.
+
+ 
+
+```{r warning=FALSE, message=FALSE, results='hide', cache=TRUE}
+female_early_repeatability <- rpt(female_fitness_early ~ (1 | line) + (1 | block),  
+                                  grname = c("line", "block"),  
+                                  data = fitness_data %>% filter(!is.na(female_fitness_early)), 
+                                  datatype = "Poisson", nboot = 1000, npermut = 0)
+
+female_late_repeatability <- rpt(female_fitness_late ~ (1 | line) + (1 | block),  
+                                  grname = c("line", "block"),  
+                                  data = fitness_data %>% filter(!is.na(female_fitness_late)), 
+                                  datatype = "Poisson", nboot = 1000, npermut = 0)
+
+male_early_repeatability <- rpt(cbind(early_male_focal, early_male_rival) ~ (1 | line) + (1 | block),  
+                                grname = c("line", "block"),  
+                                data = fitness_data %>% 
+                                  filter(!is.na(early_male_focal) & !is.na(early_male_rival)) %>% 
+                                  filter(early_male_focal + early_male_rival > 0), 
+                                datatype = "Proportion", nboot = 1000, npermut = 0)
+
+male_late_repeatability <- rpt(cbind(late_male_focal, late_male_rival) ~ (1 | line) + (1 | block),  
+                                grname = c("line", "block"),  
+                                data = fitness_data %>% 
+                                  filter(!is.na(late_male_focal) & !is.na(late_male_rival)) %>% 
+                                  filter(late_male_focal + late_male_rival > 0), 
+                                datatype = "Proportion", nboot = 1000, npermut = 0)
+
+process_rpt_object <- function(rpt, fitness_trait){
+  
+  link <- cbind(data.frame(R = as.numeric(rpt$R["R_link", ]),
+                   SE = as.numeric(rpt$se["se_link", ])),
+        rpt$CI_emp$CI_link) %>% mutate(Scale = "Latent scale approximation",
+                                       Predictor = c("line", "block"),
+                                       Trait = fitness_trait)
+  
+  original <- cbind(data.frame(R = as.numeric(rpt$R["R_org", ]),
+                               SE = as.numeric(rpt$se["se_org", ])),
+                    rpt$CI_emp$CI_org) %>% mutate(Scale = "Original scale approximation",
+                                       Predictor = c("line", "block"),
+                                       Trait = fitness_trait)
+  
+  bind_rows(link, original) %>% 
+    select(Trait, Scale, Predictor, everything()) %>% 
+    as_tibble() %>% 
+    rename(`Lower 95% CI` = `2.5%`, `Upper 95% CI` = `97.5%`)
+}
+
+repeatability_table <- bind_rows(process_rpt_object(female_early_repeatability, "Female fitness early"),
+          process_rpt_object(female_late_repeatability, "Female fitness late"),
+          process_rpt_object(male_early_repeatability, "Male fitness early"),
+          process_rpt_object(male_late_repeatability, "Male fitness late")) 
+
+simple_repeatability_table <- repeatability_table %>% 
+  filter(Scale == "Latent scale approximation", Predictor == "line") %>% 
+  select(-Scale, -Predictor) 
+
+saveRDS(simple_repeatability_table, "data/derived/simple_repeatability_table.rds")
+```
+
+### Simple table
+
+```{r}
+simple_repeatability_table %>% 
+  kable(digits = 2) %>% kable_styling(full_width = FALSE)
+```
+
+### Full table
+
+```{r}
+repeatability_table %>% 
+  kable(digits = 2) %>% kable_styling(full_width = FALSE)
+```
+
+
+
+
+
+### Correlations in the line means
+
+The table shows the Pearson correlation coefficients ($r$) between each pair of fitness traits, across the 125 DGRP lines.
+
+```{r}
+tidy_correlation_test <- function(x, y){
+  
+  focal_dat <- line_means %>% 
+    select(!!x, !!y)
+  
+  focal_dat <- focal_dat[complete.cases(focal_dat), ]
+  
+  x_dat <- focal_dat %>% pull(!! x)
+  y_dat <- focal_dat %>% pull(!! y)
+
+  se_r <- function(corr){
+    sqrt((1-corr$estimate^2) / (corr$parameter))
+  }
+    
+  corr <- cor.test(x_dat, y_dat)
+   
+  tibble(
+    `Variable 1` = x, 
+    `Variable 2` = y,
+    `Pearson correlation` = as.numeric(corr$estimate),
+    SE = se_r(corr),
+    `Lower 95% CI` = corr$conf.int[1],
+    `Upper 95% CI` = corr$conf.int[2],
+    `p value` = corr$p.value
+  ) %>% mutate(
+    `p value` = round(`p value`, 4),
+    `p value` = replace(`p value`, `p value` < 0.0001, "< 0.0001"))
+}
+line_mean_corrs <- bind_rows(
+  tidy_correlation_test("female_fitness_early", "female_fitness_late"),
+  tidy_correlation_test("female_fitness_early", "male_fitness_early"),
+  tidy_correlation_test("female_fitness_early", "male_fitness_late"),
+  tidy_correlation_test("female_fitness_late", "male_fitness_early"),
+  tidy_correlation_test("female_fitness_late", "male_fitness_late"),
+  tidy_correlation_test("male_fitness_early", "male_fitness_late"),
+) %>% mutate(`Variable 1` = str_replace_all(`Variable 1`, "_", " "),
+             `Variable 2` = str_replace_all(`Variable 2`, "_", " "))
+
+saveRDS(line_mean_corrs, "data/derived/line_mean_corrs.rds")
+
+line_mean_corrs %>% kable(digits = 3) %>% kable_styling()
+```
+
+#### Difference in inter-sex correlation between age classes
+
+The inter-sex correlation for fitness was more positive when measured in the late-life age class ($r$ = 0.317 as opposed to $r$ = 0.228), but this difference was not statistically significantly different from zero (bootstrapped 95% confidence interval of the difference in correlations: -0.057 to 0.233).
+
+```{r bootstrap1}
+set.seed(1)
+
+female_w_early <- line_means$female_fitness_early
+male_w_early <- line_means$male_fitness_early
+female_w_late <- line_means$female_fitness_late
+male_w_late <- line_means$male_fitness_late
+cor1_actual <- cor(female_w_early, male_w_early)
+cor2_actual <- cor(female_w_late, male_w_late)
+
+n_bootstraps <- 10000
+n_lines <- length(female_w_early)
+cor1 <- cor2 <- rep(0, n_bootstraps)
+for(i in 1:n_bootstraps){
+  samp <- sample(n_lines, n_lines, replace = TRUE)  
+  cor1[i] <- cor(female_w_early[samp], male_w_early[samp])
+  cor2[i] <- cor(female_w_late[samp], male_w_late[samp])
+}
+
+data.frame(diff = cor2 - cor1) %>% 
+  summarise(`Inter-sex correlation (early life)` = cor1_actual,
+            `Inter-sex correlation (late life)` = cor2_actual,
+            `Difference in estimated correlations` = cor2_actual - cor1_actual,
+            `Difference, lower 95% CI (bootstrapped)` = 
+              as.numeric(quantile(diff, probs = c(0.025))),
+            `Difference, upper 95% CI (bootstrapped)` = 
+              as.numeric(quantile(diff, probs = c(0.975)))) %>%
+  gather(Parameter, `Estimated value`) %>% 
+  kable(digits = 3) %>% kable_styling(full_width = F)
+```
+
+#### Difference in inter-age correlation between sexes
+
+The inter-age correlation for fitness was more positive in males compared to females ($r$ = 0.864 as opposed to $r$ = 0.766), and this difference was statistically significantly different from zero (bootstrapped 95% confidence interval of the difference in correlations: 0.006 to 0.213).
+
+
+```{r bootstrap2}
+rm(cor1); rm(cor2)
+cor1_actual <- cor(female_w_early, female_w_late)
+cor2_actual <- cor(male_w_early, male_w_late)
+
+n_bootstraps <- 10000
+n_lines <- length(female_w_early)
+cor1 <- cor2 <- rep(0, n_bootstraps)
+for(i in 1:n_bootstraps){
+  samp <- sample(n_lines, n_lines, replace = TRUE)  
+  cor1[i] <- cor(female_w_early[samp], female_w_late[samp])
+  cor2[i] <- cor(male_w_early[samp], male_w_late[samp])
+}
+
+
+data.frame(diff = cor2 - cor1) %>% 
+  summarise(`Inter-age correlation (females)` = cor1_actual,
+            `Inter-age correlation (males)` = cor2_actual,
+            `Difference in estimated correlations` = cor2_actual - cor1_actual,
+            `Difference, lower 95% CI (bootstrapped)` = 
+              as.numeric(quantile(diff, probs = c(0.025))),
+            `Difference, upper 95% CI (bootstrapped)` = 
+              as.numeric(quantile(diff, probs = c(0.975)))) %>% 
+  gather(Parameter, `Estimated value`) %>% 
+  kable(digits = 3) %>% kable_styling(full_width = F)
+
+rm(cor1); rm(cor2)
+```
+

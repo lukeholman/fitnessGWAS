@@ -10,11 +10,9 @@ output:
 library(tidyverse)
 library(kableExtra)
 library(rptR)
-
-# library(glue)
-# library(brms)
 options(readr.show_col_types = FALSE)
 
+# Load the 'raw' data, giving the fitness of each replicate vial
 fitness_data <- bind_rows(
   read_csv("data/input/female_fitness_CLEANED.csv"),
   read_csv("data/input/male_fitness_CLEANED.csv")) %>% 
@@ -23,7 +21,7 @@ fitness_data <- bind_rows(
   rename_all(~ str_replace_all(.x, "[.]", "_"))
 
 
-# Load the line mean fitness values calculated by brms
+# Load the estimated line mean fitness values calculated by brms
 line_means <- read_csv("data/derived/predicted_line_means.csv") %>% 
   mutate(line = factor(str_remove_all(line, "_"))) %>%
   filter(!is.na(male.fitness.early)) %>%
@@ -41,15 +39,15 @@ line_means <- read_csv("data/derived/predicted_line_means.csv") %>%
 
 Here, we calculate the proportion of variance in each fitness trait that is explained by DGRP line. The proportion of explained variance (also called "repeatability") for DGRP line is approximately equal to the broad sense heritability, since in our study flies from the same line have identical genotypes. 
 
-To calculate repeatability, we use the approach recommended by Nakagawa & Schielzeth (2010, _Biological Reviews_ 85: 935-956), which is implemented in the function `rpt` from the package `rptR`. In short, in the code below, `rpt` fits either a Poisson GLMM (for the two female fitness traits) or a Binomial GLMM (for the two male fitness traits) using the `lme4` package, and estimates the proportion of the total variance that is explained for each random effect in the model. For all four fitness traits, the GLMM we fitted had the model formula `Y ~ (1 | line) + (1 | block)`, i.e. we fit a random intercept for DGRP line and experimental block, and no fixed effects. Using a model with the block effect included is more conservative and more accurate, since not all lines were equally represented in every block; therefore, we artificially inflate the line-level repeatability it we ignored variation in fitness between blocks. 
+To calculate repeatability, we use the approach recommended by Nakagawa & Schielzeth (2010, _Biological Reviews_ 85: 935-956), which is implemented in the function `rpt` from the package `rptR`. In short, in the code below, `rpt` fits either a Poisson GLMM (for the two female fitness traits) or a Binomial GLMM (for the two male fitness traits) using the `lme4` package, and estimates the proportion of the total variance that is explained for each random effect in the model. For all four fitness traits, the GLMM we fitted had the model formula `Y ~ (1 | line) + (1 | block)`, i.e. we fit a random intercept for DGRP line and experimental block, and no fixed effects. Using a model with the block effect included is more conservative and more accurate, since not all lines were equally represented in every block; therefore, we would artificially inflate the line-level repeatability it we ignored variation in fitness between blocks. 
 
 When calculating repeatability from models with a link function, one can calculate either the "Latent scale approximation" or the "Original scale approximation" (see the ['rptR' vignette](https://rdrr.io/cran/rptR/f/vignettes/rptR.Rmd)). We focus on the former, though the repeatability estimates are very similar, since in most of our analyses we focused on the estimated fitness of each DGRP line on the latent scale. 
 
-For simplicity, we present just the results of interest in the first table (which is the one discussed in the paper), and present all the results in a second table that can be viewed by clicking the tab. The "Simple tab" shows the line-level repeatability for each trait (the Latent scale approximation), along with the associated SE and CIs from parametric bootstrapping. The full table also shows the Original scale approximation estimates and the block effects.
+For simplicity, we present just the results of interest in the first table (which is the one discussed in the paper), and present all the results in a second table that can be viewed by clicking the tab. The "Simple table" shows the line-level repeatability, $R$, for each trait (the Latent scale approximation), along with the associated SE and CIs from parametric bootstrapping. The "Full table" also shows the Original scale approximation estimates and the block effects.
 
  
 
-```{r warning=FALSE, message=FALSE, results='hide', cache=TRUE}
+```{r warning=FALSE, message=FALSE, results='hide'}
 female_early_repeatability <- rpt(female_fitness_early ~ (1 | line) + (1 | block),  
                                   grname = c("line", "block"),  
                                   data = fitness_data %>% filter(!is.na(female_fitness_early)), 
@@ -124,9 +122,9 @@ repeatability_table %>%
 
 
 
-### Correlations in the line means
+## Correlations in the line means
 
-The table shows the Pearson correlation coefficients ($r$) between each pair of fitness traits, across the 125 DGRP lines.
+The table shows the Pearson correlation coefficients ($r$) between the DGRP line means (estimated from the two `brms` models in the script `get_predicted_line_means.Rmd`) for each pair of fitness traits, across our sample of DGRP lines. These correlations approximate the genetic correlations between each pair of fitness traits.
 
 ```{r}
 tidy_correlation_test <- function(x, y){
@@ -172,9 +170,13 @@ saveRDS(line_mean_corrs, "data/derived/line_mean_corrs.rds")
 line_mean_corrs %>% kable(digits = 3) %>% kable_styling()
 ```
 
-#### Difference in inter-sex correlation between age classes
 
-The inter-sex correlation for fitness was more positive when measured in the late-life age class ($r$ = 0.317 as opposed to $r$ = 0.228), but this difference was not statistically significantly different from zero (bootstrapped 95% confidence interval of the difference in correlations: -0.057 to 0.233).
+## Testing for differences in genetic correlations between sexes and ages
+
+We here use bootstrapping to test whether A) the inter-sex genetic correlation for fitness changes between the two age classes, and B) the genetic correlation between fitness in early- and late-life differs between males and females. 
+
+
+### Difference in inter-sex correlation between age classes
 
 ```{r bootstrap1}
 set.seed(1)
@@ -207,10 +209,7 @@ data.frame(diff = cor2 - cor1) %>%
   kable(digits = 3) %>% kable_styling(full_width = F)
 ```
 
-#### Difference in inter-age correlation between sexes
-
-The inter-age correlation for fitness was more positive in males compared to females ($r$ = 0.864 as opposed to $r$ = 0.766), and this difference was statistically significantly different from zero (bootstrapped 95% confidence interval of the difference in correlations: 0.006 to 0.213).
-
+### Difference in inter-age correlation between sexes
 
 ```{r bootstrap2}
 rm(cor1); rm(cor2)

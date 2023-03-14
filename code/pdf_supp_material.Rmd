@@ -1,0 +1,283 @@
+---
+output: pdf_document
+header-includes: 
+  \usepackage{booktabs}
+  \usepackage{microtype}
+  \usepackage{longtable}
+  \usepackage[margin=1in]{geometry}
+---
+
+```{r setup, include=FALSE, results='hide', warning=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(kableExtra)
+library(stringr)
+library(dplyr)
+library(readr)
+
+linesep <- function(x, y = character()){
+  if(!length(x))
+    return(y)
+  linesep(x[-length(x)], c(rep('', x[length(x)]-1), '\\addlinespace', y))  
+}
+
+make_table <- function(tabl, digits = getOption("digits"), BT = TRUE, fontsize = 7){
+  # tabl <- readRDS(file) 
+  #tabl[tabl == "~"] <- ""
+  # if(" " %in% names(tabl)) names(tabl)[names(tabl) == " "] <- "Sig."
+  #if(" " %in% names(tabl)) tabl$` ` <- gsub('\\\\', "", tabl$` `)
+
+  if("Q2.5" %in% names(tabl)) tabl <- rename(tabl, `Lower 95% CI` = "Q2.5")
+  if("Q97.5" %in% names(tabl)) tabl <- rename(tabl, `Upper 95% CI` = "Q97.5")
+
+  kable(tabl, format = "latex", booktabs = BT, digits = digits) %>%
+    kable_styling(font_size = fontsize, full_width = FALSE, latex_options = "hold_position")
+}
+```
+
+
+\newpage
+\pagenumbering{gobble}
+
+\begin{center}
+\huge{\textbf{Online Supplementary Material}}
+\end{center}
+\vspace{0.5cm}
+\textbf{A genome-wide scan for pleiotropic fitness effects on sexes and age classes in \textit{Drosophila}}, by
+Luke Holman and Heidi Wong.
+\vspace{0.5cm}
+
+
+
+The figures and tables in this document, along with the with the R code used to generate them, can also be viewed online at `lukeholman.github.io/fitnessGWAS`.
+
+
+\newpage
+
+***Table S1***: Recipe for _Drosophila_ food used in this study.
+
+```{r, results='asis'}
+data.frame(Ingredients = c("Water", "Dextrose", "Cornmeal", "Yeast", "Soy flour", "Agar", "Tegosept", "Acid mix (4mL orthophosphoric acid, 41mL propionic acid, 55mL water per 100mL)"),
+       Quantity = c("1000 mL", "75g", "73g", "35g", "20g", "6g", "17mL", "14mL")) %>%
+  make_table(digits = 2) 
+```
+
+\newpage
+
+***Table S2***: Proportion of variance ($R$) in fitness explained by 'DGRP line', with associated standard errors and 95% confidence intervals estimated using parametric bootstrapping. $R$ was calculated from univariate generalised linear mixed models of each fitness trait, which included the random effect of experimental block, and had either Poisson errors (for females) or Binomial errors (for males), using the `rpt` function from the `rptR` package for R. 
+
+
+```{r, results='asis'}
+readRDS('../data/derived/simple_repeatability_table.rds') %>% 
+  rename(`Fitness trait` = Trait) %>%
+  make_table(digits = 2) 
+```
+
+\newpage
+
+***Table S3***: Correlations between line means shown in Figure 1. FINISH THIS
+
+```{r}
+readRDS("../data/derived/line_mean_corrs.rds") %>%
+  make_table(digits = 2) 
+```
+
+
+\newpage
+
+***Table S4***:  G matrix from gcta, showing estimated genetic variances and covariances (standard error shown in brackets). FINISH THIS
+
+```{r, results='asis'}
+readRDS("../data/derived/G_mat.rds") %>%
+  make_table(digits = 2) 
+```
+\newpage
+
+***Table S5***: This table shows variants that passed the statistical significance threshold of $p < 10^{-5}$ for at least one of the four phenotypes, in a linear mixed model GWAS implemented in GEMMA. Columns 2 identifies genes that overlap the variant, and column 3 shows the site class. Columns 4-5 show the estimated effect size of the variant on the four phenotypes (where positive values mean that the minor allele is associated with higher fitness, and negative values that the minor allele is associated with lower fitness), as well as the associated p-value ($-log_{10}$ transformed, with significant values starred).
+
+
+```{r, results='asis'}
+rr <- function(x) format(round(x, 2), nsmall = 2)
+rp <- function(x) {
+  x <- -1 * log10(x)
+  sig <- ifelse(x > 5, "*", "")
+  paste(format(round(x, 1), nsmall = 1), sig, sep = "")
+}
+read_csv("../data/derived/GWAS_significant_snps.csv") %>% 
+  select(Variant, FBID, contains(" ")) %>% 
+  mutate(`Female early effect` = paste(rr(`Female early effect`), " (", rp(`Female early pval`), ")", sep = "")) %>%
+  mutate(`Female late effect` = paste(rr(`Female late effect`), " (", rp(`Female late pval`), ")", sep = "")) %>%
+  mutate(`Male early effect` = paste(rr(`Male early effect`), " (", rp(`Male early pval`), ")", sep = "")) %>%
+  mutate(`Male late effect` = paste(rr(`Male late effect`), " (", rp(`Male late pval`), ")", sep = "")) %>% 
+  select(-contains("pval"), -contains("clump")) %>% 
+  mutate(FBID = replace(FBID, is.na(FBID), "_")) %>%
+  rename_all(~ str_replace_all(.x, " effect", "")) %>% 
+  kable(format = "latex", booktabs = TRUE, longtable = T) %>%
+  kable_styling(font_size = 7, full_width = FALSE, latex_options = c("hold_position", "repeat_header")) 
+```
+\newpage
+
+***Table S6:*** The table tallies the numbers of loci showing a particular significant relationship with fitness (rows) for various different $p$-value thresholds (columns). For example, 'Female early only' counts the number of loci whose genotype significantly correlated with mean female early life fitness across lines. 'Age concordant, males' counts loci whose genotype correlated with early- _and_ late-life fitness in males, in the same direction, while 'Age antagonistic, males' counts loci showing significant, opposite relationships with male early- and male late-life fitness. Similarly, 'Sex concordant, early' counts loci showing a concordant relationship with early life fitness in both males and females, and 'Sex antagonistic, late' counts those showing opposing relationships with late-life fitness in males and females. All categories are mutually exclusive, such that loci are only counted towards the most specific category that applies to them. Note that this method has low power to detect loci that correlate with two or more fitness metrics, because there are two or more opportunities to make a 'false negative' error, and the power is low for any given locus (we therefore use a range of $p$-value thresholds, including some permissive ones, to illustrate general patterns of genetic covariance).
+
+```{r, results='asis'}
+readRDS("../data/derived/GWAS_tally_table.rds") %>%
+  make_table(digits = 2)
+```
+
+\newpage
+
+***Table S7:*** Table showing the mean and median effect size  (in standard units), across all 208,987 loci in an LD-pruned subset of the total. Though the average effect size is close to zero, the mean is significantly negative (shown by the $t$ and $p$ statistics, from linear models), indicating that on average, the minor allele was associated with lower fitness and the major allele with higher fitness.
+```{r, results='asis'}
+readRDS("../data/derived/supp_table_of_variant_effect_means.rds") %>% 
+  make_table() 
+```
+\newpage
+
+***Table S8:*** The table showing the 517 transcripts that were associated with one or more of the four phenotypes (with a p-value less than 0.01) is too large to display here, and is provided at the following URL: https://lukeholman.github.io/fitnessGWAS/TWAS_tables.html. For each transcript, the table gives the gene name and Flybase ID, the chromosome, the extent of male bias in gene expression (as log fold change) and average expression level (calculated from the DGRP expression data from Huang et al. 2015, _PNAS_), and the average effect size and p-value for each fitness components (calculated using linear models relating mean expression level to mean fitness across lines).
+\newpage
+
+***Table S9:*** The table tallies the numbers of transcripts showing a particular significant relationship with fitness (rows) for various different $p$-value thresholds (columns). See Table S5 for the meanings of each row. As in Table S5, all categories are mutually exclusive, such that transcripts are only counted towards the most specific category that applies to them, and the method has low power to detect transcripts that correlate with two or more fitness metrics, because there are two or more opportunities to make a 'false negative' error.
+
+```{r}
+readRDS("../data/derived/TWAS_tally_table.rds") %>%
+  make_table()
+```
+\newpage
+
+***Table S10:*** The fourth column of the table shows the numbers of variants comprising each of the 32 coloured panels in Figures 4A and 4B. The fifth column gives these numbers as a percentage of the total number of variants, while the sixth column shows the number as a percentage among the variants that have the same association with female fitness. 
+```{r}
+readRDS("../data/derived/supp_tabl_gwas_intersex.rds") %>%
+  mutate(`Age class` = str_remove_all(`Age class`, "[ABCD][.] ")) %>% 
+  mutate(`Age class` = str_remove_all(`Age class`, " fitness")) %>% 
+  kable(format = "latex", booktabs = T, digits = 2, linesep = linesep(c(4,4))) %>%
+  kable_styling(font_size = 7, full_width = FALSE, latex_options = "hold_position") %>% 
+  column_spec(c(2:3, 6), width = "2.3cm") %>% 
+  column_spec(4:5, width = "1.5cm")
+```
+\newpage
+
+***Table S11:*** The fourth column of the table shows the numbers of transcripts comprising each of the 32 coloured panels in Figures 4C and 4D. The fifth column gives these numbers as a percentage of the total number of transcripts, while the sixth column shows the number as a percentage among the transcripts that have the same association with female fitness. 
+```{r}
+readRDS("../data/derived/supp_tabl_twas_intersex.rds") %>%
+  mutate(`Age class` = str_remove_all(`Age class`, "[ABCD][.] ")) %>% 
+  mutate(`Age class` = str_remove_all(`Age class`, " fitness")) %>% 
+  kable(format = "latex", booktabs = T, digits = 2, linesep = linesep(c(4,4))) %>%
+  kable_styling(font_size = 7, full_width = FALSE, latex_options = "hold_position") %>% 
+  column_spec(c(2:3, 6), width = "2.3cm") %>% 
+  column_spec(4:5, width = "1.5cm")
+```
+\newpage
+
+***Table S12:*** The table shows similar information to Table S9, except that we now tabulate the number of variants that have various associations with early- and late-life fitness (separately within each sex). Note that there are essentially no variants with opposing effects on early- and late-life fitness, in either sex.
+```{r}
+readRDS("../data/derived/supp_tabl_gwas_interage.rds") %>%
+  mutate(Sex = str_remove_all(Sex, "[ABCD][.] ")) %>% 
+  mutate(Sex = str_remove_all(Sex, " fitness")) %>% 
+  kable(format = "latex", booktabs = T, digits = 2, linesep = linesep(c(4,4))) %>%
+  kable_styling(font_size = 7, full_width = FALSE, latex_options = "hold_position") %>% 
+  column_spec(c(2:3, 6), width = "2.3cm") %>% 
+  column_spec(4:5, width = "1.5cm")
+```
+\newpage
+
+<!-- For some reason, knitr inserts vphantom code that breaks this table. I think it's a bug. Manually removing it gives the code below which makes a nice table... -->
+
+<!-- ***Table S12:***  -->
+<!-- ```{r} -->
+<!-- readRDS("../data/derived/supp_tabl_twas_interage.rds") %>% -->
+<!--   mutate(`Percentage (overall)` = format(round(`Percentage (overall)`, 2), nsmall = 2)) %>%  -->
+<!--   mutate(`Percentage (given effect on females)` = format(round(`Percentage (given effect on females)`, 2), nsmall = 2)) %>%  -->
+<!--   mutate(Sex = str_remove_all(Sex, "[ABCD][.] ")) %>%  -->
+<!--   mutate(Sex = str_remove_all(Sex, " fitness")) %>%  -->
+<!--   kable(format = "latex", booktabs = T, digits = 2, linesep = linesep(c(4,4))) %>% -->
+<!--   kable_styling(font_size = 7, full_width = FALSE, latex_options = "hold_position") %>%  -->
+<!--   column_spec(c(2:3, 6), width = "2.6cm") %>%  -->
+<!--   column_spec(4:5, width = "1.8cm") -->
+<!-- ``` -->
+<!-- \newpage -->
+
+***Table S13:*** The table shows similar information to Table S10, except that we now tabulate the number of transcripts that have various associations with early- and late-life fitness (separately within each sex). Note that there are essentially no transcripts with opposing effects on early- and late-life fitness, in either sex.
+
+\begin{table}[!h]
+\centering\begingroup\fontsize{7}{9}\selectfont
+
+\begin{tabular}{l>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedleft\arraybackslash}p{1.8cm}>{\raggedright\arraybackslash}p{1.8cm}>{\raggedright\arraybackslash}p{2.6cm}}
+\toprule
+Sex & Association with early-life fitness & Association with late-life fitness & Number of transcripts & Percentage (overall) & Percentage (given association with early life fitness)\\
+\midrule
+Female & Negative & Negative & 3523 & 24.66 & 98.63\\
+Female & Negative & Weakly
+negative & 49 & 0.34 & 1.37\\
+Female & Negative & Weakly
+positive & 0 & 0.00 & 0.00\\
+Female & Negative & Positive & 0 & 0.00 & 0.00\\
+\addlinespace
+Female & Weakly
+negative & Negative & 49 & 0.34 & 1.37\\
+Female & Weakly
+negative & Weakly
+negative & 3464 & 24.25 & 96.98\\
+Female & Weakly
+negative & Weakly
+positive & 59 & 0.41 & 1.65\\
+Female & Weakly
+negative & Positive & 0 & 0.00 & 0.00\\
+\addlinespace
+Female & Weakly
+positive & Negative & 0 & 0.00 & 0.00\\
+Female & Weakly
+positive & Weakly
+negative & 59 & 0.41 & 1.65\\
+Female & Weakly
+positive & Weakly
+positive & 3450 & 24.15 & 96.61\\
+Female & Weakly
+positive & Positive & 62 & 0.43 & 1.74\\
+\addlinespace
+Female & Positive & Negative & 0 & 0.00 & 0.00\\
+Female & Positive & Weakly
+negative & 0 & 0.00 & 0.00\\
+Female & Positive & Weakly
+positive & 62 & 0.43 & 1.74\\
+Female & Positive & Positive & 3509 & 24.56 & 98.26\\
+\addlinespace
+Male & Negative & Negative & 3550 & 24.85 & 99.38\\
+Male & Negative & Weakly
+negative & 22 & 0.15 & 0.62\\
+Male & Negative & Weakly
+positive & 0 & 0.00 & 0.00\\
+Male & Negative & Positive & 0 & 0.00 & 0.00\\
+\addlinespace
+Male & Weakly
+negative & Negative & 22 & 0.15 & 0.62\\
+Male & Weakly
+negative & Weakly
+negative & 3521 & 24.65 & 98.57\\
+Male & Weakly
+negative & Weakly
+positive & 29 & 0.20 & 0.81\\
+Male & Weakly
+negative & Positive & 0 & 0.00 & 0.00\\
+\addlinespace
+Male & Weakly
+positive & Negative & 0 & 0.00 & 0.00\\
+Male & Weakly
+positive & Weakly
+negative & 29 & 0.20 & 0.81\\
+Male & Weakly
+positive & Weakly
+positive & 3520 & 24.64 & 98.57\\
+Male & Weakly
+positive & Positive & 22 & 0.15 & 0.62\\
+\addlinespace
+Male & Positive & Negative & 0 & 0.00 & 0.00\\
+Male & Positive & Weakly
+negative & 0 & 0.00 & 0.00\\
+Male & Positive & Weakly
+positive & 22 & 0.15 & 0.62\\
+Male & Positive & Positive & 3549 & 24.84 & 99.38\\
+\bottomrule
+\end{tabular}
+\endgroup{}
+\end{table}
+
+

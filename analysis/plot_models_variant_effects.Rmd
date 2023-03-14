@@ -40,6 +40,56 @@ SNP_clumps <- all_snps %>% select(-SNP) %>% distinct() %>% collect(n = Inf)
 LD_subset <- !is.na(SNP_clumps$LFSR_female_early_mashr_ED)
 ```
 
+
+```{r}
+# testing ruzicka comparison
+
+xx <- read_tsv("~/Downloads/Assoc_Data.txt")
+
+xx %>% arrange(-MAF_DGRP) %>% head() %>% as.data.frame()
+
+ruz_data <- xx %>% select(ruzicka_SNP_name = Predictor, chr = Chromosome, position = Basepair, ruzicka_MAF = MAF, ruzicka_effect_size = Effect, ruzicka_wald_stat = Wald_Stat, ruzicka_wald_p = Wald_P)
+
+merged <- all_snps %>% select(SNP, SNP_clump, contains("_mashr_ED")) %>%
+  filter(!is.na(beta_female_early_mashr_ED)) %>% 
+  # collect(n=1000) %>% 
+  collect(n=Inf) %>% 
+  distinct() %>% 
+  mutate(position = str_split(SNP, "_"),
+         chr = map_chr(position, ~ .x[1]),
+         position = as.numeric(map_chr(position, ~ .x[2]))) %>% 
+  left_join(ruz_data, by = c("position", "chr")) 
+
+merged <- merged[complete.cases(merged), ] 
+
+merged <- left_join(merged, 
+          antagonism_evidence_ratios_gwas %>% arrange(inter_sex_early) %>% mutate(inter_sex_early = log2(inter_sex_early)))
+
+ggplot(merged, aes(x = ruzicka_wald_p, y = inter_sex_early)) +
+  geom_point()
+
+ruzicka_SA <- xx %>% arrange(-MAF_DGRP) %>% filter(fdr<0.3) %>% select(chr = Chromosome, position = Basepair)
+
+merged %>% filter(paste(chr, position) %in% paste(ruzicka_SA$chr, ruzicka_SA$position)) %>% pull(inter_sex_early) %>% hist()
+merged %>% filter(!(paste(chr, position) %in% paste(ruzicka_SA$chr, ruzicka_SA$position))) %>% pull(inter_sex_early) %>% hist()
+
+hist(-1 * (merged %>% filter(inter_sex_early <= quantile(inter_sex_early, 0.99)) %>% pull(ruzicka_effect_size) %>% log10))
+
+bind_rows(merged %>% filter(inter_sex_early <= quantile(inter_sex_early, 0.01)) %>% mutate(type ="holmanSA"),
+          merged %>% filter(inter_sex_early >= quantile(inter_sex_early, 0.99)) %>% mutate(type ="holmanSC")) %>% 
+  ggplot(aes(type, -1 * log10(ruzicka_wald_p))) +
+  geom_boxplot(outlier.shape = NA) + geom_beeswarm(alpha=0.3)
+
+merged %>% filter(inter_sex_early <= quantile(inter_sex_early, 0.01) & -1 * log10(ruzicka_wald_p) >3)
+tbl(db, "variants") %>% filter(SNP=="2L_18784363_SNP")
+
+xx<- select(merged, SNP, ruzicka_MAF) %>% left_join(tbl(db, "variants") %>% select(SNP, MAF) %>%  filter(SNP %in% !!merged$SNP) %>% collect(n=Inf)) 
+cor(xx$ruzicka_MAF, xx$MAF, use = "pairwise.complete.obs")
+
+```
+
+
+
 ## Load and clean the variant effect sizes
 Modify column names, reorder columns, filter based on the p-value, etc.
 ```{r load_data, message=FALSE}

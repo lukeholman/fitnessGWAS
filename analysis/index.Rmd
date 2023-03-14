@@ -18,9 +18,9 @@ This script creates a SQLite3 database holding two tables: one with annotations 
 
 This script uses Bayesian mixed models implemented in the package `brms` to estimate the line means for our four fitness traits, while imputing missing values and adjusting for block effects.
 
-### [3. Calculating quantitative genetic parameters](gcta_quant_genetics.html)
+### [3. Calculating quantitative genetic parameters](quant_genetics.html)
 
-We first present a table showing the proportion of variance in fitness explained by 'DGRP line', which was calculated using the models in Section 2. We then use `gcta64` software to estimate the genetics (co)variances for the four fitness metrics from the genomic relatedness matrix.
+We first present a table showing the proportion of variance in fitness explained by 'DGRP line', which approximates heritability. We then estimate the correlations among line means in the 4 fitness traits, which approximates genetic correlations.
 
 ### [4. Running the GWAS](perfom_gwas.html)
 

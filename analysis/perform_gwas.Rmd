@@ -135,8 +135,6 @@ perform_SNP_QC_and_imputation(phenotypes = predicted_line_means)
 ```
 
 
-
-
 ## Run GWAS using GEMMA
 
 <!-- ### Create a file of _Wolbachia_ infection status -->

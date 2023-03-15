@@ -103,13 +103,18 @@ make_tally <- function(p_cutoff){
   GWAS_results <- tbl(db, "univariate_lmm_results") %>%
     select(SNP_clump, contains("raw"), -contains("SE")) %>% 
     mutate(sum_p = pvalue_female_early_raw + pvalue_female_late_raw + pvalue_male_early_raw + pvalue_male_late_raw) %>% 
-    arrange(sum_p) %>% select(-sum_p) %>% 
-    rename(beta_FE = beta_female_early_raw, beta_FL = beta_female_late_raw,
-           beta_ME = beta_male_early_raw, beta_ML = beta_male_late_raw,
-           pval_FE = pvalue_female_early_raw, pval_FL = pvalue_female_late_raw,
-           pval_ME = pvalue_male_early_raw, pval_ML = pvalue_male_late_raw) %>% 
+    arrange(sum_p) %>% 
+    rename(beta_FE = beta_female_early_raw, 
+           beta_FL = beta_female_late_raw,
+           beta_ME = beta_male_early_raw, 
+           beta_ML = beta_male_late_raw,
+           pval_FE = pvalue_female_early_raw, 
+           pval_FL = pvalue_female_late_raw,
+           pval_ME = pvalue_male_early_raw, 
+           pval_ML = pvalue_male_late_raw) %>% 
     distinct() %>% # Analyse clumps of SNPs in <100% LD with one another
     collect(n = Inf) %>% 
+    select(-sum_p) %>% 
     mutate(
       type = 
         factor(case_when(

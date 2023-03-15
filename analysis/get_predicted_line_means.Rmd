@@ -9,7 +9,7 @@ output:
 library(knitrhooks) # for scrollable R output. remotes::install_github("nathaneastwood/knitrhooks")
 output_max_height()
 knitr::opts_chunk$set(output_max_height = "300px")
-setwd("~/Rprojects/fitnessGWAS/")
+# setwd("~/Rprojects/fitnessGWAS/")
 ```
 
 ```{r message=FALSE, warning=FALSE, results="hide"}

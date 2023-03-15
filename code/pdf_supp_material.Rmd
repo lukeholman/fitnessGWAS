@@ -32,6 +32,23 @@ make_table <- function(tabl, digits = getOption("digits"), BT = TRUE, fontsize =
   kable(tabl, format = "latex", booktabs = BT, digits = digits) %>%
     kable_styling(font_size = fontsize, full_width = FALSE, latex_options = "hold_position")
 }
+
+make_table_no_linespaces <- function(tabl, digits = getOption("digits"), BT = TRUE, fontsize = 7){
+  # tabl <- readRDS(file) 
+  #tabl[tabl == "~"] <- ""
+  # if(" " %in% names(tabl)) names(tabl)[names(tabl) == " "] <- "Sig."
+  #if(" " %in% names(tabl)) tabl$` ` <- gsub('\\\\', "", tabl$` `)
+
+  if("Q2.5" %in% names(tabl)) tabl <- rename(tabl, `Lower 95% CI` = "Q2.5")
+  if("Q97.5" %in% names(tabl)) tabl <- rename(tabl, `Upper 95% CI` = "Q97.5")
+
+  kable(tabl, format = "latex", booktabs = BT, linesep = "", digits = digits) %>%
+    kable_styling(font_size = fontsize, full_width = FALSE, latex_options = "hold_position")
+}
+
+
+
+
 ```
 
 
@@ -58,7 +75,7 @@ The figures and tables in this document, along with the with the R code used to 
 ```{r, results='asis'}
 data.frame(Ingredients = c("Water", "Dextrose", "Cornmeal", "Yeast", "Soy flour", "Agar", "Tegosept", "Acid mix (4mL orthophosphoric acid, 41mL propionic acid, 55mL water per 100mL)"),
        Quantity = c("1000 mL", "75g", "73g", "35g", "20g", "6g", "17mL", "14mL")) %>%
-  make_table(digits = 2) 
+  make_table_no_linespaces(digits = 2) 
 ```
 
 \newpage
@@ -74,25 +91,18 @@ readRDS('../data/derived/simple_repeatability_table.rds') %>%
 
 \newpage
 
-***Table S3***: Correlations between line means shown in Figure 1. FINISH THIS
+***Table S3***: Pearson correlation coefficients between the DGRP line means (estimated using two Bayesian mixed models; one for each sex) for each pair of fitness traits. These correlations approximate the genetic correlations between each pair of fitness traits.
+
 
 ```{r}
 readRDS("../data/derived/line_mean_corrs.rds") %>%
-  make_table(digits = 2) 
+  make_table_no_linespaces(digits = 2) 
 ```
 
 
 \newpage
 
-***Table S4***:  G matrix from gcta, showing estimated genetic variances and covariances (standard error shown in brackets). FINISH THIS
-
-```{r, results='asis'}
-readRDS("../data/derived/G_mat.rds") %>%
-  make_table(digits = 2) 
-```
-\newpage
-
-***Table S5***: This table shows variants that passed the statistical significance threshold of $p < 10^{-5}$ for at least one of the four phenotypes, in a linear mixed model GWAS implemented in GEMMA. Columns 2 identifies genes that overlap the variant, and column 3 shows the site class. Columns 4-5 show the estimated effect size of the variant on the four phenotypes (where positive values mean that the minor allele is associated with higher fitness, and negative values that the minor allele is associated with lower fitness), as well as the associated p-value ($-log_{10}$ transformed, with significant values starred).
+***Table S4***: This table shows variants that passed the statistical significance threshold of $p < 10^{-5}$ for at least one of the four phenotypes, in a linear mixed model GWAS implemented in GEMMA. Columns 2 identifies genes that overlap the variant, and column 3 shows the site class. Columns 4-5 show the estimated effect size of the variant on the four phenotypes (where positive values mean that the minor allele is associated with higher fitness, and negative values that the minor allele is associated with lower fitness), with the $p$-value in parentheses ($-log_{10}$ transformed, with significant values starred). A more readable version of this table, with extra information such as full gene names, is provided at https://lukeholman.github.io/fitnessGWAS/GWAS_tables.html.
 
 
 ```{r, results='asis'}
@@ -116,34 +126,34 @@ read_csv("../data/derived/GWAS_significant_snps.csv") %>%
 ```
 \newpage
 
-***Table S6:*** The table tallies the numbers of loci showing a particular significant relationship with fitness (rows) for various different $p$-value thresholds (columns). For example, 'Female early only' counts the number of loci whose genotype significantly correlated with mean female early life fitness across lines. 'Age concordant, males' counts loci whose genotype correlated with early- _and_ late-life fitness in males, in the same direction, while 'Age antagonistic, males' counts loci showing significant, opposite relationships with male early- and male late-life fitness. Similarly, 'Sex concordant, early' counts loci showing a concordant relationship with early life fitness in both males and females, and 'Sex antagonistic, late' counts those showing opposing relationships with late-life fitness in males and females. All categories are mutually exclusive, such that loci are only counted towards the most specific category that applies to them. Note that this method has low power to detect loci that correlate with two or more fitness metrics, because there are two or more opportunities to make a 'false negative' error, and the power is low for any given locus (we therefore use a range of $p$-value thresholds, including some permissive ones, to illustrate general patterns of genetic covariance).
+***Table S5:*** The table tallies the numbers of loci showing a particular relationship with fitness (rows), for various different $p$-value thresholds (columns). For example, 'Female early only' counts the number of loci whose genotype significantly correlated with mean female early life fitness across lines. 'Age concordant, males' counts loci whose genotype correlated with early- _and_ late-life fitness in males, in the same direction, while 'Age antagonistic, males' counts loci showing significant, opposite relationships with male early- and male late-life fitness. Similarly, 'Sex concordant, early' counts loci showing a concordant relationship with early life fitness in both males and females, and 'Sex antagonistic, late' counts those showing opposing relationships with late-life fitness in males and females. All categories are mutually exclusive, such that loci are only counted towards the most specific category that applies to them. Note that this method has low power to detect loci that correlate with two or more fitness metrics, because there are two or more opportunities to make a 'false negative' error, and the power is low for any given locus (we therefore use a range of $p$-value thresholds, including some permissive ones, to illustrate general patterns of genetic covariance).
 
 ```{r, results='asis'}
 readRDS("../data/derived/GWAS_tally_table.rds") %>%
-  make_table(digits = 2)
+  make_table_no_linespaces(digits = 2)
 ```
 
 \newpage
 
-***Table S7:*** Table showing the mean and median effect size  (in standard units), across all 208,987 loci in an LD-pruned subset of the total. Though the average effect size is close to zero, the mean is significantly negative (shown by the $t$ and $p$ statistics, from linear models), indicating that on average, the minor allele was associated with lower fitness and the major allele with higher fitness.
+***Table S6:*** Table showing the mean and median effect size (in standard units), across all 208,987 loci in an LD-pruned subset of the total. The average effect size is close to zero, reflecting the fact that most loci have essentially zero effect on fitness. However, the mean is significantly negative (shown by the $t$ and $p$ statistics, from linear models), indicating that the minor allele is most often associated with lower fitness (and the major allele with higher fitness) at loci with non-zero associations with fitness. 
 ```{r, results='asis'}
 readRDS("../data/derived/supp_table_of_variant_effect_means.rds") %>% 
   make_table() 
 ```
 \newpage
 
-***Table S8:*** The table showing the 517 transcripts that were associated with one or more of the four phenotypes (with a p-value less than 0.01) is too large to display here, and is provided at the following URL: https://lukeholman.github.io/fitnessGWAS/TWAS_tables.html. For each transcript, the table gives the gene name and Flybase ID, the chromosome, the extent of male bias in gene expression (as log fold change) and average expression level (calculated from the DGRP expression data from Huang et al. 2015, _PNAS_), and the average effect size and p-value for each fitness components (calculated using linear models relating mean expression level to mean fitness across lines).
+***Table S7:*** The table showing the 517 transcripts that were associated with one or more of the four phenotypes (with a p-value less than 0.01) is too large to display here, and is provided at the following URL: https://lukeholman.github.io/fitnessGWAS/TWAS_tables.html. For each transcript, the table gives the gene name and Flybase ID, the chromosome, the extent of male bias in gene expression (as log fold change) and average expression level (calculated from the DGRP expression data from Huang et al. 2015, _PNAS_), and the average effect size and $p$-value for each fitness components (calculated using linear models relating mean expression level to mean fitness across lines).
 \newpage
 
-***Table S9:*** The table tallies the numbers of transcripts showing a particular significant relationship with fitness (rows) for various different $p$-value thresholds (columns). See Table S5 for the meanings of each row. As in Table S5, all categories are mutually exclusive, such that transcripts are only counted towards the most specific category that applies to them, and the method has low power to detect transcripts that correlate with two or more fitness metrics, because there are two or more opportunities to make a 'false negative' error.
+***Table S8:*** The table tallies the numbers of transcripts showing a particular relationship with fitness (rows) for various different $p$-value thresholds (columns). See Table S5 for the meanings of each row. As in Table S5, all categories are mutually exclusive, such that transcripts are only counted towards the most specific category that applies to them, and the method has low power to detect transcripts that correlate with two or more fitness metrics, because there are two or more opportunities to make a 'false negative' error.
 
 ```{r}
 readRDS("../data/derived/TWAS_tally_table.rds") %>%
-  make_table()
+  make_table_no_linespaces()
 ```
 \newpage
 
-***Table S10:*** The fourth column of the table shows the numbers of variants comprising each of the 32 coloured panels in Figures 4A and 4B. The fifth column gives these numbers as a percentage of the total number of variants, while the sixth column shows the number as a percentage among the variants that have the same association with female fitness. 
+***Table S9:*** The fourth column of the table shows the numbers of variants comprising each of the 32 coloured panels in Figures 4A and 4B. The fifth column gives these numbers as a percentage of the total number of variants, while the sixth column shows the number as a percentage among the variants that have the same association with female fitness. 
 ```{r}
 readRDS("../data/derived/supp_tabl_gwas_intersex.rds") %>%
   mutate(`Age class` = str_remove_all(`Age class`, "[ABCD][.] ")) %>% 
@@ -155,7 +165,7 @@ readRDS("../data/derived/supp_tabl_gwas_intersex.rds") %>%
 ```
 \newpage
 
-***Table S11:*** The fourth column of the table shows the numbers of transcripts comprising each of the 32 coloured panels in Figures 4C and 4D. The fifth column gives these numbers as a percentage of the total number of transcripts, while the sixth column shows the number as a percentage among the transcripts that have the same association with female fitness. 
+***Table S10:*** The fourth column of the table shows the numbers of transcripts comprising each of the 32 coloured panels in Figures 4C and 4D. The fifth column gives these numbers as a percentage of the total number of transcripts, while the sixth column shows the number as a percentage among the transcripts that have the same association with female fitness. 
 ```{r}
 readRDS("../data/derived/supp_tabl_twas_intersex.rds") %>%
   mutate(`Age class` = str_remove_all(`Age class`, "[ABCD][.] ")) %>% 
@@ -167,7 +177,7 @@ readRDS("../data/derived/supp_tabl_twas_intersex.rds") %>%
 ```
 \newpage
 
-***Table S12:*** The table shows similar information to Table S9, except that we now tabulate the number of variants that have various associations with early- and late-life fitness (separately within each sex). Note that there are essentially no variants with opposing effects on early- and late-life fitness, in either sex.
+***Table S11:*** The table shows similar information to Table S9, except that we now tabulate the number of variants that have various associations with early- and late-life fitness (separately within each sex). Note that there are essentially no variants with opposing effects on early- and late-life fitness, in either sex.
 ```{r}
 readRDS("../data/derived/supp_tabl_gwas_interage.rds") %>%
   mutate(Sex = str_remove_all(Sex, "[ABCD][.] ")) %>% 
@@ -195,7 +205,7 @@ readRDS("../data/derived/supp_tabl_gwas_interage.rds") %>%
 <!-- ``` -->
 <!-- \newpage -->
 
-***Table S13:*** The table shows similar information to Table S10, except that we now tabulate the number of transcripts that have various associations with early- and late-life fitness (separately within each sex). Note that there are essentially no transcripts with opposing effects on early- and late-life fitness, in either sex.
+***Table S12:*** The table shows similar information to Table S10, except that we now tabulate the number of transcripts that have various associations with early- and late-life fitness (separately within each sex). Note that there are essentially no transcripts with opposing effects on early- and late-life fitness, in either sex.
 
 \begin{table}[!h]
 \centering\begingroup\fontsize{7}{9}\selectfont
@@ -279,5 +289,12 @@ Male & Positive & Positive & 3549 & 24.84 & 99.38\\
 \end{tabular}
 \endgroup{}
 \end{table}
+
+
+***Table S13:*** A list of all the GO terms with a family wise error rate (FWER) threshold of FWER < 0.05, when testing for GO enrichment among genes with a high evidence ratio (indicating greater likelihood of being sexually concordant, as measured in the early-life fitness assay). The results imply strong, sexually concordant selection on the expression levels of genes involved in the functions listed here, such as gene expression and translation.
+
+```{r}
+readRDS("data/derived/supp_table_GO_terms.rds")
+```
 
 

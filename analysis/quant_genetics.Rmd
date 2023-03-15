@@ -155,6 +155,12 @@ tidy_correlation_test <- function(x, y){
     `p value` = round(`p value`, 4),
     `p value` = replace(`p value`, `p value` < 0.0001, "< 0.0001"))
 }
+
+firstup <- function(x) {
+  substr(x, 1, 1) <- toupper(substr(x, 1, 1))
+  x
+}
+
 line_mean_corrs <- bind_rows(
   tidy_correlation_test("female_fitness_early", "female_fitness_late"),
   tidy_correlation_test("female_fitness_early", "male_fitness_early"),
@@ -163,7 +169,9 @@ line_mean_corrs <- bind_rows(
   tidy_correlation_test("female_fitness_late", "male_fitness_late"),
   tidy_correlation_test("male_fitness_early", "male_fitness_late"),
 ) %>% mutate(`Variable 1` = str_replace_all(`Variable 1`, "_", " "),
-             `Variable 2` = str_replace_all(`Variable 2`, "_", " "))
+             `Variable 2` = str_replace_all(`Variable 2`, "_", " "),
+             `Variable 1` = firstup(`Variable 1`),
+             `Variable 2` = firstup(`Variable 2`))
 
 saveRDS(line_mean_corrs, "data/derived/line_mean_corrs.rds")
 

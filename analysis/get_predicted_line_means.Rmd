@@ -6,7 +6,7 @@ output:
 ---
 
 ```{r, include=FALSE}
-library(knitrhooks) # for scrollable output of the brms models below
+library(knitrhooks) # for scrollable R output. remotes::install_github("nathaneastwood/knitrhooks")
 output_max_height()
 knitr::opts_chunk$set(output_max_height = "300px")
 setwd("~/Rprojects/fitnessGWAS/")
@@ -25,21 +25,19 @@ library(kableExtra)
 ## Estimate the line means for relative fitness
 Most studies of the DGRP calculate "line means" simply by averaging the phenotypes of several individuals per line. Instead, we used Bayesian generalised linear mixed model (GLMMs) to estimate the true line means for each of the 4 fitness traits, implemented in the `brms` package.
 
-One notable advantage of using a model instead of a simple average is that a model allows one to statistically remove confounding factors such as block effects, which would otherwise bias the line means. Note that we intentionally measured line 352 in every block in our experiments, in order to improve our precision to estimate block effects.
+One notable advantage of using a model instead of a simple average is that a model allows one to statistically remove confounding factors such as block effects, which would otherwise bias the line means. Note that we measured line 352 in every block in our experiments, in order to improve precision when estimating block effects. Additionally, we must properly account for our experimental design in order to avoid pseudoreplication. Our design involved repeatedly measuring the same individuals to determine early- and late-life fitness, which we incorporate into the model via the random effect `vial`.
 
-Additionally, we must properly account for our experimental design in order to avoid pseudoreplication. Our design involved repeatedly measuring the same individuals to determine early- and late-life fitness. 
-
-For the progeny count data used to measure early and late female fitness, we used multivariate model with two components, one for early- and one for late-life fitness, which had the following formulae (in `brms`-like pseudocode):
+For the progeny count data used to measure early and late female fitness, we used a multivariate model with two components, one for early- and one for late-life fitness, which had the following formulae (in `brms`-like pseudocode):
 
 `Progeny count (early) = Intercept + (1 | p | line) + (1 | q | block) + (1 | r | vial)`
 
 `Progeny count (late) = Intercept + (1 | p | line) + (1 | q | block) + (1 | r | vial)`
 
-To explain, the terms with the form `(1 | x | y)` represent random intercepts for line, block, and vial ID (i.e. `y`), where the letter between the pipe operators (`x`) indicates which random intercepts are assumed to be correlated with which other random intercepts. Thus, we assume that the effects of line, block, and vial ID on early- and late-life fitness are potentially correlated, and estimate this correlation using the data and prior.
+Here, the model terms with the form `(1 | x | y)` represent random intercepts for line, block, and vial ID (i.e. `y`), where the letter between the pipe operators (`x`) indicates which random intercepts are assumed to be correlated with which other random intercepts. Thus, we assume that the effects of line, block, and vial ID on early-life fitness are potentially correlated with the effects of these three random variables on late-life fitness, and estimate this correlation from the data and prior.
 
 The progeny count data were assumed to follow a Poisson distribution (with the standard log link function).
 
-Similarly, for our measure of male fitness (proportion of offspring sired), we used a multivariate model consisting of a pair of binomial GLMMs (with logit link), with the following formula:
+Similarly, for our measure of male fitness, proportion of offspring sired, we used a multivariate model consisting of a pair of binomial GLMMs (with logit link), with the following formula:
 
 `Proportion of progeny sired (early) = Intercept + (1 | p | line) + (1 | q | block) + (1 | r | vial)`
 
@@ -47,11 +45,12 @@ Similarly, for our measure of male fitness (proportion of offspring sired), we u
 
 Where the response variable was a Bernoulli outcome describing the paternity of each offspring observed (either a male from the focal DGRP line, or from one of the competitor males). 
 
-For both models, we assume the default priors except for the fact that we chose more informative, 'skeptical' priors for the random intercept terms, of the form `cauchy(0, 0.1)`. This prior helps the model to converge by making very large estimates implausible, constraining the parameter space. 
+For both models, we mostly used the `brms` default (weak) priors, except that we chose more informative, 'skeptical' priors for the random intercept terms, of the form `cauchy(0, 0.1)`. This prior helps the model to converge by making very large estimates implausible, constraining the parameter space. 
 
 
 ### Define functions for prediction
 ```{r}
+# function to load the raw data on male and female fitness, and tidy it for analysis
 load_and_tidy_fitness_data <- function(){
   female_fitness <- read_csv("data/input/female_fitness.csv") %>% 
     arrange(line) %>%
@@ -219,40 +218,40 @@ get_predicted_line_means <- function(overwrite = FALSE){
            male.fitness.late = as.numeric(scale(male.fitness.late))) 
 
   ## Define a function to get the ICC for line, for each posterior sample of predicted line means
-  get_ICC_line <- function(predictions){
-    cols <- str_detect(names(predictions), "X")
-    first_posterior_column <- which(cols)[1] 
-    n_draws <- sum(cols)
-    lapply(0:(n_draws - 1), function(i){
-      ICCbare(predictions$line, predictions[, i + first_posterior_column])
-    }) %>% unlist()
-  }
+  # get_ICC_line <- function(predictions){
+  #   cols <- str_detect(names(predictions), "X")
+  #   first_posterior_column <- which(cols)[1] 
+  #   n_draws <- sum(cols)
+  #   lapply(0:(n_draws - 1), function(i){
+  #     ICCbare(predictions$line, predictions[, i + first_posterior_column])
+  #   }) %>% unlist()
+  # }
   
   # Calculate ICC for each sample, separately for old and young females
   # For females, this is done on the estimated line mean progeny produced (i.e. response scale)
-  predicted <- fitted(female_model, summary = FALSE)
-  Line_ICC_female_early <- get_ICC_line(data.frame(female_fitness, t(predicted[, , 1])))
-  Line_ICC_female_late <- get_ICC_line(data.frame(female_fitness, t(predicted[, , 2])))
+  # predicted <- fitted(female_model, summary = FALSE)
+  # Line_ICC_female_early <- get_ICC_line(data.frame(female_fitness, t(predicted[, , 1])))
+  # Line_ICC_female_late <- get_ICC_line(data.frame(female_fitness, t(predicted[, , 2])))
   
   # Do the same for males
   # For males, this is done on the estimated proportion progeny sired (i.e. response scale)
-  new_data <- male_fitness %>% 
-    select(block, line, vial) %>% 
-    mutate(total1 = 100, 
-           total2 = 100, 
-           num.GFP.males = male_fitness %>% .$num.GFP.males %>% mean(na.rm=TRUE))
-  predicted <- fitted(male_model, summary = FALSE, newdata = new_data)
-  Line_ICC_male_early <- get_ICC_line(data.frame(new_data, t(predicted[, , 1])))
-  Line_ICC_male_late <- get_ICC_line(data.frame(new_data, t(predicted[, , 2])))
-  
-  ICC <- list(Line_ICC_female_early, 
-              Line_ICC_female_late,
-              Line_ICC_male_early,
-              Line_ICC_male_late) %>% lapply(posterior_summary) %>% 
-    do.call("rbind", .) %>% as_tibble() %>%
-    mutate(Fitness_trait = c("Female early-life fitness", "Female late-life fitness",
-                             "Male early-life fitness", "Male late-life fitness"))
-  write.csv(ICC, file = "data/derived/ICC.csv", row.names = TRUE)
+  # new_data <- male_fitness %>% 
+  #   select(block, line, vial) %>% 
+  #   mutate(total1 = 100, 
+  #          total2 = 100, 
+  #          num.GFP.males = male_fitness %>% .$num.GFP.males %>% mean(na.rm=TRUE))
+  # predicted <- fitted(male_model, summary = FALSE, newdata = new_data)
+  # Line_ICC_male_early <- get_ICC_line(data.frame(new_data, t(predicted[, , 1])))
+  # Line_ICC_male_late <- get_ICC_line(data.frame(new_data, t(predicted[, , 2])))
+  # 
+  # ICC <- list(Line_ICC_female_early, 
+  #             Line_ICC_female_late,
+  #             Line_ICC_male_early,
+  #             Line_ICC_male_late) %>% lapply(posterior_summary) %>% 
+  #   do.call("rbind", .) %>% as_tibble() %>%
+  #   mutate(Fitness_trait = c("Female early-life fitness", "Female late-life fitness",
+  #                            "Male early-life fitness", "Male late-life fitness"))
+  # write.csv(ICC, file = "data/derived/ICC.csv", row.names = TRUE)
   
 
   # Record which block(s) each line was measured in. Generally one block, except for ref line (all blocks)

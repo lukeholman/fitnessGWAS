@@ -13,7 +13,8 @@
 
 <title>GWAS for fitness in Drosophila</title>
 
-<script src="site_libs/jquery-3.5.0/jquery-3.5.0.min.js"></script>
+<script src="site_libs/header-attrs-2.20/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
@@ -38,13 +39,15 @@
 <link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
 
-<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
 <!-- Add a small amount of space between sections. -->
 <style type="text/css">
 div.section {
   padding-top: 12px;
 }
 </style>
+
+
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -73,6 +76,7 @@ if (window.hljs) {
 
 
 
+
 <style type = "text/css">
 .main-container {
   max-width: 940px;
@@ -93,6 +97,9 @@ button.code-folding-btn:focus {
 }
 summary {
   display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
 }
 pre code {
   padding: 0;
@@ -150,11 +157,15 @@ $(document).ready(function () {
     href = "index.html";
   var menuAnchor = $('a[href="' + href + '"]');
 
-  // mark it active
-  menuAnchor.tab('show');
-
-  // if it's got a parent navbar menu mark it active as well
-  menuAnchor.closest('li.dropdown').addClass('active');
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
 
   // Navbar adjustments
   var navHeight = $(".navbar").first().height() + 15;
@@ -183,8 +194,8 @@ $(document).ready(function () {
   border-radius: 4px;
 }
 
-.tabset-dropdown > .nav-tabs > li.active:before {
-  content: "";
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
   font-family: 'Glyphicons Halflings';
   display: inline-block;
   padding: 10px;
@@ -192,16 +203,9 @@ $(document).ready(function () {
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
-  content: "&#xe258;";
-  border: none;
-}
-
-.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
-  content: "";
+  content: "\e258";
   font-family: 'Glyphicons Halflings';
-  display: inline-block;
-  padding: 10px;
-  border-right: 1px solid #ddd;
+  border: none;
 }
 
 .tabset-dropdown > .nav-tabs > li.active {
@@ -321,7 +325,7 @@ div.tocify {
 <div class="navbar navbar-default  navbar-fixed-top" role="navigation">
   <div class="container">
     <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
@@ -352,7 +356,7 @@ div.tocify {
 <div id="header">
 
 <div class="btn-group pull-right float-right">
-<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
 <ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
 <li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
 <li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
@@ -368,7 +372,9 @@ div.tocify {
 
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
-<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span>
 </button>
 </p>
 <div id="workflowr-report" class="collapse">
@@ -377,7 +383,9 @@ div.tocify {
 <a data-toggle="tab" href="#summary">Summary</a>
 </li>
 <li>
-<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</a>
 </li>
 <li>
 <a data-toggle="tab" href="#versions">Past versions</a>
@@ -386,17 +394,27 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2021-11-12
+<strong>Last updated:</strong> 2023-03-15
 </p>
 <p>
-<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 0
 </p>
 <p>
-<strong>Knit directory:</strong> <code>fitnessGWAS/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+<strong>Knit directory:</strong> <code>fitnessGWAS/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
 </p>
 <p>
-This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
-  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.2). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.0.4). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
 </p>
 <hr>
 </div>
@@ -405,91 +423,138 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date
+</a>
 </p>
 </div>
-<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div id="strongRMarkdownfilestronguptodate"
+class="panel-collapse collapse">
 <div class="panel-body">
-<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+<p>Great! Since the R Markdown file has been committed to the Git
+repository, you know the exact version of the code that produced these
+results.</p>
 </div>
 </div>
 </div>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
 </p>
 </div>
 <div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
 <div class="panel-body">
-<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
 </div>
 </div>
 </div>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20180914code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20180914)</code> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20180914code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20180914)</code> </a>
 </p>
 </div>
-<div id="strongSeedstrongcodesetseed20180914code" class="panel-collapse collapse">
+<div id="strongSeedstrongcodesetseed20180914code"
+class="panel-collapse collapse">
 <div class="panel-body">
-<p>The command <code>set.seed(20180914)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+<p>The command <code>set.seed(20180914)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
 </div>
 </div>
 </div>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
 </p>
 </div>
-<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
 <div class="panel-body">
-<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
 </div>
 </div>
 </div>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
 </p>
 </div>
 <div id="strongCachestrongnone" class="panel-collapse collapse">
 <div class="panel-body">
-<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
 </div>
 </div>
 </div>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
 </p>
 </div>
 <div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
 <div class="panel-body">
-<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
 </div>
 </div>
 </div>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreeca70247d9e22f5eb18959d35eed5a71d9d62660atargetblankca70247a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/lukeholman/fitnessGWAS/tree/ca70247d9e22f5eb18959d35eed5a71d9d62660a" target="_blank">ca70247</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree2080e0c3655d7a874de57c46fa63b3828250aaa2targetblank2080e0ca">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/2080e0c3655d7a874de57c46fa63b3828250aaa2" target="_blank">2080e0c</a>
+</a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreeca70247d9e22f5eb18959d35eed5a71d9d62660atargetblankca70247a" class="panel-collapse collapse">
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree2080e0c3655d7a874de57c46fa63b3828250aaa2targetblank2080e0ca"
+class="panel-collapse collapse">
 <div class="panel-body">
 <p>
-Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/lukeholman/fitnessGWAS/tree/ca70247d9e22f5eb18959d35eed5a71d9d62660a" target="_blank">ca70247</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/2080e0c3655d7a874de57c46fa63b3828250aaa2" target="_blank">2080e0c</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
 </p>
 <p>
-Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
 </p>
 <pre><code>
 Ignored files:
@@ -513,30 +578,22 @@ Ignored files:
     Ignored:    data/input/dgrp2.fam
     Ignored:    data/input/huang_transcriptome/
     Ignored:    figures/.DS_Store
-    Ignored:    figures/fig1_inkscape.svg
-    Ignored:    figures/figure1a.pdf
-    Ignored:    figures/figure1b.pdf
 
 Untracked files:
     Untracked:  big_model.rds
     Untracked:  code/quant_gen_1.R
     Untracked:  data/input/genomic_relatedness_matrix.rds
-    Untracked:  old_analyses/
 
 Unstaged changes:
     Modified:   .gitignore
-    Modified:   analysis/GWAS_tables.Rmd
-    Modified:   figures/GWAS_stats_figure.pdf
-    Modified:   figures/SNP_effect_ED.pdf
-    Modified:   figures/TWAS_stats_figure.pdf
-    Modified:   figures/antagonism_ratios.pdf
-    Modified:   figures/boyle_plot.pdf
-    Modified:   figures/composite_mixture_figure.pdf
-    Modified:   figures/eff_size_histos.pdf
+    Modified:   code/pdf_supp_material.Rmd
+    Modified:   code/pdf_supp_material.pdf
 
 </code></pre>
 <p>
-Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
 </p>
 </div>
 </div>
@@ -547,7 +604,12 @@ Note that any generated files, e.g. HTML, png, CSS, etc., are not included in t
 <div id="versions" class="tab-pane fade">
 
 <p>
-These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/perform_gwas.Rmd</code>) and HTML (<code>docs/perform_gwas.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+These are the previous versions of the repository in which changes were
+made to the R Markdown (<code>analysis/perform_gwas.Rmd</code>) and HTML
+(<code>docs/perform_gwas.html</code>) files. If you’ve configured a
+remote Git repository (see <code>?wflow_git_remote</code>), click on the
+hyperlinks in the table below to view the files as they were in that
+past version.
 </p>
 <div class="table-responsive">
 <table class="table table-condensed table-hover">
@@ -571,6 +633,57 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/2080e0c3655d7a874de57c46fa63b3828250aaa2/analysis/perform_gwas.Rmd" target="_blank">2080e0c</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-03-15
+</td>
+<td>
+wflow_publish("analysis/perform_gwas.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/d94e22dc2fbcacfe3430866ac5f7116866a93ec3/analysis/perform_gwas.Rmd" target="_blank">d94e22d</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-03-14
+</td>
+<td>
+New quant gen and other changes
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/0a415e319a073797e6b6ea9a30327b0b035408c7/docs/perform_gwas.html" target="_blank">0a415e3</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2021-11-12
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 html
@@ -835,7 +948,7 @@ Initial commit
 </div>
 <pre class="r"><code>library(dplyr)
 library(ggplot2)
-library(ggdendro)
+# library(ggdendro)
 library(glue)
 library(bigsnpr) # to install:   devtools::install_github(&quot;privefl/bigsnpr&quot;)
 library(readr)
@@ -863,14 +976,25 @@ plink &lt;- paste(getwd(), &quot;code/plink&quot;, sep = &quot;/&quot;)
 run_command &lt;- function(shell_command, wd = getwd(), path = &quot;&quot;){
   cat(system(glue(&quot;cd &quot;, wd, path, &quot;\n&quot;,shell_command), intern = TRUE), sep = &#39;\n&#39;)
 }</code></pre>
-<div id="perform-snp-quality-control-and-imputation" class="section level2">
+<div id="perform-snp-quality-control-and-imputation"
+class="section level2">
 <h2>Perform SNP quality control and imputation</h2>
-<p>We cleaned up the DGRP’s .bed/.bim/.fam files (available from the <a href="http://dgrp2.gnets.ncsu.edu/">Mackay lab website</a>) as follows:</p>
+<p>We cleaned up the DGRP’s .bed/.bim/.fam files (available from the <a
+href="http://dgrp2.gnets.ncsu.edu/">Mackay lab website</a>) as
+follows:</p>
 <ol style="list-style-type: decimal">
-<li>Remove any SNPs for which genotypes are missing for &gt;10% of the DGRP lines. We then use the software <a href="https://faculty.washington.edu/browning/beagle/beagle.html">Beagle</a> to impute the remaining missing genotypes.</li>
+<li>Remove any SNPs for which genotypes are missing for &gt;10% of the
+DGRP lines. We then use the software <a
+href="https://faculty.washington.edu/browning/beagle/beagle.html">Beagle</a>
+to impute the remaining missing genotypes.</li>
 <li>Remove SNPs with a minor allele frequency of less than 5%</li>
 </ol>
-<p>Note that in the PLINK-formatted genotype files, lines fixed for the major allele are coded as 2, and lines fixed for the minor allele as 0. This means that in the association tests we calculate, negative effect sizes mean that the minor allele is associated with lower fitness, while positive effect sizes means that the minor allele is associated with higher fitness.</p>
+<p>Note that in the PLINK-formatted genotype files, lines fixed for the
+major allele are coded as 2, and lines fixed for the minor allele as 0.
+This means that in the association tests we calculate, negative effect
+sizes mean that the minor allele is associated with lower fitness, while
+positive effect sizes means that the minor allele is associated with
+higher fitness.</p>
 <pre class="r"><code>beagle &lt;- bigsnpr::download_beagle()
 
 perform_SNP_QC_and_imputation &lt;- function(phenotypes){
@@ -977,9 +1101,12 @@ perform_SNP_QC_and_imputation(phenotypes = predicted_line_means)</code></pre>
 <!--   select(intercept, wolbachia, Inv_1, Inv_2, Inv_3, Inv_4, Inv_5) -->
 <!-- write_delim(covariates, path = "data/derived/covariate_file_for_GEMMA.txt", col_names = FALSE) -->
 <!-- ``` -->
-<div id="decompose-the-genomic-relatedness-matrix" class="section level3">
+<div id="decompose-the-genomic-relatedness-matrix"
+class="section level3">
 <h3>Decompose the genomic relatedness matrix</h3>
-<p>This step is needed as a set up for the mixed model association tests, which use the eigenvectors and values of the GRM to adjust for ‘population structure’ among our samples.</p>
+<p>This step is needed as a set up for the mixed model association
+tests, which use the eigenvectors and values of the GRM to adjust for
+‘population structure’ among our samples.</p>
 <pre class="r"><code># Any command with {bed} uses this particular PLINK file, double-checking that all the SNPs have MAF &gt; 0.05
 bed &lt;- &quot;dgrp2_QC_focal_lines -maf 0.05&quot; 
 #cov &lt;- &quot;-c covariate_file_for_GEMMA.txt&quot; # not used at present
@@ -1007,9 +1134,15 @@ unlink(&quot;data/derived/output/eigen_decomp.eigenU.txt&quot;)
 # write_tsv(vectors, path = &quot;data/derived/output/eigen_decomp.eigenU.txt&quot;, col_names = FALSE)
 # write_tsv(data.frame(value = values), path = &quot;data/derived/output/eigen_decomp.eigenD.txt&quot;, col_names = FALSE)</code></pre>
 </div>
-<div id="run-univariate-and-multivariate-association-tests" class="section level3">
+<div id="run-univariate-and-multivariate-association-tests"
+class="section level3">
 <h3>Run univariate and multivariate association tests</h3>
-<p>The following code chunk runs 5 linear mixed models, implemented in <a href="http://www.xzlab.org/software/GEMMAmanual.pdf">GEMMA</a>. Each of the univariate linear mixed models uses the decomposed genomic relatedness matrix from above, and has one of our four fitness traits as the response variable. The multivariate model contains all four traits, and also uses the decomposed genomic relatedness matrix.</p>
+<p>The following code chunk runs 5 linear mixed models, implemented in
+<a href="http://www.xzlab.org/software/GEMMAmanual.pdf">GEMMA</a>. Each
+of the univariate linear mixed models uses the decomposed genomic
+relatedness matrix from above, and has one of our four fitness traits as
+the response variable. The multivariate model contains all four traits,
+and also uses the decomposed genomic relatedness matrix.</p>
 <pre class="r"><code># The option &quot;-lmm 1&quot; runs a linear mixed model using Wald test to get the p-values
 # The option &quot;-r2 0.95&quot; only keeps SNPs that are &lt;95% correlated with Wolbachia infection status
 # The option &quot;-c covariate_file_for_GEMMA.txt&quot; adds in the Wolbahia infection status as a covariate, and also tells the model to fit an intercept
@@ -1045,9 +1178,15 @@ c(&quot;gemma -bfile {bed} {GRM_female} {opts} -n 1 -o female_early_lmm&quot;,
 <!-- cat(readLines("data/derived/output/male_late_lmm.log.txt"), sep = "\n") -->
 <!-- ``` -->
 </div>
-<div id="add-the-allele-ids-and-minor-allele-frequencies-mafs-to-variant-annotation-database" class="section level3">
-<h3>Add the allele IDs and minor allele frequencies (MAFs) to variant annotation database</h3>
-<p>This part uses the full DGRP panel, because our aim is to determine how common these alleles are in the original wild population from which the DGRP was captured. These MAFs are the ones used in our statistical analyses and plots.</p>
+<div
+id="add-the-allele-ids-and-minor-allele-frequencies-mafs-to-variant-annotation-database"
+class="section level3">
+<h3>Add the allele IDs and minor allele frequencies (MAFs) to variant
+annotation database</h3>
+<p>This part uses the full DGRP panel, because our aim is to determine
+how common these alleles are in the original wild population from which
+the DGRP was captured. These MAFs are the ones used in our statistical
+analyses and plots.</p>
 <pre class="r"><code># Extract and save the MAFs, SNP positions, and major/minor alleles
 MAFs &lt;- read.table(&quot;data/derived/plink.frq&quot;, header = TRUE, stringsAsFactors = FALSE) %&gt;% 
   mutate(position = map_chr(strsplit(SNP, split = &quot;_&quot;), function(x) x[2])) %&gt;%
@@ -1072,7 +1211,9 @@ rm(MAFs)</code></pre>
 </div>
 <div id="clean-up-the-gemma-results" class="section level3">
 <h3>Clean up the GEMMA results</h3>
-<p>Discard columns we don’t need, and rename the SNP column from the name assigned by GEMMA (<code>rs</code>) to something more sensible (<code>SNP</code>).</p>
+<p>Discard columns we don’t need, and rename the SNP column from the
+name assigned by GEMMA (<code>rs</code>) to something more sensible
+(<code>SNP</code>).</p>
 <pre class="r"><code># The 4 univariate files:
 c(&quot;data/derived/output/female_early_lmm.assoc.txt&quot;,
   &quot;data/derived/output/female_late_lmm.assoc.txt&quot;,
@@ -1147,9 +1288,15 @@ do_snp_clumping &lt;- function(trait){
 lapply(c(&quot;female_early_lmm&quot;, &quot;female_late_lmm&quot;, &quot;male_early_lmm&quot;, &quot;male_late_lmm&quot;), do_snp_clumping)</code></pre>
 </div>
 </div>
-<div id="concatenate-the-results-of-the-four-univariate-gwas" class="section level2">
+<div id="concatenate-the-results-of-the-four-univariate-gwas"
+class="section level2">
 <h2>Concatenate the results of the four univariate GWAS</h2>
-<p>Load up the GWAS results, which were produced by using linear mixed models implemented in GEMMA, and arrange the data in a ‘wide’ format, where each row is one SNP, and the columns hold the estimates of <span class="math inline">\(\beta\)</span>, the standard error of <span class="math inline">\(\beta\)</span>, and the p-value for the GEMMA association tests on each of the four fitness traits.</p>
+<p>Load up the GWAS results, which were produced by using linear mixed
+models implemented in GEMMA, and arrange the data in a ‘wide’ format,
+where each row is one SNP, and the columns hold the estimates of <span
+class="math inline">\(\beta\)</span>, the standard error of <span
+class="math inline">\(\beta\)</span>, and the p-value for the GEMMA
+association tests on each of the four fitness traits.</p>
 <pre class="r"><code>load_gwas_results &lt;- function(fitness.component){
   new_names &lt;- c(x = &quot;beta&quot;, y = &quot;se&quot;, z = &quot;p_wald&quot;)
   names(new_names) &lt;- c(paste(&quot;beta_&quot;, fitness.component, sep = &quot;&quot;), 
@@ -1166,9 +1313,21 @@ all_univariate_lmm_results &lt;- load_gwas_results(&quot;female_early&quot;) %&g
   full_join(load_gwas_results(&quot;male_early&quot;), by = &quot;SNP&quot;) %&gt;%
   full_join(load_gwas_results(&quot;male_late&quot;), by = &quot;SNP&quot;) </code></pre>
 </div>
-<div id="prune-snps-that-are-in-100-linkage-disequilibrium" class="section level2">
+<div id="prune-snps-that-are-in-100-linkage-disequilibrium"
+class="section level2">
 <h2>Prune SNPs that are in 100% linkage disequilibrium</h2>
-<p>Because GEMMA is quick and easy to run, we did not bother working out how to edit PLINK files to identify SNPs that are in complete linkage disequilibrium with one another (and there is lots of short- and long-range LD in the dataset). However, it is easy to perform LD pruning at this stage, because we can take advantage of the fact that SNPs in perfect LD with each other will have identical estimates of <span class="math inline">\(|\beta|\)</span> and its standard error, for all four fitness traits. The following code groups together SNPs that have identical association test results, producing a data frame in which the number of rows is equal to the number of unique datasets (i.e. combinations of genotypes and phenotypes) that were statistically analysed by GEMMA.</p>
+<p>Because GEMMA is quick and easy to run, we did not bother working out
+how to edit PLINK files to identify SNPs that are in complete linkage
+disequilibrium with one another (and there is lots of short- and
+long-range LD in the dataset). However, it is easy to perform LD pruning
+at this stage, because we can take advantage of the fact that SNPs in
+perfect LD with each other will have identical estimates of <span
+class="math inline">\(|\beta|\)</span> and its standard error, for all
+four fitness traits. The following code groups together SNPs that have
+identical association test results, producing a data frame in which the
+number of rows is equal to the number of unique datasets
+(i.e. combinations of genotypes and phenotypes) that were statistically
+analysed by GEMMA.</p>
 <pre class="r"><code># Group loci with identical GWAS results (these are in 100% LD with each other)
 all_univariate_lmm_results &lt;- all_univariate_lmm_results %&gt;%
   mutate(pasted = paste(beta_female_early, beta_female_late, beta_male_early, beta_male_late, 
@@ -1205,9 +1364,19 @@ unlink(&quot;data/derived/output/female_late_lmm.assoc.txt&quot;)
 unlink(&quot;data/derived/output/male_early_lmm.assoc.txt&quot;)
 unlink(&quot;data/derived/output/male_late_lmm.assoc.txt&quot;)</code></pre>
 </div>
-<div id="create-a-reduced-list-of-ld-pruned-snps-with-plink" class="section level2">
+<div id="create-a-reduced-list-of-ld-pruned-snps-with-plink"
+class="section level2">
 <h2>Create a reduced list of LD-pruned SNPs with PLINK</h2>
-<p>To keep the computation time and memory usage for <code>mashr</code> manageable, we did not analyse every SNP analysed in the GWAS (i.e. 1207357 SNPs), but rather a subset of them that were approximately in linkage disequilibrium. We identified this LD-pruned set of SNPs using the PLINK arguments <code>--indep-pairwise 100 10 0.2</code>, i.e. pruning within 100kB sliding windows, sliding 10 variants along with each step, and allowing a maximum pairwise <span class="math inline">\(r^2\)</span> threshold of 0.2 between loci. With these parameters, 1420071 SNPs were removed, leaving 2.2658110^{5} for downstream analysis.</p>
+<p>To keep the computation time and memory usage for <code>mashr</code>
+manageable, we did not analyse every SNP analysed in the GWAS
+(i.e. 1207357 SNPs), but rather a subset of them that were approximately
+in linkage disequilibrium. We identified this LD-pruned set of SNPs
+using the PLINK arguments <code>--indep-pairwise 100 10 0.2</code>,
+i.e. pruning within 100kB sliding windows, sliding 10 variants along
+with each step, and allowing a maximum pairwise <span
+class="math inline">\(r^2\)</span> threshold of 0.2 between loci. With
+these parameters, 1420071 SNPs were removed, leaving 2.26581^{5} for
+downstream analysis.</p>
 <pre class="r"><code># indep-pairwise arguments are: 
 # 100kB window size, 
 # variant count to shift the window by 10 variants at the end of each step, 
@@ -2020,54 +2189,59 @@ Marker lists written to plink.prune.in and plink.prune.out .</code></pre>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
-<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
 </button>
 </p>
 <div id="workflowr-sessioninfo" class="collapse">
 <pre class="r"><code>sessionInfo()</code></pre>
-<pre><code>R version 4.0.3 (2020-10-10)
+<pre><code>R version 4.2.2 (2022-10-31)
 Platform: x86_64-apple-darwin17.0 (64-bit)
-Running under: macOS Catalina 10.15.7
+Running under: macOS Big Sur ... 10.16
 
 Matrix products: default
-BLAS:   /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib
-LAPACK: /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
+BLAS:   /Library/Frameworks/R.framework/Versions/4.2/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/4.2/Resources/lib/libRlapack.dylib
 
 locale:
-[1] en_GB.UTF-8/en_GB.UTF-8/en_GB.UTF-8/C/en_GB.UTF-8/en_GB.UTF-8
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
 
 attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
- [1] future.apply_1.5.0 future_1.17.0      purrr_0.3.4        pander_0.6.3      
- [5] readr_2.0.0        bigsnpr_1.3.0      bigstatsr_1.2.3    glue_1.4.2        
- [9] ggdendro_0.1-20    ggplot2_3.3.2      dplyr_1.0.0        workflowr_1.6.2   
+ [1] future.apply_1.10.0 future_1.30.0       purrr_1.0.1        
+ [4] pander_0.6.5        readr_2.1.4         bigsnpr_1.11.6     
+ [7] bigstatsr_1.5.12    glue_1.6.2          ggplot2_3.4.1      
+[10] dplyr_1.1.0         workflowr_1.7.0.4  
 
 loaded via a namespace (and not attached):
- [1] tidyselect_1.1.0   xfun_0.26          listenv_0.8.0      lattice_0.20-41   
- [5] bigassertr_0.1.3   colorspace_1.4-1   vctrs_0.3.0        generics_0.0.2    
- [9] htmltools_0.5.0    yaml_2.2.1         rlang_0.4.6        jquerylib_0.1.1   
-[13] later_1.0.0        pillar_1.4.4       withr_2.2.0        bit64_0.9-7       
-[17] foreach_1.5.0      lifecycle_0.2.0    stringr_1.4.0      munsell_0.5.0     
-[21] gtable_0.3.0       codetools_0.2-16   evaluate_0.14      knitr_1.32        
-[25] tzdb_0.1.2         doParallel_1.0.15  httpuv_1.5.3.1     parallel_4.0.3    
-[29] fansi_0.4.1        Rcpp_1.0.4.6       promises_1.1.0     scales_1.1.1      
-[33] backports_1.1.7    vroom_1.5.3        bit_1.1-15.2       fs_1.4.1          
-[37] hms_0.5.3          digest_0.6.25      stringi_1.5.3      bigparallelr_0.2.3
-[41] grid_4.0.3         rprojroot_1.3-2    cowplot_1.0.0      cli_2.0.2         
-[45] tools_4.0.3        magrittr_2.0.1     tibble_3.0.1       crayon_1.3.4      
-[49] whisker_0.4        pkgconfig_2.0.3    ellipsis_0.3.1     MASS_7.3-53       
-[53] Matrix_1.2-18      data.table_1.12.8  rstudioapi_0.11    assertthat_0.2.1  
-[57] rmarkdown_2.11     iterators_1.0.12   globals_0.12.5     R6_2.4.1          
-[61] flock_0.7          git2r_0.27.1       compiler_4.0.3    </code></pre>
+ [1] Rcpp_1.0.10        lattice_0.20-45    listenv_0.9.0      getPass_0.2-2     
+ [5] ps_1.7.2           rprojroot_2.0.3    digest_0.6.31      foreach_1.5.2     
+ [9] utf8_1.2.2         parallelly_1.34.0  R6_2.5.1           bigsparser_0.6.1  
+[13] evaluate_0.20      httr_1.4.5         pillar_1.8.1       flock_0.7         
+[17] rlang_1.0.6        rstudioapi_0.14    data.table_1.14.6  whisker_0.4.1     
+[21] callr_3.7.3        jquerylib_0.1.4    Matrix_1.5-1       rmarkdown_2.20    
+[25] bigparallelr_0.3.2 stringr_1.5.0      bit_4.0.5          munsell_0.5.0     
+[29] compiler_4.2.2     httpuv_1.6.9       xfun_0.37          pkgconfig_2.0.3   
+[33] globals_0.16.2     htmltools_0.5.4    tidyselect_1.2.0   tibble_3.1.8      
+[37] codetools_0.2-18   fansi_1.0.4        crayon_1.5.2       tzdb_0.3.0        
+[41] withr_2.5.0        later_1.3.0        grid_4.2.2         jsonlite_1.8.4    
+[45] gtable_0.3.1       lifecycle_1.0.3    git2r_0.31.0       magrittr_2.0.3    
+[49] scales_1.2.1       vroom_1.6.1        cli_3.6.0          stringi_1.7.12    
+[53] cachem_1.0.7       fs_1.6.1           promises_1.2.0.1   doRNG_1.8.6       
+[57] doParallel_1.0.17  bslib_0.4.2        ellipsis_0.3.2     generics_0.1.3    
+[61] vctrs_0.5.2        cowplot_1.1.1      iterators_1.0.14   tools_4.2.2       
+[65] bit64_4.0.5        hms_1.1.2          rngtools_1.5.2     processx_3.8.0    
+[69] parallel_4.2.2     fastmap_1.1.1      yaml_2.3.7         colorspace_2.1-0  
+[73] bigassertr_0.1.6   knitr_1.42         sass_0.4.5        </code></pre>
 </div>
 </div>
 
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
 TeX fonts only; see
-http://docs.mathjax.org/en/latest/configuration.html.  This will make
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
 the presentation more consistent at the cost of the webpage sometimes
 taking slightly longer to load. Note that this only works because the
 footer is added to webpages before the MathJax javascript. -->
@@ -2076,6 +2250,8 @@ footer is added to webpages before the MathJax javascript. -->
     "HTML-CSS": { availableFonts: ["TeX"] }
   });
 </script>
+
+
 
 
 </div>

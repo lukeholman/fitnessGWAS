@@ -427,7 +427,7 @@ unlink("data/derived/output/male_late_lmm.assoc.txt")
 
 ## Create a reduced list of LD-pruned SNPs with PLINK
 
-To keep the computation time and memory usage for `mashr` manageable, we did not analyse every SNP analysed in the GWAS (i.e. `r nrow(read.csv("data/derived/all_univariate_GEMMA_results.csv"))` SNPs), but rather a subset of them that were approximately in linkage disequilibrium. We identified this LD-pruned set of SNPs using the PLINK arguments `--indep-pairwise 100 10 0.2`, i.e. pruning within 100kB sliding windows, sliding 10 variants along with each step, and allowing a maximum pairwise $r^2$ threshold of 0.2 between loci. With these parameters, 1420071 SNPs were removed, leaving `r 1646652 - 1420071` for downstream analysis.
+To keep the computation time and memory usage for `mashr` manageable, we did not analyse every SNP analysed in the GWAS (i.e. `r nrow(read.csv("data/derived/all_univariate_GEMMA_results.csv"))` SNPs), but rather a subset of them that were approximately in linkage disequilibrium. We identified this LD-pruned set of SNPs using the PLINK arguments `--indep-pairwise 100 10 0.2`, i.e. pruning within 100kB sliding windows, sliding 10 variants along with each step, and allowing a maximum pairwise $r^2$ threshold of 0.2 between loci. With these parameters, 1420071 SNPs were removed, leaving 226581 for downstream analysis.
 
 ```{r results='hide'}
 # indep-pairwise arguments are: 

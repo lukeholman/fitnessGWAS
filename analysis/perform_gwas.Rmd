@@ -188,31 +188,22 @@ write_tsv(vectors[-missing_row, -missing_row], path = "data/derived/output/eigen
 write_tsv(data.frame(values[-missing_row]), path = "data/derived/output/eigen_decomp.eigenD_male.txt", col_names = FALSE)
 unlink("data/derived/output/eigen_decomp.eigenD.txt")
 unlink("data/derived/output/eigen_decomp.eigenU.txt")
-# vectors <- vectors[,-(which(values < 0.2))]
-# values <- values[-(which(values < 0.2))]
-# write_tsv(vectors, path = "data/derived/output/eigen_decomp.eigenU.txt", col_names = FALSE)
-# write_tsv(data.frame(value = values), path = "data/derived/output/eigen_decomp.eigenD.txt", col_names = FALSE)
 ```
 
 
-### Run univariate and multivariate association tests
+### Run univariate association tests
 
-The following code chunk runs 5 linear mixed models, implemented in [GEMMA](http://www.xzlab.org/software/GEMMAmanual.pdf). Each of the univariate linear mixed models uses the decomposed genomic relatedness matrix from above, and has one of our four fitness traits as the response variable. The multivariate model contains all four traits, and also uses the decomposed genomic relatedness matrix.
+The following code chunk runs 4 linear mixed models, implemented in [GEMMA](http://www.xzlab.org/software/GEMMAmanual.pdf). Each linear mixed models uses the decomposed genomic relatedness matrix from above, and has one of our four fitness traits as the response variable.
 
 ```{r eval=FALSE}
 # The option "-lmm 1" runs a linear mixed model using Wald test to get the p-values
-# The option "-r2 0.95" only keeps SNPs that are <95% correlated with Wolbachia infection status
-# The option "-c covariate_file_for_GEMMA.txt" adds in the Wolbahia infection status as a covariate, and also tells the model to fit an intercept
-opts <- "-lmm 1"
 GRM_female <- "-d ./output/eigen_decomp.eigenD_female.txt -u ./output/eigen_decomp.eigenU_female.txt"
 GRM_male <- "-d ./output/eigen_decomp.eigenD_male.txt -u ./output/eigen_decomp.eigenU_male.txt"
-#cov <- "-c covariate_file_for_GEMMA.txt -r2 0.99" # not used at present
 
-c("gemma -bfile {bed} {GRM_female} {opts} -n 1 -o female_early_lmm",
-  "gemma -bfile {bed} {GRM_female} {opts} -n 2 -o female_late_lmm",
-  "gemma -bfile {bed} {GRM_male} {opts} -n 3 -o male_early_lmm",
-  "gemma -bfile {bed} {GRM_male} {opts} -n 4 -o male_late_lmm") %>%
-  #"gemma -bfile {bed} {GRM_male} {opts} -n 1 2 3 4 -o all_four_traits") %>% 
+c("gemma -bfile {bed} {GRM_female} -lmm 1 -n 1 -o female_early_lmm",
+  "gemma -bfile {bed} {GRM_female} -lmm 1 -n 2 -o female_late_lmm",
+  "gemma -bfile {bed} {GRM_male} -lmm 1 -n 3 -o male_early_lmm",
+  "gemma -bfile {bed} {GRM_male} -lmm 1 -n 4 -o male_late_lmm") %>%
   lapply(run_command, path = "/data/derived")
 ```
 
@@ -223,7 +214,7 @@ c("gemma -bfile {bed} {GRM_female} {opts} -n 1 -o female_early_lmm",
 
 <!-- According to the manual, GEMMA calculates the relatedness matrix from the SNP data, then "extracts the matrix elements corresponding to the analyzed individuals (which may be smaller than the number of total individuals), centers the matrix, and then performs an eigendecomposition". The aim is to better estimate the effects of each SNP independently of the rest of the genome.  -->
 
-<!-- The metric `pve` in the outputs below is "the proportion of variance in the phenotype explained by typed genotypes", also called SNP heritability. Next, `vg` is $V_g$, the variance in phenotype due to variance in genotype, while `ve` is $V_e$, the variance in phenotype due to variance in environment. Note that we present alternative estimates from gcta64 for the heritabilities in the manuscript, though these estimates from GEMMA are qualitatively very similar.  -->
+<!-- The metric `pve` in the outputs below is "the proportion of variance in the phenotype explained by typed genotypes", also called SNP heritability. Next, `vg` is $V_g$, the variance in phenotype due to variance in genotype, while `ve` is $V_e$, the variance in phenotype due to variance in environment.   -->
 
 <!-- #### Female early-life fitness -->
 <!-- ```{r lmm1} -->
@@ -279,7 +270,7 @@ rm(MAFs)
 
 
 ### Clean up the GEMMA results
-Discard columns we don't need, and rename the SNP column from the name assigned by GEMMA (`rs`) to something more sensible (`SNP`).
+Discard columns we don't need, and give the columns more sensible names (`rs` becomes `SNP`).
 ```{r clean_up, eval=FALSE}
 # The 4 univariate files:
 c("data/derived/output/female_early_lmm.assoc.txt",
@@ -294,71 +285,76 @@ c("data/derived/output/female_early_lmm.assoc.txt",
   })
 ```
 
-### Perform SNP clumping using PLINK
 
-```{r snp_clumping, eval=FALSE}
-# Use the un-manipulated DGRP bed/bim/fam files, since they don't throw an error from plink
-bed <- "../input/dgrp2"
+<!-- ### Perform SNP clumping using PLINK -->
 
-# Remind plink to only use the SNPs that passed QC
-# read_tsv("data/derived/output/female_early_lmm.assoc.txt") %>% select(SNP) %>%
-#   write_tsv(col_names = FALSE, path = "data/derived/snp_list.txt")
+<!-- ```{r snp_clumping, eval=FALSE} -->
+<!-- # Use the un-manipulated DGRP bed/bim/fam files, since they don't throw an error from plink -->
+<!-- bed <- "../input/dgrp2" -->
 
-
-do_snp_clumping <- function(trait){
-
-  run_command(glue("plink --bfile {bed}", 
-                   " --clump output/{trait}.assoc.txt",
-                   " --clump-field p_wald --clump-p1 0.00001"), # Each clump must contain one snp with p < 10 ^ -5
-              path = "/data/derived")
-  trait <- gsub("_lmm", "", trait)
-  file_name <- glue("data/derived/{trait}_SNP_clumps.txt")
-  file.rename("data/derived/plink.clumped", file_name)
-  
-  clumps <- read.table(file_name, header = TRUE) %>% 
-    as_tibble() %>%
-    rename(index_SNP = SNP,
-           index_SNP_p_value = P,
-           num_SNPs_in_clump = TOTAL,
-           not_sig = NSIG, # Number of clumped SNPs that are not significant ( p > 0.05 )
-           sig_p05 = S05, # Number of clumped SNPs 0.01 < p < 0.05
-           sig_p01 = S01, # Number of clumped SNPs 0.001 < p < 0.01
-           sig_p001 = S001, # Number of clumped SNPs 0.0001 < p < 0.001 
-           sig_p0001 = S0001, # Number of clumped SNPs p < 0.0001
-           other_snps = SP2) %>%
-    mutate(other_snps = gsub("\\(1\\),", ", ", other_snps),
-           other_snps = gsub("\\(1\\)", "", other_snps),
-           other_snps = replace(other_snps, other_snps == "NONE", NA)) %>%
-    select(-CHR, -F, -BP) 
-  
-  SNPs <- apply(clumps, 1, function(x) {
-    res <- c(x[1], strsplit(x[9], split = ", ")[[1]])
-    res[!is.na(res)]
-  })
-  
-  db_local <- tbl(db, "variants") %>% select(SNP, FBID) %>% collect() 
-  clumps$FBIDs <- lapply(SNPs, function(x) {
-    focal <- db_local %>% filter(SNP %in% x) 
-    if(nrow(focal) == 0) return(NA)
-    focal %>% pull(FBID) %>% unique() %>% paste0(collapse = ", ")
-    }) %>% unlist()
-  
-  db_local <- tbl(db, "genes") %>% collect()
-  clumps$genes <- lapply(clumps$FBIDs, function(x) {
-    if(is.na(x)) return(NA)
-    FB <- strsplit(x, split = ", ")[[1]]
-    return(db_local %>% filter(FBID %in% FB) %>% pull(gene_name) %>% paste0(collapse = ", "))
-  }) %>% unlist()
-  
-  write_tsv(clumps, file_name)
-  unlink("data/derived/plink.log")
-}
-
-lapply(c("female_early_lmm", "female_late_lmm", "male_early_lmm", "male_late_lmm"), do_snp_clumping)
-```
+<!-- # Remind plink to only use the SNPs that passed QC -->
+<!-- # read_tsv("data/derived/output/female_early_lmm.assoc.txt") %>% select(SNP) %>% -->
+<!-- #   write_tsv(col_names = FALSE, path = "data/derived/snp_list.txt") -->
 
 
-## Concatenate the results of the four univariate GWAS
+<!-- do_snp_clumping <- function(trait){ -->
+
+<!--   run_command(glue("plink --bfile {bed}",  -->
+<!--                    " --clump output/{trait}.assoc.txt", -->
+<!--                    " --clump-field p_wald --clump-p1 0.00001"), # Each clump must contain one snp with p < 10 ^ -5 -->
+<!--               path = "/data/derived") -->
+<!--   trait <- gsub("_lmm", "", trait) -->
+<!--   file_name <- glue("data/derived/{trait}_SNP_clumps.txt") -->
+<!--   file.rename("data/derived/plink.clumped", file_name) -->
+
+<!--   clumps <- read.table(file_name, header = TRUE) %>%  -->
+<!--     as_tibble() %>% -->
+<!--     rename(index_SNP = SNP, -->
+<!--            index_SNP_p_value = P, -->
+<!--            num_SNPs_in_clump = TOTAL, -->
+<!--            not_sig = NSIG, # Number of clumped SNPs that are not significant ( p > 0.05 ) -->
+<!--            sig_p05 = S05, # Number of clumped SNPs 0.01 < p < 0.05 -->
+<!--            sig_p01 = S01, # Number of clumped SNPs 0.001 < p < 0.01 -->
+<!--            sig_p001 = S001, # Number of clumped SNPs 0.0001 < p < 0.001  -->
+<!--            sig_p0001 = S0001, # Number of clumped SNPs p < 0.0001 -->
+<!--            other_snps = SP2) %>% -->
+<!--     mutate(other_snps = gsub("\\(1\\),", ", ", other_snps), -->
+<!--            other_snps = gsub("\\(1\\)", "", other_snps), -->
+<!--            other_snps = replace(other_snps, other_snps == "NONE", NA)) %>% -->
+<!--     select(-CHR, -F, -BP)  -->
+
+<!--   SNPs <- apply(clumps, 1, function(x) { -->
+<!--     res <- c(x[1], strsplit(x[9], split = ", ")[[1]]) -->
+<!--     res[!is.na(res)] -->
+<!--   }) -->
+
+<!--   db_local <- tbl(db, "variants") %>% select(SNP, FBID) %>% collect()  -->
+<!--   clumps$FBIDs <- lapply(SNPs, function(x) { -->
+<!--     focal <- db_local %>% filter(SNP %in% x)  -->
+<!--     if(nrow(focal) == 0) return(NA) -->
+<!--     focal %>% pull(FBID) %>% unique() %>% paste0(collapse = ", ") -->
+<!--     }) %>% unlist() -->
+
+<!--   db_local <- tbl(db, "genes") %>% collect() -->
+<!--   clumps$genes <- lapply(clumps$FBIDs, function(x) { -->
+<!--     if(is.na(x)) return(NA) -->
+<!--     FB <- strsplit(x, split = ", ")[[1]] -->
+<!--     return(db_local %>% filter(FBID %in% FB) %>% pull(gene_name) %>% paste0(collapse = ", ")) -->
+<!--   }) %>% unlist() -->
+
+<!--   write_tsv(clumps, file_name) -->
+<!--   unlink("data/derived/plink.log") -->
+<!-- } -->
+
+<!-- lapply(c("female_early_lmm",  -->
+<!--          "female_late_lmm",  -->
+<!--          "male_early_lmm",  -->
+<!--          "male_late_lmm"),  -->
+<!--        do_snp_clumping) -->
+<!-- ``` -->
+
+
+## Concatenate the results of the four GWAS
 
 Load up the GWAS results, which were produced by using linear mixed models implemented in GEMMA, and arrange the data in a 'wide' format, where each row is one SNP, and the columns hold the estimates of $\beta$, the standard error of $\beta$, and the p-value for the GEMMA association tests on each of the four fitness traits.
 
@@ -409,8 +405,7 @@ all_univariate_lmm_results <- all_univariate_lmm_results %>%
   arrange(SNPs)
 
 
-all_univariate_lmm_results <- read_csv("data/derived/all_univariate_GEMMA_results.csv")
-# a handful of SNPs with low MAF could not be estimated and they have beta and SE == NA, so remove them now
+# a handful of SNPs with low MAF could not be estimated and they have 'NA' for beta and SE, so remove them now
 # I think these are SNPs where the only lines with the minor allele were the lines where we measured female but not male fitness
 SNPs_to_remove <- all_univariate_lmm_results$SNPs[!complete.cases(all_univariate_lmm_results)] 
 
@@ -427,7 +422,7 @@ unlink("data/derived/output/male_late_lmm.assoc.txt")
 
 ## Create a reduced list of LD-pruned SNPs with PLINK
 
-To keep the computation time and memory usage for `mashr` manageable, we did not analyse every SNP analysed in the GWAS (i.e. `r nrow(read.csv("data/derived/all_univariate_GEMMA_results.csv"))` SNPs), but rather a subset of them that were approximately in linkage disequilibrium. We identified this LD-pruned set of SNPs using the PLINK arguments `--indep-pairwise 100 10 0.2`, i.e. pruning within 100kB sliding windows, sliding 10 variants along with each step, and allowing a maximum pairwise $r^2$ threshold of 0.2 between loci. With these parameters, 1420071 SNPs were removed, leaving 226581 for downstream analysis.
+To keep the computation time and memory usage for `mashr` manageable, we did not analyse every SNP analysed in the GWAS (i.e. `r nrow(read.csv("data/derived/all_univariate_GEMMA_results.csv"))` SNPs), but rather a subset of them that were approximately in linkage disequilibrium. We identified this LD-pruned set of SNPs using the PLINK arguments `--indep-pairwise 100 10 0.2`, i.e. pruning within 100kB sliding windows, sliding 10 variants along with each step, and allowing a maximum pairwise $r^2$ threshold of 0.2 between loci. With these parameters, 1,420,071 SNPs were removed, leaving 226,581 for downstream analysis.
 
 ```{r results='hide'}
 # indep-pairwise arguments are: 
@@ -441,169 +436,5 @@ file.rename("data/derived/plink.prune.in", "data/derived/SNPs_in_LD")
 unlink("gwas_data/derived/plink.prune.out")
 ```
 
-<!-- ## Run Bayesian Sparse Linear Mixed Models -->
-
-<!-- Here is a screenshot from the relevant part of the GEMMA manual, explaining how the BSLMMs work, and the key parameters that are estimated: -->
-
-<!-- !["Screenshot from the GEMMA manual"](data/input/GEMMA_manual_screenshot.png) -->
-
-<!-- I run these with a burn-in period of 50,000 iterations, then 10m sampling iterations, recording every 1000^{th} iteration. This may seem extreme, but I picked it because there was massive auto-correlation in the MCMC chain with the default settings. -->
-
-<!-- Glossary of abbreviations and parameters used by GEMMA: -->
-<!--  - PVE: "Proportion of (phenotypic) variance explained", by the SNPs and the random effect terms together -->
-<!--  - PGE: "Proportion of _genetic_ variance explained by the sparse effects terms".  -->
-
-<!--  Useful quote from Zhou: I think you can treat both h and rho as parameters and only rely on only PVE and PGE. The result essentially says that a total 3414 SNPs explain approximately 33% of phenotypic variance (i.e. PVE=0.33). Among these 3414 SNPs, a small proportion of them (\approx 158) have relatively large effects and explain a total of 48% PVE (i.e. PGE=0.48). Although these 158 SNPs have relatively larger effects than the rest of the SNPs, their absolute effect sizes are still small. All these quantities provide a description of the genetic architecture of the phenotype, and give much more information than simply categorizing a trait into polygenic vs oligogenic.  -->
-
-
-<!-- ### Female early-life fitness -->
-<!-- ```{r bslmm1} -->
-<!-- run_command("gemma -bfile trimmed_DGRP -maf 0.05 -n 1 -bslmm 1 -w 50000 -s 10000000 -rpace 1000 -seed 1 -o female_early_bslmm") -->
-<!-- ``` -->
-
-
-
-<!-- ```{r} -->
-<!-- make_trimmed_BED <- function(phenotypes){ -->
-
-<!--   # Define a function to add phenotype data to a .fam file, for later GWAS analysis -->
-<!--   # 'phenotypes' needs to have a column called 'line' -->
-<!--   add_phenotypes_to_fam <- function(filepath, phenotypes){ -->
-<!--     read.delim(filepath, header = FALSE, stringsAsFactors = FALSE) %>%  -->
-<!--       select(V1, V2, V3, V4, V5) %>% # Get all the non-phenotype columns -->
-<!--       left_join(phenotypes,  -->
-<!--                 by = c("V1" = "line")) %>% -->
-<!--       write.table(file = filepath,  -->
-<!--                   col.names = FALSE, row.names = FALSE,  -->
-<!--                   quote = FALSE, sep = "\t") -->
-<!--   } -->
-
-
-<!-- #  if(file.exists("data/derived/trimmed_DGRP.bed")) return(NULL) -->
-
-<!--   # Load the BED/BIM/FAM files as a bigsnp object -->
-<!--   bigsnp <- snp_readBed("data/input/dgrp2.bed", backingfile = tempfile()) -->
-<!--   bigsnp_attached <- snp_attach(bigsnp) -->
-
-<!--   ###################################################### -->
-<!--   # 1. Perform simple SNP quality control using PLINK -->
-<!--   ###################################################### -->
-<!--   bedfile <- "data/input/dgrp2.bed" -->
-
-<!--   plink <- download_plink() -->
-<!--   bigsnp <- snp_plinkQC(plink.path = plink, -->
-<!--                         prefix.in = "data/input/dgrp2", -->
-<!--                         prefix.out = tempfile(), -->
-<!--                         maf = 0.05, # MAF >= 0.05 -->
-<!--                         geno = 0.05,   # acceptable number missing genotypes per locus: none -->
-<!--                         mind = 0.1,   # acceptable proportion of missing genotypes per individual (i.e. DGRP line): none -->
-<!--                         hwe = 0,    # do not filter by HWE test p-value (p = 0 is kept) -->
-<!--                         autosome.only = FALSE) # Keep X chromosome -->
-<!--   bigsnp <- snp_readBed(bigsnp) -->
-<!--   bigsnp_attached <- snp_attach(bigsnp) -->
-<!--   ###### Important messages from this QC: ######## -->
-<!--   # Total genotyping rate is 0.956183. -->
-<!--   # 1050867 variants removed due to missing genotype data (--geno). -->
-<!--   # 2266579 variants removed due to minor allele threshold(s) -->
-<!--   # (--maf/--max-maf/--mac/--max-mac). -->
-<!--   # 1120981 variants and 193 people pass filters and QC. -->
-
-
-<!--   # cull the PLINK files to just the DGRP lines that we measured -->
-<!--   focal.lines <- phenotypes$line %>% as.character() -->
-<!--   bigsnp_attached <- subset(bigsnp_attached,  -->
-<!--                             ind.row = bigsnp_attached$fam$family.ID %in% focal.lines) %>% -->
-<!--     snp_attach() -->
-
-<!--   beagle <- download_beagle() -->
-
-
-<!--   # Delete these files, because snp_writeBed() throws an error rather than over-writing -->
-<!--   unlink(c("data/derived/dgrp2_after_QC.bed",  -->
-<!--            "data/derived/dgrp2_after_QC.bim", "data/derived/dgrp2_after_QC.fam"))  -->
-
-<!--   # Write the QC'd BED files for all 205 DGRP lines to disk -->
-<!--   # This is is needed to use PLINK on them, and also because we now have a SNP set that is not pruned for LD -->
-<!--   snp_writeBed(bigsnp_attached, "data/derived/dgrp2_after_QC.bed") -->
-
-<!--   # Add our phenotype data to this new .fam file -->
-<!--   add_phenotypes_to_fam("data/derived/dgrp2_after_QC.fam",  -->
-<!--                         phenotypes %>% select(-block)) -->
-
-<!--   ################################################################## -->
-<!--   # 2. Remove SNPs that do not have MAF < 0.05 within our 115 lines -->
-<!--   ################################################################## -->
-
-<!--   bigsnp <- snp_plinkQC(plink.path = plink, -->
-<!--                         prefix.in = "data/derived/dgrp2_after_QC", -->
-<!--                         prefix.out = tempfile(), -->
-<!--                         maf = 0.05, -->
-<!--                         geno = 0, -->
-<!--                         mind = 1, -->
-<!--                         hwe = 0, -->
-<!--                         autosome.only = FALSE) -->
-<!--   bigsnp_attached <- snp_readBed(bigsnp) %>% snp_attach() -->
-<!--   # unlink(temp.file) -->
-<!--   ##### PLINK messages: ###### -->
-<!--   # 1637 variants removed due to minor allele threshold(s) -->
-<!--   # (--maf/--max-maf/--mac/--max-mac). -->
-<!--   # 12954 variants and 115 people pass filters and QC. -->
-
-<!--   ################################################################## -->
-<!--   # 3. Perform short-range SNP clumping, using snp_clumping function -->
-<!--   ################################################################## -->
-
-<!--   # Sum the significant correlations of each SNP to each other SNP -->
-<!--   summed_correlations <- apply(snp_cor(bigsnp_attached$genotypes), 1, sum) %>% -->
-<!--     round(2) -->
-
-<!--   # Identify 1 SNP from each 'clump' of highly linked SNPs -->
-<!--   # Nearby SNPs that are correlated with a squared-corr of at least .1, i.e. r = +/- 0.316, are counted as clumped -->
-<!--   snp_clumps <- snp_clumping(G = bigsnp_attached$genotypes,  -->
-<!--                              infos.chr = bigsnp_attached$map$chromosome,  -->
-<!--                              thr.r2 = 0.2, -->
-<!--                              size = 1000, # 1kB windows -->
-<!--                              is.size.in.bp = TRUE, -->
-<!--                              infos.pos = bigsnp_attached$map$physical.pos)  -->
-<!--   # After this there are 7523 SNPs left -->
-
-<!--   clumped_subset <- subset(bigsnp_attached, ind.col = snp_clumps) %>% snp_attach() -->
-
-
-<!--   ###################################################### -->
-<!--   # 4. Perform long-range LD pruning using snp_autoSVD -->
-<!--   ###################################################### -->
-<!--   SVD_output <- snp_autoSVD(G = clumped_subset$genotypes, -->
-<!--                             infos.chr = clumped_subset$map$chromosome, -->
-<!--                             infos.pos = clumped_subset$map$physical.pos, -->
-<!--                             thr.r2 = 0.2) -->
-
-<!--   # Vector of SNP IDs to keep -->
-<!--   SVD_output <- attributes(SVD_output)$subset -->
-<!--   # After this there are 6897 SNPs left -->
-
-<!--   # Retain all the SNPs that passed both types of clumping -->
-<!--   to.keep <- snp_clumps[SVD_output] -->
-<!--   clumped_subset2 <- subset(bigsnp_attached, ind.col = to.keep) %>% snp_attach() -->
-<!--   summed_correlations <- data.frame(id = clumped_subset2$map$marker.ID, -->
-<!--                                     summed_corr = summed_correlations[to.keep]) -->
-
-<!--   # Delete these files, because snp_writeBed() throws an error rather than over-writing -->
-<!--   unlink(c("data/derived/trimmed_DGRP.bed",  -->
-<!--            "data/derived/trimmed_DGRP.bim", "data/derived/trimmed_DGRP.fam"))  -->
-
-<!--   # Save the fully-pruned SNP data, and the SNP "tagging" data -->
-<!--   snp_writeBed(clumped_subset2, "data/derived/trimmed_DGRP.bed") -->
-<!--   write.csv(summed_correlations, "data/derived/summed_interSNP_correlations.csv", row.names = FALSE) -->
-
-<!--   # Lastly, add our phenotype data to the new .fam file -->
-<!--   add_phenotypes_to_fam("data/derived/trimmed_DGRP.fam",  -->
-<!--                         phenotypes %>% select(-block)) -->
-<!-- } -->
-<!-- make_trimmed_BED(phenotypes = predicted_line_means) -->
-
-<!-- if(file.exists('data/derived/trimmed_DGRP.bk')) unlink('data/derived/trimmed_DGRP.bk') -->
-<!-- dgrp_bed <- snp_readBed("data/derived/trimmed_DGRP.bed") %>% snp_attach() -->
-<!-- ``` -->
 
 

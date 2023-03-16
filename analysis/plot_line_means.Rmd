@@ -43,15 +43,17 @@ make_figure_1 <- function(){
     slope <- format(model$coefficients[2,1] %>% round(2), nsmall = 2)
     se <- format(model$coefficients[2,2] %>% round(2), nsmall = 2)
     # print(model$coefficients[2,4]) # print p-value of the correlation
-    text1 <- paste("R^2 == ", r2, sep = "")
-    text2 <- paste("β = ", slope, " \u00B1 ", se, sep = "")
+    # text1 <- paste("R^2 == ", r2, sep = "")
+    # text2 <- paste("β = ", slope, " \u00B1 ", se, sep = "")
     
     pp <- df %>% 
       ggplot(aes_string(x = v1, y = v2)) + 
-      annotate("text", x=min(lims) + 0.1, y=max(lims), label = text1, parse = TRUE, hjust= 0) +
-      annotate("text", x=min(lims) + 0.1, y=max(lims)-0.4, label = text2, hjust= 0) +
+      # annotate("text", x=min(lims) + 0.1, y=max(lims), label = text1, parse = TRUE, hjust= 0) +
+      # annotate("text", x=min(lims) + 0.1, y=max(lims)-0.4, label = text2, hjust= 0) +
+      stat_ellipse(colour = "grey20", lwd = 0.5) +
+      stat_ellipse(fill = "grey85", geom = "polygon") +
       geom_point(alpha = 0.7) + 
-      stat_smooth(method = "lm", level = 0, colour = "tomato") + 
+      # stat_smooth(method = "lm", level = 0, colour = "tomato") + 
       xlab(fix.title(v1)) + ylab(fix.title(v2)) + 
       theme_classic() + 
       theme(text = element_text(family = "Raleway")) +
@@ -72,14 +74,11 @@ make_figure_1 <- function(){
   p4 <- nice.plot(predicted_line_means, "female.fitness.early", "female.fitness.late")
   full_plot <- grid.arrange(p1, p2, p3, p4)
   
-  # Saving does not work (ggmarginal + showtext issue?), so get it from the HTML output
-  # svg("figures/figure1.svg", height = 9, width = 9)
-  # full_plot
-  # invisible(dev.off())
 }
 make_figure_1()
 
-ggsave(filename = "figures/fig1.pdf", make_figure_1(), height = 7, width = 7)
+# Saving does not work (ggmarginal + showtext issue?), so get the file by saving from the HTML output
+# ggsave(filename = "figures/fig1.pdf", make_figure_1(), height = 7, width = 7)
 ```
 <br></br>
 **Figure 1**: Correlations among estimated line means for the four fitness components. The line means were estimated from Bayesian mixed models that account for block effects, and the non-independence of our early- and late-life fitness measurements.

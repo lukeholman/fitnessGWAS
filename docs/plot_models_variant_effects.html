@@ -397,7 +397,7 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2023-03-15
+<strong>Last updated:</strong> 2023-03-20
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -528,15 +528,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreec2119179fd068f579259ae22a2f4024a2595ec3btargetblankc211917a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree9f76cf2487968f4212262d3de838f7bfc71ffde7targetblank9f76cf2a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/c2119179fd068f579259ae22a2f4024a2595ec3b" target="_blank">c211917</a>
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/9f76cf2487968f4212262d3de838f7bfc71ffde7" target="_blank">9f76cf2</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreec2119179fd068f579259ae22a2f4024a2595ec3btargetblankc211917a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree9f76cf2487968f4212262d3de838f7bfc71ffde7targetblank9f76cf2a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -546,7 +546,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/c2119179fd068f579259ae22a2f4024a2595ec3b" target="_blank">c211917</a>.
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/9f76cf2487968f4212262d3de838f7bfc71ffde7" target="_blank">9f76cf2</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -584,20 +584,29 @@ Ignored files:
     Ignored:    figures/.DS_Store
 
 Untracked files:
-    Untracked:  big_model.rds
     Untracked:  code/quant_gen_1.R
+    Untracked:  code/~$in_paper_figures.docx
+    Untracked:  data/input/dgrp2.bk
+    Untracked:  data/input/dgrp2.rds
     Untracked:  data/input/genomic_relatedness_matrix.rds
+    Untracked:  figures/fig4_mutation_load.pdf
+    Untracked:  figures/fig5_quartiles_plot.pdf
+    Untracked:  figures/fig6_antagonism_ratios.pdf
+    Untracked:  figures/fig7_models.pdf
 
 Unstaged changes:
     Modified:   .gitignore
+    Modified:   analysis/perform_gwas.Rmd
     Modified:   analysis/quant_genetics.Rmd
+    Modified:   code/main_paper_figures.Rmd
     Modified:   code/pdf_supp_material.Rmd
     Modified:   code/pdf_supp_material.pdf
-    Modified:   figures/fig2_SNPs_manhattan_plot.png
+    Modified:   figures/fig1.pdf
     Modified:   figures/fig3_boyle_plot.pdf
-    Modified:   figures/fig4_quartiles_plot.pdf
-    Modified:   figures/fig5_antagonism_ratios.pdf
-    Modified:   figures/fig6_models.pdf
+    Deleted:    figures/fig4_quartiles_plot.pdf
+    Deleted:    figures/fig4_quartiles_plot.png
+    Deleted:    figures/fig5_antagonism_ratios.pdf
+    Deleted:    figures/fig6_models.pdf
 
 </code></pre>
 <p>
@@ -644,6 +653,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/9f76cf2487968f4212262d3de838f7bfc71ffde7/analysis/plot_models_variant_effects.Rmd" target="_blank">9f76cf2</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-03-20
+</td>
+<td>
+wflow_publish("analysis/plot_models_variant_effects.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/c63ff6283bcda0ea9a7db6dc201d1d3bf3bdb4b0/docs/plot_models_variant_effects.html" target="_blank">c63ff62</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-03-15
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1139,7 +1182,15 @@ library(cowplot)
 library(grid)
 library(RColorBrewer)
 library(car)
+library(brms)
+library(tidybayes)
+library(bigsnpr)
+library(glue)
 library(staplr) # for removing blank page from saved PDF file
+
+# Note: you may need to re-download plink to get this to run on non-Mac systems
+# I used bigsnpr::download_plink()
+plink &lt;- paste(getwd(), &quot;code/plink&quot;, sep = &quot;/&quot;)
 
 font_add_google(name = &quot;Raleway&quot;, family = &quot;Raleway&quot;, regular.wt = 400, bold.wt = 700) # Install font from Google Fonts
 showtext_auto()
@@ -1154,53 +1205,12 @@ all_snps &lt;- tbl(db, &quot;univariate_lmm_results&quot;)
 SNP_clumps &lt;- all_snps %&gt;% select(-SNP) %&gt;% distinct() %&gt;% collect(n = Inf)
 
 # Subsetting variable to get the approx-LD subset of SNPs
-LD_subset &lt;- !is.na(SNP_clumps$LFSR_female_early_mashr_ED)</code></pre>
-<!-- ```{r} -->
-<!-- # testing ruzicka comparison -->
-<!-- xx <- read_tsv("~/Downloads/Assoc_Data.txt") -->
-<!-- xx %>% arrange(-MAF_DGRP) %>% head() %>% as.data.frame() -->
-<!-- ruz_data <- xx %>% select(ruzicka_SNP_name = Predictor, chr = Chromosome, position = Basepair, ruzicka_MAF = MAF, ruzicka_effect_size = Effect, ruzicka_wald_stat = Wald_Stat, ruzicka_wald_p = Wald_P) -->
-<!-- merged <- all_snps %>% select(SNP, SNP_clump, contains("_mashr_ED")) %>% -->
-<!--   filter(!is.na(beta_female_early_mashr_ED)) %>%  -->
-<!--   # collect(n=1000) %>%  -->
-<!--   collect(n=Inf) %>%  -->
-<!--   distinct() %>%  -->
-<!--   mutate(position = str_split(SNP, "_"), -->
-<!--          chr = map_chr(position, ~ .x[1]), -->
-<!--          position = as.numeric(map_chr(position, ~ .x[2]))) %>%  -->
-<!--   left_join(ruz_data, by = c("position", "chr"))  -->
-<!-- merged <- merged[complete.cases(merged), ]  -->
-<!-- merged <- left_join(merged,  -->
-<!--           antagonism_evidence_ratios_gwas %>% arrange(inter_sex_early) %>% mutate(inter_sex_early = log2(inter_sex_early))) -->
-<!-- ggplot(merged, aes(x = ruzicka_wald_p, y = inter_sex_early)) + -->
-<!--   geom_point() -->
-<!-- ruzicka_SA <- xx %>% arrange(-MAF_DGRP) %>% filter(fdr<0.3) %>% select(chr = Chromosome, position = Basepair) -->
-<!-- ruz_hits <- merged %>% filter(paste(chr, position) %in% paste(ruzicka_SA$chr, ruzicka_SA$position)) %>% pull(inter_sex_early) -->
-<!-- nonruz_hits <- merged %>% filter(!(paste(chr, position) %in% paste(ruzicka_SA$chr, ruzicka_SA$position))) %>% pull(inter_sex_early)  -->
-<!-- wilcox.test(nonruz_hits, ruz_hits) -->
-<!-- median(nonruz_hits) -->
-<!-- median(ruz_hits) -->
-<!-- hist(-1 * (merged %>% filter(inter_sex_early <= quantile(inter_sex_early, 0.99)) %>% pull(ruzicka_effect_size) %>% log10)) -->
-<!-- bind_rows(merged %>% filter(inter_sex_early <= quantile(inter_sex_early, 0.001)) %>% mutate(type ="holmanSA"), -->
-<!--           merged %>% filter(inter_sex_early >= quantile(inter_sex_early, 0.999)) %>% mutate(type ="holmanSC")) %>%  -->
-<!--   ggplot(aes(type, ruzicka_effect_size)) + -->
-<!--   geom_boxplot(outlier.shape = NA) + geom_beeswarm(alpha=0.3, aes(size = -1*log10(ruzicka_wald_p))) -->
-<!-- merged %>% filter(inter_sex_early <= quantile(inter_sex_early, 0.01) &  -->
-<!--                     ruzicka_wald_stat < 0 & -->
-<!--                     ruzicka_wald_p < quantile(ruzicka_wald_p, 0.01)) %>%  -->
-<!--   pull(SNP_clump) -->
-<!-- tbl(db, "variants") %>% filter(SNP=="3L_4306295_SNP") -->
-<!-- tbl(db, "variants") %>% filter(SNP=="3L_4346362_SNP") -->
-<!-- merged %>% filter(SNP=="3L_4346362_SNP") %>% as.data.frame() -->
-<!-- xx<- select(merged, SNP, ruzicka_MAF) %>% left_join(tbl(db, "variants") %>% select(SNP, MAF) %>%  filter(SNP %in% !!merged$SNP) %>% collect(n=Inf))  -->
-<!-- cor(xx$ruzicka_MAF, xx$MAF, use = "pairwise.complete.obs") -->
-<!-- ``` -->
-<div id="load-and-clean-the-variant-effect-sizes"
-class="section level2">
-<h2>Load and clean the variant effect sizes</h2>
-<p>Modify column names, reorder columns, filter based on the p-value,
-etc.</p>
-<pre class="r"><code># Univariate analysis, mashr-adjusted, data-driven approach
+LD_subset &lt;- !is.na(SNP_clumps$LFSR_female_early_mashr_ED)
+
+# Load the predicted line means, as calculated by get_predicted_line_means
+predicted_line_means &lt;- read_csv(&quot;data/derived/predicted_line_means.csv&quot;)
+
+# Load and clean the effect sizes from GWAS and join with SNP annotations
 univariate_lmm_results &lt;- tbl(db, &quot;univariate_lmm_results&quot;) %&gt;% 
   select(-contains(&quot;canonical&quot;), 
          -contains(&quot;raw&quot;)) %&gt;% 
@@ -1222,7 +1232,46 @@ univariate_lmm_results &lt;- univariate_lmm_results %&gt;%
          site.class = capitalize(tolower(site.class)),
          site.class = gsub(&quot;Utr&quot;, &quot;UTR&quot;, site.class)
   )</code></pre>
-</div>
+<!-- ```{r} -->
+<!-- # testing ruzicka comparison -->
+<!-- xx <- read_tsv("~/Downloads/Assoc_Data.txt") -->
+<!-- xx %>% arrange(-MAF_DGRP) %>% head() %>% as.data.frame() -->
+<!-- ruz_data <- xx %>% select(ruzicka_SNP_name = Predictor, chr = Chromosome, position = Basepair, ruzicka_MAF = MAF, ruzicka_effect_size = Effect, ruzicka_wald_stat = Wald_Stat, ruzicka_wald_p = Wald_P) -->
+<!-- merged <- all_snps %>% select(SNP, SNP_clump, contains("_mashr_ED")) %>% -->
+<!--   filter(!is.na(beta_female_early_mashr_ED)) %>% -->
+<!--   # collect(n=1000) %>% -->
+<!--   collect(n=Inf) %>% -->
+<!--   distinct() %>% -->
+<!--   mutate(position = str_split(SNP, "_"), -->
+<!--          chr = map_chr(position, ~ .x[1]), -->
+<!--          position = as.numeric(map_chr(position, ~ .x[2]))) %>% -->
+<!--   left_join(ruz_data, by = c("position", "chr")) -->
+<!-- merged <- merged[complete.cases(merged), ] -->
+<!-- merged <- left_join(merged, -->
+<!--           antagonism_evidence_ratios_gwas %>% arrange(inter_sex_early) %>% mutate(inter_sex_early = log2(inter_sex_early))) -->
+<!-- ggplot(merged, aes(x = ruzicka_wald_p, y = inter_sex_early)) + -->
+<!--   geom_point() -->
+<!-- ruzicka_SA <- xx %>% arrange(-MAF_DGRP) %>% filter(fdr<0.3) %>% select(chr = Chromosome, position = Basepair) -->
+<!-- ruz_hits <- merged %>% filter(paste(chr, position) %in% paste(ruzicka_SA$chr, ruzicka_SA$position)) %>% pull(inter_sex_early) -->
+<!-- nonruz_hits <- merged %>% filter(!(paste(chr, position) %in% paste(ruzicka_SA$chr, ruzicka_SA$position))) %>% pull(inter_sex_early) -->
+<!-- wilcox.test(nonruz_hits, ruz_hits) -->
+<!-- median(nonruz_hits) -->
+<!-- median(ruz_hits) -->
+<!-- hist(-1 * (merged %>% filter(inter_sex_early <= quantile(inter_sex_early, 0.99)) %>% pull(ruzicka_effect_size) %>% log10)) -->
+<!-- bind_rows(merged %>% filter(inter_sex_early <= quantile(inter_sex_early, 0.001)) %>% mutate(type ="holmanSA"), -->
+<!--           merged %>% filter(inter_sex_early >= quantile(inter_sex_early, 0.999)) %>% mutate(type ="holmanSC")) %>% -->
+<!--   ggplot(aes(type, ruzicka_effect_size)) + -->
+<!--   geom_boxplot(outlier.shape = NA) + geom_beeswarm(alpha=0.3, aes(size = -1*log10(ruzicka_wald_p))) -->
+<!-- merged %>% filter(inter_sex_early <= quantile(inter_sex_early, 0.01) & -->
+<!--                     ruzicka_wald_stat < 0 & -->
+<!--                     ruzicka_wald_p < quantile(ruzicka_wald_p, 0.01)) %>% -->
+<!--   pull(SNP_clump) -->
+<!-- tbl(db, "variants") %>% filter(SNP=="3L_4306295_SNP") -->
+<!-- tbl(db, "variants") %>% filter(SNP=="3L_4346362_SNP") -->
+<!-- merged %>% filter(SNP=="3L_4346362_SNP") %>% as.data.frame() -->
+<!-- xx<- select(merged, SNP, ruzicka_MAF) %>% left_join(tbl(db, "variants") %>% select(SNP, MAF) %>%  filter(SNP %in% !!merged$SNP) %>% collect(n=Inf)) -->
+<!-- cor(xx$ruzicka_MAF, xx$MAF, use = "pairwise.complete.obs") -->
+<!-- ``` -->
 <div id="q-q-plots" class="section level2 tabset">
 <h2 class="tabset">Q-Q plots</h2>
 <p>Here are some quantile-quantile plots, which are commonly used to
@@ -1259,6 +1308,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/c63ff6283bcda0ea9a7db6dc201d1d3bf3bdb4b0/docs/figure/plot_models_variant_effects.Rmd/qqplot1-1.png" target="_blank">c63ff62</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-03-15
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/lukeholman/fitnessGWAS/blob/8d14298b4d59c2198b6f9c62d415e6adc9b7e658/docs/figure/plot_models_variant_effects.Rmd/qqplot1-1.png" target="_blank">8d14298</a>
@@ -1303,6 +1363,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/c63ff6283bcda0ea9a7db6dc201d1d3bf3bdb4b0/docs/figure/plot_models_variant_effects.Rmd/qqplot2-1.png" target="_blank">c63ff62</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-03-15
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/lukeholman/fitnessGWAS/blob/8d14298b4d59c2198b6f9c62d415e6adc9b7e658/docs/figure/plot_models_variant_effects.Rmd/qqplot2-1.png" target="_blank">8d14298</a>
 </td>
 <td>
@@ -1345,6 +1416,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/c63ff6283bcda0ea9a7db6dc201d1d3bf3bdb4b0/docs/figure/plot_models_variant_effects.Rmd/qqplot3-1.png" target="_blank">c63ff62</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-03-15
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/lukeholman/fitnessGWAS/blob/8d14298b4d59c2198b6f9c62d415e6adc9b7e658/docs/figure/plot_models_variant_effects.Rmd/qqplot3-1.png" target="_blank">8d14298</a>
 </td>
 <td>
@@ -1385,6 +1467,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/c63ff6283bcda0ea9a7db6dc201d1d3bf3bdb4b0/docs/figure/plot_models_variant_effects.Rmd/qqplot4-1.png" target="_blank">c63ff62</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-03-15
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/lukeholman/fitnessGWAS/blob/8d14298b4d59c2198b6f9c62d415e6adc9b7e658/docs/figure/plot_models_variant_effects.Rmd/qqplot4-1.png" target="_blank">8d14298</a>
@@ -1460,6 +1553,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/c63ff6283bcda0ea9a7db6dc201d1d3bf3bdb4b0/docs/figure/plot_models_variant_effects.Rmd/hex1-1.png" target="_blank">c63ff62</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-03-15
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/lukeholman/fitnessGWAS/blob/490266c958359428cc4b979291695f7e55e15b71/docs/figure/plot_models_variant_effects.Rmd/hex1-1.png" target="_blank">490266c</a>
@@ -1670,6 +1774,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/c63ff6283bcda0ea9a7db6dc201d1d3bf3bdb4b0/docs/figure/plot_models_variant_effects.Rmd/hex3-1.png" target="_blank">c63ff62</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-03-15
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/lukeholman/fitnessGWAS/blob/490266c958359428cc4b979291695f7e55e15b71/docs/figure/plot_models_variant_effects.Rmd/hex3-1.png" target="_blank">490266c</a>
@@ -2137,6 +2252,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/c63ff6283bcda0ea9a7db6dc201d1d3bf3bdb4b0/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-9-1.png" target="_blank">c63ff62</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-03-15
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/lukeholman/fitnessGWAS/blob/e4f2f4f17ad066aea2499537ec7bd625b587cbdf/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-9-1.png" target="_blank">e4f2f4f</a>
 </td>
 <td>
@@ -2152,6 +2278,761 @@ lukeholman
 </div>
 <pre><code>quartz_off_screen 
                 2 </code></pre>
+</div>
+<div id="correlations-between-mutation-load-and-fitness"
+class="section level2">
+<h2>Correlations between mutation load and fitness</h2>
+<div id="count-all-the-mutations-in-each-dgrp-line"
+class="section level3">
+<h3>Count all the mutations in each DGRP line</h3>
+<p>The following code counts the number of mutations per DGRP line which
+A) have a minor allele frequency of 0.05 or lower, and B) were
+classified by SnpEff as having an effect that we designated to be a
+“major effect”, defined as an insertion, deletion, or nonsynonymous
+substitution inside a coding sequence (as well as gains and losses of
+start codons). We reasoned that such alleles are probably mostly
+deleterious. The following mutation types were classified as major
+effect mutations (see <code>SnpEff</code>’s classification scheme <a
+href="https://pcingola.github.io/SnpEff/se_outputsummary/">here</a>):</p>
+<ul>
+<li>EXON_DELETED</li>
+<li>NON_SYNONYMOUS_CODING</li>
+<li>FRAME_SHIFT</li>
+<li>CODON_CHANGE</li>
+<li>CODON_INSERTION</li>
+<li>CODON_CHANGE_PLUS_CODON_INSERTION</li>
+<li>CODON_DELETION</li>
+<li>CODON_CHANGE_PLUS_CODON_DELETION</li>
+<li>STOP_GAINED</li>
+<li>STOP_LOST</li>
+<li>RARE_AMINO_ACID</li>
+<li>START_LOST</li>
+<li>START_GAINED</li>
+</ul>
+<pre class="r"><code># Load up the DGRP genotype data using the bigsnpr package
+if(!file.exists(&quot;snp_backing_file.bk&quot;)) {
+  rds &lt;- snp_readBed(&quot;data/input/dgrp2.bed&quot;, backingfile = &quot;snp_backing_file&quot;)
+}
+bed_file &lt;- snp_attach(&quot;snp_backing_file.rds&quot;)
+annot &lt;- read.table(&quot;data/input/dgrp.fb557.annot.txt&quot;, 
+                    header = FALSE, stringsAsFactors = FALSE)
+
+# Use PLINK to count allele freqs in the whole DGRP
+plink &lt;- paste(getwd(), &quot;code/plink&quot;, sep = &quot;/&quot;)
+run_command &lt;- function(shell_command, wd = getwd(), path = &quot;&quot;){
+  cat(system(glue(&quot;cd &quot;, wd, path, &quot;\n&quot;,shell_command), intern = TRUE), sep = &#39;\n&#39;)
+}
+run_command(&quot;{plink} --bfile dgrp2 --freq&quot;, path = &quot;/data/input&quot;)</code></pre>
+<pre><code>PLINK v1.90b6.24 64-bit (6 Jun 2021)           www.cog-genomics.org/plink/1.9/
+(C) 2005-2021 Shaun Purcell, Christopher Chang   GNU General Public License v3
+Logging to plink.log.
+Options in effect:
+  --bfile dgrp2
+  --freq
+
+32768 MB RAM detected; reserving 16384 MB for main workspace.
+4438427 variants loaded from .bim file.
+205 people (0 males, 205 females) loaded from .fam.
+205 phenotype values loaded from .fam.
+Using 1 thread (no multithreaded calculations invoked).
+Before main variant filters, 205 founders and 0 nonfounders present.
+Calculating allele frequencies... 0%1%2%3%4%5%6%7%8%9%10%11%12%13%14%15%16%17%18%19%20%21%22%23%24%25%26%27%28%29%30%31%32%33%34%35%36%37%38%39%40%41%42%43%44%45%46%47%48%49%50%51%52%53%54%55%56%57%58%59%60%61%62%63%64%65%66%67%68%69%70%71%72%73%74%75%76%77%78%79%80%81%82%83%84%85%86%87%88%89%90%91%92%93%94%95%96%97%98%99% done.
+Total genotyping rate is 0.956183.
+--freq: Allele frequencies (founders only) written to plink.frq .</code></pre>
+<pre class="r"><code># Get a list of variants that constitute a &#39;major mutation&#39; (types as shown in code below)
+
+major_effect_types &lt;- c(
+  &quot;EXON_DELETED&quot;, &quot;NON_SYNONYMOUS_CODING&quot;,
+  &quot;FRAME_SHIFT&quot;, &quot;CODON_CHANGE&quot;,
+  &quot;CODON_INSERTION&quot;,
+  &quot;CODON_CHANGE_PLUS_CODON_INSERTION&quot;,
+  &quot;CODON_DELETION&quot;,
+  &quot;CODON_CHANGE_PLUS_CODON_DELETION&quot;,
+  &quot;STOP_GAINED&quot;,
+  &quot;STOP_LOST&quot;,
+  &quot;RARE_AMINO_ACID&quot;,
+  &quot;START_LOST&quot;,
+  &quot;START_GAINED&quot;
+)
+
+all_major_mutations &lt;- annot$V1[unique(c(
+  which(str_detect(annot$V3, major_effect_types[1])),
+  which(str_detect(annot$V3, major_effect_types[2])),
+  which(str_detect(annot$V3, major_effect_types[3])),
+  which(str_detect(annot$V3, major_effect_types[4])),
+  which(str_detect(annot$V3, major_effect_types[5])),
+  which(str_detect(annot$V3, major_effect_types[6])),
+  which(str_detect(annot$V3, major_effect_types[7])),
+  which(str_detect(annot$V3, major_effect_types[8])),
+  which(str_detect(annot$V3, major_effect_types[9])),
+  which(str_detect(annot$V3, major_effect_types[10])),
+  which(str_detect(annot$V3, major_effect_types[11])),
+  which(str_detect(annot$V3, major_effect_types[12])),
+  which(str_detect(annot$V3, major_effect_types[13]))
+))]
+
+# Get a list of variants with 0 &gt; MAF &lt; 0.05
+rare_alleles &lt;- read.table(&quot;data/input/plink.frq&quot;, header = T) %&gt;% 
+  filter(MAF &lt; 0.05 &amp; MAF &gt; 0) %&gt;% pull(SNP)
+
+# Get the indexes of variants that are major mutations and also have MAF &lt; 0.05
+indexes &lt;- intersect(
+  which(bed_file$map$marker.ID %in% all_major_mutations), 
+  which(bed_file$map$marker.ID %in% rare_alleles)
+)
+
+# Function to count the number of mutations in all 205 DGRP lines
+count_mutations &lt;- function(indexes){
+  tibble(
+    line = bed_file$fam$family.ID,
+    mutation_load = sapply(
+      1:205, function(i) sum(bed_file$genotypes[i, ][indexes] == 2, na.rm = T))
+  )
+}
+
+mutation_load &lt;- count_mutations(indexes)
+
+# Join the mutation counts with our line mean fitness data
+joined &lt;- left_join(
+  predicted_line_means %&gt;% 
+    select(-block) %&gt;% 
+    gather(fitness_trait, fitness_value, -line),
+  mutation_load, by = join_by(line)) %&gt;% 
+  mutate(fitness_trait = str_to_sentence(str_replace_all(fitness_trait, &quot;[.]&quot;, &quot; &quot;)))</code></pre>
+</div>
+<div id="run-bayesian-multivariate-models" class="section level3">
+<h3>Run Bayesian multivariate models</h3>
+<p>The following Bayesian multivariate model estiamtes the relationship
+between mutation count and each of the four fitness traits, across DGRP
+lines. The model has the multivariate formula
+<code>(FE, FL, ME, ML) ~ mutation_count</code>, assumes Gaussian errors,
+and estimates the residual correlation between the four fitness traits
+(thereby accounting for the correlation between fitness traits when
+estimating the relationship with mutation count). The model uses
+<code>brms</code> default priors.</p>
+<pre class="r"><code>brms_data_muts &lt;- joined %&gt;% 
+  mutate(fitness_trait = str_replace_all(fitness_trait, &quot; &quot;, &quot;_&quot;)) %&gt;% 
+  spread(fitness_trait, fitness_value) %&gt;% 
+  mutate(mutation_count = mutation_load / 100) %&gt;% select(-mutation_load)
+
+mut_model &lt;- brm(bf(
+  mvbind(Female_fitness_early, 
+         Female_fitness_late, 
+         Male_fitness_early, 
+         Male_fitness_late) ~ 
+    mutation_count, sigma ~ 0) + set_rescor(TRUE), 
+  data = brms_data_muts,
+  warmup = 2000, iter = 8000, chains = 4, cores = 4) </code></pre>
+<pre><code>Running /Library/Frameworks/R.framework/Resources/bin/R CMD SHLIB foo.c
+clang -mmacosx-version-min=10.13 -I&quot;/Library/Frameworks/R.framework/Resources/include&quot; -DNDEBUG   -I&quot;/Library/Frameworks/R.framework/Versions/4.2/Resources/library/Rcpp/include/&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.2/Resources/library/RcppEigen/include/&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.2/Resources/library/RcppEigen/include/unsupported&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.2/Resources/library/BH/include&quot; -I&quot;/Library/Frameworks/R.framework/Versions/4.2/Resources/library/StanHeaders/include/src/&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.2/Resources/library/StanHeaders/include/&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.2/Resources/library/RcppParallel/include/&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.2/Resources/library/rstan/include&quot; -DEIGEN_NO_DEBUG  -DBOOST_DISABLE_ASSERTS  -DBOOST_PENDING_INTEGER_LOG2_HPP  -DSTAN_THREADS  -DBOOST_NO_AUTO_PTR  -include &#39;/Library/Frameworks/R.framework/Versions/4.2/Resources/library/StanHeaders/include/stan/math/prim/mat/fun/Eigen.hpp&#39;  -D_REENTRANT -DRCPP_PARALLEL_USE_TBB=1   -I/usr/local/include   -fPIC  -Wall -g -O2  -c foo.c -o foo.o
+In file included from &lt;built-in&gt;:1:
+In file included from /Library/Frameworks/R.framework/Versions/4.2/Resources/library/StanHeaders/include/stan/math/prim/mat/fun/Eigen.hpp:13:
+In file included from /Library/Frameworks/R.framework/Versions/4.2/Resources/library/RcppEigen/include/Eigen/Dense:1:
+In file included from /Library/Frameworks/R.framework/Versions/4.2/Resources/library/RcppEigen/include/Eigen/Core:88:
+/Library/Frameworks/R.framework/Versions/4.2/Resources/library/RcppEigen/include/Eigen/src/Core/util/Macros.h:628:1: error: unknown type name &#39;namespace&#39;
+namespace Eigen {
+^
+/Library/Frameworks/R.framework/Versions/4.2/Resources/library/RcppEigen/include/Eigen/src/Core/util/Macros.h:628:16: error: expected &#39;;&#39; after top level declarator
+namespace Eigen {
+               ^
+               ;
+In file included from &lt;built-in&gt;:1:
+In file included from /Library/Frameworks/R.framework/Versions/4.2/Resources/library/StanHeaders/include/stan/math/prim/mat/fun/Eigen.hpp:13:
+In file included from /Library/Frameworks/R.framework/Versions/4.2/Resources/library/RcppEigen/include/Eigen/Dense:1:
+/Library/Frameworks/R.framework/Versions/4.2/Resources/library/RcppEigen/include/Eigen/Core:96:10: fatal error: &#39;complex&#39; file not found
+#include &lt;complex&gt;
+         ^~~~~~~~~
+3 errors generated.
+make: *** [foo.o] Error 1</code></pre>
+<div id="model-checks-posterior-predictive-plots"
+class="section level4">
+<h4>Model checks (posterior predictive plots)</h4>
+<p>Here, we plot the distribution of the model’s posterior predictions,
+for each of the four response variables, for 50 samples from the
+posterior. If the model’s assumptions and prior are suitable, there
+should be a good match between the posterior predictions (shown in blue;
+one line per sample from the posterior) and the original data (shown in
+black). See <code>?pp_check</code>.</p>
+<pre class="r"><code>do_ppcheck &lt;- function(rr, title){
+    pp_check(mut_model, resp = rr, ndraws = 50) + 
+    scale_y_continuous(limits = c(0, 0.55)) +
+    labs(subtitle=title) + 
+    theme_bw() + 
+    theme(legend.position = &quot;none&quot;) 
+}
+
+grid.arrange(
+  do_ppcheck(&quot;Femalefitnessearly&quot;, &quot;Female fitness early&quot;),
+  do_ppcheck(&quot;Femalefitnesslate&quot;, &quot;Female fitness late&quot;),
+  do_ppcheck(&quot;Malefitnessearly&quot;, &quot;Male fitness early&quot;),
+  do_ppcheck(&quot;Malefitnesslate&quot;, &quot;Male fitness late&quot;))</code></pre>
+<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-11-1">
+Past versions of unnamed-chunk-11-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-11-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/e4f2f4f17ad066aea2499537ec7bd625b587cbdf/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-11-1.png" target="_blank">e4f2f4f</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2022-02-23
+</td>
+</tr>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/1bb603c18144f3ad95844a63f1f0dedcab9e2d0b/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-11-1.png" target="_blank">1bb603c</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2022-02-23
+</td>
+</tr>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/5a59d9f982db9a933d0cea448822677a000087c9/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-11-1.png" target="_blank">5a59d9f</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2021-11-12
+</td>
+</tr>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/8d14298b4d59c2198b6f9c62d415e6adc9b7e658/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-11-1.png" target="_blank">8d14298</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2021-09-26
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div id="plot-mutation-load-against-line-mean-fitness"
+class="section level3">
+<h3>Plot mutation load against line mean fitness</h3>
+<p>The plot shows the correlation, across DGRP lines of fitness with the
+mutation load. The top row shows the effect of ‘major effect’ mutations
+on each of the four fitness traits, while the bottom row shows the
+effect of mutations with a minor allele frequency (MAF) below 5%. The
+number of mutations of the specified type (in 100s) is shown on the
+x-axis, and the regression line comes from the previously mentioned
+Bayesian multivariate model (which accounts for covariance between the
+four fitness traits when estimating the effects of mutation load).</p>
+<p>The figure illustrates that there is large variation in the number of
+putatively deleterious mutations between lines, and there is a negative
+correlation with fitness (especially in females).</p>
+<pre class="r"><code>mut_plot_data &lt;- conditional_effects(mut_model, plot = F)
+
+get_regression_line_data &lt;- function(plot_data){
+  regression_line_rare_muts &lt;- bind_rows(
+    plot_data[[1]] %&gt;% 
+      select(mutation_count, estimate__, lower__, upper__) %&gt;% 
+      mutate(trait = &quot;A. Female early-life fitness&quot;),
+    plot_data[[2]] %&gt;% 
+      select(mutation_count, estimate__, lower__, upper__) %&gt;% 
+      mutate(trait = &quot;B. Female late-life fitness&quot;),
+    plot_data[[3]] %&gt;% 
+      select(mutation_count, estimate__, lower__, upper__) %&gt;% 
+      mutate(trait = &quot;C. Male early-life fitness&quot;),
+    plot_data[[4]] %&gt;% 
+      select(mutation_count, estimate__, lower__, upper__) %&gt;% 
+      mutate(trait = &quot;D. Male late-life fitness&quot;)) %&gt;% 
+    mutate(mut_type = &quot;Load of mutations with MAF &lt; 0.05&quot;) %&gt;% 
+    as_tibble()
+}
+
+get_points_data &lt;- function(brms_data){
+  brms_data %&gt;% select(-line) %&gt;% 
+  rename(`A. Female early-life fitness` = Female_fitness_early,
+         `B. Female late-life fitness` = Female_fitness_late,
+         `C. Male early-life fitness` = Male_fitness_early,
+         `D. Male late-life fitness` = Male_fitness_late) %&gt;% 
+  gather(trait, estimate__, -mutation_count)
+}
+
+
+mut_load_correlation_plot &lt;- get_regression_line_data(mut_plot_data) %&gt;% 
+  ggplot(aes(x = mutation_count, y = estimate__)) + 
+  geom_ribbon(aes(ymin = lower__, ymax = upper__, linetype = NA, fill = trait)) +
+  geom_line(lwd = 0.5) +
+  geom_point(data = get_points_data(brms_data_muts), alpha = 0.7, size = 0.7) +
+  labs(x = &quot;Mutation load (100s)&quot;, 
+       y = &quot;Line mean fitness&quot;) + 
+  facet_wrap(~trait, nrow = 2) +
+  scale_fill_manual(values = c(&quot;pink&quot;, &quot;deeppink2&quot;, &quot;lightblue&quot;, &quot;steelblue&quot;)) + 
+  theme_bw() + 
+  theme(text = element_text(family = &quot;Raleway&quot;, size = 12)) +
+  theme(plot.title = element_text(hjust = 0), 
+        strip.text = element_text(hjust = 0),
+        strip.background = element_blank(),
+        legend.position = &quot;none&quot;)
+
+mut_load_correlation_plot</code></pre>
+<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-12-1">
+Past versions of unnamed-chunk-12-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-12-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/c63ff6283bcda0ea9a7db6dc201d1d3bf3bdb4b0/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-12-1.png" target="_blank">c63ff62</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-03-15
+</td>
+</tr>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/e4f2f4f17ad066aea2499537ec7bd625b587cbdf/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-12-1.png" target="_blank">e4f2f4f</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2022-02-23
+</td>
+</tr>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/1bb603c18144f3ad95844a63f1f0dedcab9e2d0b/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-12-1.png" target="_blank">1bb603c</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2022-02-23
+</td>
+</tr>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/652106368c95ac4a04b2383d560d3c8073990f18/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-12-1.png" target="_blank">6521063</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2022-02-22
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="estimated-effect-size-of-mutation-load-on-fitness"
+class="section level3 tabset">
+<h3 class="tabset">Estimated effect size of mutation load on
+fitness</h3>
+<div id="plot-2" class="section level4">
+<h4>Plot</h4>
+<p>The left plot shows the posterior estimates of the effect size of
+mutation load on fitness (i.e. the ‘regression slope’ from the previous
+figure). The coloured area shows the posterior distribution, and the
+horizontal bar summarises its median and 66% and 95% credible intervals.
+The right plot shows the difference in this effect size between fitness
+traits, e.g. FE - FL shows the difference in regression slope between
+female early-life and late-life fitness. A positive sign indicates that
+mutation load has more negative effect on the second trait
+(e.g. mutations appear more costly to older females than younger).</p>
+<pre class="r"><code>posterior_muts &lt;- as_draws_df(mut_model, variable = &quot;^b_&quot;, regex = T) %&gt;% 
+  as_tibble() %&gt;% select(contains(&quot;mutation&quot;))
+
+make_plot1 &lt;- function(posterior, title){
+  tibble(
+    `Female\nearly-life\n(FE)` = unlist(posterior[,1]), 
+    `Female\nlate-life\n(FL)` = unlist(posterior[,2]),  
+    `Male\nearly-life\n(ME)` = unlist(posterior[,3]),  
+    `Male\nlate-life\n(ML)` = unlist(posterior[,4])) %&gt;% 
+    gather() %&gt;% 
+    mutate(key = factor(key, rev(unique(key))),
+           x = title) %&gt;% 
+    ggplot(aes(value, key)) + 
+    geom_vline(xintercept = 0, linetype = 2) +
+    stat_halfeye(aes(fill = key)) + 
+    facet_wrap(~ x) +
+    labs(x = &quot;Change per 100 mutations&quot;, y = NULL) +
+    scale_fill_manual(values = rev(c(&quot;pink&quot;, &quot;deeppink2&quot;, &quot;lightblue&quot;, &quot;steelblue&quot;))) + 
+    theme_bw() + 
+    theme(text = element_text(family = &quot;Raleway&quot;, size = 10)) +
+    theme(plot.title = element_text(hjust = 0), 
+          strip.text = element_text(hjust = 0),
+          strip.background = element_blank(),
+          legend.position = &quot;none&quot;)
+}
+
+make_plot2 &lt;- function(posterior, title, col){
+  tibble(
+    `ME - FE` = unlist(posterior[,3] - posterior[,1]), 
+    `ML - FE` = unlist(posterior[,4] - posterior[,1]), 
+    `ME - FL` = unlist(posterior[,3] - posterior[,2]), 
+    `ML - FL` = unlist(posterior[,4] - posterior[,2]), 
+    `FE - FL` = unlist(posterior[,1] - posterior[,2]), 
+    `ME - ML` = unlist(posterior[,3] - posterior[,4]) ) %&gt;% 
+    gather() %&gt;% 
+    mutate(key = factor(key, rev(c(&quot;FE - FL&quot;, &quot;ME - ML&quot;,
+                                   &quot;ME - FE&quot;, &quot;ML - FE&quot;,
+                                   &quot;ME - FL&quot;, &quot;ML - FL&quot;))),
+           x = title) %&gt;% 
+    ggplot(aes(value, key)) + 
+    geom_vline(xintercept = 0, linetype = 2) +
+    stat_halfeye(fill = col) + labs(x = &quot;Effect size difference&quot;, y = NULL) +
+    facet_wrap(~ x) +
+    
+    theme_bw() + 
+    theme(text = element_text(family = &quot;Raleway&quot;, size = 10)) +
+    theme(plot.title = element_text(hjust = 0), 
+          strip.text = element_text(hjust = 0),
+          strip.background = element_blank())
+}
+
+pp1 &lt;- make_plot1(posterior_muts, &quot;E. Effect sizes (posterior)&quot;)
+pp2 &lt;- make_plot2(posterior_muts, &quot;F. Differences in effect size&quot;, col = &quot;#F5CA7B&quot;)
+
+plot_grid(mut_load_correlation_plot,
+          arrangeGrob(pp1, pp2, ncol=2), rel_widths = c(1,1.1))</code></pre>
+<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-13-1">
+Past versions of unnamed-chunk-13-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-13-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/e4f2f4f17ad066aea2499537ec7bd625b587cbdf/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-13-1.png" target="_blank">e4f2f4f</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2022-02-23
+</td>
+</tr>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/1bb603c18144f3ad95844a63f1f0dedcab9e2d0b/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-13-1.png" target="_blank">1bb603c</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2022-02-23
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<pre class="r"><code>pdf(&quot;figures/fig4_mutation_load.pdf&quot;, height = 4.7, width = 9.4)
+plot_grid(mut_load_correlation_plot,
+          arrangeGrob(pp1, pp2, ncol=2), rel_widths = c(1,1.1))
+dev.off()</code></pre>
+<pre><code>quartz_off_screen 
+                2 </code></pre>
+<pre class="r"><code>remove_pages(1, &quot;figures/fig4_mutation_load.pdf&quot;, &quot;figures/fig4_mutation_load.pdf&quot;)</code></pre>
+<pre><code>[1] TRUE</code></pre>
+<pre class="r"><code># Clean up files:
+unlink(list(&quot;snp_backing_file.rds&quot;, 
+            &quot;snp_backing_file.bk&quot;, 
+            &quot;data/input/plink.log&quot;,
+            &quot;data/input/plink.frq&quot;))</code></pre>
+</div>
+<div id="table" class="section level4">
+<h4>Table</h4>
+<pre class="r"><code>make_posterior_table &lt;- function(posterior){
+  as_tibble(rbind(
+    posterior_summary(posterior[,1]),
+    posterior_summary(posterior[,2]),
+    posterior_summary(posterior[,3]),
+    posterior_summary(posterior[,4]),
+    posterior_summary(posterior[,1] - posterior[,2]), 
+    posterior_summary(posterior[,3] - posterior[,4]), 
+    posterior_summary(posterior[,3] - posterior[,1]), 
+    posterior_summary(posterior[,4] - posterior[,1]), 
+    posterior_summary(posterior[,3] - posterior[,2]), 
+    posterior_summary(posterior[,4] - posterior[,2]))) %&gt;% 
+    mutate(`Effect size or effect size difference` = c(
+      &quot;Female early-life (FE)&quot;, &quot;Female late-life (FL)&quot;,
+      &quot;Male late-life (ME)&quot;, &quot;Male late-life (ML)&quot;,
+      &quot;FE - FL&quot;, &quot;ME - ML&quot;,
+      &quot;ME - FE&quot;, &quot;ML - FE&quot;, 
+      &quot;ME - FL&quot;, &quot;ML - FL&quot;), .before = 1) %&gt;% 
+    rename(&quot;Error&quot; = `Est.Error`,
+           `Lower 95% CI` = Q2.5,
+           `Upper 95% CI` = Q97.5,)
+  
+}
+
+saveRDS(make_posterior_table(posterior_muts), 
+        &quot;data/derived/supp_table_mutation_load_effects.rds&quot;)
+
+make_posterior_table(posterior_muts) %&gt;% 
+  kable(digits = 3) %&gt;% 
+  kable_styling(full_width = F)</code></pre>
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Effect size or effect size difference
+</th>
+<th style="text-align:right;">
+Estimate
+</th>
+<th style="text-align:right;">
+Error
+</th>
+<th style="text-align:right;">
+Lower 95% CI
+</th>
+<th style="text-align:right;">
+Upper 95% CI
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Female early-life (FE)
+</td>
+<td style="text-align:right;">
+-0.032
+</td>
+<td style="text-align:right;">
+0.022
+</td>
+<td style="text-align:right;">
+-0.075
+</td>
+<td style="text-align:right;">
+0.011
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Female late-life (FL)
+</td>
+<td style="text-align:right;">
+-0.054
+</td>
+<td style="text-align:right;">
+0.022
+</td>
+<td style="text-align:right;">
+-0.096
+</td>
+<td style="text-align:right;">
+-0.011
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Male late-life (ME)
+</td>
+<td style="text-align:right;">
+-0.024
+</td>
+<td style="text-align:right;">
+0.022
+</td>
+<td style="text-align:right;">
+-0.067
+</td>
+<td style="text-align:right;">
+0.019
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Male late-life (ML)
+</td>
+<td style="text-align:right;">
+-0.040
+</td>
+<td style="text-align:right;">
+0.022
+</td>
+<td style="text-align:right;">
+-0.083
+</td>
+<td style="text-align:right;">
+0.002
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+FE - FL
+</td>
+<td style="text-align:right;">
+0.022
+</td>
+<td style="text-align:right;">
+0.015
+</td>
+<td style="text-align:right;">
+-0.008
+</td>
+<td style="text-align:right;">
+0.052
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ME - ML
+</td>
+<td style="text-align:right;">
+0.017
+</td>
+<td style="text-align:right;">
+0.012
+</td>
+<td style="text-align:right;">
+-0.007
+</td>
+<td style="text-align:right;">
+0.040
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ME - FE
+</td>
+<td style="text-align:right;">
+0.008
+</td>
+<td style="text-align:right;">
+0.028
+</td>
+<td style="text-align:right;">
+-0.046
+</td>
+<td style="text-align:right;">
+0.063
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ML - FE
+</td>
+<td style="text-align:right;">
+-0.008
+</td>
+<td style="text-align:right;">
+0.029
+</td>
+<td style="text-align:right;">
+-0.064
+</td>
+<td style="text-align:right;">
+0.049
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ME - FL
+</td>
+<td style="text-align:right;">
+0.030
+</td>
+<td style="text-align:right;">
+0.026
+</td>
+<td style="text-align:right;">
+-0.021
+</td>
+<td style="text-align:right;">
+0.081
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ML - FL
+</td>
+<td style="text-align:right;">
+0.014
+</td>
+<td style="text-align:right;">
+0.026
+</td>
+<td style="text-align:right;">
+-0.039
+</td>
+<td style="text-align:right;">
+0.065
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="frequencies-of-antagonistic-loci-and-transcripts"
 class="section level2">
@@ -2224,7 +3105,7 @@ focal_dat &lt;- rbind(
 
 labs &lt;- c(&quot;Negative&quot;, &quot;Weakly negative&quot;, &quot;Weakly positive&quot;, &quot;Positive&quot;)
 
-fig_4_top_row &lt;- focal_dat %&gt;% 
+fig_5_top_row &lt;- focal_dat %&gt;% 
   ggplot(aes(Var1, Freq, fill = Var2)) + 
   facet_wrap(~ pp) + 
   geom_bar(stat=&quot;identity&quot;, colour = &quot;grey20&quot;) +
@@ -2241,14 +3122,14 @@ fig_4_top_row &lt;- focal_dat %&gt;%
 # To count the total number of transcripts tested:
 # focal_dat$Freq[focal_dat$pp == &quot;C. Early-life fitness&quot;] %&gt;% sum()
 
-fig_4_top_row</code></pre>
-<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-10-1.png" width="768" style="display: block; margin: auto;" /></p>
+fig_5_top_row</code></pre>
+<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-15-1.png" width="768" style="display: block; margin: auto;" /></p>
 <p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-10-1">
-Past versions of unnamed-chunk-10-1.png
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-15-1">
+Past versions of unnamed-chunk-15-1.png
 </button>
 </p>
-<div id="fig-unnamed-chunk-10-1" class="collapse">
+<div id="fig-unnamed-chunk-15-1" class="collapse">
 <div class="table-responsive">
 <table class="table table-condensed table-hover">
 <thead>
@@ -2267,35 +3148,24 @@ Date
 <tbody>
 <tr>
 <td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/e4f2f4f17ad066aea2499537ec7bd625b587cbdf/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-10-1.png" target="_blank">e4f2f4f</a>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/c63ff6283bcda0ea9a7db6dc201d1d3bf3bdb4b0/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-15-1.png" target="_blank">c63ff62</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-03-15
+</td>
+</tr>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/e4f2f4f17ad066aea2499537ec7bd625b587cbdf/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-15-1.png" target="_blank">e4f2f4f</a>
 </td>
 <td>
 lukeholman
 </td>
 <td>
 2022-02-23
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/1bb603c18144f3ad95844a63f1f0dedcab9e2d0b/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-10-1.png" target="_blank">1bb603c</a>
-</td>
-<td>
-lukeholman
-</td>
-<td>
-2022-02-23
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/652106368c95ac4a04b2383d560d3c8073990f18/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-10-1.png" target="_blank">6521063</a>
-</td>
-<td>
-lukeholman
-</td>
-<td>
-2022-02-22
 </td>
 </tr>
 </tbody>
@@ -2303,7 +3173,7 @@ lukeholman
 </div>
 </div>
 </div>
-<div id="table" class="section level5">
+<div id="table-1" class="section level5">
 <h5>Table</h5>
 <pre class="r"><code>supp_tabl_gwas_intersex &lt;- focal_dat %&gt;% 
   split(.$pp) %&gt;% 
@@ -3011,13 +3881,13 @@ focal_dat %&gt;%
   theme(panel.grid.major.x = element_blank(),
         strip.background = element_blank(),
         strip.text = element_text(hjust = 0, family = &quot;Raleway&quot;, size = 12))</code></pre>
-<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-12-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-17-1.png" width="768" style="display: block; margin: auto;" /></p>
 <p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-12-1">
-Past versions of unnamed-chunk-12-1.png
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-17-1">
+Past versions of unnamed-chunk-17-1.png
 </button>
 </p>
-<div id="fig-unnamed-chunk-12-1" class="collapse">
+<div id="fig-unnamed-chunk-17-1" class="collapse">
 <div class="table-responsive">
 <table class="table table-condensed table-hover">
 <thead>
@@ -3036,7 +3906,7 @@ Date
 <tbody>
 <tr>
 <td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/e4f2f4f17ad066aea2499537ec7bd625b587cbdf/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-12-1.png" target="_blank">e4f2f4f</a>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/1bb603c18144f3ad95844a63f1f0dedcab9e2d0b/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-17-1.png" target="_blank">1bb603c</a>
 </td>
 <td>
 lukeholman
@@ -3047,18 +3917,7 @@ lukeholman
 </tr>
 <tr>
 <td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/1bb603c18144f3ad95844a63f1f0dedcab9e2d0b/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-12-1.png" target="_blank">1bb603c</a>
-</td>
-<td>
-lukeholman
-</td>
-<td>
-2022-02-23
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/652106368c95ac4a04b2383d560d3c8073990f18/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-12-1.png" target="_blank">6521063</a>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/652106368c95ac4a04b2383d560d3c8073990f18/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-17-1.png" target="_blank">6521063</a>
 </td>
 <td>
 lukeholman
@@ -3072,7 +3931,7 @@ lukeholman
 </div>
 </div>
 </div>
-<div id="table-1" class="section level5">
+<div id="table-2" class="section level5">
 <h5>Table</h5>
 <pre class="r"><code>supp_tabl_gwas_interage &lt;- focal_dat %&gt;% 
   split(.$pp) %&gt;% 
@@ -3827,7 +4686,7 @@ focal_dat &lt;- rbind(
 # To count the total number of transcripts tested, 14286:
 # focal_dat$Freq[focal_dat$pp == &quot;C. Early-life fitness&quot;] %&gt;% sum()
 
-fig_4_bottom_row &lt;- focal_dat %&gt;% 
+fig_5_bottom_row &lt;- focal_dat %&gt;% 
   ggplot(aes(Var1, Freq, fill = Var2)) + 
   facet_wrap(~ pp) + 
   geom_bar(stat=&quot;identity&quot;, colour = &quot;grey20&quot;) +
@@ -3842,14 +4701,14 @@ fig_4_bottom_row &lt;- focal_dat %&gt;%
         strip.text = element_text(hjust = 0))
         # strip.text = element_text(hjust = 0, size = 12))
 
-fig_4_bottom_row</code></pre>
-<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-15-1.png" width="768" style="display: block; margin: auto;" /></p>
+fig_5_bottom_row</code></pre>
+<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-20-1.png" width="768" style="display: block; margin: auto;" /></p>
 <p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-15-1">
-Past versions of unnamed-chunk-15-1.png
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-20-1">
+Past versions of unnamed-chunk-20-1.png
 </button>
 </p>
-<div id="fig-unnamed-chunk-15-1" class="collapse">
+<div id="fig-unnamed-chunk-20-1" class="collapse">
 <div class="table-responsive">
 <table class="table table-condensed table-hover">
 <thead>
@@ -3868,7 +4727,18 @@ Date
 <tbody>
 <tr>
 <td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/e4f2f4f17ad066aea2499537ec7bd625b587cbdf/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-15-1.png" target="_blank">e4f2f4f</a>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/e4f2f4f17ad066aea2499537ec7bd625b587cbdf/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-20-1.png" target="_blank">e4f2f4f</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2022-02-23
+</td>
+</tr>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/1bb603c18144f3ad95844a63f1f0dedcab9e2d0b/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-20-1.png" target="_blank">1bb603c</a>
 </td>
 <td>
 lukeholman
@@ -3882,7 +4752,7 @@ lukeholman
 </div>
 </div>
 </div>
-<div id="table-2" class="section level5">
+<div id="table-3" class="section level5">
 <h5>Table</h5>
 <pre class="r"><code>supp_tabl_twas_intersex &lt;- focal_dat %&gt;% 
   split(.$pp) %&gt;% 
@@ -4616,46 +5486,9 @@ focal_dat %&gt;%
   theme(panel.grid.major.x = element_blank(),
         strip.background = element_blank(),
         strip.text = element_text(hjust = 0, family = &quot;Raleway&quot;, size = 12))</code></pre>
-<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-19-1.png" width="1056" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-19-1">
-Past versions of unnamed-chunk-19-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-19-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/e4f2f4f17ad066aea2499537ec7bd625b587cbdf/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-19-1.png" target="_blank">e4f2f4f</a>
-</td>
-<td>
-lukeholman
-</td>
-<td>
-2022-02-23
-</td>
-</tr>
-</tbody>
-</table>
+<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-24-1.png" width="1056" style="display: block; margin: auto;" /></p>
 </div>
-</div>
-</div>
-<div id="table-3" class="section level5">
+<div id="table-4" class="section level5">
 <h5>Table</h5>
 <pre class="r"><code>supp_tabl_twas_interage &lt;- focal_dat %&gt;% 
   split(.$pp) %&gt;% 
@@ -5482,7 +6315,7 @@ TWAS_ratios_plot &lt;- antagonism_evidence_ratios_twas %&gt;%
 pp &lt;- plot_grid(GWAS_ratios_plot, TWAS_ratios_plot, 
                    labels = c(&#39;A&#39;, &#39;B&#39;), label_size = 12)
 
-ggsave(&quot;figures/fig5_antagonism_ratios.pdf&quot;, pp, width = 8.5, height = 4.9)
+ggsave(&quot;figures/fig6_antagonism_ratios.pdf&quot;, pp, width = 8.5, height = 4.9)
 
 pp</code></pre>
 <p><img src="figure/plot_models_variant_effects.Rmd/evidence_ratio_plot-1.png" width="672" style="display: block; margin: auto;" /></p>
@@ -5508,6 +6341,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/c63ff6283bcda0ea9a7db6dc201d1d3bf3bdb4b0/docs/figure/plot_models_variant_effects.Rmd/evidence_ratio_plot-1.png" target="_blank">c63ff62</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-03-15
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/lukeholman/fitnessGWAS/blob/1bb603c18144f3ad95844a63f1f0dedcab9e2d0b/docs/figure/plot_models_variant_effects.Rmd/evidence_ratio_plot-1.png" target="_blank">1bb603c</a>
@@ -5561,149 +6405,163 @@ lukeholman
 <h3>Model the evidence ratios</h3>
 <div id="inter-sex-early-life-model-gwas" class="section level4">
 <h4>Inter-sex, early-life model (GWAS)</h4>
+<p>The initial full model contains the predictors <code>MAF</code>,
+<code>chromosome</code>, and <code>major_effect</code> (which records
+whether or not the focal variant causes an insertion, deletion, or
+nonsynonymous change in a coding sequence). <code>major_effect</code>
+was not significant, so the model was refitted without it.</p>
 <pre class="r"><code># Annotate data with MAF, site, class, etc. 
 dat &lt;- left_join(antagonism_evidence_ratios_gwas,
-          collect(tbl(db, &quot;variants&quot;)), by = &quot;SNP&quot;) %&gt;% 
-  distinct() %&gt;% mutate(site.class = str_to_title(site.class))
-
-# Focus only on the commonest site classes:
-dat &lt;- dat %&gt;% 
-  filter(site.class %in% c(&quot;Intron&quot;, &quot;Intergenic&quot;, &quot;Downstream&quot;, &quot;Upstream&quot;,
-                           &quot;Synonymous_coding&quot;, &quot;Non_synonymous_coding&quot;, &quot;Utr_3_prime&quot;,
-                           &quot;Exon&quot;, &quot;Utr_5_prime&quot;)) 
+          collect(tbl(db, &quot;variants&quot;)), by = &quot;SNP&quot;, multiple = &quot;all&quot;) %&gt;% 
+  distinct() %&gt;% rename(chromosome = chr)
 
 # Remove chromosome 4 (too few sites)
-dat &lt;- dat %&gt;% filter(chr != &quot;4&quot;) 
+dat &lt;- dat %&gt;% filter(chromosome != &quot;4&quot;) 
+dat$chromosome &lt;- relevel(factor(dat$chromosome), ref = &quot;X&quot;)
 
-# If there are multiple site classes for a SNP, or multiple SNPs 
-# in the same 100% LD clump, pick one SNP and/or 1 site class at random
-set.seed(1)
-dat &lt;- dat[sample(nrow(dat), nrow(dat)), ] %&gt;%
-  split(.$SNP_clump) %&gt;%
-  map_df(~ .x[1, ])
+# Classify mutations as being major effect or not
+dat &lt;- dat %&gt;% 
+  mutate(major_effect = &quot;No&quot;,
+         major_effect = replace(major_effect, site.class %in% major_effect_types, &quot;Yes&quot;))
 
-dat &lt;- dat %&gt;% arrange(site.class)
-dat$site.class &lt;- relevel(factor(dat$site.class), ref = &quot;Synonymous_coding&quot;)
-dat$chr &lt;- relevel(factor(dat$chr), ref = &quot;X&quot;)
+# For mutations with multiple site classes, record whether any site class is major or not,
+# ensuring that there is one row in &#39;dat&#39; for each SNP
+dat &lt;- dat %&gt;% 
+  group_by(SNP_clump) %&gt;% 
+  summarise(inter_sex_early = inter_sex_early[1],
+            inter_sex_late = inter_sex_late[1],
+            MAF = MAF[1],
+            chromosome = chromosome[1],
+            major_effect = ifelse(any(major_effect == &quot;Yes&quot;), &quot;Yes&quot;, &quot;No&quot;))
 
 n_loci &lt;- prettyNum(nrow(dat), big.mark = &quot;,&quot;, scientific = FALSE)
 
-
-intersex_early_model_gwas &lt;- glm(antagonistic ~ chr + MAF + site.class, 
+intersex_early_model_gwas &lt;- glm(antagonistic ~ chromosome + MAF + major_effect, 
              data = dat %&gt;% 
                mutate(antagonistic = as.numeric(inter_sex_early &lt;= 
-                        quantile(dat$inter_sex_early, probs=0.01))), 
+                        quantile(dat$inter_sex_early, probs = 0.01))), 
     family = &quot;binomial&quot;)
 car::Anova(intersex_early_model_gwas, type = 3)</code></pre>
 <pre><code>Analysis of Deviance Table (Type III tests)
 
 Response: antagonistic
-           LR Chisq Df Pr(&gt;Chisq)    
-chr           11.07  4    0.02584 *  
-MAF          632.01  1    &lt; 2e-16 ***
-site.class     4.48  7    0.72322    
+             LR Chisq Df Pr(&gt;Chisq)    
+chromosome      11.04  4    0.02617 *  
+MAF            629.77  1    &lt; 2e-16 ***
+major_effect     0.00  1    0.96622    
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<pre class="r"><code>intersex_early_model_gwas &lt;- update(intersex_early_model_gwas,  ~ . -site.class)
+<pre class="r"><code>intersex_early_model_gwas &lt;- update(intersex_early_model_gwas,  ~ . -major_effect)
 car::Anova(intersex_early_model_gwas, type = 3)</code></pre>
 <pre><code>Analysis of Deviance Table (Type III tests)
 
 Response: antagonistic
-    LR Chisq Df Pr(&gt;Chisq)    
-chr    11.23  4    0.02411 *  
-MAF   630.62  1    &lt; 2e-16 ***
+           LR Chisq Df Pr(&gt;Chisq)    
+chromosome    11.03  4    0.02618 *  
+MAF          629.83  1    &lt; 2e-16 ***
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 <pre class="r"><code>summary(intersex_early_model_gwas)</code></pre>
 <pre><code>
 Call:
-glm(formula = antagonistic ~ chr + MAF, family = &quot;binomial&quot;, 
+glm(formula = antagonistic ~ chromosome + MAF, family = &quot;binomial&quot;, 
     data = dat %&gt;% mutate(antagonistic = as.numeric(inter_sex_early &lt;= 
         quantile(dat$inter_sex_early, probs = 0.01))))
 
 Deviance Residuals: 
     Min       1Q   Median       3Q      Max  
--0.2256  -0.1766  -0.1208  -0.0939   3.4183  
+-0.2253  -0.1764  -0.1207  -0.0941   3.4181  
 
 Coefficients:
-            Estimate Std. Error z value Pr(&gt;|z|)    
-(Intercept) -5.83559    0.08616 -67.730  &lt; 2e-16 ***
-chr2L       -0.25998    0.08095  -3.212  0.00132 ** 
-chr2R       -0.14129    0.07894  -1.790  0.07346 .  
-chr3L       -0.14743    0.07801  -1.890  0.05877 .  
-chr3R       -0.08119    0.08005  -1.014  0.31047    
-MAF          4.37586    0.18468  23.695  &lt; 2e-16 ***
+             Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)  -5.83463    0.08607 -67.787  &lt; 2e-16 ***
+chromosome2L -0.25990    0.08095  -3.211  0.00132 ** 
+chromosome2R -0.14171    0.07893  -1.795  0.07261 .  
+chromosome3L -0.13637    0.07781  -1.752  0.07969 .  
+chromosome3R -0.08426    0.08011  -1.052  0.29292    
+MAF           4.36814    0.18443  23.684  &lt; 2e-16 ***
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 
 (Dispersion parameter for binomial family taken to be 1)
 
-    Null deviance: 18467  on 164800  degrees of freedom
-Residual deviance: 17828  on 164795  degrees of freedom
-AIC: 17840
+    Null deviance: 18501  on 165100  degrees of freedom
+Residual deviance: 17862  on 165095  degrees of freedom
+AIC: 17874
 
 Number of Fisher Scoring iterations: 8</code></pre>
 </div>
 <div id="inter-sex-late-life-model-gwas" class="section level4">
 <h4>Inter-sex, late-life model (GWAS)</h4>
-<pre class="r"><code>intersex_late_model_gwas &lt;- glm(antagonistic ~ chr + MAF + site.class, 
+<p>The initial full model contains the predictors <code>MAF</code>,
+<code>chromosome</code>, and <code>major_effect</code> (which records
+whether or not the focal variant causes an insertion, deletion, or
+nonsynonymous change in a coding sequence). <code>major_effect</code>
+was not significant, so the model was refitted without it.</p>
+<pre class="r"><code>intersex_late_model_gwas &lt;- glm(antagonistic ~ chromosome + MAF + major_effect, 
              data = dat %&gt;% 
                mutate(antagonistic = inter_sex_late &lt;= 
-                        quantile(dat$inter_sex_late, probs=0.01)), 
+                        quantile(dat$inter_sex_late, probs = 0.01)), 
     family = &quot;binomial&quot;)
 car::Anova(intersex_late_model_gwas, type = 3)</code></pre>
 <pre><code>Analysis of Deviance Table (Type III tests)
 
 Response: antagonistic
-           LR Chisq Df Pr(&gt;Chisq)    
-chr            7.85  4    0.09706 .  
-MAF          537.35  1    &lt; 2e-16 ***
-site.class     3.24  7    0.86166    
+             LR Chisq Df Pr(&gt;Chisq)    
+chromosome       7.91  4     0.0948 .  
+MAF            537.00  1     &lt;2e-16 ***
+major_effect     0.14  1     0.7120    
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<pre class="r"><code>intersex_late_model_gwas &lt;- update(intersex_late_model_gwas,  ~ . -site.class)
+<pre class="r"><code>intersex_late_model_gwas &lt;- update(intersex_late_model_gwas,  ~ . -major_effect)
 car::Anova(intersex_late_model_gwas, type = 3)</code></pre>
 <pre><code>Analysis of Deviance Table (Type III tests)
 
 Response: antagonistic
-    LR Chisq Df Pr(&gt;Chisq)    
-chr     8.03  4    0.09041 .  
-MAF   536.59  1    &lt; 2e-16 ***
+           LR Chisq Df Pr(&gt;Chisq)    
+chromosome     7.93  4    0.09421 .  
+MAF          537.26  1    &lt; 2e-16 ***
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 <pre class="r"><code>summary(intersex_late_model_gwas)</code></pre>
 <pre><code>
 Call:
-glm(formula = antagonistic ~ chr + MAF, family = &quot;binomial&quot;, 
+glm(formula = antagonistic ~ chromosome + MAF, family = &quot;binomial&quot;, 
     data = dat %&gt;% mutate(antagonistic = inter_sex_late &lt;= quantile(dat$inter_sex_late, 
         probs = 0.01)))
 
 Deviance Residuals: 
     Min       1Q   Median       3Q      Max  
--0.2204  -0.1748  -0.1232  -0.0980   3.3596  
+-0.2202  -0.1746  -0.1231  -0.0981   3.3600  
 
 Coefficients:
-            Estimate Std. Error z value Pr(&gt;|z|)    
-(Intercept) -5.69624    0.08410 -67.735  &lt; 2e-16 ***
-chr2L       -0.21675    0.07974  -2.718  0.00657 ** 
-chr2R       -0.16673    0.07910  -2.108  0.03504 *  
-chr3L       -0.15168    0.07778  -1.950  0.05118 .  
-chr3R       -0.12758    0.08057  -1.583  0.11332    
-MAF          4.00050    0.18112  22.087  &lt; 2e-16 ***
+             Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)  -5.69753    0.08405 -67.791  &lt; 2e-16 ***
+chromosome2L -0.21668    0.07974  -2.717  0.00658 ** 
+chromosome2R -0.16423    0.07904  -2.078  0.03774 *  
+chromosome3L -0.14626    0.07769  -1.883  0.05973 .  
+chromosome3R -0.12753    0.08057  -1.583  0.11347    
+MAF           3.99919    0.18095  22.102  &lt; 2e-16 ***
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 
 (Dispersion parameter for binomial family taken to be 1)
 
-    Null deviance: 18467  on 164800  degrees of freedom
-Residual deviance: 17925  on 164795  degrees of freedom
-AIC: 17937
+    Null deviance: 18501  on 165100  degrees of freedom
+Residual deviance: 17958  on 165095  degrees of freedom
+AIC: 17970
 
 Number of Fisher Scoring iterations: 8</code></pre>
 </div>
 <div id="inter-sex-early-life-model-twas" class="section level4">
 <h4>Inter-sex, early-life model (TWAS)</h4>
-<pre class="r"><code>n_transcripts &lt;- prettyNum(nrow(antagonism_evidence_ratios_twas), big.mark = &quot;,&quot;, scientific = FALSE)
+<p>The full model fitted here contains the predictors
+<code>chromosome</code>, <code>absolute_sex_bias_in_expression</code>,
+and <code>mean_expression_level</code>. Only the latter is significant,
+with highly-expressed transcripts being less likely to be sexually
+antagonistic.</p>
+<pre class="r"><code>n_transcripts &lt;- prettyNum(nrow(antagonism_evidence_ratios_twas), 
+                           big.mark = &quot;,&quot;, scientific = FALSE)
 
 twas_model_data &lt;- antagonism_evidence_ratios_twas %&gt;% 
   mutate(antagonistic = inter_sex_early &lt;= 
@@ -5712,9 +6570,10 @@ twas_model_data &lt;- antagonism_evidence_ratios_twas %&gt;%
          mean_expression_level = AveExpr)
 
 
-intersex_early_twas &lt;- glm(antagonistic ~ chromosome + absolute_sex_bias_in_expression + mean_expression_level, 
-             data = twas_model_data, 
-    family = &quot;binomial&quot;)
+intersex_early_twas &lt;- glm(
+  antagonistic ~ chromosome + absolute_sex_bias_in_expression + mean_expression_level, 
+  data = twas_model_data, 
+  family = &quot;binomial&quot;)
 car::Anova(intersex_early_twas, type = 3)</code></pre>
 <pre><code>Analysis of Deviance Table (Type III tests)
 
@@ -5725,45 +6584,58 @@ absolute_sex_bias_in_expression   0.0446  1   0.832701
 mean_expression_level             8.7170  1   0.003153 **
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>intersex_early_twas &lt;- update(
+  intersex_early_twas,  
+  ~ . -absolute_sex_bias_in_expression -chromosome)
+car::Anova(intersex_early_twas, type = 3)</code></pre>
+<pre><code>Analysis of Deviance Table (Type III tests)
+
+Response: antagonistic
+                      LR Chisq Df Pr(&gt;Chisq)   
+mean_expression_level   9.2385  1    0.00237 **
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 <pre class="r"><code>summary(intersex_early_twas)</code></pre>
 <pre><code>
 Call:
-glm(formula = antagonistic ~ chromosome + absolute_sex_bias_in_expression + 
-    mean_expression_level, family = &quot;binomial&quot;, data = twas_model_data)
+glm(formula = antagonistic ~ mean_expression_level, family = &quot;binomial&quot;, 
+    data = twas_model_data)
 
 Deviance Residuals: 
     Min       1Q   Median       3Q      Max  
--0.2018  -0.1541  -0.1377  -0.1236   3.2023  
+-0.1848  -0.1543  -0.1391  -0.1256   3.2353  
 
 Coefficients:
-                                Estimate Std. Error z value Pr(&gt;|z|)   
-(Intercept)                     -1.56221    1.11609  -1.400  0.16160   
-chromosome2L                     0.35439    0.29528   1.200  0.23008   
-chromosome2R                     0.15257    0.30175   0.506  0.61312   
-chromosome3L                     0.32701    0.29486   1.109  0.26742   
-chromosome3R                    -0.02928    0.30172  -0.097  0.92268   
-absolute_sex_bias_in_expression -0.05345    0.25445  -0.210  0.83363   
-mean_expression_level           -0.52326    0.17945  -2.916  0.00355 **
+                      Estimate Std. Error z value Pr(&gt;|z|)   
+(Intercept)            -1.3052     1.0838  -1.204  0.22848   
+mean_expression_level  -0.5401     0.1792  -3.014  0.00258 **
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 
 (Dispersion parameter for binomial family taken to be 1)
 
     Null deviance: 1590.3  on 14190  degrees of freedom
-Residual deviance: 1577.4  on 14184  degrees of freedom
-AIC: 1591.4
+Residual deviance: 1581.0  on 14189  degrees of freedom
+AIC: 1585
 
 Number of Fisher Scoring iterations: 7</code></pre>
 </div>
 <div id="inter-sex-late-life-model-twas" class="section level4">
 <h4>Inter-sex, late-life model (TWAS)</h4>
-<pre class="r"><code>intersex_late_model_twas &lt;- glm(antagonistic ~ chromosome + absolute_sex_bias_in_expression + mean_expression_level, 
-             data = antagonism_evidence_ratios_twas %&gt;% 
-  mutate(antagonistic = inter_sex_late &lt;= 
-           quantile(antagonism_evidence_ratios_twas$inter_sex_late, probs=0.01),
-         absolute_sex_bias_in_expression = abs(male_bias_in_expression),
-         mean_expression_level = AveExpr), 
-    family = &quot;binomial&quot;)
+<p>The full model fitted here contains the predictors
+<code>chromosome</code>, <code>absolute_sex_bias_in_expression</code>,
+and <code>mean_expression_level</code>. Only the latter is significant,
+with highly-expressed transcripts being less likely to be sexually
+antagonistic.</p>
+<pre class="r"><code>intersex_late_model_twas &lt;- glm(
+  antagonistic ~ chromosome + absolute_sex_bias_in_expression + mean_expression_level,
+  data = antagonism_evidence_ratios_twas %&gt;% 
+    mutate(antagonistic = inter_sex_late &lt;= 
+             quantile(antagonism_evidence_ratios_twas$inter_sex_late, probs=0.01),
+           absolute_sex_bias_in_expression = abs(male_bias_in_expression),
+           mean_expression_level = AveExpr), 
+  family = &quot;binomial&quot;)
+
 car::Anova(intersex_late_model_twas, type = 3)</code></pre>
 <pre><code>Analysis of Deviance Table (Type III tests)
 
@@ -5774,7 +6646,9 @@ absolute_sex_bias_in_expression   0.0003  1   0.986291
 mean_expression_level             8.3362  1   0.003886 **
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<pre class="r"><code>intersex_late_model_twas &lt;- update(intersex_late_model_twas,  ~ . -absolute_sex_bias_in_expression -chromosome)
+<pre class="r"><code>intersex_late_model_twas &lt;- update(
+  intersex_late_model_twas, 
+  ~ . -absolute_sex_bias_in_expression -chromosome)
 car::Anova(intersex_late_model_twas, type = 3)</code></pre>
 <pre><code>Analysis of Deviance Table (Type III tests)
 
@@ -5824,11 +6698,19 @@ antagonistic transcript, from a binomial GLM with expression level as a
 predictor. The dashed lines and error bars show 95% confidence
 intervals, estimated as 1.96SE.</p>
 <pre class="r"><code># plotting models
-new &lt;- data.frame(MAF = seq(from = 0.05, to = 0.5, by = 0.01), chr = &quot;X&quot;)
+new &lt;- data.frame(MAF = seq(from = 0.05, to = 0.5, by = 0.01), chromosome = &quot;X&quot;)
 inv_logit &lt;- function(x) exp(x)/(1+exp(x))
-preds &lt;- data.frame(new, prop = predict(intersex_early_model_gwas, newdata = new, se.fit=T, type = &quot;link&quot;)) %&gt;% 
-  mutate(y = prop.fit, lwr = prop.fit - 1.96*prop.se.fit, upr = prop.fit + 1.96*prop.se.fit,
-         y = inv_logit(y), lwr = inv_logit(lwr), upr = inv_logit(upr))
+preds &lt;- data.frame(new, 
+                    prop = predict(intersex_early_model_gwas, 
+                                   newdata = new, 
+                                   se.fit=T, type = &quot;link&quot;)) %&gt;% 
+  mutate(y = prop.fit, 
+         lwr = prop.fit - 1.96*prop.se.fit, 
+         upr = prop.fit + 1.96*prop.se.fit,
+         y = inv_logit(y), 
+         lwr = inv_logit(lwr), 
+         upr = inv_logit(upr))
+
 p1 &lt;- preds %&gt;% 
   mutate(panel = &quot;A.&quot;) %&gt;% 
   ggplot(aes(MAF,  y)) + geom_line() + 
@@ -5840,18 +6722,24 @@ p1 &lt;- preds %&gt;%
   facet_wrap( ~ panel) + 
   theme_bw() + 
   theme(text = element_text(family = &quot;Raleway&quot;, size = 12)) +
-  theme(strip.background = element_blank(), strip.text = element_text(hjust = 0)) +
+  theme(strip.background = element_blank(), 
+        strip.text = element_text(hjust = 0)) +
   ylab(&quot;Probability of being in the top 1%\nsexually antagonistic loci (\u00B1 95% CIs)&quot;) +
   xlab(&quot;Minor allele frequency&quot;)
 
-new2 &lt;- data.frame(chr = levels(dat$chr), MAF = 0.3)
+new2 &lt;- data.frame(chromosome = levels(dat$chromosome), MAF = 0.3)
 inv_logit &lt;- function(x) exp(x)/(1+exp(x))
 preds2 &lt;- data.frame(new2, prop = predict(intersex_early_model_gwas, newdata = new2, se.fit=T, type = &quot;link&quot;)) %&gt;% 
-  mutate(y = prop.fit, lwr = prop.fit - 1.96*prop.se.fit, upr = prop.fit + 1.96*prop.se.fit,
-         y = inv_logit(y), lwr = inv_logit(lwr), upr = inv_logit(upr))
+  mutate(y = prop.fit, 
+         lwr = prop.fit - 1.96*prop.se.fit, 
+         upr = prop.fit + 1.96*prop.se.fit,
+         y = inv_logit(y), 
+         lwr = inv_logit(lwr), 
+         upr = inv_logit(upr))
+
 p2 &lt;- preds2 %&gt;% 
   mutate(panel = &quot;B.&quot;) %&gt;%
-  ggplot(aes(chr,  y)) + 
+  ggplot(aes(chromosome,  y)) + 
   geom_point(size = 3) + 
   geom_errorbar(aes(ymin = lwr, ymax = upr), width = 0) + 
   facet_wrap( ~ panel) + 
@@ -5862,15 +6750,24 @@ p2 &lt;- preds2 %&gt;%
   xlab(&quot;Chromosome arm&quot;)
 
 new &lt;- data.frame(
-  mean_expression_level = seq(from = min(twas_model_data$mean_expression_level), 
-                                to = max(twas_model_data$mean_expression_level), by = 0.01), 
-                  chromosome = &quot;X&quot;, 
+  mean_expression_level = seq(
+    from = min(twas_model_data$mean_expression_level), 
+    to = max(twas_model_data$mean_expression_level), by = 0.01), 
+  chromosome = &quot;X&quot;, 
   absolute_sex_bias_in_expression = 0,
-                  mean_expression_level = mean(twas_model_data$absolute_sex_bias_in_expression))
-inv_logit &lt;- function(x) exp(x)/(1+exp(x))
-preds &lt;- data.frame(new, prop = predict(intersex_early_twas, newdata = new, se.fit=T, type = &quot;link&quot;)) %&gt;% 
-  mutate(y = prop.fit, lwr = prop.fit - 1.96*prop.se.fit, upr = prop.fit + 1.96*prop.se.fit,
-         y = inv_logit(y), lwr = inv_logit(lwr), upr = inv_logit(upr))
+  mean_expression_level = mean(twas_model_data$absolute_sex_bias_in_expression))
+
+preds &lt;- data.frame(new, 
+                    prop = predict(intersex_early_twas, 
+                                   newdata = new, 
+                                   se.fit=T, type = &quot;link&quot;)) %&gt;% 
+  mutate(y = prop.fit, 
+         lwr = prop.fit - 1.96*prop.se.fit, 
+         upr = prop.fit + 1.96*prop.se.fit,
+         y = inv_logit(y), 
+         lwr = inv_logit(lwr), 
+         upr = inv_logit(upr))
+
 p3 &lt;- preds %&gt;% 
   mutate(panel = &quot;C.&quot;) %&gt;%
   ggplot(aes(mean_expression_level,  y)) + geom_line() + 
@@ -5889,56 +6786,8 @@ blank &lt;- ggplot() + theme_void()
 
 grid.arrange(arrangeGrob(p1, p2, ncol = 2), 
              arrangeGrob(blank, p3, blank, nrow = 1, widths = c(0.2,0.6,0.2)))</code></pre>
-<p><img src="figure/plot_models_variant_effects.Rmd/unnamed-chunk-27-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-27-1">
-Past versions of unnamed-chunk-27-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-27-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/e4f2f4f17ad066aea2499537ec7bd625b587cbdf/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-27-1.png" target="_blank">e4f2f4f</a>
-</td>
-<td>
-lukeholman
-</td>
-<td>
-2022-02-23
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/1bb603c18144f3ad95844a63f1f0dedcab9e2d0b/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-27-1.png" target="_blank">1bb603c</a>
-</td>
-<td>
-lukeholman
-</td>
-<td>
-2022-02-23
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<pre class="r"><code>pdf(&quot;figures/fig6_models.pdf&quot;, height = 7, width = 7)
+<p><img src="figure/plot_models_variant_effects.Rmd/ER_figure-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>pdf(&quot;figures/fig7_models.pdf&quot;, height = 7, width = 7)
 grid.arrange(arrangeGrob(p1, p2, ncol = 2), 
              arrangeGrob(blank, p3, blank, nrow = 1, widths = c(0.2,0.6,0.2)))
 dev.off()</code></pre>
@@ -6164,7 +7013,7 @@ gene expression
 5.1
 </td>
 <td style="text-align:right;">
-0.010
+0.009
 </td>
 </tr>
 <tr>
@@ -6178,7 +7027,7 @@ rRNA processing
 5.1
 </td>
 <td style="text-align:right;">
-0.011
+0.010
 </td>
 </tr>
 <tr>
@@ -6192,7 +7041,7 @@ ribosome biogenesis
 4.9
 </td>
 <td style="text-align:right;">
-0.015
+0.014
 </td>
 </tr>
 <tr>
@@ -6206,7 +7055,7 @@ ribosomal large subunit biogenesis
 4.9
 </td>
 <td style="text-align:right;">
-0.016
+0.015
 </td>
 </tr>
 <tr>
@@ -6220,7 +7069,7 @@ rRNA metabolic process
 4.8
 </td>
 <td style="text-align:right;">
-0.019
+0.018
 </td>
 </tr>
 <tr>
@@ -6235,7 +7084,7 @@ rRNA, LSU-rRNA)
 4.7
 </td>
 <td style="text-align:right;">
-0.022
+0.021
 </td>
 </tr>
 <tr>
@@ -6249,7 +7098,7 @@ ribosomal small subunit biogenesis
 4.5
 </td>
 <td style="text-align:right;">
-0.038
+0.042
 </td>
 </tr>
 <tr>
@@ -6263,7 +7112,7 @@ cellular nitrogen compound biosynthetic process
 4.5
 </td>
 <td style="text-align:right;">
-0.039
+0.043
 </td>
 </tr>
 </tbody>
@@ -6311,7 +7160,7 @@ second-messenger-mediated signaling
 4.5
 </td>
 <td style="text-align:right;">
-0.039
+0.038
 </td>
 </tr>
 <tr>
@@ -6325,7 +7174,7 @@ sleep
 4.2
 </td>
 <td style="text-align:right;">
-0.091
+0.082
 </td>
 </tr>
 <tr>
@@ -6339,7 +7188,7 @@ cell communication
 4.2
 </td>
 <td style="text-align:right;">
-0.097
+0.085
 </td>
 </tr>
 <tr>
@@ -6353,7 +7202,7 @@ signaling
 4.2
 </td>
 <td style="text-align:right;">
-0.101
+0.087
 </td>
 </tr>
 <tr>
@@ -6367,7 +7216,7 @@ signal transduction
 3.8
 </td>
 <td style="text-align:right;">
-0.236
+0.222
 </td>
 </tr>
 <tr>
@@ -6381,7 +7230,7 @@ regulation of multicellular organismal process
 3.6
 </td>
 <td style="text-align:right;">
-0.333
+0.338
 </td>
 </tr>
 <tr>
@@ -6395,7 +7244,7 @@ tRNA thio-modification
 3.3
 </td>
 <td style="text-align:right;">
-0.529
+0.530
 </td>
 </tr>
 <tr>
@@ -6409,7 +7258,7 @@ sensory organ development
 3.3
 </td>
 <td style="text-align:right;">
-0.534
+0.535
 </td>
 </tr>
 <tr>
@@ -6423,7 +7272,7 @@ mitotic cell cycle process
 3.3
 </td>
 <td style="text-align:right;">
-0.607
+0.600
 </td>
 </tr>
 <tr>
@@ -6437,7 +7286,7 @@ cell junction assembly
 3.2
 </td>
 <td style="text-align:right;">
-0.630
+0.626
 </td>
 </tr>
 <tr>
@@ -6451,7 +7300,7 @@ intracellular signal transduction
 3.0
 </td>
 <td style="text-align:right;">
-0.803
+0.807
 </td>
 </tr>
 </tbody>
@@ -6484,59 +7333,77 @@ other attached packages:
  [1] org.Dm.eg.db_3.16.0  AnnotationDbi_1.60.2 IRanges_2.32.0      
  [4] S4Vectors_0.36.2     Biobase_2.58.0       BiocGenerics_0.44.0 
  [7] GOfuncR_1.18.0       vioplot_0.4.0        zoo_1.8-11          
-[10] sm_2.2-5.7.1         staplr_3.1.1         car_3.1-1           
-[13] carData_3.0-5        RColorBrewer_1.1-3   cowplot_1.1.1       
-[16] kableExtra_1.3.4     mashr_0.2.69         ashr_2.2-54         
-[19] showtext_0.9-5       showtextdb_3.0       sysfonts_0.8.8      
-[22] Hmisc_4.7-2          Formula_1.2-4        survival_3.4-0      
-[25] lattice_0.20-45      ggbeeswarm_0.7.1     qqman_0.1.8         
-[28] gridExtra_2.3        lubridate_1.9.2      forcats_1.0.0       
-[31] stringr_1.5.0        dplyr_1.1.0          purrr_1.0.1         
-[34] readr_2.1.4          tidyr_1.3.0          tibble_3.1.8        
-[37] ggplot2_3.4.1        tidyverse_2.0.0      workflowr_1.7.0.4   
+[10] sm_2.2-5.7.1         staplr_3.1.1         glue_1.6.2          
+[13] bigsnpr_1.11.6       bigstatsr_1.5.12     tidybayes_3.0.3     
+[16] brms_2.18.0          Rcpp_1.0.10          car_3.1-1           
+[19] carData_3.0-5        RColorBrewer_1.1-3   cowplot_1.1.1       
+[22] kableExtra_1.3.4     mashr_0.2.69         ashr_2.2-54         
+[25] showtext_0.9-5       showtextdb_3.0       sysfonts_0.8.8      
+[28] Hmisc_4.7-2          Formula_1.2-4        survival_3.4-0      
+[31] lattice_0.20-45      ggbeeswarm_0.7.1     qqman_0.1.8         
+[34] gridExtra_2.3        lubridate_1.9.2      forcats_1.0.0       
+[37] stringr_1.5.0        dplyr_1.1.0          purrr_1.0.1         
+[40] readr_2.1.4          tidyr_1.3.0          tibble_3.1.8        
+[43] ggplot2_3.4.1        tidyverse_2.0.0      workflowr_1.7.0.4   
 
 loaded via a namespace (and not attached):
-  [1] backports_1.4.1        systemfonts_1.0.4      plyr_1.8.8            
-  [4] splines_4.2.2          GenomeInfoDb_1.34.9    digest_0.6.31         
-  [7] invgamma_1.1           htmltools_0.5.4        SQUAREM_2021.1        
- [10] fansi_1.0.4            magrittr_2.0.3         checkmate_2.1.0       
- [13] memoise_2.0.1          cluster_2.1.4          tzdb_0.3.0            
- [16] Biostrings_2.66.0      vroom_1.6.1            svglite_2.1.1         
- [19] timechange_0.2.0       jpeg_0.1-10            colorspace_2.1-0      
- [22] blob_1.2.3             rvest_1.0.3            textshaping_0.3.6     
- [25] xfun_0.37              RCurl_1.98-1.9         tcltk_4.2.2           
- [28] callr_3.7.3            crayon_1.5.2           jsonlite_1.8.4        
- [31] hexbin_1.28.2          glue_1.6.2             gtable_0.3.1          
- [34] zlibbioc_1.44.0        XVector_0.38.0         webshot_0.5.4         
- [37] abind_1.4-5            scales_1.2.1           mvtnorm_1.1-3         
- [40] DBI_1.1.3              Rcpp_1.0.10            isoband_0.2.7         
- [43] viridisLite_0.4.1      htmlTable_2.4.1        foreign_0.8-83        
- [46] bit_4.0.5              truncnorm_1.0-8        htmlwidgets_1.6.1     
- [49] httr_1.4.5             calibrate_1.7.7        ellipsis_0.3.2        
- [52] pkgconfig_2.0.3        rJava_1.0-6            farver_2.1.1          
- [55] nnet_7.3-18            sass_0.4.5             dbplyr_2.3.0          
- [58] deldir_1.0-6           utf8_1.2.2             tidyselect_1.2.0      
- [61] labeling_0.4.2         rlang_1.0.6            later_1.3.0           
- [64] munsell_0.5.0          tools_4.2.2            cachem_1.0.7          
- [67] cli_3.6.0              generics_0.1.3         RSQLite_2.3.0         
- [70] evaluate_0.20          fastmap_1.1.1          yaml_2.3.7            
- [73] ragg_1.2.5             processx_3.8.0         knitr_1.42            
- [76] bit64_4.0.5            fs_1.6.1               KEGGREST_1.38.0       
- [79] nlme_3.1-160           whisker_0.4.1          xml2_1.3.3            
- [82] compiler_4.2.2         rstudioapi_0.14        beeswarm_0.4.0        
- [85] curl_5.0.0             png_0.1-8              mapplots_1.5.1        
- [88] bslib_0.4.2            stringi_1.7.12         highr_0.10            
- [91] ps_1.7.2               Matrix_1.5-1           vctrs_0.5.2           
- [94] pillar_1.8.1           lifecycle_1.0.3        jquerylib_0.1.4       
- [97] bitops_1.0-7           data.table_1.14.6      irlba_2.3.5.1         
-[100] GenomicRanges_1.50.2   httpuv_1.6.9           R6_2.5.1              
-[103] latticeExtra_0.6-30    promises_1.2.0.1       vipor_0.4.5           
-[106] gtools_3.9.4           MASS_7.3-58.1          assertthat_0.2.1      
-[109] rprojroot_2.0.3        withr_2.5.0            GenomeInfoDbData_1.2.9
-[112] mgcv_1.8-41            parallel_4.2.2         hms_1.1.2             
-[115] rpart_4.1.19           rmarkdown_2.20         git2r_0.31.0          
-[118] mixsqp_0.3-48          getPass_0.2-2          base64enc_0.1-3       
-[121] rmeta_3.0              interp_1.1-3          </code></pre>
+  [1] bigreadr_0.2.5         coda_0.19-4            ragg_1.2.5            
+  [4] bit64_4.0.5            knitr_1.42             irlba_2.3.5.1         
+  [7] dygraphs_1.1.1.6       data.table_1.14.6      rpart_4.1.19          
+ [10] inline_0.3.19          RCurl_1.98-1.9         KEGGREST_1.38.0       
+ [13] doParallel_1.0.17      generics_0.1.3         callr_3.7.3           
+ [16] RSQLite_2.3.0          bit_4.0.5              tzdb_0.3.0            
+ [19] webshot_0.5.4          xml2_1.3.3             httpuv_1.6.9          
+ [22] StanHeaders_2.21.0-7   assertthat_0.2.1       isoband_0.2.7         
+ [25] xfun_0.37              hms_1.1.2              ggdist_3.2.1          
+ [28] jquerylib_0.1.4        bayesplot_1.10.0       rJava_1.0-6           
+ [31] evaluate_0.20          promises_1.2.0.1       fansi_1.0.4           
+ [34] dbplyr_2.3.0           igraph_1.3.5           DBI_1.1.3             
+ [37] htmlwidgets_1.6.1      tensorA_0.36.2         ellipsis_0.3.2        
+ [40] crosstalk_1.2.0        backports_1.4.1        calibrate_1.7.7       
+ [43] markdown_1.4           RcppParallel_5.1.6     deldir_1.0-6          
+ [46] vctrs_0.5.2            abind_1.4-5            cachem_1.0.7          
+ [49] withr_2.5.0            checkmate_2.1.0        vroom_1.6.1           
+ [52] xts_0.12.2             prettyunits_1.1.1      svglite_2.1.1         
+ [55] cluster_2.1.4          crayon_1.5.2           pkgconfig_2.0.3       
+ [58] labeling_0.4.2         GenomeInfoDb_1.34.9    nlme_3.1-160          
+ [61] vipor_0.4.5            nnet_7.3-18            rlang_1.0.6           
+ [64] lifecycle_1.0.3        miniUI_0.1.1.1         colourpicker_1.2.0    
+ [67] invgamma_1.1           distributional_0.3.1   tcltk_4.2.2           
+ [70] rprojroot_2.0.3        matrixStats_0.63.0     rngtools_1.5.2        
+ [73] Matrix_1.5-1           loo_2.5.1              base64enc_0.1-3       
+ [76] beeswarm_0.4.0         whisker_0.4.1          processx_3.8.0        
+ [79] png_0.1-8              viridisLite_0.4.1      bitops_1.0-7          
+ [82] getPass_0.2-2          Biostrings_2.66.0      blob_1.2.3            
+ [85] doRNG_1.8.6            mixsqp_0.3-48          SQUAREM_2021.1        
+ [88] parallelly_1.34.0      mapplots_1.5.1         jpeg_0.1-10           
+ [91] shinystan_2.6.0        rmeta_3.0              scales_1.2.1          
+ [94] memoise_2.0.1          magrittr_2.0.3         plyr_1.8.8            
+ [97] hexbin_1.28.2          zlibbioc_1.44.0        threejs_0.3.3         
+[100] compiler_4.2.2         rstantools_2.2.0       flock_0.7             
+[103] cli_3.6.0              XVector_0.38.0         ps_1.7.2              
+[106] bigsparser_0.6.1       Brobdingnag_1.2-9      htmlTable_2.4.1       
+[109] MASS_7.3-58.1          mgcv_1.8-41            tidyselect_1.2.0      
+[112] stringi_1.7.12         textshaping_0.3.6      highr_0.10            
+[115] yaml_2.3.7             svUnit_1.0.6           latticeExtra_0.6-30   
+[118] bridgesampling_1.1-2   sass_0.4.5             tools_4.2.2           
+[121] bigassertr_0.1.6       timechange_0.2.0       parallel_4.2.2        
+[124] rstudioapi_0.14        foreach_1.5.2          foreign_0.8-83        
+[127] git2r_0.31.0           rmio_0.4.0             posterior_1.3.1       
+[130] farver_2.1.1           digest_0.6.31          shiny_1.7.4           
+[133] ff_4.0.9               GenomicRanges_1.50.2   later_1.3.0           
+[136] bigparallelr_0.3.2     httr_1.4.5             colorspace_2.1-0      
+[139] rvest_1.0.3            fs_1.6.1               truncnorm_1.0-8       
+[142] splines_4.2.2          shinythemes_1.2.0      systemfonts_1.0.4     
+[145] xtable_1.8-4           jsonlite_1.8.4         rstan_2.21.8          
+[148] R6_2.5.1               pillar_1.8.1           htmltools_0.5.4       
+[151] mime_0.12              fastmap_1.1.1          DT_0.27               
+[154] codetools_0.2-18       pkgbuild_1.4.0         mvtnorm_1.1-3         
+[157] utf8_1.2.2             bslib_0.4.2            arrayhelpers_1.1-0    
+[160] curl_5.0.0             gtools_3.9.4           shinyjs_2.1.0         
+[163] interp_1.1-3           rmarkdown_2.20         munsell_0.5.0         
+[166] GenomeInfoDbData_1.2.9 iterators_1.0.14       reshape2_1.4.4        
+[169] gtable_0.3.1          </code></pre>
 </div>
 </div>
 </div>

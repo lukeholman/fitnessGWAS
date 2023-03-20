@@ -23,7 +23,15 @@ library(cowplot)
 library(grid)
 library(RColorBrewer)
 library(car)
+library(brms)
+library(tidybayes)
+library(bigsnpr)
+library(glue)
 library(staplr) # for removing blank page from saved PDF file
+
+# Note: you may need to re-download plink to get this to run on non-Mac systems
+# I used bigsnpr::download_plink()
+plink <- paste(getwd(), "code/plink", sep = "/")
 
 font_add_google(name = "Raleway", family = "Raleway", regular.wt = 400, bold.wt = 700) # Install font from Google Fonts
 showtext_auto()
@@ -39,71 +47,11 @@ SNP_clumps <- all_snps %>% select(-SNP) %>% distinct() %>% collect(n = Inf)
 
 # Subsetting variable to get the approx-LD subset of SNPs
 LD_subset <- !is.na(SNP_clumps$LFSR_female_early_mashr_ED)
-```
 
+# Load the predicted line means, as calculated by get_predicted_line_means
+predicted_line_means <- read_csv("data/derived/predicted_line_means.csv")
 
-<!-- ```{r} -->
-<!-- # testing ruzicka comparison -->
-
-<!-- xx <- read_tsv("~/Downloads/Assoc_Data.txt") -->
-
-<!-- xx %>% arrange(-MAF_DGRP) %>% head() %>% as.data.frame() -->
-
-<!-- ruz_data <- xx %>% select(ruzicka_SNP_name = Predictor, chr = Chromosome, position = Basepair, ruzicka_MAF = MAF, ruzicka_effect_size = Effect, ruzicka_wald_stat = Wald_Stat, ruzicka_wald_p = Wald_P) -->
-
-<!-- merged <- all_snps %>% select(SNP, SNP_clump, contains("_mashr_ED")) %>% -->
-<!--   filter(!is.na(beta_female_early_mashr_ED)) %>%  -->
-<!--   # collect(n=1000) %>%  -->
-<!--   collect(n=Inf) %>%  -->
-<!--   distinct() %>%  -->
-<!--   mutate(position = str_split(SNP, "_"), -->
-<!--          chr = map_chr(position, ~ .x[1]), -->
-<!--          position = as.numeric(map_chr(position, ~ .x[2]))) %>%  -->
-<!--   left_join(ruz_data, by = c("position", "chr"))  -->
-
-<!-- merged <- merged[complete.cases(merged), ]  -->
-
-<!-- merged <- left_join(merged,  -->
-<!--           antagonism_evidence_ratios_gwas %>% arrange(inter_sex_early) %>% mutate(inter_sex_early = log2(inter_sex_early))) -->
-
-<!-- ggplot(merged, aes(x = ruzicka_wald_p, y = inter_sex_early)) + -->
-<!--   geom_point() -->
-
-<!-- ruzicka_SA <- xx %>% arrange(-MAF_DGRP) %>% filter(fdr<0.3) %>% select(chr = Chromosome, position = Basepair) -->
-
-<!-- ruz_hits <- merged %>% filter(paste(chr, position) %in% paste(ruzicka_SA$chr, ruzicka_SA$position)) %>% pull(inter_sex_early) -->
-<!-- nonruz_hits <- merged %>% filter(!(paste(chr, position) %in% paste(ruzicka_SA$chr, ruzicka_SA$position))) %>% pull(inter_sex_early)  -->
-<!-- wilcox.test(nonruz_hits, ruz_hits) -->
-<!-- median(nonruz_hits) -->
-<!-- median(ruz_hits) -->
-
-<!-- hist(-1 * (merged %>% filter(inter_sex_early <= quantile(inter_sex_early, 0.99)) %>% pull(ruzicka_effect_size) %>% log10)) -->
-
-<!-- bind_rows(merged %>% filter(inter_sex_early <= quantile(inter_sex_early, 0.001)) %>% mutate(type ="holmanSA"), -->
-<!--           merged %>% filter(inter_sex_early >= quantile(inter_sex_early, 0.999)) %>% mutate(type ="holmanSC")) %>%  -->
-<!--   ggplot(aes(type, ruzicka_effect_size)) + -->
-<!--   geom_boxplot(outlier.shape = NA) + geom_beeswarm(alpha=0.3, aes(size = -1*log10(ruzicka_wald_p))) -->
-
-<!-- merged %>% filter(inter_sex_early <= quantile(inter_sex_early, 0.01) &  -->
-<!--                     ruzicka_wald_stat < 0 & -->
-<!--                     ruzicka_wald_p < quantile(ruzicka_wald_p, 0.01)) %>%  -->
-<!--   pull(SNP_clump) -->
-<!-- tbl(db, "variants") %>% filter(SNP=="3L_4306295_SNP") -->
-<!-- tbl(db, "variants") %>% filter(SNP=="3L_4346362_SNP") -->
-
-<!-- merged %>% filter(SNP=="3L_4346362_SNP") %>% as.data.frame() -->
-
-
-<!-- xx<- select(merged, SNP, ruzicka_MAF) %>% left_join(tbl(db, "variants") %>% select(SNP, MAF) %>%  filter(SNP %in% !!merged$SNP) %>% collect(n=Inf))  -->
-<!-- cor(xx$ruzicka_MAF, xx$MAF, use = "pairwise.complete.obs") -->
-<!-- ``` -->
-
-
-
-## Load and clean the variant effect sizes
-Modify column names, reorder columns, filter based on the p-value, etc.
-```{r load_data, message=FALSE}
-# Univariate analysis, mashr-adjusted, data-driven approach
+# Load and clean the effect sizes from GWAS and join with SNP annotations
 univariate_lmm_results <- tbl(db, "univariate_lmm_results") %>% 
   select(-contains("canonical"), 
          -contains("raw")) %>% 
@@ -126,6 +74,63 @@ univariate_lmm_results <- univariate_lmm_results %>%
          site.class = gsub("Utr", "UTR", site.class)
   )
 ```
+
+
+<!-- ```{r} -->
+<!-- # testing ruzicka comparison -->
+
+<!-- xx <- read_tsv("~/Downloads/Assoc_Data.txt") -->
+
+<!-- xx %>% arrange(-MAF_DGRP) %>% head() %>% as.data.frame() -->
+
+<!-- ruz_data <- xx %>% select(ruzicka_SNP_name = Predictor, chr = Chromosome, position = Basepair, ruzicka_MAF = MAF, ruzicka_effect_size = Effect, ruzicka_wald_stat = Wald_Stat, ruzicka_wald_p = Wald_P) -->
+
+<!-- merged <- all_snps %>% select(SNP, SNP_clump, contains("_mashr_ED")) %>% -->
+<!--   filter(!is.na(beta_female_early_mashr_ED)) %>% -->
+<!--   # collect(n=1000) %>% -->
+<!--   collect(n=Inf) %>% -->
+<!--   distinct() %>% -->
+<!--   mutate(position = str_split(SNP, "_"), -->
+<!--          chr = map_chr(position, ~ .x[1]), -->
+<!--          position = as.numeric(map_chr(position, ~ .x[2]))) %>% -->
+<!--   left_join(ruz_data, by = c("position", "chr")) -->
+
+<!-- merged <- merged[complete.cases(merged), ] -->
+
+<!-- merged <- left_join(merged, -->
+<!--           antagonism_evidence_ratios_gwas %>% arrange(inter_sex_early) %>% mutate(inter_sex_early = log2(inter_sex_early))) -->
+
+<!-- ggplot(merged, aes(x = ruzicka_wald_p, y = inter_sex_early)) + -->
+<!--   geom_point() -->
+
+<!-- ruzicka_SA <- xx %>% arrange(-MAF_DGRP) %>% filter(fdr<0.3) %>% select(chr = Chromosome, position = Basepair) -->
+
+<!-- ruz_hits <- merged %>% filter(paste(chr, position) %in% paste(ruzicka_SA$chr, ruzicka_SA$position)) %>% pull(inter_sex_early) -->
+<!-- nonruz_hits <- merged %>% filter(!(paste(chr, position) %in% paste(ruzicka_SA$chr, ruzicka_SA$position))) %>% pull(inter_sex_early) -->
+<!-- wilcox.test(nonruz_hits, ruz_hits) -->
+<!-- median(nonruz_hits) -->
+<!-- median(ruz_hits) -->
+
+<!-- hist(-1 * (merged %>% filter(inter_sex_early <= quantile(inter_sex_early, 0.99)) %>% pull(ruzicka_effect_size) %>% log10)) -->
+
+<!-- bind_rows(merged %>% filter(inter_sex_early <= quantile(inter_sex_early, 0.001)) %>% mutate(type ="holmanSA"), -->
+<!--           merged %>% filter(inter_sex_early >= quantile(inter_sex_early, 0.999)) %>% mutate(type ="holmanSC")) %>% -->
+<!--   ggplot(aes(type, ruzicka_effect_size)) + -->
+<!--   geom_boxplot(outlier.shape = NA) + geom_beeswarm(alpha=0.3, aes(size = -1*log10(ruzicka_wald_p))) -->
+
+<!-- merged %>% filter(inter_sex_early <= quantile(inter_sex_early, 0.01) & -->
+<!--                     ruzicka_wald_stat < 0 & -->
+<!--                     ruzicka_wald_p < quantile(ruzicka_wald_p, 0.01)) %>% -->
+<!--   pull(SNP_clump) -->
+<!-- tbl(db, "variants") %>% filter(SNP=="3L_4306295_SNP") -->
+<!-- tbl(db, "variants") %>% filter(SNP=="3L_4346362_SNP") -->
+
+<!-- merged %>% filter(SNP=="3L_4346362_SNP") %>% as.data.frame() -->
+
+
+<!-- xx<- select(merged, SNP, ruzicka_MAF) %>% left_join(tbl(db, "variants") %>% select(SNP, MAF) %>%  filter(SNP %in% !!merged$SNP) %>% collect(n=Inf)) -->
+<!-- cor(xx$ruzicka_MAF, xx$MAF, use = "pairwise.complete.obs") -->
+<!-- ``` -->
 
 
 ## Q-Q plots {.tabset}
@@ -447,6 +452,315 @@ boyle_plot
 dev.off()
 ```
 
+## Correlations between mutation load and fitness
+
+### Count all the mutations in each DGRP line
+
+The following code counts the number of mutations per DGRP line which A) have a minor allele frequency of 0.05 or lower, and B) were classified by SnpEff as having an effect that we designated to be a "major effect", defined as an insertion, deletion, or nonsynonymous substitution inside a coding sequence (as well as gains and losses of start codons). We reasoned that such alleles are probably mostly deleterious. The following mutation types were classified as major effect mutations (see `SnpEff`'s classification scheme [here](https://pcingola.github.io/SnpEff/se_outputsummary/)):
+
+- EXON_DELETED
+- NON_SYNONYMOUS_CODING
+- FRAME_SHIFT
+- CODON_CHANGE
+- CODON_INSERTION
+- CODON_CHANGE_PLUS_CODON_INSERTION
+- CODON_DELETION
+- CODON_CHANGE_PLUS_CODON_DELETION
+- STOP_GAINED
+- STOP_LOST
+- RARE_AMINO_ACID
+- START_LOST
+- START_GAINED
+
+
+```{r count_mutations}
+# Load up the DGRP genotype data using the bigsnpr package
+if(!file.exists("snp_backing_file.bk")) {
+  rds <- snp_readBed("data/input/dgrp2.bed", backingfile = "snp_backing_file")
+}
+bed_file <- snp_attach("snp_backing_file.rds")
+annot <- read.table("data/input/dgrp.fb557.annot.txt", 
+                    header = FALSE, stringsAsFactors = FALSE)
+
+# Use PLINK to count allele freqs in the whole DGRP
+plink <- paste(getwd(), "code/plink", sep = "/")
+run_command <- function(shell_command, wd = getwd(), path = ""){
+  cat(system(glue("cd ", wd, path, "\n",shell_command), intern = TRUE), sep = '\n')
+}
+run_command("{plink} --bfile dgrp2 --freq", path = "/data/input")
+
+# Get a list of variants that constitute a 'major mutation' (types as shown in code below)
+
+major_effect_types <- c(
+  "EXON_DELETED", "NON_SYNONYMOUS_CODING",
+  "FRAME_SHIFT", "CODON_CHANGE",
+  "CODON_INSERTION",
+  "CODON_CHANGE_PLUS_CODON_INSERTION",
+  "CODON_DELETION",
+  "CODON_CHANGE_PLUS_CODON_DELETION",
+  "STOP_GAINED",
+  "STOP_LOST",
+  "RARE_AMINO_ACID",
+  "START_LOST",
+  "START_GAINED"
+)
+
+all_major_mutations <- annot$V1[unique(c(
+  which(str_detect(annot$V3, major_effect_types[1])),
+  which(str_detect(annot$V3, major_effect_types[2])),
+  which(str_detect(annot$V3, major_effect_types[3])),
+  which(str_detect(annot$V3, major_effect_types[4])),
+  which(str_detect(annot$V3, major_effect_types[5])),
+  which(str_detect(annot$V3, major_effect_types[6])),
+  which(str_detect(annot$V3, major_effect_types[7])),
+  which(str_detect(annot$V3, major_effect_types[8])),
+  which(str_detect(annot$V3, major_effect_types[9])),
+  which(str_detect(annot$V3, major_effect_types[10])),
+  which(str_detect(annot$V3, major_effect_types[11])),
+  which(str_detect(annot$V3, major_effect_types[12])),
+  which(str_detect(annot$V3, major_effect_types[13]))
+))]
+
+# Get a list of variants with 0 > MAF < 0.05
+rare_alleles <- read.table("data/input/plink.frq", header = T) %>% 
+  filter(MAF < 0.05 & MAF > 0) %>% pull(SNP)
+
+# Get the indexes of variants that are major mutations and also have MAF < 0.05
+indexes <- intersect(
+  which(bed_file$map$marker.ID %in% all_major_mutations), 
+  which(bed_file$map$marker.ID %in% rare_alleles)
+)
+
+# Function to count the number of mutations in all 205 DGRP lines
+count_mutations <- function(indexes){
+  tibble(
+    line = bed_file$fam$family.ID,
+    mutation_load = sapply(
+      1:205, function(i) sum(bed_file$genotypes[i, ][indexes] == 2, na.rm = T))
+  )
+}
+
+mutation_load <- count_mutations(indexes)
+
+# Join the mutation counts with our line mean fitness data
+joined <- left_join(
+  predicted_line_means %>% 
+    select(-block) %>% 
+    gather(fitness_trait, fitness_value, -line),
+  mutation_load, by = join_by(line)) %>% 
+  mutate(fitness_trait = str_to_sentence(str_replace_all(fitness_trait, "[.]", " ")))
+```
+
+### Run Bayesian multivariate models
+
+The following Bayesian multivariate model estiamtes the relationship between mutation count and each of the four fitness traits, across DGRP lines. The model has the multivariate formula `(FE, FL, ME, ML) ~ mutation_count`, assumes Gaussian errors, and estimates the residual correlation between the four fitness traits (thereby accounting for the correlation between fitness traits when estimating the relationship with mutation count). The model uses `brms` default priors. 
+```{r}
+brms_data_muts <- joined %>% 
+  mutate(fitness_trait = str_replace_all(fitness_trait, " ", "_")) %>% 
+  spread(fitness_trait, fitness_value) %>% 
+  mutate(mutation_count = mutation_load / 100) %>% select(-mutation_load)
+
+mut_model <- brm(bf(
+  mvbind(Female_fitness_early, 
+         Female_fitness_late, 
+         Male_fitness_early, 
+         Male_fitness_late) ~ 
+    mutation_count, sigma ~ 0) + set_rescor(TRUE), 
+  data = brms_data_muts,
+  warmup = 2000, iter = 8000, chains = 4, cores = 4) 
+```
+
+#### Model checks (posterior predictive plots) 
+
+Here, we plot the distribution of the model's posterior predictions, for each of the four response variables, for 50 samples from the posterior. If the model's assumptions and prior are suitable, there should be a good match between the posterior predictions (shown in blue; one line per sample from the posterior) and the original data (shown in black). See `?pp_check`.
+
+```{r}
+do_ppcheck <- function(rr, title){
+    pp_check(mut_model, resp = rr, ndraws = 50) + 
+    scale_y_continuous(limits = c(0, 0.55)) +
+    labs(subtitle=title) + 
+    theme_bw() + 
+    theme(legend.position = "none") 
+}
+
+grid.arrange(
+  do_ppcheck("Femalefitnessearly", "Female fitness early"),
+  do_ppcheck("Femalefitnesslate", "Female fitness late"),
+  do_ppcheck("Malefitnessearly", "Male fitness early"),
+  do_ppcheck("Malefitnesslate", "Male fitness late"))
+```
+
+
+### Plot mutation load against line mean fitness
+
+The plot shows the correlation, across DGRP lines of fitness with the mutation load. The top row shows the effect of 'major effect' mutations on each of the four fitness traits, while the bottom row shows the effect of mutations with a minor allele frequency (MAF) below 5%. The number of mutations of the specified type (in 100s) is shown on the x-axis, and the regression line comes from the previously mentioned Bayesian multivariate model (which accounts for covariance between the four fitness traits when estimating the effects of mutation load). 
+
+The figure illustrates that there is large variation in the number of putatively deleterious mutations between lines, and there is a negative correlation with fitness (especially in females).
+
+```{r fig.showtext=TRUE}
+mut_plot_data <- conditional_effects(mut_model, plot = F)
+
+get_regression_line_data <- function(plot_data){
+  regression_line_rare_muts <- bind_rows(
+    plot_data[[1]] %>% 
+      select(mutation_count, estimate__, lower__, upper__) %>% 
+      mutate(trait = "A. Female early-life fitness"),
+    plot_data[[2]] %>% 
+      select(mutation_count, estimate__, lower__, upper__) %>% 
+      mutate(trait = "B. Female late-life fitness"),
+    plot_data[[3]] %>% 
+      select(mutation_count, estimate__, lower__, upper__) %>% 
+      mutate(trait = "C. Male early-life fitness"),
+    plot_data[[4]] %>% 
+      select(mutation_count, estimate__, lower__, upper__) %>% 
+      mutate(trait = "D. Male late-life fitness")) %>% 
+    mutate(mut_type = "Load of mutations with MAF < 0.05") %>% 
+    as_tibble()
+}
+
+get_points_data <- function(brms_data){
+  brms_data %>% select(-line) %>% 
+  rename(`A. Female early-life fitness` = Female_fitness_early,
+         `B. Female late-life fitness` = Female_fitness_late,
+         `C. Male early-life fitness` = Male_fitness_early,
+         `D. Male late-life fitness` = Male_fitness_late) %>% 
+  gather(trait, estimate__, -mutation_count)
+}
+
+
+mut_load_correlation_plot <- get_regression_line_data(mut_plot_data) %>% 
+  ggplot(aes(x = mutation_count, y = estimate__)) + 
+  geom_ribbon(aes(ymin = lower__, ymax = upper__, linetype = NA, fill = trait)) +
+  geom_line(lwd = 0.5) +
+  geom_point(data = get_points_data(brms_data_muts), alpha = 0.7, size = 0.7) +
+  labs(x = "Mutation load (100s)", 
+       y = "Line mean fitness") + 
+  facet_wrap(~trait, nrow = 2) +
+  scale_fill_manual(values = c("pink", "deeppink2", "lightblue", "steelblue")) + 
+  theme_bw() + 
+  theme(text = element_text(family = "Raleway", size = 12)) +
+  theme(plot.title = element_text(hjust = 0), 
+        strip.text = element_text(hjust = 0),
+        strip.background = element_blank(),
+        legend.position = "none")
+
+mut_load_correlation_plot
+```
+
+### Estimated effect size of mutation load on fitness {.tabset}
+
+#### Plot
+
+The left plot shows the posterior estimates of the effect size of mutation load on fitness (i.e. the 'regression slope' from the previous figure). The coloured area shows the posterior distribution, and the horizontal bar summarises its median and 66% and 95% credible intervals. The right plot shows the difference in this effect size between fitness traits, e.g. FE - FL shows the difference in regression slope between female early-life and late-life fitness. A positive sign indicates that mutation load has more negative effect on the second trait (e.g. mutations appear more costly to older females than younger).
+
+```{r fig.showtext=TRUE}
+posterior_muts <- as_draws_df(mut_model, variable = "^b_", regex = T) %>% 
+  as_tibble() %>% select(contains("mutation"))
+
+make_plot1 <- function(posterior, title){
+  tibble(
+    `Female\nearly-life\n(FE)` = unlist(posterior[,1]), 
+    `Female\nlate-life\n(FL)` = unlist(posterior[,2]),  
+    `Male\nearly-life\n(ME)` = unlist(posterior[,3]),  
+    `Male\nlate-life\n(ML)` = unlist(posterior[,4])) %>% 
+    gather() %>% 
+    mutate(key = factor(key, rev(unique(key))),
+           x = title) %>% 
+    ggplot(aes(value, key)) + 
+    geom_vline(xintercept = 0, linetype = 2) +
+    stat_halfeye(aes(fill = key)) + 
+    facet_wrap(~ x) +
+    labs(x = "Change per 100 mutations", y = NULL) +
+    scale_fill_manual(values = rev(c("pink", "deeppink2", "lightblue", "steelblue"))) + 
+    theme_bw() + 
+    theme(text = element_text(family = "Raleway", size = 10)) +
+    theme(plot.title = element_text(hjust = 0), 
+          strip.text = element_text(hjust = 0),
+          strip.background = element_blank(),
+          legend.position = "none")
+}
+
+make_plot2 <- function(posterior, title, col){
+  tibble(
+    `ME - FE` = unlist(posterior[,3] - posterior[,1]), 
+    `ML - FE` = unlist(posterior[,4] - posterior[,1]), 
+    `ME - FL` = unlist(posterior[,3] - posterior[,2]), 
+    `ML - FL` = unlist(posterior[,4] - posterior[,2]), 
+    `FE - FL` = unlist(posterior[,1] - posterior[,2]), 
+    `ME - ML` = unlist(posterior[,3] - posterior[,4]) ) %>% 
+    gather() %>% 
+    mutate(key = factor(key, rev(c("FE - FL", "ME - ML",
+                                   "ME - FE", "ML - FE",
+                                   "ME - FL", "ML - FL"))),
+           x = title) %>% 
+    ggplot(aes(value, key)) + 
+    geom_vline(xintercept = 0, linetype = 2) +
+    stat_halfeye(fill = col) + labs(x = "Effect size difference", y = NULL) +
+    facet_wrap(~ x) +
+    
+    theme_bw() + 
+    theme(text = element_text(family = "Raleway", size = 10)) +
+    theme(plot.title = element_text(hjust = 0), 
+          strip.text = element_text(hjust = 0),
+          strip.background = element_blank())
+}
+
+pp1 <- make_plot1(posterior_muts, "E. Effect sizes (posterior)")
+pp2 <- make_plot2(posterior_muts, "F. Differences in effect size", col = "#F5CA7B")
+
+plot_grid(mut_load_correlation_plot,
+          arrangeGrob(pp1, pp2, ncol=2), rel_widths = c(1,1.1))
+
+
+
+
+pdf("figures/fig4_mutation_load.pdf", height = 4.7, width = 9.4)
+plot_grid(mut_load_correlation_plot,
+          arrangeGrob(pp1, pp2, ncol=2), rel_widths = c(1,1.1))
+dev.off()
+remove_pages(1, "figures/fig4_mutation_load.pdf", "figures/fig4_mutation_load.pdf")
+
+# Clean up files:
+unlink(list("snp_backing_file.rds", 
+            "snp_backing_file.bk", 
+            "data/input/plink.log",
+            "data/input/plink.frq"))
+```
+
+#### Table
+
+```{r}
+make_posterior_table <- function(posterior){
+  as_tibble(rbind(
+    posterior_summary(posterior[,1]),
+    posterior_summary(posterior[,2]),
+    posterior_summary(posterior[,3]),
+    posterior_summary(posterior[,4]),
+    posterior_summary(posterior[,1] - posterior[,2]), 
+    posterior_summary(posterior[,3] - posterior[,4]), 
+    posterior_summary(posterior[,3] - posterior[,1]), 
+    posterior_summary(posterior[,4] - posterior[,1]), 
+    posterior_summary(posterior[,3] - posterior[,2]), 
+    posterior_summary(posterior[,4] - posterior[,2]))) %>% 
+    mutate(`Effect size or effect size difference` = c(
+      "Female early-life (FE)", "Female late-life (FL)",
+      "Male late-life (ME)", "Male late-life (ML)",
+      "FE - FL", "ME - ML",
+      "ME - FE", "ML - FE", 
+      "ME - FL", "ML - FL"), .before = 1) %>% 
+    rename("Error" = `Est.Error`,
+           `Lower 95% CI` = Q2.5,
+           `Upper 95% CI` = Q97.5,)
+  
+}
+
+saveRDS(make_posterior_table(posterior_muts), 
+        "data/derived/supp_table_mutation_load_effects.rds")
+
+make_posterior_table(posterior_muts) %>% 
+  kable(digits = 3) %>% 
+  kable_styling(full_width = F)
+```
 
 
 ## Frequencies of antagonistic loci and transcripts
@@ -506,7 +820,7 @@ focal_dat <- rbind(
 
 labs <- c("Negative", "Weakly negative", "Weakly positive", "Positive")
 
-fig_4_top_row <- focal_dat %>% 
+fig_5_top_row <- focal_dat %>% 
   ggplot(aes(Var1, Freq, fill = Var2)) + 
   facet_wrap(~ pp) + 
   geom_bar(stat="identity", colour = "grey20") +
@@ -523,7 +837,7 @@ fig_4_top_row <- focal_dat %>%
 # To count the total number of transcripts tested:
 # focal_dat$Freq[focal_dat$pp == "C. Early-life fitness"] %>% sum()
 
-fig_4_top_row
+fig_5_top_row
 ```
 
 ##### Table
@@ -649,7 +963,7 @@ focal_dat <- rbind(
 # To count the total number of transcripts tested, 14286:
 # focal_dat$Freq[focal_dat$pp == "C. Early-life fitness"] %>% sum()
 
-fig_4_bottom_row <- focal_dat %>% 
+fig_5_bottom_row <- focal_dat %>% 
   ggplot(aes(Var1, Freq, fill = Var2)) + 
   facet_wrap(~ pp) + 
   geom_bar(stat="identity", colour = "grey20") +
@@ -664,7 +978,7 @@ fig_4_bottom_row <- focal_dat %>%
         strip.text = element_text(hjust = 0))
         # strip.text = element_text(hjust = 0, size = 12))
 
-fig_4_bottom_row
+fig_5_bottom_row
 ```
 
 
@@ -699,23 +1013,14 @@ grid_arrange_shared_legend <- function(..., ncol = 1, nrow = 2, position = c("bo
 
 }
 
-# 
-# ggsave("figures/fig4_quartiles_plot.png", 
-#        grid_arrange_shared_legend(fig_4_top_row + 
-#                                     theme(axis.text.x = element_blank(),
-#                                           axis.ticks.x = element_blank()) +
-#                                     xlab(" "), 
-#                                   fig_4_bottom_row, position = "right"), 
-#        height = 6, width = 7)
-
-pdf("figures/fig4_quartiles_plot.pdf", height = 6, width = 7)
-grid_arrange_shared_legend(fig_4_top_row + 
+pdf("figures/fig5_quartiles_plot.pdf", height = 6, width = 7)
+grid_arrange_shared_legend(fig_5_top_row + 
                              theme(axis.text.x = element_blank(),
                                    axis.ticks.x = element_blank()) +
                              xlab(" "), 
-                           fig_4_bottom_row, position = "right")
+                           fig_5_bottom_row, position = "right")
 dev.off()
-remove_pages(1, "figures/fig4_quartiles_plot.pdf", "figures/fig4_quartiles_plot.pdf")
+remove_pages(1, "figures/fig5_quartiles_plot.pdf", "figures/fig5_quartiles_plot.pdf")
 ```
 
 
@@ -854,7 +1159,7 @@ antagonism_evidence_ratios_gwas <- all_snps %>%
 ```
 
 #### For the TWAS results
-```{r}
+```{r get_TWAS_ERs}
 TWAS_ED <- readRDS("data/derived/TWAS/TWAS_ED.rds")
 
 twas <- data.frame(
@@ -939,7 +1244,7 @@ TWAS_ratios_plot <- antagonism_evidence_ratios_twas %>%
 pp <- plot_grid(GWAS_ratios_plot, TWAS_ratios_plot, 
                    labels = c('A', 'B'), label_size = 12)
 
-ggsave("figures/fig5_antagonism_ratios.pdf", pp, width = 8.5, height = 4.9)
+ggsave("figures/fig6_antagonism_ratios.pdf", pp, width = 8.5, height = 4.9)
 
 pp
 ```
@@ -949,57 +1254,62 @@ pp
 
 #### Inter-sex, early-life model (GWAS)
 
-```{r}
+The initial full model contains the predictors `MAF`, `chromosome`, and `major_effect` (which records whether or not the focal variant causes an insertion, deletion, or nonsynonymous change in a coding sequence). `major_effect` was not significant, so the model was refitted without it.
+
+```{r model_evidence_ratios}
 # Annotate data with MAF, site, class, etc. 
 dat <- left_join(antagonism_evidence_ratios_gwas,
-          collect(tbl(db, "variants")), by = "SNP") %>% 
-  distinct() %>% mutate(site.class = str_to_title(site.class))
-
-# Focus only on the commonest site classes:
-dat <- dat %>% 
-  filter(site.class %in% c("Intron", "Intergenic", "Downstream", "Upstream",
-                           "Synonymous_coding", "Non_synonymous_coding", "Utr_3_prime",
-                           "Exon", "Utr_5_prime")) 
+          collect(tbl(db, "variants")), by = "SNP", multiple = "all") %>% 
+  distinct() %>% rename(chromosome = chr)
 
 # Remove chromosome 4 (too few sites)
-dat <- dat %>% filter(chr != "4") 
+dat <- dat %>% filter(chromosome != "4") 
+dat$chromosome <- relevel(factor(dat$chromosome), ref = "X")
 
-# If there are multiple site classes for a SNP, or multiple SNPs 
-# in the same 100% LD clump, pick one SNP and/or 1 site class at random
-set.seed(1)
-dat <- dat[sample(nrow(dat), nrow(dat)), ] %>%
-  split(.$SNP_clump) %>%
-  map_df(~ .x[1, ])
+# Classify mutations as being major effect or not
+dat <- dat %>% 
+  mutate(major_effect = "No",
+         major_effect = replace(major_effect, site.class %in% major_effect_types, "Yes"))
 
-dat <- dat %>% arrange(site.class)
-dat$site.class <- relevel(factor(dat$site.class), ref = "Synonymous_coding")
-dat$chr <- relevel(factor(dat$chr), ref = "X")
+# For mutations with multiple site classes, record whether any site class is major or not,
+# ensuring that there is one row in 'dat' for each SNP
+dat <- dat %>% 
+  group_by(SNP_clump) %>% 
+  summarise(inter_sex_early = inter_sex_early[1],
+            inter_sex_late = inter_sex_late[1],
+            MAF = MAF[1],
+            chromosome = chromosome[1],
+            major_effect = ifelse(any(major_effect == "Yes"), "Yes", "No"))
 
 n_loci <- prettyNum(nrow(dat), big.mark = ",", scientific = FALSE)
 
-
-intersex_early_model_gwas <- glm(antagonistic ~ chr + MAF + site.class, 
+intersex_early_model_gwas <- glm(antagonistic ~ chromosome + MAF + major_effect, 
              data = dat %>% 
                mutate(antagonistic = as.numeric(inter_sex_early <= 
-                        quantile(dat$inter_sex_early, probs=0.01))), 
+                        quantile(dat$inter_sex_early, probs = 0.01))), 
     family = "binomial")
 car::Anova(intersex_early_model_gwas, type = 3)
-intersex_early_model_gwas <- update(intersex_early_model_gwas,  ~ . -site.class)
+intersex_early_model_gwas <- update(intersex_early_model_gwas,  ~ . -major_effect)
 car::Anova(intersex_early_model_gwas, type = 3)
 
 summary(intersex_early_model_gwas)
 ```
 
+
+
 #### Inter-sex, late-life model (GWAS)
 
-```{r}
-intersex_late_model_gwas <- glm(antagonistic ~ chr + MAF + site.class, 
+The initial full model contains the predictors `MAF`, `chromosome`, and `major_effect` (which records whether or not the focal variant causes an insertion, deletion, or nonsynonymous change in a coding sequence). `major_effect` was not significant, so the model was refitted without it.
+
+
+```{r ER_model1}
+intersex_late_model_gwas <- glm(antagonistic ~ chromosome + MAF + major_effect, 
              data = dat %>% 
                mutate(antagonistic = inter_sex_late <= 
-                        quantile(dat$inter_sex_late, probs=0.01)), 
+                        quantile(dat$inter_sex_late, probs = 0.01)), 
     family = "binomial")
 car::Anova(intersex_late_model_gwas, type = 3)
-intersex_late_model_gwas <- update(intersex_late_model_gwas,  ~ . -site.class)
+intersex_late_model_gwas <- update(intersex_late_model_gwas,  ~ . -major_effect)
 car::Anova(intersex_late_model_gwas, type = 3)
 
 summary(intersex_late_model_gwas)
@@ -1007,8 +1317,11 @@ summary(intersex_late_model_gwas)
 
 #### Inter-sex, early-life model (TWAS)
 
-```{r}
-n_transcripts <- prettyNum(nrow(antagonism_evidence_ratios_twas), big.mark = ",", scientific = FALSE)
+The full model fitted here contains the predictors `chromosome`, `absolute_sex_bias_in_expression`, and `mean_expression_level`. Only the latter is significant, with highly-expressed transcripts being less likely to be sexually antagonistic.
+
+```{r ER_model2}
+n_transcripts <- prettyNum(nrow(antagonism_evidence_ratios_twas), 
+                           big.mark = ",", scientific = FALSE)
 
 twas_model_data <- antagonism_evidence_ratios_twas %>% 
   mutate(antagonistic = inter_sex_early <= 
@@ -1017,25 +1330,36 @@ twas_model_data <- antagonism_evidence_ratios_twas %>%
          mean_expression_level = AveExpr)
 
 
-intersex_early_twas <- glm(antagonistic ~ chromosome + absolute_sex_bias_in_expression + mean_expression_level, 
-             data = twas_model_data, 
-    family = "binomial")
+intersex_early_twas <- glm(
+  antagonistic ~ chromosome + absolute_sex_bias_in_expression + mean_expression_level, 
+  data = twas_model_data, 
+  family = "binomial")
+car::Anova(intersex_early_twas, type = 3)
+intersex_early_twas <- update(
+  intersex_early_twas,  
+  ~ . -absolute_sex_bias_in_expression -chromosome)
 car::Anova(intersex_early_twas, type = 3)
 summary(intersex_early_twas)
 ```
 
 #### Inter-sex, late-life model (TWAS)
 
-```{r}
-intersex_late_model_twas <- glm(antagonistic ~ chromosome + absolute_sex_bias_in_expression + mean_expression_level, 
-             data = antagonism_evidence_ratios_twas %>% 
-  mutate(antagonistic = inter_sex_late <= 
-           quantile(antagonism_evidence_ratios_twas$inter_sex_late, probs=0.01),
-         absolute_sex_bias_in_expression = abs(male_bias_in_expression),
-         mean_expression_level = AveExpr), 
-    family = "binomial")
+The full model fitted here contains the predictors `chromosome`, `absolute_sex_bias_in_expression`, and `mean_expression_level`. Only the latter is significant, with highly-expressed transcripts being less likely to be sexually antagonistic.
+
+```{r ER_model3}
+intersex_late_model_twas <- glm(
+  antagonistic ~ chromosome + absolute_sex_bias_in_expression + mean_expression_level,
+  data = antagonism_evidence_ratios_twas %>% 
+    mutate(antagonistic = inter_sex_late <= 
+             quantile(antagonism_evidence_ratios_twas$inter_sex_late, probs=0.01),
+           absolute_sex_bias_in_expression = abs(male_bias_in_expression),
+           mean_expression_level = AveExpr), 
+  family = "binomial")
+
 car::Anova(intersex_late_model_twas, type = 3)
-intersex_late_model_twas <- update(intersex_late_model_twas,  ~ . -absolute_sex_bias_in_expression -chromosome)
+intersex_late_model_twas <- update(
+  intersex_late_model_twas, 
+  ~ . -absolute_sex_bias_in_expression -chromosome)
 car::Anova(intersex_late_model_twas, type = 3)
 summary(intersex_late_model_twas)
 ```
@@ -1045,13 +1369,21 @@ summary(intersex_late_model_twas)
 Panels A and B show the predicted effects of minor allele frequency and chromosome, respectively, on the probability that a locus is among the top 1% candidate sexually antagonistic loci, as ranked by their evidence ratio. The model predictions come from a binomial GLM with minor allele frequency and chromosome as predictor variables. Panel C shows the predicted effect of average gene expression level on the probability that a transcript is among the top 1% candidate sexually antagonistic transcript, from a binomial GLM with expression level as a predictor. The dashed lines and error bars show 95% confidence intervals, estimated as 1.96SE. 
 
 
-```{r fig.showtext=T, fig.height=7, fig.width=7} 
+```{r ER_figure, fig.showtext=T, fig.height=7, fig.width=7} 
 # plotting models
-new <- data.frame(MAF = seq(from = 0.05, to = 0.5, by = 0.01), chr = "X")
+new <- data.frame(MAF = seq(from = 0.05, to = 0.5, by = 0.01), chromosome = "X")
 inv_logit <- function(x) exp(x)/(1+exp(x))
-preds <- data.frame(new, prop = predict(intersex_early_model_gwas, newdata = new, se.fit=T, type = "link")) %>% 
-  mutate(y = prop.fit, lwr = prop.fit - 1.96*prop.se.fit, upr = prop.fit + 1.96*prop.se.fit,
-         y = inv_logit(y), lwr = inv_logit(lwr), upr = inv_logit(upr))
+preds <- data.frame(new, 
+                    prop = predict(intersex_early_model_gwas, 
+                                   newdata = new, 
+                                   se.fit=T, type = "link")) %>% 
+  mutate(y = prop.fit, 
+         lwr = prop.fit - 1.96*prop.se.fit, 
+         upr = prop.fit + 1.96*prop.se.fit,
+         y = inv_logit(y), 
+         lwr = inv_logit(lwr), 
+         upr = inv_logit(upr))
+
 p1 <- preds %>% 
   mutate(panel = "A.") %>% 
   ggplot(aes(MAF,  y)) + geom_line() + 
@@ -1063,18 +1395,24 @@ p1 <- preds %>%
   facet_wrap( ~ panel) + 
   theme_bw() + 
   theme(text = element_text(family = "Raleway", size = 12)) +
-  theme(strip.background = element_blank(), strip.text = element_text(hjust = 0)) +
+  theme(strip.background = element_blank(), 
+        strip.text = element_text(hjust = 0)) +
   ylab("Probability of being in the top 1%\nsexually antagonistic loci (\u00B1 95% CIs)") +
   xlab("Minor allele frequency")
 
-new2 <- data.frame(chr = levels(dat$chr), MAF = 0.3)
+new2 <- data.frame(chromosome = levels(dat$chromosome), MAF = 0.3)
 inv_logit <- function(x) exp(x)/(1+exp(x))
 preds2 <- data.frame(new2, prop = predict(intersex_early_model_gwas, newdata = new2, se.fit=T, type = "link")) %>% 
-  mutate(y = prop.fit, lwr = prop.fit - 1.96*prop.se.fit, upr = prop.fit + 1.96*prop.se.fit,
-         y = inv_logit(y), lwr = inv_logit(lwr), upr = inv_logit(upr))
+  mutate(y = prop.fit, 
+         lwr = prop.fit - 1.96*prop.se.fit, 
+         upr = prop.fit + 1.96*prop.se.fit,
+         y = inv_logit(y), 
+         lwr = inv_logit(lwr), 
+         upr = inv_logit(upr))
+
 p2 <- preds2 %>% 
   mutate(panel = "B.") %>%
-  ggplot(aes(chr,  y)) + 
+  ggplot(aes(chromosome,  y)) + 
   geom_point(size = 3) + 
   geom_errorbar(aes(ymin = lwr, ymax = upr), width = 0) + 
   facet_wrap( ~ panel) + 
@@ -1085,15 +1423,24 @@ p2 <- preds2 %>%
   xlab("Chromosome arm")
 
 new <- data.frame(
-  mean_expression_level = seq(from = min(twas_model_data$mean_expression_level), 
-                                to = max(twas_model_data$mean_expression_level), by = 0.01), 
-                  chromosome = "X", 
+  mean_expression_level = seq(
+    from = min(twas_model_data$mean_expression_level), 
+    to = max(twas_model_data$mean_expression_level), by = 0.01), 
+  chromosome = "X", 
   absolute_sex_bias_in_expression = 0,
-                  mean_expression_level = mean(twas_model_data$absolute_sex_bias_in_expression))
-inv_logit <- function(x) exp(x)/(1+exp(x))
-preds <- data.frame(new, prop = predict(intersex_early_twas, newdata = new, se.fit=T, type = "link")) %>% 
-  mutate(y = prop.fit, lwr = prop.fit - 1.96*prop.se.fit, upr = prop.fit + 1.96*prop.se.fit,
-         y = inv_logit(y), lwr = inv_logit(lwr), upr = inv_logit(upr))
+  mean_expression_level = mean(twas_model_data$absolute_sex_bias_in_expression))
+
+preds <- data.frame(new, 
+                    prop = predict(intersex_early_twas, 
+                                   newdata = new, 
+                                   se.fit=T, type = "link")) %>% 
+  mutate(y = prop.fit, 
+         lwr = prop.fit - 1.96*prop.se.fit, 
+         upr = prop.fit + 1.96*prop.se.fit,
+         y = inv_logit(y), 
+         lwr = inv_logit(lwr), 
+         upr = inv_logit(upr))
+
 p3 <- preds %>% 
   mutate(panel = "C.") %>%
   ggplot(aes(mean_expression_level,  y)) + geom_line() + 
@@ -1114,7 +1461,7 @@ grid.arrange(arrangeGrob(p1, p2, ncol = 2),
              arrangeGrob(blank, p3, blank, nrow = 1, widths = c(0.2,0.6,0.2)))
 
 
-pdf("figures/fig6_models.pdf", height = 7, width = 7)
+pdf("figures/fig7_models.pdf", height = 7, width = 7)
 grid.arrange(arrangeGrob(p1, p2, ncol = 2), 
              arrangeGrob(blank, p3, blank, nrow = 1, widths = c(0.2,0.6,0.2)))
 dev.off()
@@ -1126,7 +1473,7 @@ dev.off()
 The following code performs a GO enrichment test using the Wilcoxon method, which tests for enrichment of GO terms at the top and the bottom of a gene list that has been ordered by some variable. In this case, the ordering variable is the evidence ratio for early-life sexual antagonism/concordance that is plotted in the top left of panel B in the previous figure. Transcripts with a more negative evidence ratio are more likely to be sexually antagonistic, while those with a more positive evidence ratio are more likely to be sexually concordant. The two tables below (accessible by clicking the tabs) illustrate the GO: Biological Process terms that are most associated with the most sexually antagonistic and sexually concordant transcripts, according to the Wilcoxon method. The `GOfuncR::go_enrich()` function uses permutation to calculate the 'family wise error rate' (FWER) to correct for multiple testing, and we define significantly enriched GO terms as those with FWER < 0.05. See the `GOfuncR` [vignette](https://bioconductor.org/packages/devel/bioc/vignettes/GOfuncR/inst/doc/GOfuncR.html) for more information on this method.
 
 
-```{r}
+```{r GO_enrich}
 library(GOfuncR) # BiocManager::install("GOfuncR")
 library(org.Dm.eg.db) 
 

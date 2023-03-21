@@ -27,7 +27,9 @@ library(brms)
 library(tidybayes)
 library(bigsnpr)
 library(glue)
-library(staplr) # for removing blank page from saved PDF file
+library(patchwork)
+library(ggpubr)
+library(staplr) 
 
 # Note: you may need to re-download plink to get this to run on non-Mac systems
 # I used bigsnpr::download_plink()
@@ -135,7 +137,7 @@ univariate_lmm_results <- univariate_lmm_results %>%
 
 ## Q-Q plots {.tabset}
 
-Here are some quantile-quantile plots, which are commonly used to check GWAS results, and to test the hypothesis that there are more SNPs than expected showing large effects on the trait of interest. There is an excess of loci with effects on female fitness, but not much of a visible excess for males. These plots use the raw $p$-values results from GEMMA.
+Here are some quantile-quantile plots, which are commonly used to check GWAS results, and to test the hypothesis that there are more SNPs than expected showing large effects on the trait of interest. There is a modest excess of loci with effects on female fitness, but not much of a visible excess for males. These plots use the raw $p$-values results from GEMMA.
 
 ### Female early-life fitness
 
@@ -200,7 +202,7 @@ snp_effect_fig
 **Top part of Figure 2**: `mashr`-adjusted effect sizes of `r nrow(SNP_clumps)` loci (i.e. groups of one or more polymorphic sites in complete linkage disequilibrium) on male and female early- and late-life fitness. The data have been binned into hexagons, with the colour and contour lines indicating the number of loci. The diagonal line represents $y=x$. Positive effect sizes indicate that the minor allele is associated with higher fitness, while negative effects indicate that the major allele is associated with higher fitness.
 
 
-#### Pearson correlation
+#### Pearson correlation matrix
 
 ```{r}
 SNP_clumps %>%
@@ -243,7 +245,7 @@ bind_rows(
   theme(text = element_text(family = "Raleway", size = 12))
 ```
 
-#### Pearson correlation
+#### Pearson correlation matrix
 
 ```{r}
 SNP_clumps %>%
@@ -344,7 +346,8 @@ manhattan_data <- manhattan_data %>%
 
 
 p1 <- manhattan_data %>%
-  ggplot(aes(position, -1 * log10(pvalue_female_early_raw), group = chr, colour = chr, stroke = 0.2)) + 
+  ggplot(aes(position, -1 * log10(pvalue_female_early_raw), 
+             group = chr, colour = chr, stroke = 0.2)) + 
   geom_point(size = 0.5) +
   scale_colour_brewer(palette = "Paired", name = "Chromosome") + 
   scale_y_continuous(limits = c(0,8)) +
@@ -356,7 +359,8 @@ p1 <- manhattan_data %>%
         axis.ticks.x = element_blank())
 
 p2 <- manhattan_data %>%
-  ggplot(aes(position, -1 * log10(pvalue_male_early_raw), group = chr, colour = chr, stroke = 0.2)) + 
+  ggplot(aes(position, -1 * log10(pvalue_male_early_raw), 
+             group = chr, colour = chr, stroke = 0.2)) + 
   geom_point(size = 0.5) +
   scale_colour_brewer(palette = "Paired", name = "Chromosome") + 
   xlab("Position") + ylab("") +
@@ -370,7 +374,6 @@ p2 <- manhattan_data %>%
 grid_arrange_shared_legend <- function(..., ncol = length(list(...)), nrow = 1) {
 
   plots <- list(...)
-  # position <- match.arg(position)
   g <- ggplotGrob(plots[[1]] + theme(legend.position = "right"))$grobs
   legend <- g[[which(sapply(g, function(x) x$name) == "guide-box")]]
   lheight <- sum(legend$height)
@@ -378,13 +381,17 @@ grid_arrange_shared_legend <- function(..., ncol = length(list(...)), nrow = 1) 
   gl <- lapply(plots, function(x) x + theme(legend.position = "none"))
   gl <- c(gl, ncol = ncol, nrow = nrow)
   
-  combined <- arrangeGrob(arrangeGrob(gl[[1]], gl[[2]], nrow = 2, left = "Effect on early-life fitness\n(-Log10 p)"),
-                          legend,
-                          ncol = 2,
-                          widths = unit.c(unit(1, "npc") - lwidth, lwidth))
+  left_label <- text_grob(expression(Effect~on~early-life~fitness~(-Log[10]~p)), 
+                          size = 12, family = "Raleway", rot = 90)
+
+  combined <- arrangeGrob(
+    arrangeGrob(gl[[1]], gl[[2]], nrow = 2, 
+                left = left_label),
+    legend,
+    ncol = 2,
+    widths = unit.c(unit(1, "npc") - lwidth, lwidth))
   return(combined)
 }
-
 grid_arrange_shared_legend(p1, p2)
 ```
 
@@ -392,7 +399,8 @@ grid_arrange_shared_legend(p1, p2)
 ```{r make_fig2, echo=FALSE, results='hide', message=F, warning=F, fig.showtext=TRUE}
 # Make composite figure 2, with SNP effects and Manhattan plot
 
-png("figures/fig2_SNPs_manhattan_plot.png", height = 8, width = 8, res = 300, units = "in")
+png("figures/fig2_SNPs_manhattan_plot.png", 
+    height = 8, width = 8, res = 300, units = "in")
 grid.arrange(fig2_top, grid_arrange_shared_legend(p1, p2))
 dev.off()
 ```
@@ -403,9 +411,7 @@ dev.off()
 
 Inspired by Boyle et al. 2017 (_Cell_, specifically the analysis in their Figure 1C), we sorted all the variants in order of effect size on female fitness, placed the variants in bins of 1000, and then calculated the average effect size for each bin for both male and female fitness. This analysis was performed on the raw SNP effect sizes from GEMMA, pruned to a set of `r sum(LD_subset)` SNPs in approximate LD with one another. 
 
-If there is pleiotropy between male and female fitness, we would predict a correlation between the effect sizes for male and female fitness; on the contrary if there were no pleiotropy, we would see no correlation. 
-
-Moreover, if fitness is highly polygenic ('omnigenic'; Boyle et al. 2017), we predict a tight, straight line relationship, because each bin would contain some variants with small but genuine associations with fitness, and these effects would replicate in the other fitness trait. On the contrary if genetic variance in fitness stems from just a few genes with larger effects, the relationship between male and female fitness would be flat in the center and sloped at the extremes.
+If there is pleiotropy between male and female fitness, we predict a correlation between the effect sizes for male and female fitness; on the contrary if there were no pleiotropy, we would see no correlation. Moreover, if fitness is highly polygenic ('omnigenic'; Boyle et al. 2017), we predict a tight, straight line relationship, because each bin would contain some variants with small but genuine associations with fitness, and these effects would replicate in the other fitness trait. On the contrary, if genetic variance in fitness stems from just a few genes with larger effects (with most loci having no true effect on fitness), the relationship between male and female fitness would be flat in the center and sloped at the extremes.
 
 Figure 3 shows that there was a very tight correlation between the average effects of the variants in each bin on male and female fitness. The data therefore suggest that variants associated with male fitness tend to also affect female fitness (in the same direction), and that a very large number of loci have small, concordant effects on fitness in both sexes. 
 
@@ -638,7 +644,7 @@ mut_load_correlation_plot <- get_regression_line_data(mut_plot_data) %>%
   facet_wrap(~trait, nrow = 2) +
   scale_fill_manual(values = c("pink", "deeppink2", "lightblue", "steelblue")) + 
   theme_bw() + 
-  theme(text = element_text(family = "Raleway", size = 12)) +
+  theme(text = element_text(family = "Raleway", size = 11)) +
   theme(plot.title = element_text(hjust = 0), 
         strip.text = element_text(hjust = 0),
         strip.background = element_blank(),
@@ -673,25 +679,26 @@ make_plot1 <- function(posterior, title){
     labs(x = "Change per 100 mutations", y = NULL) +
     scale_fill_manual(values = rev(c("pink", "deeppink2", "lightblue", "steelblue"))) + 
     theme_bw() + 
-    theme(text = element_text(family = "Raleway", size = 10)) +
+    theme(text = element_text(family = "Raleway", size = 11)) +
     theme(plot.title = element_text(hjust = 0), 
           strip.text = element_text(hjust = 0),
           strip.background = element_blank(),
+          panel.background = element_blank(),
           legend.position = "none")
 }
 
 make_plot2 <- function(posterior, title, col){
   tibble(
-    `ME - FE` = unlist(posterior[,3] - posterior[,1]), 
-    `ML - FE` = unlist(posterior[,4] - posterior[,1]), 
-    `ME - FL` = unlist(posterior[,3] - posterior[,2]), 
-    `ML - FL` = unlist(posterior[,4] - posterior[,2]), 
-    `FE - FL` = unlist(posterior[,1] - posterior[,2]), 
-    `ME - ML` = unlist(posterior[,3] - posterior[,4]) ) %>% 
+    `ME − FE` = unlist(posterior[,3] - posterior[,1]), 
+    `ML − FE` = unlist(posterior[,4] - posterior[,1]), 
+    `ME − FL` = unlist(posterior[,3] - posterior[,2]), 
+    `ML − FL` = unlist(posterior[,4] - posterior[,2]), 
+    `FE − FL` = unlist(posterior[,1] - posterior[,2]), 
+    `ME − ML` = unlist(posterior[,3] - posterior[,4]) ) %>% 
     gather() %>% 
-    mutate(key = factor(key, rev(c("FE - FL", "ME - ML",
-                                   "ME - FE", "ML - FE",
-                                   "ME - FL", "ML - FL"))),
+    mutate(key = factor(key, rev(c("FE − FL", "ME − ML",
+                                   "ME − FE", "ML − FE",
+                                   "ME − FL", "ML − FL"))),
            x = title) %>% 
     ggplot(aes(value, key)) + 
     geom_vline(xintercept = 0, linetype = 2) +
@@ -699,9 +706,10 @@ make_plot2 <- function(posterior, title, col){
     facet_wrap(~ x) +
     
     theme_bw() + 
-    theme(text = element_text(family = "Raleway", size = 10)) +
+    theme(text = element_text(family = "Raleway", size = 11)) +
     theme(plot.title = element_text(hjust = 0), 
           strip.text = element_text(hjust = 0),
+          panel.background = element_blank(),
           strip.background = element_blank())
 }
 
@@ -712,13 +720,13 @@ plot_grid(mut_load_correlation_plot,
           arrangeGrob(pp1, pp2, ncol=2), rel_widths = c(1,1.1))
 
 
+mut_load_correlation_plot + pp1 + pp2 + 
+  plot_layout(ncol = 3, widths = c(1, 0.5,0.5))
 
-
-pdf("figures/fig4_mutation_load.pdf", height = 4.7, width = 9.4)
-plot_grid(mut_load_correlation_plot,
-          arrangeGrob(pp1, pp2, ncol=2), rel_widths = c(1,1.1))
+pdf("figures/fig4_mutation_load.pdf", height = 4.7, width = 9.55)
+mut_load_correlation_plot + pp1 + pp2 + 
+  plot_layout(ncol = 3, widths = c(1, 0.5,0.5))
 dev.off()
-remove_pages(1, "figures/fig4_mutation_load.pdf", "figures/fig4_mutation_load.pdf")
 
 # Clean up files:
 unlink(list("snp_backing_file.rds", 

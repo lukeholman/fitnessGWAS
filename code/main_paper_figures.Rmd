@@ -9,16 +9,15 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 ```
 
 
-![](../figures/fig1.pdf)
+![](../docs/figure/plot_line_means.Rmd/unnamed-chunk-2-1.png)
 
-***Figure 1***: Correlations among estimated line means for male and female early and late-life fitness. The line means were estimated from Bayesian mixed models that account for block effects and the non-independence of our early- and late-life fitness measurements.
+***Figure 1***: Correlations among estimated line means for male and female early and late-life fitness. The line means were estimated from Bayesian mixed models that account for block effects and the non-independence of our early- and late-life fitness measurements. The grey ellipses show where 95% of genotypes are expected to fall in bivariate trait space, and the histograms show the variation in line means.
 
 \newpage
 
 ![](../figures/fig2_SNPs_manhattan_plot.png)
 
-***Figure 2***: Panels A and B show the mashr-adjusted effect sizes of 1,207,357 loci (i.e. groups of one or more polymorphisms in complete linkage disequilibrium) on male and female early- and late-life fitness. The data have been binned into hexagons, with the colour and contour lines indicating the number of loci in each bin. Positive effect sizes indicate that the minor allele is associated with higher fitness and the major allele with lower fitness. Panel C shows a pair of Manhattan plots, showing the chromosomal position and $-Log_{10}$ $p$-value (from linear mixed model GWAS using GEMMA) for each locus's effect on female (top) and male (bottom) early-life fitness.
-
+***Figure 2***: Panels A and B show the mashr-adjusted effect sizes of 1,207,357 polymorphic loci on male and female early- and late-life fitness. The data have been binned into hexagons, with the colour and contour lines indicating the number of loci in each bin. Positive effect sizes indicate that the minor allele is associated with higher fitness and the major allele with lower fitness. Panel C shows a pair of Manhattan plots, showing the chromosomal position and $-Log_{10}$ $p$-value (from linear mixed model GWAS using GEMMA) for each locus's effect on female (top) and male (bottom) early-life fitness.
 
 \newpage
 
@@ -28,19 +27,25 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 \newpage
 
-![](../figures/fig4_quartiles_plot.pdf)
+![](../figures/fig4_mutation_load.pdf)
 
-***Figure 4***: This plot tallies the number of loci (panels A-B) and transcripts (C-D) falling into each quartile in their effect on male and female fitness. Because the median effect size is essentially zero, quartiles 1-4 have been labelled negative, weakly negative, weakly positive, and positive respectively. For example, the largest red area in panel A illustrates the number of loci whose effect size for female early-life fitness was in quartile 1 (i.e. the 25% most negative effects), which were also in quartile 1 for male early-life fitness. 
-
-\newpage
-
-![](../figures/fig5_antagonism_ratios.pdf)
-
-***Figure 5***: Distribution of evidence ratios across loci (panel A) and transcripts (panel B), illustrating the strength of evidence for a  concordant relationship with fitness (evidence ratio > 1, blue), or an antagonistic relationship (<1, red). The top row of both panels considers the evidence for concordance/antagonism between the sexes (within each age class), while the bottom row shows concordance/antagonism between age classes (within each sex). The figure illustrates that many loci and transcripts (i.e. those with large evidence ratios) show strong evidence for concordant effects across sexes and age classes. By contrast, there are are relatively few candidate sexually antagonistic loci (i.e. those with evidence ratios well below 1), somewhat more sexually antagonistic transcripts, and essentially zero age antagonistic loci or transcripts.
+***Figure 4***: Panels A-D show the relationship across DGRP lines between mutation load and line mean fitness; the regression lines are from a Bayesian multivariate model that accounts for the covariance in line mean fitness. Panel E shows the posterior estimates of the four regression slopes (i.e. the effect size of 100 mutations on fitness, where fitness is measured in standard units on the scale of the linear predictor), with the black bars summarising the median and 66% and 95% credible intervals. Panel F shows the posterior estimates of the differences in this effect size between pairs of fitness traits. 
 
 \newpage
 
-![](../figures/fig6_models.pdf)
+![](../figures/fig5_quartiles_plot.pdf)
 
-***Figure 6***: Panels A and B show the predicted effects of minor allele frequency and chromosome, respectively, on the probability that a locus is among the top 1% candidate sexually antagonistic loci, as ranked by their evidence ratio. The model predictions come from a binomial GLM with minor allele frequency and chromosome as predictor variables. Panel C shows the predicted effect of average gene expression level on the probability that a transcript is among the top 1% candidate sexually antagonistic transcript, from a binomial GLM with expression level as a predictor. The dashed lines and error bars show 95% confidence intervals, estimated as 1.96SE. 
+***Figure 5***: This plot tallies the number of loci (panels A-B) and transcripts (C-D) falling into each quartile in their effect on male and female fitness. Because the median effect size is essentially zero, quartiles 1-4 have been labelled negative, weakly negative, weakly positive, and positive respectively. For example, the largest red area in panel A illustrates the number of loci whose effect size for female early-life fitness was in quartile 1 (i.e. the 25% most negative effects), which were also in quartile 1 for male early-life fitness. 
+
+\newpage
+
+![](../figures/fig6_antagonism_ratios.pdf)
+
+***Figure 6***: Distribution of evidence ratios across loci (panel A) and transcripts (panel B), illustrating the strength of evidence for a  concordant relationship with fitness (evidence ratio > 1, blue), or an antagonistic relationship (<1, red). The top row of both panels considers the evidence for concordance/antagonism between the sexes (within each age class), while the bottom row shows concordance/antagonism between age classes (within each sex). The figure illustrates that many loci and transcripts (i.e. those with large evidence ratios) show strong evidence for concordant effects across sexes and age classes. By contrast, there are are relatively few candidate sexually antagonistic loci (i.e. those with evidence ratios well below 1), somewhat more sexually antagonistic transcripts, and essentially zero age antagonistic loci or transcripts.
+
+\newpage
+
+![](../figures/fig7_models.pdf)
+
+***Figure 7***: Panels A and B show the predicted effects of minor allele frequency and chromosome, respectively, on the probability that a locus is among the top 1% candidate sexually antagonistic loci, as ranked by their evidence ratio. The model predictions come from a binomial GLM with minor allele frequency and chromosome as predictor variables. Panel C shows the predicted effect of average gene expression level on the probability that a transcript is among the top 1% candidate sexually antagonistic transcript, from a binomial GLM with expression level as a predictor. The dashed lines and error bars show 95% confidence intervals, estimated as 1.96SE. 
 

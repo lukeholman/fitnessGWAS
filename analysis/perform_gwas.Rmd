@@ -18,6 +18,9 @@ library(future.apply) # for parallel code
 
 # Load the predicted line means, as calculated by get_predicted_line_means
 predicted_line_means <- read_csv("data/derived/predicted_line_means.csv")
+
+# Note: you may need to re-download plink to get this to run on non-Mac systems
+# I used bigsnpr::download_plink()
 plink <- paste(getwd(), "code/plink", sep = "/")
 
 # # Load the wolbachia infection status data from the DGRP website

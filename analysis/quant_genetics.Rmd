@@ -33,6 +33,10 @@ line_means <- read_csv("data/derived/predicted_line_means.csv") %>%
          female_fitness_late = female.fitness.late,
          male_fitness_early = male.fitness.early,
          male_fitness_late = male.fitness.late)
+
+line_means %>% 
+  select(line, contains(" ")) %>% gather(Trait, Fitness, -line) %>% 
+  ggplot(aes(line, ))
 ```
 
 ## Proportion of variance in fitness explained by DGRP line {.tabset}

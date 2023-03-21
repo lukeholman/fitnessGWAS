@@ -142,10 +142,16 @@ readRDS("../data/derived/supp_table_of_variant_effect_means.rds") %>%
 ```
 \newpage
 
-***Table S7:*** The table showing the 517 transcripts that were associated with one or more of the four phenotypes (with a p-value less than 0.01) is too large to display here, and is provided at the following URL: https://lukeholman.github.io/fitnessGWAS/TWAS_tables.html. For each transcript, the table gives the gene name and Flybase ID, the chromosome, the extent of male bias in gene expression (as log fold change) and average expression level (calculated from the DGRP expression data from Huang et al. 2015, _PNAS_), and the average effect size and $p$-value for each fitness components (calculated using linear models relating mean expression level to mean fitness across lines).
+***Table S7:*** Estimated effect sizes (or differences in effect size) for the relationship between mutation load and fitness, from a Bayesian multivariate model. The columns shown the median of the posterior, its error, and the 95% credible intervals. These estimates are plotted in Figure 4.
+```{r, results='asis'}
+readRDS("../data/derived/supp_table_mutation_load_effects.rds") %>% 
+  make_table() 
+```
+
+***Table S8:*** The table showing the 517 transcripts that were associated with one or more of the four phenotypes (with a p-value less than 0.01) is too large to display here, and is provided at the following URL: https://lukeholman.github.io/fitnessGWAS/TWAS_tables.html. For each transcript, the table gives the gene name and Flybase ID, the chromosome, the extent of male bias in gene expression (as log fold change) and average expression level (calculated from the DGRP expression data from Huang et al. 2015, _PNAS_), and the average effect size and $p$-value for each fitness components (calculated using linear models relating mean expression level to mean fitness across lines).
 \newpage
 
-***Table S8:*** The table tallies the numbers of transcripts showing a particular relationship with fitness (rows) for various different $p$-value thresholds (columns). See Table S5 for the meanings of each row. As in Table S5, all categories are mutually exclusive, such that transcripts are only counted towards the most specific category that applies to them, and the method has low power to detect transcripts that correlate with two or more fitness metrics, because there are two or more opportunities to make a 'false negative' error.
+***Table S9:*** The table tallies the numbers of transcripts showing a particular relationship with fitness (rows) for various different $p$-value thresholds (columns). See Table S5 for the meanings of each row. As in Table S5, all categories are mutually exclusive, such that transcripts are only counted towards the most specific category that applies to them, and the method has low power to detect transcripts that correlate with two or more fitness metrics, because there are two or more opportunities to make a 'false negative' error.
 
 ```{r}
 readRDS("../data/derived/TWAS_tally_table.rds") %>%
@@ -153,7 +159,7 @@ readRDS("../data/derived/TWAS_tally_table.rds") %>%
 ```
 \newpage
 
-***Table S9:*** The fourth column of the table shows the numbers of variants comprising each of the 32 coloured panels in Figures 4A and 4B. The fifth column gives these numbers as a percentage of the total number of variants, while the sixth column shows the number as a percentage among the variants that have the same association with female fitness. 
+***Table S10:*** The fourth column of the table shows the numbers of variants comprising each of the 32 coloured panels in Figures 4A and 4B. The fifth column gives these numbers as a percentage of the total number of variants, while the sixth column shows the number as a percentage among the variants that have the same association with female fitness. 
 ```{r}
 readRDS("../data/derived/supp_tabl_gwas_intersex.rds") %>%
   mutate(`Age class` = str_remove_all(`Age class`, "[ABCD][.] ")) %>% 
@@ -165,7 +171,7 @@ readRDS("../data/derived/supp_tabl_gwas_intersex.rds") %>%
 ```
 \newpage
 
-***Table S10:*** The fourth column of the table shows the numbers of transcripts comprising each of the 32 coloured panels in Figures 4C and 4D. The fifth column gives these numbers as a percentage of the total number of transcripts, while the sixth column shows the number as a percentage among the transcripts that have the same association with female fitness. 
+***Table S11:*** The fourth column of the table shows the numbers of transcripts comprising each of the 32 coloured panels in Figures 4C and 4D. The fifth column gives these numbers as a percentage of the total number of transcripts, while the sixth column shows the number as a percentage among the transcripts that have the same association with female fitness. 
 ```{r}
 readRDS("../data/derived/supp_tabl_twas_intersex.rds") %>%
   mutate(`Age class` = str_remove_all(`Age class`, "[ABCD][.] ")) %>% 
@@ -177,7 +183,7 @@ readRDS("../data/derived/supp_tabl_twas_intersex.rds") %>%
 ```
 \newpage
 
-***Table S11:*** The table shows similar information to Table S9, except that we now tabulate the number of variants that have various associations with early- and late-life fitness (separately within each sex). Note that there are essentially no variants with opposing effects on early- and late-life fitness, in either sex.
+***Table S12:*** The table shows similar information to Table S9, except that we now tabulate the number of variants that have various associations with early- and late-life fitness (separately within each sex). Note that there are essentially no variants with opposing effects on early- and late-life fitness, in either sex.
 ```{r}
 readRDS("../data/derived/supp_tabl_gwas_interage.rds") %>%
   mutate(Sex = str_remove_all(Sex, "[ABCD][.] ")) %>% 
@@ -205,7 +211,7 @@ readRDS("../data/derived/supp_tabl_gwas_interage.rds") %>%
 <!-- ``` -->
 <!-- \newpage -->
 
-***Table S12:*** The table shows similar information to Table S10, except that we now tabulate the number of transcripts that have various associations with early- and late-life fitness (separately within each sex). Note that there are essentially no transcripts with opposing effects on early- and late-life fitness, in either sex.
+***Table S13:*** The table shows similar information to Table S10, except that we now tabulate the number of transcripts that have various associations with early- and late-life fitness (separately within each sex). Note that there are essentially no transcripts with opposing effects on early- and late-life fitness, in either sex.
 
 \begin{table}[!h]
 \centering\begingroup\fontsize{7}{9}\selectfont
@@ -290,11 +296,13 @@ Male & Positive & Positive & 3549 & 24.84 & 99.38\\
 \endgroup{}
 \end{table}
 
+\newpage
 
-***Table S13:*** A list of all the GO terms with a family wise error rate (FWER) threshold of FWER < 0.05, when testing for GO enrichment among genes with a high evidence ratio (indicating greater likelihood of being sexually concordant, as measured in the early-life fitness assay). The results imply strong, sexually concordant selection on the expression levels of genes involved in the functions listed here, such as gene expression and translation.
+***Table S14:*** A list of all the GO terms with a family wise error rate (FWER) threshold of FWER < 0.05, when testing for GO enrichment among genes with a high evidence ratio (indicating greater likelihood of being sexually concordant, as measured in the early-life fitness assay). The results imply strong, sexually concordant selection on the expression levels of genes involved in the functions listed here, such as cytoplasmic translation and peptide metabolism.
 
 ```{r}
-readRDS("data/derived/supp_table_GO_terms.rds")
+readRDS("../data/derived/supp_table_GO_terms.rds") %>%
+  make_table_no_linespaces()
 ```
 
 

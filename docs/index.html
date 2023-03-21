@@ -354,15 +354,15 @@ results.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree24aedf38df994c859b25663f40763f5ab97150cdtargetblank24aedf3a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreebe63a3f316b86e523a0e48df113e6844dc62d1datargetblankbe63a3fa">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/24aedf38df994c859b25663f40763f5ab97150cd" target="_blank">24aedf3</a>
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/be63a3f316b86e523a0e48df113e6844dc62d1da" target="_blank">be63a3f</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree24aedf38df994c859b25663f40763f5ab97150cdtargetblank24aedf3a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreebe63a3f316b86e523a0e48df113e6844dc62d1datargetblankbe63a3fa"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -372,7 +372,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/24aedf38df994c859b25663f40763f5ab97150cd" target="_blank">24aedf3</a>.
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/be63a3f316b86e523a0e48df113e6844dc62d1da" target="_blank">be63a3f</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -416,6 +416,7 @@ Untracked files:
     Untracked:  old_analyses/quantitative_genetics_OLD_brms.Rmd
 
 Unstaged changes:
+    Modified:   analysis/get_predicted_line_means.Rmd
     Modified:   figures/fig3_boyle_plot.pdf
     Modified:   figures/fig4_mutation_load.pdf
     Modified:   figures/fig5_quartiles_plot.pdf
@@ -465,6 +466,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/be63a3f316b86e523a0e48df113e6844dc62d1da/analysis/index.Rmd" target="_blank">be63a3f</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-03-21
+</td>
+<td>
+wflow_publish("analysis/index.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/79db4a4015c1239f4c88b9d4791f80b6348e37ed/docs/index.html" target="_blank">79db4a4</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-03-21
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1110,9 +1145,20 @@ fitness using Bayesian models</a></h3>
 traits, while imputing missing values and adjusting for block
 effects.</p>
 </div>
+<div id="tables-of-the-raw-data-and-estimated-line-means"
+class="section level3">
+<h3><a href="raw_data_and_line_means.html">3. Tables of the raw data and
+estimated line means</a></h3>
+<p>To facilitate data re-use, we here provide tables showing the raw
+data (i.e. the measurements of male and female fitness that were
+collected on each individual replicate vial), as well as the estimated
+line means that were calculated in <a
+href="get_predicted_line_means.html">2. Estimating line mean fitness
+using Bayesian models</a>.</p>
+</div>
 <div id="calculating-quantitative-genetic-parameters"
 class="section level3">
-<h3><a href="quant_genetics.html">3. Calculating quantitative genetic
+<h3><a href="quant_genetics.html">4. Calculating quantitative genetic
 parameters</a></h3>
 <p>We first present a table showing the proportion of variance in
 fitness explained by ‘DGRP line’, which approximates heritability. We
@@ -1120,7 +1166,7 @@ then estimate the correlations among line means in the 4 fitness traits,
 which approximates genetic correlations.</p>
 </div>
 <div id="running-the-gwas" class="section level3">
-<h3><a href="perfom_gwas.html">4. Running the GWAS</a></h3>
+<h3><a href="perfom_gwas.html">5. Running the GWAS</a></h3>
 <p>This script first performs quality control and imputation on the
 dataset of SNPs and indels for the DGRP (e.g filtering by MAF). Second,
 it runs mixed model association tests on our four phenotypes using the
@@ -1132,7 +1178,7 @@ in approximate LD for downstream analyses.</p>
 </div>
 <div id="applying-adaptive-shrinkage-to-the-gwas-results"
 class="section level3">
-<h3><a href="gwas_adaptive_shrinkage.html">5. Applying adaptive
+<h3><a href="gwas_adaptive_shrinkage.html">6. Applying adaptive
 shrinkage to the GWAS results</a></h3>
 <p>This script uses the R package <code>mashr</code> to perform
 multivariate adaptive shrinkage on the results of the GWAS, for an
@@ -1142,7 +1188,7 @@ types of loci (e.g. sexually- or age-antagonistic loci).</p>
 </div>
 <div id="running-the-twas-and-applying-mashr-to-the-twas-results"
 class="section level3">
-<h3><a href="TWAS.html">6. Running the TWAS and applying mashr to the
+<h3><a href="TWAS.html">7. Running the TWAS and applying mashr to the
 TWAS results</a></h3>
 <p>This script uses the transcriptomic data on the DGRP from Huang et
 al. 2015 <em>PNAS</em> to run a ‘transcriptome-wide association study’

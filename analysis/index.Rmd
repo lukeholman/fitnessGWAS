@@ -18,19 +18,23 @@ This script creates a SQLite3 database holding two tables: one with annotations 
 
 This script uses Bayesian mixed models implemented in the package `brms` to estimate the line means for our four fitness traits, while imputing missing values and adjusting for block effects.
 
-### [3. Calculating quantitative genetic parameters](quant_genetics.html)
+### [3. Tables of the raw data and estimated line means](raw_data_and_line_means.html)
+
+To facilitate data re-use, we here provide tables showing the raw data (i.e. the measurements of male and female fitness that were collected on each individual replicate vial), as well as the estimated line means that were calculated in [2. Estimating line mean fitness using Bayesian models](get_predicted_line_means.html).
+
+### [4. Calculating quantitative genetic parameters](quant_genetics.html)
 
 We first present a table showing the proportion of variance in fitness explained by 'DGRP line', which approximates heritability. We then estimate the correlations among line means in the 4 fitness traits, which approximates genetic correlations.
 
-### [4. Running the GWAS](perfom_gwas.html)
+### [5. Running the GWAS](perfom_gwas.html)
 
 This script first performs quality control and imputation on the dataset of SNPs and indels for the DGRP (e.g filtering by MAF). Second, it runs mixed model association tests on our four phenotypes using the software [GEMMA](http://www.xzlab.org/software/GEMMAmanual.pdf). Third, it uses PLINK to identify groups of loci that are in complete linkage disequilibrium ('SNP clumps'), and to identify a subset of SNPs that are in approximate LD for downstream analyses.
 
-### [5. Applying adaptive shrinkage to the GWAS results](gwas_adaptive_shrinkage.html)
+### [6. Applying adaptive shrinkage to the GWAS results](gwas_adaptive_shrinkage.html)
 
 This script uses the R package `mashr` to perform multivariate adaptive shrinkage on the results of the GWAS, for an LD-pruned subset of loci. This produces corrected estimates of each SNP's effect size, and allows estimation of the frequencies of different types of loci (e.g. sexually- or age-antagonistic loci).
 
-### [6. Running the TWAS and applying mashr to the TWAS results](TWAS.html)
+### [7. Running the TWAS and applying mashr to the TWAS results](TWAS.html)
 
 This script uses the transcriptomic data on the DGRP from Huang et al. 2015 _PNAS_ to run a 'transcriptome-wide association study' (TWAS). In this script, we
 

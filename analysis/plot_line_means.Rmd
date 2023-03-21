@@ -84,71 +84,50 @@ make_figure_1()
 **Figure 1**: Correlations among estimated line means for the four fitness components. The line means were estimated from Bayesian mixed models that account for block effects, and the non-independence of our early- and late-life fitness measurements.
 
 
-## Interaction plot showing trait covariance across lines
-All possible types of lines were observed: some lines are uniformly bad, or uniformly good, or good in one sex or age class but bad in the other.
-```{r fig.showtext=TRUE, fig.height = 6, fig.width = 6, warning = FALSE}
-make_bonus_figure <- function(){
+<!-- ## Interaction plot showing trait covariance across lines -->
+<!-- All possible types of lines were observed: some lines are uniformly bad, or uniformly good, or good in one sex or age class but bad in the other. -->
+<!-- ```{r fig.showtext=TRUE, fig.height = 6, fig.width = 6, warning = FALSE} -->
+<!-- make_bonus_figure <- function(){ -->
 
-  interaction.plot <- function(predicted_line_means, x1, x2, title, sex.or.age){
-    if(sex.or.age == "sex"){
-      x.labs <-  c("Female", "Male") 
-      cols <- c("steelblue", "darkgrey", "deeppink2")
-    } else {
-      x.labs <- c("Early life", "Late life")
-      cols <- c("green", "darkgrey", "purple")
-    }
-    
-    df <- predicted_line_means %>% select(!!x1, !!x2) 
-    df$rank.x1 <- rank(df[,1]) / max(abs(rank(df[,1])))
-    df$rank.x2 <- rank(df[,2]) / max(abs(rank(df[,2])))
-    df %>% mutate(slope = rank.x1 - rank.x2,
-                  line = 1:length(rank.x1)) %>%
-      gather(key = sex_or_age, value = fitness, rank.x1, rank.x2) %>% 
-      mutate(fitness = fitness / max(fitness),
-             title = title) %>%  
-      ggplot(aes(x = sex_or_age, y = fitness, group = line, colour = slope)) + 
-      geom_line(size = 0.4, alpha = 0.7) + 
-      scale_color_gradient2(low = cols[1], mid = cols[2], high = cols[3]) + 
-      scale_x_discrete(expand = c(0.1,0.1), labels = x.labs) + 
-      theme_classic(15) + 
-      theme(strip.background = element_blank(),
-            text = element_text(family = "Raleway")) +
-      xlab(NULL) + ylab(NULL) + 
-      facet_wrap(~title) + 
-      theme(legend.position = "none")
-  }
-  
-  full_plot <- grid.arrange(
-    interaction.plot(predicted_line_means, "female.fitness.early", "male.fitness.early", "Early-life fitness", "sex"),
-    interaction.plot(predicted_line_means, "female.fitness.late", "male.fitness.late", "Late-life fitness", "sex"),
-    interaction.plot(predicted_line_means, "female.fitness.early", "female.fitness.late", "Females", "age"),
-    interaction.plot(predicted_line_means, "male.fitness.early", "male.fitness.late", "Males", "age"),
-    ncol = 2, left = "Fitness rank among the 125 lines", bottom = "Sex or age category"
-  )
-}
-make_bonus_figure()
-```
-<br></br>
-**Bonus figure**: The relative fitness ranks for each line, for four pairs of fitness traits. The y-axis was calculated by taking the adjusted line mean fitnesses, ranking them, and then dividing by the number of lines. The intensity and hue of the colour helps highlight genotypes that rank highly for one fitness component but not the other. 
+<!--   interaction.plot <- function(predicted_line_means, x1, x2, title, sex.or.age){ -->
+<!--     if(sex.or.age == "sex"){ -->
+<!--       x.labs <-  c("Female", "Male")  -->
+<!--       cols <- c("steelblue", "darkgrey", "deeppink2") -->
+<!--     } else { -->
+<!--       x.labs <- c("Early life", "Late life") -->
+<!--       cols <- c("green", "darkgrey", "purple") -->
+<!--     } -->
 
+<!--     df <- predicted_line_means %>% select(!!x1, !!x2)  -->
+<!--     df$rank.x1 <- rank(df[,1]) / max(abs(rank(df[,1]))) -->
+<!--     df$rank.x2 <- rank(df[,2]) / max(abs(rank(df[,2]))) -->
+<!--     df %>% mutate(slope = rank.x1 - rank.x2, -->
+<!--                   line = 1:length(rank.x1)) %>% -->
+<!--       gather(key = sex_or_age, value = fitness, rank.x1, rank.x2) %>%  -->
+<!--       mutate(fitness = fitness / max(fitness), -->
+<!--              title = title) %>%   -->
+<!--       ggplot(aes(x = sex_or_age, y = fitness, group = line, colour = slope)) +  -->
+<!--       geom_line(size = 0.4, alpha = 0.7) +  -->
+<!--       scale_color_gradient2(low = cols[1], mid = cols[2], high = cols[3]) +  -->
+<!--       scale_x_discrete(expand = c(0.1,0.1), labels = x.labs) +  -->
+<!--       theme_classic(15) +  -->
+<!--       theme(strip.background = element_blank(), -->
+<!--             text = element_text(family = "Raleway")) + -->
+<!--       xlab(NULL) + ylab(NULL) +  -->
+<!--       facet_wrap(~title) +  -->
+<!--       theme(legend.position = "none") -->
+<!--   } -->
 
-
-<!-- # Relating fitness data to genotype -->
-
-<!-- ## Check for effects of wolbachia and inversions -->
-<!-- The Mackay lab have collected data on the Wolbachia infection status of each line, and recorded which chromosomal inversions each line carries. It is possible to statistically account for these variables when doing GWAS, but it makes the analysis more complex. Our fitness data are not correlated with the _Wolbachia_ or inversion data, and in light of this we elected not to include them as predictors when writing our GWAS functions below. Additional analyses (not shown) suggest that the results are essentially identical if we run the models with these predictors included. However, including these parameters as random effects slows down the Bayesian GWAS a lot (and it already takes months of CPU time), so we elected to leave them out. -->
-<!-- ```{r message=FALSE, warning=FALSE} -->
-<!-- inv.data <- predicted_line_means %>%  -->
-<!--   left_join(read.csv("data/input/inversion genotypes.csv", stringsAsFactors = FALSE) %>%  -->
-<!--               mutate(line = paste("line_", line, sep = "")), by = "line") %>%  -->
-<!--   left_join(read.csv("data/input/wolbachia.csv", stringsAsFactors = FALSE) %>%  -->
-<!--               mutate(line = paste("line_", line, sep = "")), by = "line") %>% select(-line, -block) -->
-<!-- inv.data[inv.data == "homozygous"] <- NA -->
-<!-- inv.data[inv.data == "ST"] <- 0 -->
-<!-- inv.data[inv.data == "INV"] <- 1 -->
-<!-- inv.data[inv.data == "n"] <- 0 -->
-<!-- inv.data[inv.data == "y"] <- 1 -->
-<!-- for(i in 1:ncol(inv.data)) inv.data[,i] <- inv.data[,i] %>% as.numeric() -->
-<!-- inversion.cors <- cor(inv.data, use = "pairwise.complete.obs") -->
-<!-- heatmap(inversion.cors[!is.na(inversion.cors[,1]), !is.na(inversion.cors[,1])]) -->
+<!--   full_plot <- grid.arrange( -->
+<!--     interaction.plot(predicted_line_means, "female.fitness.early", "male.fitness.early", "Early-life fitness", "sex"), -->
+<!--     interaction.plot(predicted_line_means, "female.fitness.late", "male.fitness.late", "Late-life fitness", "sex"), -->
+<!--     interaction.plot(predicted_line_means, "female.fitness.early", "female.fitness.late", "Females", "age"), -->
+<!--     interaction.plot(predicted_line_means, "male.fitness.early", "male.fitness.late", "Males", "age"), -->
+<!--     ncol = 2, left = "Fitness rank among the 125 lines", bottom = "Sex or age category" -->
+<!--   ) -->
+<!-- } -->
+<!-- make_bonus_figure() -->
 <!-- ``` -->
+<!-- <br></br> -->
+<!-- **Bonus figure**: The relative fitness ranks for each line, for four pairs of fitness traits. The y-axis was calculated by taking the adjusted line mean fitnesses, ranking them, and then dividing by the number of lines. The intensity and hue of the colour helps highlight genotypes that rank highly for one fitness component but not the other.  -->
+

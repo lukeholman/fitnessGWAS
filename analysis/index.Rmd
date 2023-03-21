@@ -62,6 +62,7 @@ Here, we present various plots and statistical analyses of the GWAS and TWAS res
 - Hex bin plots showing the correlations in effect sizes from GWAS across the 4 fitness traits
 - A statistical test showing that minor alleles tend to be associated with lower fitness
 - A plot inspired by Boyle et al. 2017 ("An expanded view of complex traits: from polygenic to omnigenic", _Cell_) illustrating that fitness is highly polygenic ('omnigenic') and pleiotropy between male and female fitness is common. 
+- An analysis of mutation load, testing whether the number of putatively harmful alleles present in each DGRP line correlates with fitness.
 - Bar plots showing an estimate of the frequencies of sexually antagonistic and sexually concordant SNPs/indels from GWAS, and transcripts from TWAS (plus the same for age concordant vs age antagonistic variants/transcripts)
 - Statistics indicating that the frequency of sexually antagonistic loci declines with age
 - Plots of the evidence ratio for each locus and transcript, where the ER compares evidence for the hypotheses that 1) the locus is concordant between sexes or ages, and B) the locus is antagonistic between sexes or ages. This plot avoids having to create a binary distinction between antagonistic and concordant loci, when in reality there is a continuum of evidence.

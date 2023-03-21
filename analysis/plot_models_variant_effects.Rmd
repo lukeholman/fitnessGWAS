@@ -319,9 +319,9 @@ rbind(mod1$coefficients,
 
 ## Manhattan plot
 
-**Figure legend**: Manhattan plot showing the p-values (-log_{10} transformed) for each variant, from mixed model GWAS of female (top) and male (bottom) early-life fitness testing the null hypothesis that the two alleles are associated with equal fitness values.  
+The code chunk below makes the Manhattan plot, and combines it with the plot above to make the composite Figure 2 shown in the paper. 
 
-```{r manhattan, fig.height=12, fig.showtext=TRUE}
+```{r manhattan, fig.showtext=TRUE}
 manhattan_data <- tbl(db, "univariate_lmm_results") %>% 
   select(SNP, starts_with("P_"),
          pvalue_female_early_raw, pvalue_male_early_raw) %>%
@@ -392,12 +392,6 @@ grid_arrange_shared_legend <- function(..., ncol = length(list(...)), nrow = 1) 
     widths = unit.c(unit(1, "npc") - lwidth, lwidth))
   return(combined)
 }
-grid_arrange_shared_legend(p1, p2)
-```
-
-
-```{r make_fig2, echo=FALSE, results='hide', message=F, warning=F, fig.showtext=TRUE}
-# Make composite figure 2, with SNP effects and Manhattan plot
 
 png("figures/fig2_SNPs_manhattan_plot.png", 
     height = 8, width = 8, res = 300, units = "in")
@@ -405,6 +399,8 @@ grid.arrange(fig2_top, grid_arrange_shared_legend(p1, p2))
 dev.off()
 ```
 
+
+![](../figures/fig2_SNPs_manhattan_plot.png)
 
 
 ## Investigating pleiotropy and polygenicity of fitness
@@ -417,7 +413,7 @@ Figure 3 shows that there was a very tight correlation between the average effec
 
 Interestingly there appears to be a curve in Figure 3A to the left of the x-axis, indicating that variants where the minor allele is strongly, negatively associated with female fitness are (on average) less negatively associated with male fitness than expected based on predictions from variants with weaker effects on female fitness. One possible explanation is that alleles that are highly highly detrimental to both sexes are usually purged by selection (or at least kept below the 5% MAF threshold that we used), whereas female-harming alleles that are neutral or beneficial in males are purged less often, resulting a greater proportion of female-limited or sexually antagonistic alleles towards the left of the x-axis.
 
-```{r}
+```{r message=FALSE}
 p1_data <- SNP_clumps %>%
   filter(LD_subset) %>% # The figure looks the same whether or not the data are thinned to the LD set of SNPs
   arrange(beta_female_early_raw) %>%
@@ -479,7 +475,7 @@ The following code counts the number of mutations per DGRP line which A) have a 
 - START_GAINED
 
 
-```{r count_mutations}
+```{r count_mutations, message=FALSE, results='hide'}
 # Load up the DGRP genotype data using the bigsnpr package
 if(!file.exists("snp_backing_file.bk")) {
   rds <- snp_readBed("data/input/dgrp2.bed", backingfile = "snp_backing_file")
@@ -560,7 +556,7 @@ joined <- left_join(
 ### Run Bayesian multivariate models
 
 The following Bayesian multivariate model estiamtes the relationship between mutation count and each of the four fitness traits, across DGRP lines. The model has the multivariate formula `(FE, FL, ME, ML) ~ mutation_count`, assumes Gaussian errors, and estimates the residual correlation between the four fitness traits (thereby accounting for the correlation between fitness traits when estimating the relationship with mutation count). The model uses `brms` default priors. 
-```{r}
+```{r message=F, warning=F, results='hide'}
 brms_data_muts <- joined %>% 
   mutate(fitness_trait = str_replace_all(fitness_trait, " ", "_")) %>% 
   spread(fitness_trait, fitness_value) %>% 
@@ -599,9 +595,7 @@ grid.arrange(
 
 ### Plot mutation load against line mean fitness
 
-The plot shows the correlation, across DGRP lines of fitness with the mutation load. The top row shows the effect of 'major effect' mutations on each of the four fitness traits, while the bottom row shows the effect of mutations with a minor allele frequency (MAF) below 5%. The number of mutations of the specified type (in 100s) is shown on the x-axis, and the regression line comes from the previously mentioned Bayesian multivariate model (which accounts for covariance between the four fitness traits when estimating the effects of mutation load). 
-
-The figure illustrates that there is large variation in the number of putatively deleterious mutations between lines, and there is a negative correlation with fitness (especially in females).
+Here, we make the plot showing the mutation load versus line mean fitness. The regression line and its 95% CIs come from the `brms` model.
 
 ```{r fig.showtext=TRUE}
 mut_plot_data <- conditional_effects(mut_model, plot = F)
@@ -649,8 +643,6 @@ mut_load_correlation_plot <- get_regression_line_data(mut_plot_data) %>%
         strip.text = element_text(hjust = 0),
         strip.background = element_blank(),
         legend.position = "none")
-
-mut_load_correlation_plot
 ```
 
 ### Estimated effect size of mutation load on fitness {.tabset}
@@ -659,7 +651,7 @@ mut_load_correlation_plot
 
 The left plot shows the posterior estimates of the effect size of mutation load on fitness (i.e. the 'regression slope' from the previous figure). The coloured area shows the posterior distribution, and the horizontal bar summarises its median and 66% and 95% credible intervals. The right plot shows the difference in this effect size between fitness traits, e.g. FE - FL shows the difference in regression slope between female early-life and late-life fitness. A positive sign indicates that mutation load has more negative effect on the second trait (e.g. mutations appear more costly to older females than younger).
 
-```{r fig.showtext=TRUE}
+```{r fig.showtext=TRUE, fig.width=9.55, fig.height=4.7, message=F}
 posterior_muts <- as_draws_df(mut_model, variable = "^b_", regex = T) %>% 
   as_tibble() %>% select(contains("mutation"))
 
@@ -716,9 +708,6 @@ make_plot2 <- function(posterior, title, col){
 pp1 <- make_plot1(posterior_muts, "E. Effect sizes (posterior)")
 pp2 <- make_plot2(posterior_muts, "F. Differences in effect size", col = "#F5CA7B")
 
-plot_grid(mut_load_correlation_plot,
-          arrangeGrob(pp1, pp2, ncol=2), rel_widths = c(1,1.1))
-
 
 mut_load_correlation_plot + pp1 + pp2 + 
   plot_layout(ncol = 3, widths = c(1, 0.5,0.5))
@@ -734,6 +723,7 @@ unlink(list("snp_backing_file.rds",
             "data/input/plink.log",
             "data/input/plink.frq"))
 ```
+
 
 #### Table
 

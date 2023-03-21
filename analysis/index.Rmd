@@ -53,7 +53,6 @@ This script presents a searchable HTML table showing a list of significant SNPs 
 
 This script presents a searchable HTML table showing a list of significant transcripts from the TWAS, with annotations, effect sizes, and $p$-values for each. 
 
-
 ### [11. Plots and statistical analyses](plot_models_variant_effects.html)
 
 Here, we present various plots and statistical analyses of the GWAS and TWAS results, specifically:
@@ -68,27 +67,3 @@ Here, we present various plots and statistical analyses of the GWAS and TWAS res
 - Plots of the evidence ratio for each locus and transcript, where the ER compares evidence for the hypotheses that 1) the locus is concordant between sexes or ages, and B) the locus is antagonistic between sexes or ages. This plot avoids having to create a binary distinction between antagonistic and concordant loci, when in reality there is a continuum of evidence.
 - Statistical models of the evidence ratios, showing _inter alia_ that candidate sexually antagonistic alleles tend to be more common and to be enriched on the X chromosome.
 - GO enrichment of the top 1% most sexually antagonistic transcripts, implicating GO terms relating to mitochondria among other things.  
-
-
-
-
-<!-- Heritability -->
-<!--  - Correlated with selection experienced by the gene? Angatonism? -->
-<!--  - Correlated with sex-specificity in expression? -->
-
-<!-- eQTLs -->
-<!--  - Are there eQTLs with matching, independent, and opposite-sex effects? YES TO ALL. NEED TO RE-DO eQTL ANALYSIS  -->
-<!--  - Are there more overlaps between the eQTLs and fitness QTLs than expected by chance? Correlation in p-vals? -->
-
-
-<!-- Predictions -->
-<!--  - eQTLs that affect transciption the same way in both sexes will have SA fitness effects for transcripts under SA selection (or concordant for concordant) We need: -->
-<!--    - Effect size for the eQTL on the transcript, in both sexes (re-run eQTL) -->
-<!--    - Effect size for the eQTL on fitness, in both sexes (done) -->
-<!--    - Effect size for the transcript on fitness (done) -->
-<!--    - "Allele 1 made the transcript increase in both sexes, good for males and bad for females" -->
-<!--  - eQTLs that only affect transciption in one sex will have a more sex-specific fitness effect as well (not concordant, not antag) -->
-<!--  - eQTLs where the + and - alleles are swapped between sexes will be antagonistic or concordant, depending on sex-specific selection on that transcript -->
-<!--  - Transcripts will show the twin peaks relationship between sex bias in expression and SA selection -->
-<!--  - Genes targetted by dsx will be extra antagonistic -->
-

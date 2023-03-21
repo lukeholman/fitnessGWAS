@@ -395,7 +395,7 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2023-03-15
+<strong>Last updated:</strong> 2023-03-21
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -526,15 +526,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree6ea4fd1e4c836d60fc098318a53279e0218a957etargetblank6ea4fd1a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree27afd2576f9f0b0e8c39e7accb69081db1853164targetblank27afd25a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/6ea4fd1e4c836d60fc098318a53279e0218a957e" target="_blank">6ea4fd1</a>
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/27afd2576f9f0b0e8c39e7accb69081db1853164" target="_blank">27afd25</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree6ea4fd1e4c836d60fc098318a53279e0218a957etargetblank6ea4fd1a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree27afd2576f9f0b0e8c39e7accb69081db1853164targetblank27afd25a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -544,7 +544,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/6ea4fd1e4c836d60fc098318a53279e0218a957e" target="_blank">6ea4fd1</a>.
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/27afd2576f9f0b0e8c39e7accb69081db1853164" target="_blank">27afd25</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -566,7 +566,6 @@ Ignored files:
     Ignored:    .httr-oauth
     Ignored:    .pversion
     Ignored:    analysis/.DS_Store
-    Ignored:    analysis/correlations_SNP_effects_cache/
     Ignored:    code/.DS_Store
     Ignored:    code/Drosophila_GWAS.Rmd
     Ignored:    data/.DS_Store
@@ -579,16 +578,21 @@ Ignored files:
     Ignored:    data/input/dgrp2.fam
     Ignored:    data/input/huang_transcriptome/
     Ignored:    figures/.DS_Store
+    Ignored:    old_analyses/.DS_Store
 
 Untracked files:
-    Untracked:  big_model.rds
-    Untracked:  code/quant_gen_1.R
-    Untracked:  data/input/genomic_relatedness_matrix.rds
+    Untracked:  old_analyses/Data for old analyses/
+    Untracked:  old_analyses/eQTL_analysis.Rmd
+    Untracked:  old_analyses/fitness_data.csv
+    Untracked:  old_analyses/gcta_quant_genetics_OLD.Rmd
+    Untracked:  old_analyses/quantitative_genetics_OLD_brms.Rmd
 
 Unstaged changes:
-    Modified:   .gitignore
-    Modified:   code/pdf_supp_material.Rmd
-    Modified:   code/pdf_supp_material.pdf
+    Modified:   figures/fig3_boyle_plot.pdf
+    Modified:   figures/fig4_mutation_load.pdf
+    Modified:   figures/fig5_quartiles_plot.pdf
+    Modified:   figures/fig6_antagonism_ratios.pdf
+    Modified:   figures/fig7_models.pdf
 
 </code></pre>
 <p>
@@ -635,6 +639,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/27afd2576f9f0b0e8c39e7accb69081db1853164/analysis/get_predicted_line_means.Rmd" target="_blank">27afd25</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-03-21
+</td>
+<td>
+wflow_publish("analysis/get_predicted_line_means.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/55c8c9b1eb19fc4c72e9852f96c69fb601f70737/docs/get_predicted_line_means.html" target="_blank">55c8c9b</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-03-15
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -934,7 +972,6 @@ Initial commit
 <pre class="r"><code>library(tidyverse)
 library(brms)
 library(mice)
-library(ICC)
 library(future)
 library(future.apply)
 library(kableExtra)</code></pre>
@@ -1063,8 +1100,7 @@ get_predicted_line_means &lt;- function(overwrite = FALSE){
   male_fitness_imputed &lt;- lapply(1:5, function(i) { # for each imputed dataset, 
     complete(male_fitness_imputed, i) %&gt;% 
       mutate(total1 = early.male.rival + early.male.focal, # tally up the focal+rival offspring for binomial model
-             total2 = late.male.rival + late.male.focal,
-             num.GFP.males = as.numeric(scale(num.GFP.males))) %&gt;% # scale this covariate
+             total2 = late.male.rival + late.male.focal) %&gt;% # scale this covariate
       # For late-life assays where the 5 focal males all died before reaching age 14, 
       # we need to assign them zero fitness. We did this by assuming that the rivals sired 100/100 offspring.
       # This scenario happened in 47 vials (out of 810)
@@ -1099,7 +1135,8 @@ get_predicted_line_means &lt;- function(overwrite = FALSE){
                       prior = prior_females,
                       iter = 5000, chains = 4, cores = 4,
                       seed = 1, control = list(adapt_delta = 0.999, max_treedepth = 15)) 
-  writeLines(capture.output(summary(female_model)), con = &quot;data/derived/model_summary_females.txt&quot;)
+  writeLines(capture.output(summary(female_model)), 
+             con = &quot;data/derived/model_summary_females.txt&quot;)
   
   # saveRDS(female_model, &quot;data/derived/female_fitness_prediction_model.rds&quot;)
   
@@ -1115,7 +1152,8 @@ get_predicted_line_means &lt;- function(overwrite = FALSE){
                              data = male_fitness_imputed,
                              iter = 5000, chains = 1, cores = 4,
                              seed = 1, control = list(adapt_delta = 0.999, max_treedepth = 15)) 
-  writeLines(capture.output(summary(male_model)), con = &quot;data/derived/model_summary_males.txt&quot;)
+  writeLines(capture.output(summary(male_model)), 
+             con = &quot;data/derived/model_summary_males.txt&quot;)
   # saveRDS(male_model, &quot;data/derived/male_fitness_prediction_model.rds&quot;) 
 
   ####### Define new data for prediction
@@ -1125,8 +1163,7 @@ get_predicted_line_means &lt;- function(overwrite = FALSE){
   new.data.male &lt;- male_fitness %&gt;% 
     select(line) %&gt;% distinct() %&gt;% arrange(line) %&gt;% 
     mutate(total1 = 100, # changing this number does not affect the line means, as expected
-           total2 = 100, 
-           num.GFP.males = mean(male_fitness$num.GFP.males, na.rm = TRUE))
+           total2 = 100)
   
   # Get predicted lines means for early and late life *female* fitness on linear predictor scale (i.e. fairly normal)
   female_line_preds &lt;- data.frame(
@@ -1153,43 +1190,6 @@ get_predicted_line_means &lt;- function(overwrite = FALSE){
            male.fitness.late = Estimate.latemalefocal) %&gt;%
     mutate(male.fitness.early = as.numeric(scale(male.fitness.early)), # scale the line means
            male.fitness.late = as.numeric(scale(male.fitness.late))) 
-
-  ## Define a function to get the ICC for line, for each posterior sample of predicted line means
-  # get_ICC_line &lt;- function(predictions){
-  #   cols &lt;- str_detect(names(predictions), &quot;X&quot;)
-  #   first_posterior_column &lt;- which(cols)[1] 
-  #   n_draws &lt;- sum(cols)
-  #   lapply(0:(n_draws - 1), function(i){
-  #     ICCbare(predictions$line, predictions[, i + first_posterior_column])
-  #   }) %&gt;% unlist()
-  # }
-  
-  # Calculate ICC for each sample, separately for old and young females
-  # For females, this is done on the estimated line mean progeny produced (i.e. response scale)
-  # predicted &lt;- fitted(female_model, summary = FALSE)
-  # Line_ICC_female_early &lt;- get_ICC_line(data.frame(female_fitness, t(predicted[, , 1])))
-  # Line_ICC_female_late &lt;- get_ICC_line(data.frame(female_fitness, t(predicted[, , 2])))
-  
-  # Do the same for males
-  # For males, this is done on the estimated proportion progeny sired (i.e. response scale)
-  # new_data &lt;- male_fitness %&gt;% 
-  #   select(block, line, vial) %&gt;% 
-  #   mutate(total1 = 100, 
-  #          total2 = 100, 
-  #          num.GFP.males = male_fitness %&gt;% .$num.GFP.males %&gt;% mean(na.rm=TRUE))
-  # predicted &lt;- fitted(male_model, summary = FALSE, newdata = new_data)
-  # Line_ICC_male_early &lt;- get_ICC_line(data.frame(new_data, t(predicted[, , 1])))
-  # Line_ICC_male_late &lt;- get_ICC_line(data.frame(new_data, t(predicted[, , 2])))
-  # 
-  # ICC &lt;- list(Line_ICC_female_early, 
-  #             Line_ICC_female_late,
-  #             Line_ICC_male_early,
-  #             Line_ICC_male_late) %&gt;% lapply(posterior_summary) %&gt;% 
-  #   do.call(&quot;rbind&quot;, .) %&gt;% as_tibble() %&gt;%
-  #   mutate(Fitness_trait = c(&quot;Female early-life fitness&quot;, &quot;Female late-life fitness&quot;,
-  #                            &quot;Male early-life fitness&quot;, &quot;Male late-life fitness&quot;))
-  # write.csv(ICC, file = &quot;data/derived/ICC.csv&quot;, row.names = TRUE)
-  
 
   # Record which block(s) each line was measured in. Generally one block, except for ref line (all blocks)
   line_blocks &lt;- rbind(female_fitness %&gt;% select(block, line), 
@@ -1230,34 +1230,46 @@ means:</h3>
 Formula: female.fitness.early ~ (1 | p | line) + (1 | q | block) + (1 | r | vial) 
          female.fitness.late ~ (1 | p | line) + (1 | q | block) + (1 | r | vial) 
    Data: female_fitness (Number of observations: 816) 
-Samples: 4 chains, each with iter = 5000; warmup = 2500; thin = 1;
-         total post-warmup samples = 10000
+  Draws: 4 chains, each with iter = 5000; warmup = 2500; thin = 1;
+         total post-warmup draws = 10000
 
 Group-Level Effects: 
 ~block (Number of levels: 10) 
-                                                              Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sd(femalefitnessearly_Intercept)                                  0.29      0.09     0.16     0.50 1.00     6955     7704
-sd(femalefitnesslate_Intercept)                                   1.21      0.35     0.70     2.05 1.00     7505     8048
-cor(femalefitnessearly_Intercept,femalefitnesslate_Intercept)    -0.42      0.29    -0.88     0.22 1.00     8010     7082
+                                                              Estimate Est.Error l-95% CI
+sd(femalefitnessearly_Intercept)                                  0.29      0.09     0.16
+sd(femalefitnesslate_Intercept)                                   1.21      0.35     0.70
+cor(femalefitnessearly_Intercept,femalefitnesslate_Intercept)    -0.42      0.29    -0.88
+                                                              u-95% CI Rhat Bulk_ESS Tail_ESS
+sd(femalefitnessearly_Intercept)                                  0.50 1.00     6956     7704
+sd(femalefitnesslate_Intercept)                                   2.05 1.00     7505     8048
+cor(femalefitnessearly_Intercept,femalefitnesslate_Intercept)     0.22 1.00     8011     7082
 
 ~line (Number of levels: 125) 
-                                                              Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sd(femalefitnessearly_Intercept)                                  0.58      0.05     0.50     0.68 1.00     5014     7236
-sd(femalefitnesslate_Intercept)                                   1.82      0.17     1.51     2.18 1.00     5993     7883
-cor(femalefitnessearly_Intercept,femalefitnesslate_Intercept)     0.68      0.07     0.53     0.79 1.00     7663     7679
+                                                              Estimate Est.Error l-95% CI
+sd(femalefitnessearly_Intercept)                                  0.58      0.05     0.50
+sd(femalefitnesslate_Intercept)                                   1.82      0.17     1.51
+cor(femalefitnessearly_Intercept,femalefitnesslate_Intercept)     0.68      0.07     0.53
+                                                              u-95% CI Rhat Bulk_ESS Tail_ESS
+sd(femalefitnessearly_Intercept)                                  0.68 1.00     5015     7236
+sd(femalefitnesslate_Intercept)                                   2.18 1.00     5994     7883
+cor(femalefitnessearly_Intercept,femalefitnesslate_Intercept)     0.79 1.00     7663     7679
 
 ~vial (Number of levels: 816) 
-                                                              Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sd(femalefitnessearly_Intercept)                                  0.52      0.02     0.49     0.55 1.00     4219     6935
-sd(femalefitnesslate_Intercept)                                   1.54      0.07     1.42     1.68 1.00     4543     6625
-cor(femalefitnessearly_Intercept,femalefitnesslate_Intercept)     0.21      0.05     0.12     0.30 1.00     7886     7637
+                                                              Estimate Est.Error l-95% CI
+sd(femalefitnessearly_Intercept)                                  0.52      0.02     0.49
+sd(femalefitnesslate_Intercept)                                   1.54      0.07     1.42
+cor(femalefitnessearly_Intercept,femalefitnesslate_Intercept)     0.21      0.05     0.12
+                                                              u-95% CI Rhat Bulk_ESS Tail_ESS
+sd(femalefitnessearly_Intercept)                                  0.55 1.00     4219     6935
+sd(femalefitnesslate_Intercept)                                   1.68 1.00     4543     6625
+cor(femalefitnessearly_Intercept,femalefitnesslate_Intercept)     0.30 1.00     7886     7637
 
 Population-Level Effects: 
                              Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-femalefitnessearly_Intercept     4.40      0.11     4.19     4.62 1.00    11285     6886
-femalefitnesslate_Intercept      0.70      0.44    -0.16     1.57 1.00    13404     7848
+femalefitnessearly_Intercept     4.40      0.11     4.19     4.62 1.00    11287     6886
+femalefitnesslate_Intercept      0.70      0.44    -0.16     1.57 1.00    13408     7848
 
-Samples were drawn using sampling(NUTS). For each parameter, Bulk_ESS
+Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).
 </pre>
@@ -1271,185 +1283,51 @@ means:</h3>
   Links: mu = logit
          mu = logit 
 Formula: early.male.focal | trials(total1) ~ (1 | p | line) + (1 | q | block) + (1 | r | vial) 
-         late.male.focal | trials(total2) ~ num.GFP.males + (1 | p | line) + (1 | q | block) + (1 | r | vial) 
+         late.male.focal | trials(total2) ~ (1 | p | line) + (1 | q | block) + (1 | r | vial) 
    Data: male_fitness_imputed (Number of observations: 810) 
-Samples: 20 chains, each with iter = 5000; warmup = 2500; thin = 1;
-         total post-warmup samples = 50000
+  Draws: 5 chains, each with iter = 5000; warmup = 2500; thin = 1;
+         total post-warmup draws = 12500
 
 Group-Level Effects: 
 ~block (Number of levels: 10) 
-                                                      Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sd(earlymalefocal_Intercept)                              0.74      0.20     0.46     1.21 1.00    25462    31760
-sd(latemalefocal_Intercept)                               0.34      0.22     0.01     0.83 1.00     6387    19201
-cor(earlymalefocal_Intercept,latemalefocal_Intercept)     0.36      0.40    -0.62     0.94 1.00    30792    28410
+                                                      Estimate Est.Error l-95% CI u-95% CI Rhat
+sd(earlymalefocal_Intercept)                              0.75      0.20     0.46     1.23 1.00
+sd(latemalefocal_Intercept)                               0.30      0.21     0.01     0.78 1.00
+cor(earlymalefocal_Intercept,latemalefocal_Intercept)     0.29      0.43    -0.73     0.93 1.00
+                                                      Bulk_ESS Tail_ESS
+sd(earlymalefocal_Intercept)                              6267     8051
+sd(latemalefocal_Intercept)                               1615     5033
+cor(earlymalefocal_Intercept,latemalefocal_Intercept)     9194     7696
 
 ~line (Number of levels: 124) 
-                                                      Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sd(earlymalefocal_Intercept)                              0.54      0.05     0.45     0.65 1.00    17106    27248
-sd(latemalefocal_Intercept)                               0.85      0.20     0.45     1.22 1.01     2221     2337
-cor(earlymalefocal_Intercept,latemalefocal_Intercept)     0.68      0.15     0.36     0.95 1.01     2784     3159
+                                                      Estimate Est.Error l-95% CI u-95% CI Rhat
+sd(earlymalefocal_Intercept)                              0.54      0.05     0.45     0.64 1.00
+sd(latemalefocal_Intercept)                               0.85      0.21     0.39     1.23 1.01
+cor(earlymalefocal_Intercept,latemalefocal_Intercept)     0.68      0.15     0.36     0.96 1.01
+                                                      Bulk_ESS Tail_ESS
+sd(earlymalefocal_Intercept)                              4250     6699
+sd(latemalefocal_Intercept)                                451      431
+cor(earlymalefocal_Intercept,latemalefocal_Intercept)      613      595
 
 ~vial (Number of levels: 810) 
-                                                      Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sd(earlymalefocal_Intercept)                              0.81      0.03     0.76     0.86 1.01     1459    30181
-sd(latemalefocal_Intercept)                               2.79      0.11     2.58     3.01 1.00     9096    21491
-cor(earlymalefocal_Intercept,latemalefocal_Intercept)     0.18      0.04     0.10     0.26 1.01     2437    14178
+                                                      Estimate Est.Error l-95% CI u-95% CI Rhat
+sd(earlymalefocal_Intercept)                              0.81      0.03     0.76     0.86 1.01
+sd(latemalefocal_Intercept)                               2.79      0.11     2.59     3.02 1.00
+cor(earlymalefocal_Intercept,latemalefocal_Intercept)     0.18      0.04     0.10     0.27 1.01
+                                                      Bulk_ESS Tail_ESS
+sd(earlymalefocal_Intercept)                              3279     7052
+sd(latemalefocal_Intercept)                               2587     5796
+cor(earlymalefocal_Intercept,latemalefocal_Intercept)     1844     4566
 
 Population-Level Effects: 
-                            Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-earlymalefocal_Intercept        0.15      0.25    -0.34     0.66 1.00    23930    27025
-latemalefocal_Intercept        -0.81      0.19    -1.17    -0.42 1.00    25469    27873
-latemalefocal_num.GFP.males    -0.13      0.12    -0.37     0.10 1.00    13718    23568
+                         Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+earlymalefocal_Intercept     0.15      0.25    -0.35     0.64 1.00     6060     5570
+latemalefocal_Intercept     -0.82      0.18    -1.18    -0.46 1.00     6338     7534
 
-Samples were drawn using sampling(NUTS). For each parameter, Bulk_ESS
+Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
 scale reduction factor on split chains (at convergence, Rhat = 1).
 </pre>
-<!-- ## Estimate genetic (co)variance from the genomic relatedness matrix -->
-<!-- The following fits a multivariate mixed model using `brms`, to estimate the amount of variance explained by the DGRP line, accounting for the genomic relatedness matrix. The response variables are the predicted line means for the four phenotypes, as estimated in the previous section. We fit line as a random effect, specifying a covariance structure among the line effects that is equal to the genomic relatedness matrix (GRM), which we estimate using the SNP genotypes of the full sample of 205 DGRP lines. We use a somewhat informative prior to help the model converge; the prior is that the line and residual variances are not large (which must be true, given that the response variables have overall variance of 1), and that only 10% of the phenotype variance is explained by line (the posterior estimates suggest much higher line variance, indicating strong signal in the data). -->
-<!-- The table below indicates that much of the variance in fitness is due to additive genetic effects, and that there is a positive geneti -->
-<!-- ```{r eval=FALSE} -->
-<!-- # Run quant gen model using brms -->
-<!-- if(!file.exists("data/derived/brms_quant_gen.rds")){ -->
-<!--   library(bigsnpr) -->
-<!--   library(MCMCglmm) -->
-<!--   library(sommer) -->
-<!--   # Get the data -->
-<!--   mcmc_dat <- predicted_line_means %>%  -->
-<!--     mutate(line = factor(str_remove_all(line, "_"))) %>% -->
-<!--     filter(!is.na(male.fitness.early)) %>% -->
-<!--     rename(femalefitnessearly = female.fitness.early, -->
-<!--            femalefitnesslate = female.fitness.late, -->
-<!--            malefitnessearly = male.fitness.early, -->
-<!--            malefitnesslate = male.fitness.late) -->
-<!--   # Make genomic relatedness matrix -->
-<!--   bigsnp <- snp_readBed("data/derived/dgrp2_QC_all_lines.bed", backingfile = tempfile()) -->
-<!--   bigsnp_attached <- snp_attach(bigsnp) -->
-<!--   G <- A.mat(bigsnp_attached$genotypes[1:nrow(bigsnp_attached$genotypes),  -->
-<!--                                        1:ncol(bigsnp_attached$genotypes)] - 1)  -->
-<!--   colnames(G) <- bigsnp_attached$fam[,1] -->
-<!--   rownames(G) <- bigsnp_attached$fam[,1] -->
-<!--   focal_lines <- mcmc_dat %>% pull(line) -->
-<!--   G <- G[rownames(G) %in% focal_lines,  -->
-<!--          colnames(G) %in% focal_lines] -->
-<!--   G <- cov2cor(G) -->
-<!--   # Female early - male early model -->
-<!--   brms_quant_gen_FE_ME <- brm( -->
-<!--     bf(femalefitnessearly ~ 0 + (1 | p | gr(line, cov = G))) + -->
-<!--       bf(malefitnessearly ~ 0 + (1 | p | gr(line, cov = G))) + -->
-<!--       set_rescor(TRUE), -->
-<!--     data = mcmc_dat, data2 = list(G = G),  -->
-<!--     iter = 30000, chains = 4, cores = 1, warmup = 20000, -->
-<!--     control = list(adapt_delta = 0.9999999999, max_treedepth = 20), -->
-<!--     prior = c( -->
-<!--       prior(normal(0.5, 0.15), "sd", resp = 'femalefitnessearly', group = "line"), -->
-<!--       prior(normal(0.5, 0.15), "sd", resp = 'malefitnessearly', group = "line"), -->
-<!--       prior(normal(0.5, 0.15), "sigma", resp = 'femalefitnessearly'), -->
-<!--       prior(normal(0.5, 0.15), "sigma", resp = 'malefitnessearly'), -->
-<!--       prior(lkj(0.5), class = "cor", group = "line")) -->
-<!--     ) -->
-<!--   saveRDS(brms_quant_gen_FE_ME, "data/derived/brms_quant_gen_FE_ME.rds") -->
-<!--   # Female late - male late model -->
-<!--   brms_quant_gen_FL_ML <- brm( -->
-<!--     bf(femalefitnesslate ~ 0 + (1 | p | gr(line, cov = G))) + -->
-<!--       bf(malefitnesslate ~ 0 + (1 | p | gr(line, cov = G))) + -->
-<!--       set_rescor(TRUE), -->
-<!--     data = mcmc_dat, data2 = list(G = G),  -->
-<!--     iter = 30000, chains = 4, cores = 1, warmup = 20000, -->
-<!--     control = list(adapt_delta = 0.9999999999, max_treedepth = 20), -->
-<!--     prior = c( -->
-<!--       prior(normal(0.5, 0.15), "sd", resp = 'femalefitnesslate', group = "line"), -->
-<!--       prior(normal(0.5, 0.15), "sd", resp = 'malefitnesslate', group = "line"), -->
-<!--       prior(normal(0.5, 0.15), "sigma", resp = 'femalefitnesslate'), -->
-<!--       prior(normal(0.5, 0.15), "sigma", resp = 'malefitnesslate'), -->
-<!--       prior(lkj(0.5), class = "cor", group = "line")) -->
-<!--     ) -->
-<!--   saveRDS(brms_quant_gen_FL_ML, "data/derived/brms_quant_gen_FL_ML.rds") -->
-<!--   # Female early - female late model -->
-<!--   brms_quant_gen_FE_FL <- brm( # failed badly, try with rescor and intercepts too? -->
-<!--     bf(femalefitnessearly ~ 1 + (1 | p | gr(line, cov = G))) + -->
-<!--       bf(femalefitnesslate ~ 1 + (1 | p | gr(line, cov = G))) + -->
-<!--       set_rescor(TRUE), -->
-<!--     data = mcmc_dat, data2 = list(G = G),  -->
-<!--     iter = 30000, chains = 4, cores = 1, warmup = 20000, -->
-<!--     control = list(adapt_delta = 0.9999999999, max_treedepth = 20), -->
-<!--     prior = c( -->
-<!--       prior(normal(0.5, 0.15), "sd", resp = 'femalefitnessearly', group = "line"), -->
-<!--       prior(normal(0.5, 0.15), "sd", resp = 'femalefitnesslate', group = "line"), -->
-<!--       prior(normal(0.5, 0.15), "sigma", resp = 'femalefitnessearly'), -->
-<!--       prior(normal(0.5, 0.15), "sigma", resp = 'femalefitnesslate'), -->
-<!--       prior(lkj(0.5), class = "cor", group = "line")) -->
-<!--     ) -->
-<!--   saveRDS(brms_quant_gen_FE_FL, "data/derived/brms_quant_gen_FE_FL.rds") -->
-<!--   # Male early - male late model -->
-<!--   brms_quant_gen_ME_ML <- brm( -->
-<!--     bf(malefitnessearly ~ 1 + (1 | p | gr(line, cov = G))) + -->
-<!--       bf(malefitnesslate ~ 1 + (1 | p | gr(line, cov = G))) + -->
-<!--       set_rescor(TRUE), -->
-<!--     data = mcmc_dat, data2 = list(G = G),  -->
-<!--     iter = 30000, chains = 4, cores = 1, warmup = 20000, -->
-<!--     control = list(adapt_delta = 0.9999999999, max_treedepth = 20), -->
-<!--     prior = c( -->
-<!--       prior(normal(0.5, 0.15), "sd", resp = 'malefitnessearly', group = "line"), -->
-<!--       prior(normal(0.5, 0.15), "sd", resp = 'malefitnesslate', group = "line"), -->
-<!--       prior(normal(0.5, 0.15), "sigma", resp = 'malefitnessearly'), -->
-<!--       prior(normal(0.5, 0.15), "sigma", resp = 'malefitnesslate'), -->
-<!--       prior(lkj(0.5), class = "cor", group = "line")) -->
-<!--     ) -->
-<!--   saveRDS(brms_quant_gen_ME_ML, "data/derived/brms_quant_gen_ME_ML.rds") -->
-<!-- } else { -->
-<!--   brms_quant_gen_FE_ME <- readRDS("data/derived/brms_quant_gen_FE_ME.rds") -->
-<!--   brms_quant_gen_FL_ML <- readRDS("data/derived/brms_quant_gen_FL_ML.rds") -->
-<!--   brms_quant_gen_FE_FL <- readRDS("data/derived/brms_quant_gen_FE_FL.rds") -->
-<!--   brms_quant_gen_ME_ML <- readRDS("data/derived/brms_quant_gen_ME_ML.rds") -->
-<!-- } -->
-<!-- p <- posterior_samples(brms_quant_gen_FE_ME) -->
-<!-- p2 <- posterior_samples(brms_quant_gen_FE_FL) -->
-<!-- p <- tibble( -->
-<!--   VA_FE = (p[, "sd_line__femalefitnessearly_Intercept"])^2, -->
-<!--   VA_FL = (p[, "sd_line__femalefitnesslate_Intercept"])^2, -->
-<!--   VA_ME = (p[, "sd_line__malefitnessearly_Intercept"])^2, -->
-<!--   VA_ML = (p[, "sd_line__malefitnesslate_Intercept"])^2, -->
-<!--   h2_FE = VA_FE / (VA_FE + (p[, "sigma_femalefitnessearly"])^2), -->
-<!--   h2_FL = VA_FL / (VA_FL + (p[, "sigma_femalefitnesslate"])^2), -->
-<!--   h2_ME = VA_ME / (VA_ME + (p[, "sigma_malefitnessearly"])^2), -->
-<!--   h2_ML = VA_ML / (VA_ML + (p[, "sigma_malefitnesslate"])^2), -->
-<!--   corr_FE_FL = p[,"cor_line__femalefitnessearly_Intercept__femalefitnesslate_Intercept"], -->
-<!--   corr_FE_ME = p[,"cor_line__femalefitnessearly_Intercept__malefitnessearly_Intercept"], -->
-<!--   corr_FL_ME = p[,"cor_line__femalefitnesslate_Intercept__malefitnessearly_Intercept"], -->
-<!--   corr_FE_ML = p[,"cor_line__femalefitnessearly_Intercept__malefitnesslate_Intercept"], -->
-<!--   corr_FL_ML = p[,"cor_line__femalefitnesslate_Intercept__malefitnesslate_Intercept"], -->
-<!--   corr_ME_ML = p[,"cor_line__malefitnessearly_Intercept__malefitnesslate_Intercept"], -->
-<!--   cov_FE_FL = corr_FE_FL * VA_FE^2 * VA_FL^2, -->
-<!--   cov_FE_ME = corr_FE_ME * VA_FE^2 * VA_ME^2, -->
-<!--   cov_FL_ME = corr_FL_ME * VA_FL^2 * VA_ME^2, -->
-<!--   cov_FE_ML = corr_FE_ML * VA_FE^2 * VA_ML^2, -->
-<!--   cov_FL_ML = corr_FL_ML * VA_FL^2 * VA_ML^2, -->
-<!--   cov_ME_ML = corr_ME_ML * VA_ME^2 * VA_ML^2, -->
-<!--   corr_FE_ME_minus_corr_FL_ML = corr_FE_ME - corr_FL_ML, -->
-<!--   corr_FE_FL_minus_corr_ME_ML = corr_FE_FL - corr_ME_ML -->
-<!-- ) %>% gather(Parameter, value) -->
-<!-- p %>% -->
-<!--   group_by(Parameter) %>% -->
-<!--   summarise(summ = list(posterior_summary(value)), -->
-<!--             Estimate = map_dbl(summ, ~ .x[[1]]), -->
-<!--             `Est. Error` = map_dbl(summ, ~ .x[[2]]), -->
-<!--             `Lower 95% CI` = map_dbl(summ, ~ .x[[3]]), -->
-<!--             `Upper 95% CI` = map_dbl(summ, ~ .x[[4]]), -->
-<!--             .groups = "drop") %>% -->
-<!--   dplyr::select(-summ) %>% -->
-<!--   mutate(sp = str_split(Parameter, "_"), -->
-<!--          Type = factor(map_chr(sp, ~ .x[[1]]), c("h2", "corr", "VA", "cov")), -->
-<!--          Parameter = map_chr(sp, ~ paste0(.x[-1], collapse = " - "))) %>% -->
-<!--   arrange(Type) %>% -->
-<!--   dplyr::select(-sp, -Type) %>% -->
-<!--   kable(digits = 3) %>% -->
-<!--   kable_styling(full_width = FALSE) %>% -->
-<!--   pack_rows("Heritabilities", 1, 4) %>% -->
-<!--   pack_rows("Genetic correlations", 5, 10) %>% -->
-<!--   pack_rows("Additive genetic variances", 11, 14) %>% -->
-<!--   pack_rows("Additive genetic covariances", 15, 20) -->
-<!-- ``` -->
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -1475,12 +1353,12 @@ attached base packages:
 
 other attached packages:
  [1] kableExtra_1.3.4    future.apply_1.10.0 future_1.30.0      
- [4] ICC_2.4.0           mice_3.15.0         brms_2.18.0        
- [7] Rcpp_1.0.10         lubridate_1.9.2     forcats_1.0.0      
-[10] stringr_1.5.0       dplyr_1.1.0         purrr_1.0.1        
-[13] readr_2.1.4         tidyr_1.3.0         tibble_3.1.8       
-[16] ggplot2_3.4.1       tidyverse_2.0.0     knitrhooks_0.0.4   
-[19] knitr_1.42          workflowr_1.7.0.4  
+ [4] mice_3.15.0         brms_2.18.0         Rcpp_1.0.10        
+ [7] lubridate_1.9.2     forcats_1.0.0       stringr_1.5.0      
+[10] dplyr_1.1.0         purrr_1.0.1         readr_2.1.4        
+[13] tidyr_1.3.0         tibble_3.1.8        ggplot2_3.4.1      
+[16] tidyverse_2.0.0     knitrhooks_0.0.4    knitr_1.42         
+[19] workflowr_1.7.0.4  
 
 loaded via a namespace (and not attached):
   [1] colorspace_2.1-0     ellipsis_0.3.2       rprojroot_2.0.3     

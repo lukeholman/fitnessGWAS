@@ -5,12 +5,9 @@ output:
     code_folding: hide 
 ---
 
-## Setting up
-
-### Libraries and helper functions
 ```{r libraries, message=FALSE, warning=FALSE, results='hide'}
-library(edgeR)
-library(tidyverse)
+library(edgeR) # BiocManager::install("edgeR")
+library(tidyverse) 
 library(glue)
 library(future)
 library(future.apply)
@@ -107,35 +104,15 @@ load_expression_data <- function(sex, both_sex_chromosomes = TRUE){
 }
 
 # Table S5: heritability of the expression level of each transcript (as measured in males, or females)
-huang_heritability <- read_csv("data/input/huang_2015_tableS5_transcript_heritability.csv")
+# huang_heritability <- read_csv("data/input/huang_2015_tableS5_transcript_heritability.csv")
 
 # Load the predicted line means from present study, as calculated in get_predicted_line_means.Rmd
 predicted_line_means <- read_csv("data/derived/predicted_line_means.csv")
 ```
 
-<!-- ### Load all data -->
-<!-- ```{r message=FALSE} -->
-<!-- # Load the results of four univariate linear mixed models run in GEMMA and corrected by mashr -->
-<!-- # univariate_lmm_results <- tbl(db, "univariate_lmm_results") %>% -->
-<!-- #   left_join(tbl(db, "variants") %>% select(SNP, FBID, site.class, MAF), by = "SNP") %>% -->
-<!-- #   left_join(tbl(db, "genes") %>% select(FBID, gene_name), by = "FBID") -->
-
-<!-- # Results of one multivariate linear mixed model run in GEMMA: -->
-<!-- # multivariate_lmm_results <- read_tsv("data/derived/output/all_four_traits.assoc.txt") %>% -->
-<!-- #   select(-contains("Vbeta")) %>% -->
-<!-- #   left_join(tbl(db, "variants") %>% select(SNP, FBID, site.class, MAF) %>% collect(), by = "SNP") %>%  -->
-<!-- #   left_join(tbl(db, "genes") %>%  -->
-<!-- #               select(FBID, gene_name) %>%  -->
-<!-- #               collect(), by = "FBID") %>%  -->
-<!-- #   left_join(univariate_lmm_results %>% select(SNP, SNP_clump) %>% collect(n=Inf), by = "SNP") %>% -->
-<!-- #   select(SNP, SNP_clump, gene_name, FBID, contains("male"), p_wald, fdr)  -->
-
-
 <!-- # Load the supplementary data files from Huang et al. 2015 PNAS -->
 <!-- # Table S2: results of statistical tests for sex, line and sex-by-line effects on expression of each transcript -->
 <!-- # huang_expression <- read_csv("data/input/huang_2015_tableS2_gene_expression.csv") -->
-
-
 
 <!-- # # Table S11+S12: statistically significant eQTLs, and the transcripts they affect (for each sex) -->
 <!-- # huang_eQTL_females <- read_csv("data/input/huang_2015_tableS11_eQTL_females.csv") %>% -->
@@ -147,10 +124,12 @@ predicted_line_means <- read_csv("data/derived/predicted_line_means.csv")
 <!-- #   rename(Affected_FBID = FBID, Affected_gene = gene_name) -->
 <!-- ``` -->
 
-## Calculate sex bias in expression for each transcript
+## Calculate sex bias in expression and average expression, for each transcript
 
-The following takes the 368 female samples and the 369 male samples, and finds the log fold difference in expression between sexes, and the average expression across both sexes, using the edgeR package.
+The following takes the 368 female samples and the 369 male samples, and finds the log fold difference in expression between sexes, and the average expression across both sexes, using the `edgeR` package.
 ```{r results='hide', message=FALSE, warning=FALSE}
+
+if(!file.exists("data/derived/gene_expression_by_sex.csv")){
 expression_data_both_sexes <- load_expression_data("both") %>% unname()
 
 voom_gene_data <- calcNormFactors(DGEList(t(expression_data_both_sexes[[2]])))
@@ -169,98 +148,25 @@ sex_bias_in_expression <- voom_gene_data %>%
 
 write_csv(sex_bias_in_expression, "data/derived/gene_expression_by_sex.csv")
 
-rm(expression_data_both_sexes)
+} else {
+  sex_bias_in_expression <- read_csv("data/derived/gene_expression_by_sex.csv")
+}
 ```
 
 
-<!-- ## Overlap between significant SNPs from our GWAS and known eQTls {.tabset} -->
+## Using linear models to find transcripts whose expression correlates with fitness across lines ("TWAS")
 
-<!-- Here, we define a significant SNP from the GWAS as one with  -->
+This analysis uses the expression data from Huang et al. (2015), which was downloaded from the [DGRP website](http://dgrp2.gnets.ncsu.edu/data.html). 
 
-<!-- ### eQTLs that affect female expression -->
-<!-- ```{r} -->
-<!-- # GWAS_significant_snps <- read_csv("data/derived/GWAS_significant_snps.csv") -->
-<!-- #  -->
-<!-- # GWAS_significant_snps <- unique(c(GWAS_significant_snps$`Index variant`, -->
-<!-- #                            na.omit(GWAS_significant_snps$`Other variants`) %>% str_split(", ") %>% unlist())) -->
-
-<!-- xx <- huang_eQTL_females %>% -->
-<!--     inner_join(univariate_lmm_results %>% -->
-<!--                  filter(SNP %in% !!huang_eQTL_females$eQTL) %>% -->
-<!--                  collect(n=Inf),  -->
-<!--                by = c("eQTL" = "SNP")) -->
-
-<!-- make_eQTL_overlap_table <- function(huang_data){ -->
-<!--   huang_data %>% -->
-<!--     select(Affected_FBID, Affected_gene, eQTL) %>% -->
-<!--     inner_join(univariate_lmm_results %>% -->
-<!--                  select(SNP, FBID, gene_name, contains("mashr_ED")) %>% -->
-<!--                  filter(SNP %in% !!huang_data$eQTL) %>%  # & SNP %in% GWAS_significant_snps -->
-<!--                  collect(n = Inf) %>% -->
-<!--                   filter_at(vars(contains("LFSR")), any_vars(. < 0.01)) %>%     -->
-<!--                  rename(eQTL_location_FBID = FBID, -->
-<!--                         eQTL_location_gene = gene_name),  -->
-<!--                by = c("eQTL" = "SNP")) %>% -->
-<!--     mutate(`Cis- or trans- eQTL` = ifelse(eQTL_location_FBID == Affected_FBID, "cis", "trans")) %>% -->
-<!--     arrange(`Cis- or trans- eQTL`, Affected_FBID, eQTL) %>% as_tibble() %>% -->
-<!--     select(eQTL, `Cis- or trans- eQTL`, everything()) %>% -->
-<!--     rename_all(~ str_remove_all(.x, "_mashr_ED")) -->
-<!-- } -->
-
-
-
-<!-- eQTL_uv_females <- huang_eQTL_females %>% make_eQTL_overlap_table()  -->
-<!-- eQTL_uv_females %>% kable_table() -->
-<!-- ``` -->
-
-<!-- ### eQTLs that affect male expression -->
-<!-- ```{r} -->
-<!-- eQTL_uv_males <- huang_eQTL_males %>% make_eQTL_overlap_table() -->
-<!-- eQTL_uv_males %>% kable_table() -->
-<!-- ``` -->
-
-<!-- ### Female eQTLs and multivariate tests -->
-<!-- ```{r} -->
-<!-- make_eQTL_overlap_table_v2 <- function(huang_data){ -->
-<!--   huang_data %>% -->
-<!--     select(Affected_FBID, Affected_gene, eQTL) %>% -->
-<!--     inner_join(multivariate_lmm_results %>% -->
-<!--                  select(SNP, FBID, gene_name, female_early, female_late, male_early, male_late, p_wald, fdr) %>% -->
-<!--                  filter(SNP %in% huang_data$eQTL) %>% -->
-<!--                  filter(p_wald < 0.001) %>%     -->
-<!--                  rename(eQTL_location_FBID = FBID, -->
-<!--                         eQTL_location_gene = gene_name, -->
-<!--                         `Uncorrected p-value` = p_wald, -->
-<!--                         `FDR-corrected p-value` = fdr),  -->
-<!--                by = c("eQTL" = "SNP")) %>% -->
-<!--     arrange(`Uncorrected p-value`) %>% distinct() -->
-<!-- } -->
-
-<!-- eQTL_mv_females <- huang_eQTL_females %>% make_eQTL_overlap_table_v2() -->
-<!-- eQTL_mv_females %>% kable_table() -->
-<!-- ``` -->
-
-<!-- ### Male eQTLs and multivariate tests -->
-<!-- ```{r} -->
-<!-- eQTL_mv_males <- huang_eQTL_males %>% make_eQTL_overlap_table_v2() -->
-<!-- eQTL_mv_males %>% kable_table() -->
-<!-- ``` -->
-
-
-
-
-## Correlating our fitness measures to transcriptome data from Huang et al. 2015
-
-Huang et al.'s microarray data was downloaded from the [DGRP website](http://dgrp2.gnets.ncsu.edu/data.html). 
-
-### Linear models to find transcripts that correlate with fitness across DGRP lines ("TWAS")
-
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 n_transcripts <- ncol(load_expression_data("male", both_sex_chromosomes = TRUE))
+n_tests <- n_transcripts * 4
+
+n_transcripts <- prettyNum(n_transcripts, big.mark = ",", scientific = FALSE)
+n_tests <- prettyNum(n_tests, big.mark = ",", scientific = FALSE)
 ```
 
-
-Here, we perform a large number of simple linear regressions, and obtain the slope (beta or $\beta$) and its standard error from a regression of transcript $i$ on fitness trait $j$. The number of regression run was `r n_transcripts*4`, i.e. 4 fitness traits $\times$ `r n_transcripts` transcripts. This approach is often called 'TWAS'. 
+Here, we perform a large number of simple linear regressions, and obtain the slope (beta or $\beta$), and the associated standard error, from a regression of transcript $i$ on fitness trait $j$. The number of regressions run was `r n_tests`, i.e. 4 fitness traits $\times$ `r n_transcripts` transcripts. This approach is often called a 'TWAS', i.e. transcriptome-wide association study. 
 
 ```{r message=FALSE}
 transcript_selection_analysis <- function(expression_data, phenotypes){
@@ -271,7 +177,8 @@ transcript_selection_analysis <- function(expression_data, phenotypes){
     filter(line %in% phenotypes$line)
   
   # Find line mean expression for each gene (average across the c. 2 replicate samples per line) 
-  chunk_cols <- split(2:ncol(expression_data), ceiling(seq_along(2:ncol(expression_data)) / 500))
+  chunk_cols <- split(2:ncol(expression_data), 
+                      ceiling(seq_along(2:ncol(expression_data)) / 500))
   
   mean_expression_data <- mclapply(1:2, function(i){  
     expression_data[, c(1, chunk_cols[[i]])] %>% 
@@ -280,10 +187,12 @@ transcript_selection_analysis <- function(expression_data, phenotypes){
       ungroup()
   }) %>% bind_rows()
 
-  # Scale each transcript's expression level so that mean is 0, and the variance is 1, across all the lines measured by Huang et al.
+  # Scale each transcript's expression level so that mean is 0, 
+  # and the variance is 1, across all the lines measured by Huang et al.
   for(i in 2:ncol(mean_expression_data)) mean_expression_data[,i] <- as.numeric(scale(mean_expression_data[,i]))
   
-  # Join the microarray data with the phenotypes (i.e. our fitness data), and keep only the lines where we have both sets of measurements
+  # Join the microarray data with the phenotypes (i.e. our fitness data), and 
+  # keep only the lines where we have both sets of measurements
   expression_data <- phenotypes %>% left_join(expression_data, by = "line")
   expression_data <- expression_data[complete.cases(expression_data), ] %>% select(-line)
   
@@ -293,7 +202,8 @@ transcript_selection_analysis <- function(expression_data, phenotypes){
   transcripts <- names(expression_data)[-c(1:4)]
   transcripts <- split(transcripts, ceiling(seq_along(transcripts) / 100))
   
-  # Define a function to run 4 linear models, and get the beta and SE for regressions of expression level on the 4 fitness traits
+  # Define a function to run 4 linear models, and get the beta and SE 
+  # for regressions of expression level on the 4 fitness traits
   do_one_transcript <- function(transcript){
     expression_level <- expression_data %>% pull(!!transcript)
     FE <- summary(lm(female.fitness.early ~ expression_level, data = expression_data))$coefficients
@@ -323,10 +233,14 @@ transcript_selection_analysis <- function(expression_data, phenotypes){
 
 if(!file.exists("data/derived/TWAS/TWAS_result_males.csv")){
 
-  TWAS_result_females <- load_expression_data("female") %>% transcript_selection_analysis(predicted_line_means) 
+  TWAS_result_females <- load_expression_data("female") %>% 
+    transcript_selection_analysis(predicted_line_means) 
   TWAS_result_females %>% write_csv("data/derived/TWAS/TWAS_result_females.csv")
-  TWAS_result_males <- load_expression_data("male") %>% transcript_selection_analysis(predicted_line_means)
+  
+  TWAS_result_males <- load_expression_data("male") %>% 
+    transcript_selection_analysis(predicted_line_means)
   TWAS_result_males %>% write_csv("data/derived/TWAS/TWAS_result_males.csv")
+  
 } else {
   TWAS_result_females <- read_csv("data/derived/TWAS/TWAS_result_females.csv")
   TWAS_result_males <- read_csv("data/derived/TWAS/TWAS_result_males.csv")
@@ -447,9 +361,7 @@ run_mashr <- function(beta_and_se, mashr_mode, ED_p_cutoff = NULL){
 }
 ```
 
-This section re-uses the custom function `run_mashr()`. See the earlier script (where `mashr` was applied to the GWAS data) for the function definition. Essentially, `run_mashr()` helps us to run `mashr` twice, once using canonical and once using data-driven covariance matrices.
-
-Similar to for the GWAS data, we use the canonical analysis to estimate the frequency of different types of transcripts (rather than loci), which we do for the entire transcriptome, as well as separately for each of the individual chromosome arms. We use the data-driven ("ED") approach to derive the most accurate adjusted beta terms (i.e. the slope of the regression of transcript abundance on the phenotype of interest).
+This section re-uses the custom function `run_mashr()`. See the earlier script (where `mashr` was applied to the GWAS data) for the function definition. As the GWAS data, we use `mashr`'s data-driven mode to derive adjusted (shrinked) estimates of beta (i.e. the slope of the regression of transcript abundance on the phenotype of interest), which are sensitive to the covariance structure in the data (which is estimated from the data). As well as producing these adjusted estimates, we derive the local false sign rate for each combination of transcript and fitness trait (used later to calculate evidence ratios).
 
 ```{r message=FALSE}
 if(!file.exists("data/derived/TWAS/TWAS_ED.rds")){
@@ -459,138 +371,55 @@ if(!file.exists("data/derived/TWAS/TWAS_ED.rds")){
                            TWAS_result_females[,6:7], 
                            TWAS_result_males[,8:9])
   
-  with_chrs <- input_data %>%
-    left_join(tbl(db, "genes") %>% 
-                select(FBID, chromosome) %>% 
-                collect(), by = c("gene" = "FBID"))
-  
-  TWAS_canonical <- input_data %>% 
-    run_mashr(mashr_mode = "canonical") 
-  
-  TWAS_canonical_2L <- with_chrs %>% 
-    filter(chromosome == "2L") %>% select(-chromosome) %>%
-    run_mashr(mashr_mode = "canonical") 
-  
-  TWAS_canonical_2R <- with_chrs %>% 
-    filter(chromosome == "2R") %>% select(-chromosome) %>%
-    run_mashr(mashr_mode = "canonical") 
-  
-  TWAS_canonical_3L <- with_chrs %>% 
-    filter(chromosome == "3L") %>% select(-chromosome) %>%
-    run_mashr(mashr_mode = "canonical") 
-  
-  TWAS_canonical_3R <- with_chrs %>% 
-    filter(chromosome == "3R") %>% select(-chromosome) %>%
-    run_mashr(mashr_mode = "canonical") 
-  
-  TWAS_canonical_X <- with_chrs %>% 
-    filter(chromosome == "X") %>% select(-chromosome) %>%
-    run_mashr(mashr_mode = "canonical") 
-  
-  saveRDS(TWAS_canonical, "data/derived/TWAS/TWAS_canonical.rds")
-  saveRDS(TWAS_canonical_2L, "data/derived/TWAS/TWAS_canonical_2L.rds")
-  saveRDS(TWAS_canonical_2R, "data/derived/TWAS/TWAS_canonical_2R.rds")
-  saveRDS(TWAS_canonical_3L, "data/derived/TWAS/TWAS_canonical_3L.rds")
-  saveRDS(TWAS_canonical_3R, "data/derived/TWAS/TWAS_canonical_3R.rds")
-  saveRDS(TWAS_canonical_X, "data/derived/TWAS/TWAS_canonical_X.rds")
-  
   TWAS_ED <- input_data %>% 
     run_mashr(mashr_mode = "ED", 
               ED_p_cutoff = 0.4) 
+  
   saveRDS(TWAS_ED, "data/derived/TWAS/TWAS_ED.rds")
+  
 } else {
-  TWAS_canonical <- readRDS("data/derived/TWAS/TWAS_canonical.rds")
   TWAS_ED <- readRDS("data/derived/TWAS/TWAS_ED.rds")
 }
-
-TWAS_mashr_results <- 
-  data.frame(
-    FBID = colnames(load_expression_data("female"))[-1],
-    as.data.frame(get_pm(TWAS_canonical)) %>% rename_all(~str_c("canonical_", .)),
-    as.data.frame(get_lfsr(TWAS_canonical)) %>% 
-      rename_all(~str_replace_all(., "beta", "LFSR")) %>% rename_all(~str_c("canonical_", .))) %>% 
-  as_tibble() %>% 
-  bind_cols(
-    data.frame(
-      as.data.frame(get_pm(TWAS_ED)) %>% rename_all(~str_c("ED_", .)),
-      as.data.frame(get_lfsr(TWAS_ED)) %>% 
-        rename_all(~str_replace_all(., "beta", "LFSR")) %>% rename_all(~str_c("ED_", .))) %>% 
-      as_tibble()) 
 ```
 
 
-### Find mixture probabilities for each transcript
-This uses the canonical analysis' classifications. Each transcript gets a posterior probability that it belongs to the $i$'th mixture component -- only the mixture components that are not very rare are included. These are: `equal_effects` (i.e. the transcript is predicted to affect all 4 phenotypes equally), female-specific and male-specific (i.e. an effect on females/males only, which is concordant across age categories), sexually antagonistic (again, regardless of age), and null (note: the prior for `mashr` was that null transcripts are $10\times$ more common than any other type). 
+<!-- ### Find mixture probabilities for each transcript -->
+<!-- This uses the canonical analysis' classifications. Each transcript gets a posterior probability that it belongs to the $i$'th mixture component -- only the mixture components that are not very rare are included. These are: `equal_effects` (i.e. the transcript is predicted to affect all 4 phenotypes equally), female-specific and male-specific (i.e. an effect on females/males only, which is concordant across age categories), sexually antagonistic (again, regardless of age), and null (note: the prior for `mashr` was that null transcripts are $10\times$ more common than any other type).  -->
 
-```{r get_mixture_assignments}
-# Get the mixture weights, as advised by mashr authors here: https://github.com/stephenslab/mashr/issues/68
-posterior_weights_cov <- TWAS_canonical$posterior_weights 
-colnames(posterior_weights_cov) <- sapply(
-  str_split(colnames(posterior_weights_cov), '\\.'), 
-  function(x) {
-    if(length(x) == 1) return(x)
-    else if(length(x) == 2) return(x[1])
-    else if(length(x) == 3) return(paste(x[1], x[2], sep = "."))
-  })
-posterior_weights_cov <- t(rowsum(t(posterior_weights_cov), 
-                                  colnames(posterior_weights_cov)))
+<!-- ```{r get_mixture_assignments} -->
+<!-- # Get the mixture weights, as advised by mashr authors here: https://github.com/stephenslab/mashr/issues/68 -->
+<!-- posterior_weights_cov <- TWAS_canonical$posterior_weights  -->
+<!-- colnames(posterior_weights_cov) <- sapply( -->
+<!--   str_split(colnames(posterior_weights_cov), '\\.'),  -->
+<!--   function(x) { -->
+<!--     if(length(x) == 1) return(x) -->
+<!--     else if(length(x) == 2) return(x[1]) -->
+<!--     else if(length(x) == 3) return(paste(x[1], x[2], sep = ".")) -->
+<!--   }) -->
+<!-- posterior_weights_cov <- t(rowsum(t(posterior_weights_cov),  -->
+<!--                                   colnames(posterior_weights_cov))) -->
 
-# Make a neat dataframe
-TWAS_mixture_assignment_probabilities <- data.frame(
-  FBID = TWAS_mashr_results$FBID,
-  posterior_weights_cov,
-  stringsAsFactors = FALSE
-) %>% as_tibble() %>%
-  rename(P_equal_effects = equal_effects,
-         P_female_specific = Female_specific_1,
-         P_male_specific = Male_specific_1,
-         P_null = null,
-         P_sex_antag = Sex_antag_0.25)
+<!-- # Make a neat dataframe -->
+<!-- TWAS_mixture_assignment_probabilities <- data.frame( -->
+<!--   FBID = TWAS_mashr_results$FBID, -->
+<!--   posterior_weights_cov, -->
+<!--   stringsAsFactors = FALSE -->
+<!-- ) %>% as_tibble() %>% -->
+<!--   rename(P_equal_effects = equal_effects, -->
+<!--          P_female_specific = Female_specific_1, -->
+<!--          P_male_specific = Male_specific_1, -->
+<!--          P_null = null, -->
+<!--          P_sex_antag = Sex_antag_0.25) -->
 
-TWAS_mixture_assignment_probabilities <- TWAS_mixture_assignment_probabilities %>%
-  left_join(huang_heritability, by = "FBID")
+<!-- # TWAS_mixture_assignment_probabilities <- TWAS_mixture_assignment_probabilities %>% -->
+<!-- #   left_join(huang_heritability, by = "FBID") -->
 
-saveRDS(TWAS_mixture_assignment_probabilities, 
-        "data/derived/TWAS/TWAS_mixture_assignment_probabilities.rds")
-```
-
-
-## Identify significantly antagonistic and concordant transcripts
-Here, we define significantly antagonistic transcripts as those where the relationship with fitness is significantly positive for one sex or age class and significantly negative for the other. Similarly, we define significantly concordant transcripts as those where the relationship with fitness is significantly positive for one sex or age class and also significantly positive for the other. This is quite conservative, because a transcript has to have a LFSR < 0.05 for two tests, giving two chances for a 'false negative' error.
-
-<!-- ### Calculate the p-value for the `sex:expression` interaction term -->
-
-<!-- ```{r} -->
-<!-- get_one_transcript <- function(gene){ -->
-<!--   data.frame(expression_data_both_sexes[[1]],  -->
-<!--              as.data.frame(expression_data_both_sexes[[2]])) %>% -->
-<!--     select(line, sex, !!gene) %>% -->
-<!--     filter(line %in% predicted_line_means$line) %>% -->
-<!--     group_by(line, sex) %>% -->
-<!--     summarise_all(~ mean(.x)) %>% -->
-<!--     left_join(predicted_line_means %>% select(-block), by = "line") %>% -->
-<!--     mutate(early_fitness = female.fitness.early, -->
-<!--            early_fitness = replace(early_fitness, sex == "male", male.fitness.early[sex == "male"]), -->
-<!--            late_fitness = female.fitness.late, -->
-<!--            late_fitness = replace(late_fitness, sex == "male", male.fitness.late[sex == "male"])) %>% -->
-<!--     filter(!is.na(early_fitness)) %>% select(-contains("male")) -->
-<!-- } -->
-
-<!-- model_one_transcript <- function(focal_gene){ -->
-<!--   dat <- get_one_transcript(focal_gene) -->
-<!--   formula1 <- glue("early_fitness ~ {focal_gene} * sex") -->
-<!--   formula2 <- glue("late_fitness ~ {focal_gene} * sex") -->
-<!--   interaction_p_early <- summary(lm(formula1, data = dat))$coefficients[4,4] -->
-<!--   interaction_p_late <- summary(lm(formula2, data = dat))$coefficients[4,4] -->
-<!--   data.frame(focal_gene, interaction_p_early, interaction_p_late) -->
-<!-- } -->
-
-<!-- if(!file.exists("data/derived/TWAS/interaction_p_values.csv")){ -->
-<!--   interaction_p_values <- colnames(expression_data_both_sexes[[2]]) %>%  -->
-<!--     mclapply(model_one_transcript) %>% bind_rows() %>% as_tibble() -->
-<!--   write_csv(interaction_p_values, "data/derived/TWAS/interaction_p_values.csv") -->
-<!-- } else interaction_p_values <- read_csv("data/derived/TWAS/interaction_p_values.csv") -->
+<!-- saveRDS(TWAS_mixture_assignment_probabilities,  -->
+<!--         "data/derived/TWAS/TWAS_mixture_assignment_probabilities.rds") -->
 <!-- ``` -->
+
+
+## Tidy and save the results of TWAS
 
 ```{r}
 TWAS_results <- data.frame(
@@ -599,24 +428,14 @@ TWAS_results <- data.frame(
   as.data.frame(get_lfsr(TWAS_ED))) %>% 
   as_tibble()
 
-names(TWAS_results)[6:9] <- paste("LFSR", c("FE", "FL", "ME", "ML"), sep = "_")
-
-p_cutoff <- 0.01
+names(TWAS_results)[6:9] <- paste(
+  "LFSR", c("FE", "FL", "ME", "ML"), sep = "_")
 
 TWAS_results <- TWAS_results  %>%
-  mutate(sig_SA_early = ifelse(sign(beta_FE) != sign(beta_ME) & LFSR_FE < p_cutoff & LFSR_ME < p_cutoff, "*", ""),
-         sig_SA_late = ifelse(sign(beta_FL) != sign(beta_ML) & beta_FL < p_cutoff & beta_ML < p_cutoff, "*", ""),
-         sig_AA_females = ifelse(sign(beta_FE) != sign(beta_FL) & LFSR_FE < p_cutoff & beta_FL < p_cutoff, "*", ""),
-         sig_AA_males = ifelse(sign(beta_ME) != sign(beta_ML) & LFSR_ME < p_cutoff & beta_ML < p_cutoff, "*", ""),
-         
-         sig_SC_early = ifelse(sign(beta_FE) == sign(beta_ME) & LFSR_FE < p_cutoff & LFSR_ME < p_cutoff, "*", ""),
-         sig_SC_late = ifelse(sign(beta_FL) == sign(beta_ML) & beta_FL < p_cutoff & beta_ML < p_cutoff, "*", ""),
-         sig_AC_females = ifelse(sign(beta_FE) == sign(beta_FL) & LFSR_FE < p_cutoff & beta_FL < p_cutoff, "*", ""),
-         sig_AC_males = ifelse(sign(beta_ME) == sign(beta_ML) & LFSR_ME < p_cutoff & beta_ML < p_cutoff, "*", "")
-  ) %>% 
-  left_join(tbl(db, "genes") %>% select(FBID, gene_name, chromosome) %>% collect(), by = "FBID") %>% # gene info for each
+  left_join(tbl(db, "genes") %>% 
+              select(FBID, gene_name, chromosome) %>% 
+              collect(), by = "FBID") %>% 
   left_join(sex_bias_in_expression, by = "FBID") %>%
-  left_join(TWAS_mixture_assignment_probabilities, by = "FBID") %>%
   mutate(across(where(is.numeric), ~ round(.x, 2))) %>%
   as_tibble() %>%
   distinct()
@@ -624,271 +443,4 @@ TWAS_results <- TWAS_results  %>%
 TWAS_results %>%
   write_csv("data/derived/TWAS/TWAS_results.csv")
 ```
-
-
-
-<!-- # Correlation between transcript heritability and selection -->
-<!-- ```{r} -->
-<!-- TWAS_ED_antagonism_effects %>%  -->
-<!--   left_join(huang_heritability, by = "FBID") %>% -->
-<!--   ggplot(aes(abs(beta_FE), female_narrow_heritability)) +  -->
-<!--   stat_bin_hex(bins = 100) + stat_smooth(method = "gam") -->
-
-<!-- TWAS_ED_antagonism_effects %>%  -->
-<!--   left_join(huang_heritability, by = "FBID") %>% -->
-<!--   ggplot(aes(abs(beta_FL), female_narrow_heritability)) +  -->
-<!--   stat_bin_hex(bins = 100) + stat_smooth(method = "gam") -->
-
-<!-- TWAS_ED_antagonism_effects %>%  -->
-<!--   left_join(huang_heritability, by = "FBID") %>% -->
-<!--   ggplot(aes(abs(beta_ME), male_narrow_heritability)) +  -->
-<!--   stat_bin_hex(bins = 100) + stat_smooth(method = "gam") -->
-
-<!-- library(gridExtra) -->
-<!-- grid.arrange( -->
-<!--   TWAS_mashr_results %>%  -->
-<!--     ggplot(aes((canonical_beta_FE), female_narrow_heritability)) +  -->
-<!--     stat_bin_hex(binwidth = c(1, 1000)) + stat_smooth(method = "loess") + theme(legend.position = "none"), -->
-<!--   TWAS_mashr_results %>%  -->
-<!--     ggplot(aes((canonical_beta_ME), male_narrow_heritability)) +  -->
-<!--     stat_bin_hex(bins = 100) + stat_smooth(method = "loess") + theme(legend.position = "none"), -->
-<!--   ncol = 2) -->
-
-
-<!-- pretty_scatter <- function(data, x_col, y_col, xlim = NULL, ylim = NULL){ -->
-<!--   # Add first principal component -->
-<!--   data$pc <- predict(princomp(data %>% select(!!x_col, !!y_col)))[,1] -->
-
-<!--     # Add density for each point -->
-<!--   data$density <- fields::interp.surface( -->
-<!--     MASS::kde2d(data %>% pull(!!x_col),  -->
-<!--                 data %>% pull(!!y_col)), -->
-<!--     data %>% select(!!x_col, !!y_col) %>% as.matrix()) -->
-
-<!--   p <- data.frame(x = data %>% pull(!!x_col), -->
-<!--              y = data %>% pull(!!y_col), -->
-<!--              density = data$density, -->
-<!--              pc = data$pc) %>% -->
-<!--     ggplot(aes(x, y, color = x, alpha = 1/density)) + -->
-<!--     geom_point(shape = 16, size = 4, show.legend = FALSE) + -->
-<!--     theme_minimal() + -->
-<!--     scale_color_gradient(low = "#32aeff", high = "#f2aeff") + -->
-<!--     scale_alpha(range = c(.25, .6)) +  -->
-<!--     stat_smooth(method = "loess", span = 0.3) + theme(legend.position = "none") + xlab(NULL) + ylab(NULL) -->
-
-<!--   if(!is.null(xlim) & !is.null(ylim)) return(p + coord_cartesian(xlim = xlim, ylim = ylim)) -->
-<!--   if(!is.null(xlim)) return(p + coord_cartesian(xlim = xlim)) -->
-<!--   if(!is.null(ylim)) return(p + coord_cartesian(ylim = ylim)) -->
-<!--   return(p) -->
-<!-- } -->
-<!-- grid.arrange( -->
-<!--   pretty_scatter(TWAS_mashr_results, "canonical_beta_FE", "female_narrow_heritability", c(-0.22, 0.21), c(0, 1)), -->
-<!--   pretty_scatter(TWAS_mashr_results, "canonical_beta_ME", "male_narrow_heritability", c(-0.22, 0.21), c(0, 1)), -->
-<!--   ncol = 2, bottom = "Relationship between transcript abundance and fitness", left = "Heritability of transcript abundance") -->
-
-
-<!-- pretty_scatter(antagonism_evidence_ratios %>%  -->
-<!--                  left_join(huang_heritability) %>%  -->
-<!--                  mutate(xx = log2(`Cross-sex comparison (early life)`)), "xx", "male_narrow_heritability") + -->
-<!--   xlab("Evidence ratio") +  -->
-<!--   ylab("Narrow-sense heritability of transcript abundance") -->
-
-<!-- TWAS_mashr_results %>%  -->
-<!--   select(ED_beta_FE, ED_beta_ME, ends_with("heritability")) %>%  -->
-<!--   mutate(ED_beta_FE = abs(ED_beta_FE), -->
-<!--          ED_beta_ME = abs(ED_beta_ME)) %>% -->
-<!--   psych::corr.test(method = "spearman") -->
-<!-- ``` -->
-
-<!-- # Find G matrix for each transcript, and do proper Lande analysis! -->
-<!-- ```{r} -->
-<!-- library(rstanarm) -->
-<!-- library(brms) -->
-
-
-<!-- line_mean_expression <- (load_expression_data("both") %>% unname() %>%  -->
-<!--   do.call("cbind", .)) -->
-<!-- females <- which(line_mean_expression$sex == "female") -->
-<!-- males   <- which(line_mean_expression$sex == "male") -->
-<!-- for(i in 3:ncol(line_mean_expression)) { -->
-<!--   line_mean_expression[females, i] <- as.numeric(scale(line_mean_expression[females, i])) -->
-<!--   line_mean_expression[males, i]   <- as.numeric(scale(line_mean_expression[males, i])) -->
-<!-- } -->
-
-
-
-<!-- find_transcript_G_matrix <- function(transcript, line_mean_expression){ -->
-
-<!--   dat <- line_mean_expression %>% -->
-<!--     select(sex, line, !!transcript) %>% -->
-<!--     mutate(sample = 1:n()) %>% -->
-<!--     spread(sex, !!transcript) -->
-
-<!--   posterior_G <- stan_mvmer( -->
-<!--     list(female ~ 0 + (1 | line), male ~ 0 + (1 | line)), -->
-<!--     data = dat, chains = 4, cores = 1, iter = 3000, adapt_delta = 0.99) %>% -->
-<!--     posterior_samples() -->
-
-<!--   posterior_G <- posterior_G[, (ncol(posterior_G)-4):ncol(posterior_G)] # Get the relevant posterior samples -->
-<!--   names(posterior_G) <- c("residual_female", "residual_male", "line_female", "line_cov", "line_male") # give them clearer names -->
-<!--   posterior_G$correlation <- posterior_G$line_cov / (sqrt(posterior_G$line_female) * sqrt(posterior_G$line_male)) # Posterior inter-sex correlation  -->
-<!--   posterior_G$heritability_female <- posterior_G$line_female / (posterior_G$line_female + posterior_G$residual_female) -->
-<!--   posterior_G$heritability_male <- posterior_G$line_male / (posterior_G$line_male + posterior_G$residual_male) -->
-<!--   posterior_G <- posterior_G %>%  -->
-<!--     select(-residual_female, -residual_male) %>%  -->
-<!--     summarise_all(~list(posterior_summary(.))) # Summarise all the posteriors: get the Median, error, and 95% CIs -->
-<!--   lapply(1:ncol(posterior_G), function(i) unlist(posterior_G[,i])) %>% do.call("rbind", .) -->
-<!-- } -->
-
-<!-- find_all_transcript_G_matrices <- function(line_mean_expression){ -->
-<!--   transcript_names <- names(line_mean_expression)[-(1:2)] -->
-<!--   n_transcripts <- length(transcript_names) -->
-<!--   # n_transcripts <- 2  # Useful for testing on the first two transcripts -->
-
-<!--   plan("multicore") -->
-<!--   future_lapply(transcript_names[1:n_transcripts], find_transcript_G_matrix, line_mean_expression) %>% -->
-<!--     do.call("rbind", .) %>% as_tibble() %>% -->
-<!--     rename(Estimate = V1, SE = V2, Lower_95_CI = V3, Upper_95_CI = V4) %>% -->
-<!--     mutate(Parameter = rep(c("Female_variance", "Covariance", "Male_variance", "Correlation", "Heritability_female", "Heritability_male"), n_transcripts), -->
-<!--            Transcript = rep(transcript_names[1:n_transcripts], each = 6)) %>% -->
-<!--     select(Transcript, Parameter, everything()) %>% arrange(Parameter, Transcript) -->
-
-<!-- } -->
-<!-- transcript_quantitative_genetics <- find_all_transcript_G_matrices(line_mean_expression) -->
-
-
-<!-- db %>% copy_to(transcript_quantitative_genetics %>% rename(FBID = Transcript),  -->
-<!--                "RNA_quant_gen", temporary = FALSE, -->
-<!--                indexes = list("FBID", "Parameter")) -->
-
-<!-- transcript_quantitative_genetics[,1:3] %>% rename(FBID = Transcript) %>% spread(Parameter, Estimate) %>% -->
-<!--   left_join(antagonism_evidence_ratios %>% mutate(evidence_ratio = log2(evidence_ratio)) %>% spread(trait, evidence_ratio)) %>% -->
-<!--   select(-FBID) %>% cor -->
-
-<!-- # Almost every well-measured genetic correlation is positive; the transcriptome does not have very sex-specific genetic architecture -->
-<!-- # This is neat because there are eQTLs with opposing effects on male and female transcription - they are just a minority -->
-<!-- tbl(db, "RNA_quant_gen") %>% -->
-<!--   filter(Parameter == "Correlation") %>% -->
-<!--   mutate(Accuracy = ifelse(Upper_95_CI - Lower_95_CI < 0.5, "High", "Low")) %>% -->
-<!--   select(Estimate, Accuracy) %>% collect() %>% -->
-<!--   ggplot(aes(Estimate, fill = Accuracy)) +  -->
-<!--   geom_density(alpha = 0.5) + theme_minimal() -->
-<!-- ``` -->
-
-
-<!-- # Looking for the twin peaks: -->
-<!-- ```{r} -->
-<!-- antagonism_evidence_ratios %>%  -->
-<!--   left_join(sex_bias_in_expression, by = "FBID") %>%  -->
-<!--   ggplot(aes((male_bias_in_expression), log2(evidence_ratio))) +  -->
-<!--   geom_point() +  -->
-<!--   stat_smooth() -->
-<!-- ``` -->
-
-
-<!-- ## Network stuff -->
-<!-- ```{r} -->
-<!-- # Build a gene coexpresison network using WGCNA package -->
-<!-- build_network <- function(expression_data, max_power = 10){ -->
-
-<!--   # Pick the soft thresholding power that gives a model fit of R^2 > 0.9 for the scale-free topology model -->
-<!--   soft.power <- pickSoftThreshold(expression_data,  -->
-<!--                                   RsquaredCut = 0.9, verbose = 0, powerVector = 1:max_power) -->
-
-<!--   # Use this power to generate a gene co-expression network, mostly using the default settings -->
-<!--   blockwiseModules(expression_data,  -->
-<!--                               power = soft.power$powerEstimate, -->
-<!--                               networkType = "signed", -->
-<!--                               minModuleSize = 30, -->
-<!--                               # saveTOMs = T, -->
-<!--                               verbose = 0) -->
-<!-- } -->
-
-<!-- convert_module_colors_to_names <- function(network){ -->
-<!--   module.sizes <- network$colors %>% table() %>% sort() %>% rev() -->
-<!--   module.sizes <- c(module.sizes[names(module.sizes) == "grey"],  -->
-<!--                     module.sizes[names(module.sizes) != "grey"]) -->
-<!--   module.mappings <- data.frame(color = names(module.sizes),  -->
-<!--                                 new.name = paste("Module",  -->
-<!--                                                  0:(length(module.sizes) - 1)),  -->
-<!--                                 stringsAsFactors = F) -->
-<!--   network$colors <- module.mappings$new.name[match(network$colors, module.mappings$color)] -->
-<!--   names(network$MEs) <- gsub("ME", "", names(network$MEs)) -->
-<!--   names(network$MEs) <- module.mappings$new.name[match(names(network$MEs),  -->
-<!--                                                             module.mappings$color)] -->
-<!--   network -->
-<!-- } -->
-
-<!-- network_female <- load_expression_data("female")    %>% build_network() %>% convert_module_colors_to_names() -->
-<!-- network_male   <- load_expression_data("male")      %>% build_network() %>% convert_module_colors_to_names() -->
-<!-- network_both   <- load_expression_data("both")[[2]] %>% build_network(max_power = 20) %>% convert_module_colors_to_names() -->
-
-<!-- table(network_female$colors) -->
-<!-- table(network_male$colors) -->
-<!-- table(network_both$colors) -->
-
-<!-- # Rearrange the data in a handy format for stats and plotting, and remove the 'Module 0', the un-assigned genes -->
-<!-- rearrange_eigengene_data <- function(network, sex){ -->
-<!--   if(sex != "both") line <- load_expression_data(sex) %>% rownames() -->
-<!--   else line <- load_expression_data("both")[[1]] -->
-<!--   data.frame(line,  -->
-<!--              network$MEs, stringsAsFactors = FALSE) %>%  -->
-<!--     gather(module, eigengene, starts_with("Module")) %>%  -->
-<!--     arrange(module, line) %>% as_tibble() -->
-<!-- }  -->
-
-<!-- eigengenes_both <- rearrange_eigengene_data(network_both, "both") %>% mutate(early_fitness = NA, late_fitness = NA) -->
-<!-- # eigengenes_both$early_fitness[eigengenes_both$sex == "female"] <- predicted_line_means$female.fitness.early[ -->
-<!-- #   match(eigengenes_both$line[eigengenes_both$sex == "female"], predicted_line_means$line)] -->
-<!-- # eigengenes_both$early_fitness[eigengenes_both$sex == "male"] <- predicted_line_means$male.fitness.early[ -->
-<!-- #   match(eigengenes_both$line[eigengenes_both$sex == "male"], predicted_line_means$line)] -->
-<!-- # eigengenes_both$late_fitness[eigengenes_both$sex == "female"] <- predicted_line_means$female.fitness.late[ -->
-<!-- #   match(eigengenes_both$line[eigengenes_both$sex == "female"], predicted_line_means$line)] -->
-<!-- # eigengenes_both$late_fitness[eigengenes_both$sex == "male"] <- predicted_line_means$male.fitness.late[ -->
-<!-- #   match(eigengenes_both$line[eigengenes_both$sex == "male"], predicted_line_means$line)] -->
-
-<!-- eigengenes_both  %>% -->
-<!--   group_by(module, line, sex) %>%  -->
-<!--   summarise(eigengene = mean(eigengene)) %>% ungroup() %>% -->
-<!--   ggplot(aes(sex, eigengene, group = line)) +  -->
-<!--   geom_line() +  -->
-<!--   facet_wrap(~module, scales = "free_y") -->
-
-<!-- eigengenes_both %>% -->
-<!--   filter(!is.na(eigengene) & !is.na(early_fitness)) %>% -->
-<!--   ggplot(aes(eigengene, early_fitness, colour = sex)) +  -->
-<!--   geom_point() + stat_smooth(method = "lm", colour = "black") + -->
-<!--   facet_wrap(module ~ sex, scales = "free", ncol = 2) +  -->
-<!--   theme(strip.background = element_blank(), strip.text.x = element_blank()) -->
-
-<!-- eigengenes_for_model <- network_both$MEs -->
-<!-- names(eigengenes_for_model) <- gsub("Module ", "m", names(eigengenes_for_model)) -->
-<!-- eigengenes_for_model <- cbind(load_expression_data("both")[[1]], eigengenes_for_model) %>% as_tibble() -->
-<!-- eigengenes_for_model <- eigengenes_for_model %>% group_by(sex, line) %>% summarise_all(mean)  -->
-
-
-<!-- eigengenes_for_model <- predicted_line_means %>% select(-block) %>% left_join(eigengenes_for_model) %>% -->
-<!--   mutate(early_fitness = ifelse(sex == "female", female.fitness.early, male.fitness.early), -->
-<!--          late_fitness  = ifelse(sex == "female", female.fitness.late, male.fitness.late)) %>% -->
-<!--   select(-contains("male")) -->
-
-<!-- library(brms) -->
-<!-- eigen_multivariate_model <- brm(cbind(early_fitness, late_fitness) ~ sex * (m1 + m2 + m3 + m4 + m5 + m6 + m7 + m8 + m9 + m10 + m11 + m12 + m13 + m14) + (1 | line), -->
-<!--     data = eigengenes_for_model, -->
-<!--     chains = 4, cores = 2, iter = 6000, seed = 1, -->
-<!--     control = list(adapt_delta = 0.999, max_treedepth = 15) -->
-<!-- ) -->
-
-<!-- new_data <- eigengenes_for_model %>% select(sex, line) %>% distinct() %>% arrange(sex, line) %>% filter(!(line %in% c("line_395", "line_596"))) -->
-<!-- preds <- data.frame(new_data, fitted(eigen_multivariate_model, newdata = new_data), stringsAsFactors = FALSE) %>% as_tibble() -->
-
-<!-- preds %>% select(sex, starts_with("Estimate"), -Estimate.latefitness) %>% -->
-<!--   gather(module, eigengene, starts_with("Estimate.m")) %>% -->
-<!--   mutate(module = str_replace_all(module, "Estimate.m", "Module ")) %>% -->
-<!--   ggplot(aes(eigengene, Estimate.earlyfitness, colour = sex)) +  -->
-<!--   geom_point() + stat_smooth(method = "lm", colour = "black") + -->
-<!--   facet_wrap(module ~ sex, scales = "free", ncol = 2) +  -->
-<!--   theme(strip.background = element_blank(), strip.text.x = element_blank()) -->
-
-<!-- ``` -->
 

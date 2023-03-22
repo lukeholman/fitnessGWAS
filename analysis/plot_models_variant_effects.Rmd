@@ -400,7 +400,7 @@ dev.off()
 ```
 
 
-![](../figures/fig2_SNPs_manhattan_plot.png)
+![](figures/fig2_SNPs_manhattan_plot.png)
 
 
 ## Investigating pleiotropy and polygenicity of fitness
@@ -413,7 +413,7 @@ Figure 3 shows that there was a very tight correlation between the average effec
 
 Interestingly there appears to be a curve in Figure 3A to the left of the x-axis, indicating that variants where the minor allele is strongly, negatively associated with female fitness are (on average) less negatively associated with male fitness than expected based on predictions from variants with weaker effects on female fitness. One possible explanation is that alleles that are highly highly detrimental to both sexes are usually purged by selection (or at least kept below the 5% MAF threshold that we used), whereas female-harming alleles that are neutral or beneficial in males are purged less often, resulting a greater proportion of female-limited or sexually antagonistic alleles towards the left of the x-axis.
 
-```{r message=FALSE}
+```{r boyle_plot, message=FALSE}
 p1_data <- SNP_clumps %>%
   filter(LD_subset) %>% # The figure looks the same whether or not the data are thinned to the LD set of SNPs
   arrange(beta_female_early_raw) %>%
@@ -448,10 +448,10 @@ boyle_plot <- bind_rows(p1_data, p2_data) %>%
 boyle_plot
 ```
 
-```{r save_boyle_plot, echo=FALSE, fig.showtext=TRUE}
+```{r save_boyle_plot, echo=FALSE, fig.showtext=TRUE, message = FALSE}
 pdf("figures/fig3_boyle_plot.pdf", height = 3.5, width = 6)
 boyle_plot
-dev.off()
+invisible(dev.off())
 ```
 
 ## Correlations between mutation load and fitness
@@ -715,7 +715,7 @@ mut_load_correlation_plot + pp1 + pp2 +
 pdf("figures/fig4_mutation_load.pdf", height = 4.7, width = 9.55)
 mut_load_correlation_plot + pp1 + pp2 + 
   plot_layout(ncol = 3, widths = c(1, 0.5,0.5))
-dev.off()
+invisible(dev.off())
 
 # Clean up files:
 unlink(list("snp_backing_file.rds", 
@@ -1462,7 +1462,7 @@ grid.arrange(arrangeGrob(p1, p2, ncol = 2),
 pdf("figures/fig7_models.pdf", height = 7, width = 7)
 grid.arrange(arrangeGrob(p1, p2, ncol = 2), 
              arrangeGrob(blank, p3, blank, nrow = 1, widths = c(0.2,0.6,0.2)))
-dev.off()
+invisible(dev.off())
 ```
 
 
@@ -1474,6 +1474,7 @@ The following code performs a GO enrichment test using the Wilcoxon method, whic
 ```{r GO_enrich}
 library(GOfuncR) # BiocManager::install("GOfuncR")
 library(org.Dm.eg.db) 
+set.seed(12345)
 
 # Get a list of Drosophila genes that have GO terms (can't analyse genes that do not)
 genes_with_GO <- select(org.Dm.eg.db, 

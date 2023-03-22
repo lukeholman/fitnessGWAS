@@ -397,10 +397,9 @@ png("figures/fig2_SNPs_manhattan_plot.png",
     height = 8, width = 8, res = 300, units = "in")
 grid.arrange(fig2_top, grid_arrange_shared_legend(p1, p2))
 dev.off()
+
+grid.arrange(fig2_top, grid_arrange_shared_legend(p1, p2))
 ```
-
-
-![](figures/fig2_SNPs_manhattan_plot.png)
 
 
 ## Investigating pleiotropy and polygenicity of fitness

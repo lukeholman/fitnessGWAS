@@ -412,7 +412,7 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2023-03-21
+<strong>Last updated:</strong> 2023-04-10
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -543,15 +543,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreeb14f3979cee39b6a0b941c04ab1b14325ff8cccdtargetblankb14f397a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreefece77970b5b20a4b387e494c37cf2d445e740c8targetblankfece779a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/b14f3979cee39b6a0b941c04ab1b14325ff8cccd" target="_blank">b14f397</a>
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/fece77970b5b20a4b387e494c37cf2d445e740c8" target="_blank">fece779</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreeb14f3979cee39b6a0b941c04ab1b14325ff8cccdtargetblankb14f397a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreefece77970b5b20a4b387e494c37cf2d445e740c8targetblankfece779a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -561,7 +561,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/b14f3979cee39b6a0b941c04ab1b14325ff8cccd" target="_blank">b14f397</a>.
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/fece77970b5b20a4b387e494c37cf2d445e740c8" target="_blank">fece779</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -605,7 +605,8 @@ Untracked files:
     Untracked:  old_analyses/quantitative_genetics_OLD_brms.Rmd
 
 Unstaged changes:
-    Modified:   analysis/get_predicted_line_means.Rmd
+    Modified:   analysis/index.Rmd
+    Deleted:    figures/fig1.pdf
     Modified:   figures/fig3_boyle_plot.pdf
     Modified:   figures/fig4_mutation_load.pdf
     Modified:   figures/fig5_quartiles_plot.pdf
@@ -657,6 +658,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/fece77970b5b20a4b387e494c37cf2d445e740c8/analysis/raw_data_and_line_means.Rmd" target="_blank">fece779</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-04-10
+</td>
+<td>
+wflow_publish("analysis/raw_data_and_line_means.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/afeb987f52b3441c130c5473c2b8108d4b4fdc99/docs/raw_data_and_line_means.html" target="_blank">afeb987</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-03-21
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -733,9 +768,9 @@ href="get_predicted_line_means.html">this script</a>.</p>
 <div id="female-fitness" class="section level3">
 <h3>Female fitness</h3>
 <ul>
-<li><code>Vial</code> is a unique ID for each vial, and groups together
-observations of the same group of 5 DGRP females whose fitness was
-measured.</li>
+<li><code>Vial</code> is a unique ID for each vial, which groups
+together observations of the same group of 5 DGRP females whose fitness
+was measured.</li>
 <li><code>Block</code> is the experimental block in which fitness was
 measured.</li>
 <li><code>Line</code> gives the DGRP line number of the focal
@@ -752,20 +787,20 @@ produced by the DGRP females, in the late-life measurement.</li>
 <div id="male-fitness" class="section level3">
 <h3>Male fitness</h3>
 <ul>
-<li><code>Vial</code> is a unique ID for each vial, and groups together
-observations of the same group of 5 DGRP females whose fitness was
-measured.</li>
+<li><code>Vial</code> is a unique ID for each vial, which groups
+together observations of the same group of 5 DGRP females whose fitness
+was measured.</li>
 <li><code>Block</code> is the experimental block in which fitness was
 measured.</li>
 <li><code>Line</code> gives the DGRP line number of the focal males</li>
 <li><code>Early male rival</code> gives the number of L1 larvae sired by
 the rival <em>GFP</em> males, in the early-life measurement.</li>
 <li><code>Early male focal</code> gives the number of L1 larvae sired by
-the focal DGRPmales, in the early-life measurement.</li>
+the focal DGRP males, in the early-life measurement.</li>
 <li><code>Late male rival</code> gives the number of L1 larvae sired by
 the rival <em>GFP</em> males, in the late-life measurement.</li>
 <li><code>Late male focal</code> gives the number of L1 larvae sired by
-the focal DGRPmales, in the late-life measurement.</li>
+the focal DGRP males, in the late-life measurement.</li>
 </ul>
 <pre class="r"><code>my_data_table(raw_male_fitness)</code></pre>
 <div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-64d9960b5d3661295c4c" style="width:100%;height:auto;"></div>

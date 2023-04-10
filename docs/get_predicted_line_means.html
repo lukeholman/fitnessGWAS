@@ -526,15 +526,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreecee9d58eafad4e2889751a2e535497e71407521ftargetblankcee9d58a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree2b013b985ad0b9fbe7529c3fc5d22e4b194cb5e7targetblank2b013b9a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/cee9d58eafad4e2889751a2e535497e71407521f" target="_blank">cee9d58</a>
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/2b013b985ad0b9fbe7529c3fc5d22e4b194cb5e7" target="_blank">2b013b9</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreecee9d58eafad4e2889751a2e535497e71407521ftargetblankcee9d58a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree2b013b985ad0b9fbe7529c3fc5d22e4b194cb5e7targetblank2b013b9a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -544,7 +544,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/cee9d58eafad4e2889751a2e535497e71407521f" target="_blank">cee9d58</a>.
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/2b013b985ad0b9fbe7529c3fc5d22e4b194cb5e7" target="_blank">2b013b9</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -641,6 +641,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/2b013b985ad0b9fbe7529c3fc5d22e4b194cb5e7/analysis/get_predicted_line_means.Rmd" target="_blank">2b013b9</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-04-10
+</td>
+<td>
+wflow_publish("analysis/get_predicted_line_means.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/4dc3be89f5bb4bdfbef3a352aa1421e1f0a0c65c/docs/get_predicted_line_means.html" target="_blank">4dc3be8</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-04-10
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1229,7 +1263,9 @@ class="section level3">
 means from the Bayesian models. These means are on the scale of the
 linear predictor (i.e. Poisson for females, binomial for males) rather
 than on the scale of the original response. They have been scaled to
-have a mean of 0 and a variance of 1.</p>
+have a mean of 0 and a variance of 1. You can view the predicted line
+means in a table on <a href="raw_data_and_line_means.html">this
+page</a>.</p>
 <pre class="r"><code>predicted_line_means &lt;- get_predicted_line_means(overwrite = FALSE) </code></pre>
 </div>
 <div id="summary-of-model-used-to-predict-female-line-means"

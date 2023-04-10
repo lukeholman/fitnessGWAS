@@ -79,26 +79,6 @@ load_and_tidy_fitness_data <- function(){
 }
 
 
-# This function calculates the traditional line means (i.e. simple averages) for each line
-get_line_means <- function(){
-  left_join(
-    load_and_tidy_fitness_data()[[1]] %>% 
-      select(line, female.fitness.early, female.fitness.late) %>% 
-      group_by(line) %>%
-      summarise(female.fitness.early = mean(female.fitness.early), 
-                female.fitness.late = mean(female.fitness.late)),
-    load_and_tidy_fitness_data()[[2]] %>% 
-      group_by(line) %>%
-      summarise(early.male.rival = sum(early.male.rival),
-                early.male.focal = sum(early.male.focal),
-                late.male.rival = sum(late.male.rival),
-                late.male.focal = sum(late.male.focal),
-                male.fitness.early = early.male.focal / (early.male.focal + early.male.rival),
-                male.fitness.late = late.male.focal / (late.male.focal + late.male.rival)) %>%
-      select(line, male.fitness.early, male.fitness.late),
-    by = "line") %>% as.data.frame()
-}
-
 # A function to calculate each line's expected fitness, using brms models to adjust for block + vial random effects
 # For the male late life assay, we also adjust for the number of competitor males that died 
 # (this assumes that their deaths happened randomly with respect to which line we were measuring)
@@ -232,12 +212,9 @@ get_predicted_line_means <- function(overwrite = FALSE){
 ```
 
 ### Predict line means and save the results
-The object `line_means` is the raw line means: unscaled, arithmetic means and in the original units.
-
 The object `predicted_line_means` is the estimated line means from the Bayesian models. These means are on the scale of the linear predictor (i.e. Poisson for females, binomial for males) rather than on the scale of the original response. They have been scaled to have a mean of 0 and a variance of 1. 
 
 ```{r message=FALSE, warning=FALSE}
-line_means <- get_line_means()
 predicted_line_means <- get_predicted_line_means(overwrite = FALSE) 
 ```
 

@@ -212,7 +212,7 @@ get_predicted_line_means <- function(overwrite = FALSE){
 ```
 
 ### Predict line means and save the results
-The object `predicted_line_means` is the estimated line means from the Bayesian models. These means are on the scale of the linear predictor (i.e. Poisson for females, binomial for males) rather than on the scale of the original response. They have been scaled to have a mean of 0 and a variance of 1. 
+The object `predicted_line_means` is the estimated line means from the Bayesian models. These means are on the scale of the linear predictor (i.e. Poisson for females, binomial for males) rather than on the scale of the original response. They have been scaled to have a mean of 0 and a variance of 1. You can view the predicted line means in a table on [this page](raw_data_and_line_means.html).
 
 ```{r message=FALSE, warning=FALSE}
 predicted_line_means <- get_predicted_line_means(overwrite = FALSE) 

@@ -57,7 +57,7 @@ To facilitate data re-use, we here provide tables showing the raw data (i.e. the
 
 ### Female fitness
 
-- `Vial` is a unique ID for each vial, and groups together observations of the same group of 5 DGRP females whose fitness was measured.
+- `Vial` is a unique ID for each vial, which groups together observations of the same group of 5 DGRP females whose fitness was measured.
 - `Block` is the experimental block in which fitness was measured.
 - `Line` gives the DGRP line number of the focal females.
 - `Female fitness early` gives the number of L1 larvae produced by the DGRP females, in the early-life measurement.
@@ -69,13 +69,13 @@ my_data_table(raw_female_fitness)
 
 ### Male fitness
 
-- `Vial` is a unique ID for each vial, and groups together observations of the same group of 5 DGRP females whose fitness was measured.
+- `Vial` is a unique ID for each vial, which groups together observations of the same group of 5 DGRP females whose fitness was measured.
 - `Block` is the experimental block in which fitness was measured.
 - `Line` gives the DGRP line number of the focal males
 - `Early male rival` gives the number of L1 larvae sired by the rival _GFP_ males, in the early-life measurement.
-- `Early male focal` gives the number of L1 larvae sired by the focal DGRPmales, in the early-life measurement.
+- `Early male focal` gives the number of L1 larvae sired by the focal DGRP males, in the early-life measurement.
 - `Late male rival` gives the number of L1 larvae sired by the rival _GFP_ males, in the late-life measurement.
-- `Late male focal` gives the number of L1 larvae sired by the focal DGRPmales, in the late-life measurement.
+- `Late male focal` gives the number of L1 larvae sired by the focal DGRP males, in the late-life measurement.
 
 ```{r}
 my_data_table(raw_male_fitness)

@@ -395,7 +395,7 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2023-03-21
+<strong>Last updated:</strong> 2023-04-10
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -526,15 +526,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree27afd2576f9f0b0e8c39e7accb69081db1853164targetblank27afd25a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreecee9d58eafad4e2889751a2e535497e71407521ftargetblankcee9d58a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/27afd2576f9f0b0e8c39e7accb69081db1853164" target="_blank">27afd25</a>
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/cee9d58eafad4e2889751a2e535497e71407521f" target="_blank">cee9d58</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree27afd2576f9f0b0e8c39e7accb69081db1853164targetblank27afd25a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreecee9d58eafad4e2889751a2e535497e71407521ftargetblankcee9d58a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -544,7 +544,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/27afd2576f9f0b0e8c39e7accb69081db1853164" target="_blank">27afd25</a>.
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/cee9d58eafad4e2889751a2e535497e71407521f" target="_blank">cee9d58</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -588,6 +588,8 @@ Untracked files:
     Untracked:  old_analyses/quantitative_genetics_OLD_brms.Rmd
 
 Unstaged changes:
+    Modified:   analysis/index.Rmd
+    Deleted:    figures/fig1.pdf
     Modified:   figures/fig3_boyle_plot.pdf
     Modified:   figures/fig4_mutation_load.pdf
     Modified:   figures/fig5_quartiles_plot.pdf
@@ -639,6 +641,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/cee9d58eafad4e2889751a2e535497e71407521f/analysis/get_predicted_line_means.Rmd" target="_blank">cee9d58</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-04-10
+</td>
+<td>
+wflow_publish("analysis/get_predicted_line_means.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/d40a8f51593a564aa9ae2892749ccf6892c81799/docs/get_predicted_line_means.html" target="_blank">d40a8f5</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-03-21
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1055,26 +1091,6 @@ load_and_tidy_fitness_data &lt;- function(){
 }
 
 
-# This function calculates the traditional line means (i.e. simple averages) for each line
-get_line_means &lt;- function(){
-  left_join(
-    load_and_tidy_fitness_data()[[1]] %&gt;% 
-      select(line, female.fitness.early, female.fitness.late) %&gt;% 
-      group_by(line) %&gt;%
-      summarise(female.fitness.early = mean(female.fitness.early), 
-                female.fitness.late = mean(female.fitness.late)),
-    load_and_tidy_fitness_data()[[2]] %&gt;% 
-      group_by(line) %&gt;%
-      summarise(early.male.rival = sum(early.male.rival),
-                early.male.focal = sum(early.male.focal),
-                late.male.rival = sum(late.male.rival),
-                late.male.focal = sum(late.male.focal),
-                male.fitness.early = early.male.focal / (early.male.focal + early.male.rival),
-                male.fitness.late = late.male.focal / (late.male.focal + late.male.rival)) %&gt;%
-      select(line, male.fitness.early, male.fitness.late),
-    by = &quot;line&quot;) %&gt;% as.data.frame()
-}
-
 # A function to calculate each line&#39;s expected fitness, using brms models to adjust for block + vial random effects
 # For the male late life assay, we also adjust for the number of competitor males that died 
 # (this assumes that their deaths happened randomly with respect to which line we were measuring)
@@ -1209,15 +1225,12 @@ get_predicted_line_means &lt;- function(overwrite = FALSE){
 <div id="predict-line-means-and-save-the-results"
 class="section level3">
 <h3>Predict line means and save the results</h3>
-<p>The object <code>line_means</code> is the raw line means: unscaled,
-arithmetic means and in the original units.</p>
 <p>The object <code>predicted_line_means</code> is the estimated line
 means from the Bayesian models. These means are on the scale of the
 linear predictor (i.e. Poisson for females, binomial for males) rather
 than on the scale of the original response. They have been scaled to
 have a mean of 0 and a variance of 1.</p>
-<pre class="r"><code>line_means &lt;- get_line_means()
-predicted_line_means &lt;- get_predicted_line_means(overwrite = FALSE) </code></pre>
+<pre class="r"><code>predicted_line_means &lt;- get_predicted_line_means(overwrite = FALSE) </code></pre>
 </div>
 <div id="summary-of-model-used-to-predict-female-line-means"
 class="section level3">

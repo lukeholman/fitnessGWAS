@@ -10,6 +10,7 @@ output:
 library(tidyverse)
 library(kableExtra)
 library(rptR)
+library(DT)
 options(readr.show_col_types = FALSE)
 
 # Load the 'raw' data, giving the fitness of each replicate vial
@@ -33,22 +34,17 @@ line_means <- read_csv("data/derived/predicted_line_means.csv") %>%
          female_fitness_late = female.fitness.late,
          male_fitness_early = male.fitness.early,
          male_fitness_late = male.fitness.late)
-
-line_means %>% 
-  select(line, contains(" ")) %>% gather(Trait, Fitness, -line) %>% 
-  ggplot(aes(line, ))
 ```
 
 ## Proportion of variance in fitness explained by DGRP line {.tabset}
 
 Here, we calculate the proportion of variance in each fitness trait that is explained by DGRP line. The proportion of explained variance (also called "repeatability") for DGRP line is approximately equal to the broad sense heritability, since in our study flies from the same line have identical genotypes. 
 
-To calculate repeatability, we use the approach recommended by Nakagawa & Schielzeth (2010, _Biological Reviews_ 85: 935-956), which is implemented in the function `rpt` from the package `rptR`. In short, in the code below, `rpt` fits either a Poisson GLMM (for the two female fitness traits) or a Binomial GLMM (for the two male fitness traits) using the `lme4` package, and estimates the proportion of the total variance that is explained for each random effect in the model. For all four fitness traits, the GLMM we fitted had the model formula `Y ~ (1 | line) + (1 | block)`, i.e. we fit a random intercept for DGRP line and experimental block, and no fixed effects. Using a model with the block effect included is more conservative and more accurate, since not all lines were equally represented in every block; therefore, we would artificially inflate the line-level repeatability it we ignored variation in fitness between blocks. 
+To calculate repeatability, we use the approach recommended by Nakagawa & Schielzeth (2010, _Biological Reviews_ 85: 935-956), which is implemented in the function `rpt` from the package `rptR`. In short, in the code below, `rpt` fits either a Poisson GLMM (for the two female fitness traits) or a Binomial GLMM (for the two male fitness traits) using the `lme4` package, and estimates the proportion of the total variance that is explained for each random effect in the model. For all four fitness traits, the GLMM we fitted had the model formula `Y ~ (1 | line) + (1 | block)`, i.e. we fit a random intercept for DGRP line and experimental block, and no fixed effects. Using a model with the block effect included is more conservative and more accurate, since not all lines were equally represented in every block; therefore, we would artificially inflate the line-level repeatability (and thus our estimate of heritability) if we ignored variation in fitness caused by block effects. 
 
-When calculating repeatability from models with a link function, one can calculate either the "Latent scale approximation" or the "Original scale approximation" (see the ['rptR' vignette](https://rdrr.io/cran/rptR/f/vignettes/rptR.Rmd)). We focus on the former, though the repeatability estimates are very similar, since in most of our analyses we focused on the estimated fitness of each DGRP line on the latent scale. 
+When calculating repeatability from models with a link function, one can calculate either the "Latent scale approximation" or the "Original scale approximation" (see the ['rptR' vignette](https://rdrr.io/cran/rptR/f/vignettes/rptR.Rmd)). We focus on the former because in most of our analyses we focused on the estimated fitness of each DGRP line on the latent scale, though in practice the choice does not matter much because the repeatability estimates are very similar. 
 
 For simplicity, we present just the results of interest in the first table (which is the one discussed in the paper), and present all the results in a second table that can be viewed by clicking the tab. The "Simple table" shows the line-level repeatability, $R$, for each trait (the Latent scale approximation), along with the associated SE and CIs from parametric bootstrapping. The "Full table" also shows the Original scale approximation estimates and the block effects.
-
  
 
 ```{r warning=FALSE, message=FALSE, results='hide'}
@@ -118,8 +114,25 @@ simple_repeatability_table %>%
 ### Full table
 
 ```{r}
+# Create a function to build HTML searchable tables
+my_data_table <- function(df){
+  datatable(
+    df, rownames = FALSE,
+    autoHideNavigation = TRUE,
+    extensions = c("Scroller",  "Buttons"),
+    options = list(
+      autoWidth = TRUE,
+      dom = 'Bfrtip',
+      deferRender=TRUE,
+      scrollX=TRUE, scrollY=1000,
+      scrollCollapse=TRUE,
+      pageLength = 10
+    )
+  )
+}
+
 repeatability_table %>% 
-  kable(digits = 2) %>% kable_styling(full_width = FALSE)
+  my_data_table()
 ```
 
 
@@ -128,7 +141,7 @@ repeatability_table %>%
 
 ## Correlations in the line means
 
-The table shows the Pearson correlation coefficients ($r$) between the DGRP line means (estimated from the two `brms` models in the script `get_predicted_line_means.Rmd`) for each pair of fitness traits, across our sample of DGRP lines. These correlations approximate the genetic correlations between each pair of fitness traits.
+The table shows the Pearson correlation coefficients between the DGRP line means (estimated from the two `brms` models in the script `get_predicted_line_means.Rmd`) for each pair of fitness traits, across our sample of DGRP lines. These correlations approximate the genetic correlations between each pair of fitness traits.
 
 ```{r}
 tidy_correlation_test <- function(x, y){
@@ -154,10 +167,10 @@ tidy_correlation_test <- function(x, y){
     SE = se_r(corr),
     `Lower 95% CI` = corr$conf.int[1],
     `Upper 95% CI` = corr$conf.int[2],
-    `p value` = corr$p.value
-  ) %>% mutate(
-    `p value` = round(`p value`, 4),
-    `p value` = replace(`p value`, `p value` < 0.0001, "< 0.0001"))
+    `p value` = corr$p.value) %>% 
+    mutate(
+      `p value` = round(`p value`, 4),
+      `p value` = replace(`p value`, `p value` < 0.0001, "< 0.0001"))
 }
 
 firstup <- function(x) {
@@ -179,7 +192,8 @@ line_mean_corrs <- bind_rows(
 
 saveRDS(line_mean_corrs, "data/derived/line_mean_corrs.rds")
 
-line_mean_corrs %>% kable(digits = 3) %>% kable_styling()
+line_mean_corrs %>% 
+  kable(digits = 3) %>% kable_styling()
 ```
 
 
@@ -216,7 +230,8 @@ data.frame(diff = cor2 - cor1) %>%
             `Difference, lower 95% CI (bootstrapped)` = 
               as.numeric(quantile(diff, probs = c(0.025))),
             `Difference, upper 95% CI (bootstrapped)` = 
-              as.numeric(quantile(diff, probs = c(0.975)))) %>%
+              as.numeric(quantile(diff, probs = c(0.975))),
+            `Proportion bootstrap samples < 0  (1-tail p)` = sum(diff < 0) / n_bootstraps) %>%
   gather(Parameter, `Estimated value`) %>% 
   kable(digits = 3) %>% kable_styling(full_width = F)
 ```
@@ -245,7 +260,8 @@ data.frame(diff = cor2 - cor1) %>%
             `Difference, lower 95% CI (bootstrapped)` = 
               as.numeric(quantile(diff, probs = c(0.025))),
             `Difference, upper 95% CI (bootstrapped)` = 
-              as.numeric(quantile(diff, probs = c(0.975)))) %>% 
+              as.numeric(quantile(diff, probs = c(0.975))),
+            `Proportion bootstrap samples < 0 (1-tail p)` = sum(diff < 0) / n_bootstraps) %>% 
   gather(Parameter, `Estimated value`) %>% 
   kable(digits = 3) %>% kable_styling(full_width = F)
 

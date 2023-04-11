@@ -412,7 +412,7 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2023-04-10
+<strong>Last updated:</strong> 2023-04-11
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -543,15 +543,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree811b5bc0e36a738d3c5b741b656a29fb1224cdaatargetblank811b5bca">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree8427a5504cf3fa9d44a27bcf949f9c1dada7915ctargetblank8427a55a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/811b5bc0e36a738d3c5b741b656a29fb1224cdaa" target="_blank">811b5bc</a>
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/8427a5504cf3fa9d44a27bcf949f9c1dada7915c" target="_blank">8427a55</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree811b5bc0e36a738d3c5b741b656a29fb1224cdaatargetblank811b5bca"
+id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree8427a5504cf3fa9d44a27bcf949f9c1dada7915ctargetblank8427a55a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -561,7 +561,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/811b5bc0e36a738d3c5b741b656a29fb1224cdaa" target="_blank">811b5bc</a>.
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/8427a5504cf3fa9d44a27bcf949f9c1dada7915c" target="_blank">8427a55</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -598,6 +598,7 @@ Ignored files:
     Ignored:    old_analyses/.DS_Store
 
 Untracked files:
+    Untracked:  code/~$in_paper_figures.docx
     Untracked:  old_analyses/Data for old analyses/
     Untracked:  old_analyses/eQTL_analysis.Rmd
     Untracked:  old_analyses/fitness_data.csv
@@ -606,6 +607,11 @@ Untracked files:
 
 Unstaged changes:
     Modified:   analysis/index.Rmd
+    Modified:   analysis/plot_models_variant_effects.Rmd
+    Modified:   code/main_paper_figures.Rmd
+    Modified:   code/main_paper_figures.docx
+    Modified:   code/pdf_supp_material.Rmd
+    Modified:   code/pdf_supp_material.pdf
     Deleted:    figures/fig1.pdf
     Modified:   figures/fig3_boyle_plot.pdf
     Modified:   figures/fig4_mutation_load.pdf
@@ -657,6 +663,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/8427a5504cf3fa9d44a27bcf949f9c1dada7915c/analysis/quant_genetics.Rmd" target="_blank">8427a55</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-04-11
+</td>
+<td>
+wflow_publish("analysis/quant_genetics.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/9aa7785510c3fdf7c193db3eab54d6145401b2e3/docs/quant_genetics.html" target="_blank">9aa7785</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-04-10
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1074,10 +1114,8 @@ traits.</p>
     SE = se_r(corr),
     `Lower 95% CI` = corr$conf.int[1],
     `Upper 95% CI` = corr$conf.int[2],
-    `p value` = corr$p.value) %&gt;% 
-    mutate(
-      `p value` = round(`p value`, 4),
-      `p value` = replace(`p value`, `p value` &lt; 0.0001, &quot;&lt; 0.0001&quot;))
+    `p value` = corr$p.value)
+  
 }
 
 firstup &lt;- function(x) {
@@ -1122,7 +1160,7 @@ Lower 95% CI
 <th style="text-align:right;">
 Upper 95% CI
 </th>
-<th style="text-align:left;">
+<th style="text-align:right;">
 p value
 </th>
 </tr>
@@ -1147,8 +1185,8 @@ Female fitness late
 <td style="text-align:right;">
 0.830
 </td>
-<td style="text-align:left;">
-&lt; 0.0001
+<td style="text-align:right;">
+0.000
 </td>
 </tr>
 <tr>
@@ -1170,8 +1208,8 @@ Male fitness early
 <td style="text-align:right;">
 0.389
 </td>
-<td style="text-align:left;">
-0.0108
+<td style="text-align:right;">
+0.011
 </td>
 </tr>
 <tr>
@@ -1193,7 +1231,7 @@ Male fitness late
 <td style="text-align:right;">
 0.338
 </td>
-<td style="text-align:left;">
+<td style="text-align:right;">
 0.056
 </td>
 </tr>
@@ -1216,8 +1254,8 @@ Male fitness early
 <td style="text-align:right;">
 0.467
 </td>
-<td style="text-align:left;">
-3e-04
+<td style="text-align:right;">
+0.000
 </td>
 </tr>
 <tr>
@@ -1239,8 +1277,8 @@ Male fitness late
 <td style="text-align:right;">
 0.467
 </td>
-<td style="text-align:left;">
-3e-04
+<td style="text-align:right;">
+0.000
 </td>
 </tr>
 <tr>
@@ -1262,8 +1300,8 @@ Male fitness late
 <td style="text-align:right;">
 0.903
 </td>
-<td style="text-align:left;">
-&lt; 0.0001
+<td style="text-align:right;">
+0.000
 </td>
 </tr>
 </tbody>

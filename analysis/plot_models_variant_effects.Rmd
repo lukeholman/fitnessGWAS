@@ -5,6 +5,12 @@ output:
     code_folding: hide 
 ---
 
+```{r, include=FALSE}
+library(knitrhooks) # for scrollable R output. remotes::install_github("nathaneastwood/knitrhooks")
+output_max_height()
+knitr::opts_chunk$set(output_max_height = "300px")
+```
+
 ```{r include=FALSE}
 knitr::opts_chunk$set(warning=FALSE, message=FALSE)
 ```
@@ -321,7 +327,7 @@ rbind(mod1$coefficients,
 
 The code chunk below makes the Manhattan plot, and combines it with the plot above to make the composite Figure 2 shown in the paper. 
 
-```{r manhattan, fig.showtext=TRUE}
+```{r manhattan, fig.showtext=TRUE, fig.height = 8, fig.width = 8}
 manhattan_data <- tbl(db, "univariate_lmm_results") %>% 
   select(SNP, starts_with("P_"),
          pvalue_female_early_raw, pvalue_male_early_raw) %>%
@@ -341,9 +347,6 @@ max_pos$max_pos <- c(0, cumsum(max_pos$max_pos[1:4]))
 manhattan_data <- manhattan_data %>%
     left_join(max_pos, by = "chr") %>%
     mutate(position = position + max_pos) 
-
-# left_axis_label <- expression(paste("Effect on female early-life fitness (-", Log[10], " p)"))
-
 
 p1 <- manhattan_data %>%
   ggplot(aes(position, -1 * log10(pvalue_female_early_raw), 
@@ -396,11 +399,12 @@ grid_arrange_shared_legend <- function(..., ncol = length(list(...)), nrow = 1) 
 png("figures/fig2_SNPs_manhattan_plot.png", 
     height = 8, width = 8, res = 300, units = "in")
 grid.arrange(fig2_top, grid_arrange_shared_legend(p1, p2))
-dev.off()
+invisible(dev.off())
 
 grid.arrange(fig2_top, grid_arrange_shared_legend(p1, p2))
 ```
 
+***Figure 2***: Panels A and B show the mashr-adjusted effect sizes of 1,207,357 polymorphic loci on male and female early- and late-life fitness. The data have been binned into hexagons, with the colour and contour lines indicating the number of loci in each bin. Positive effect sizes indicate that the minor allele is associated with higher fitness and the major allele with lower fitness. Panel C shows a pair of Manhattan plots, showing the chromosomal position and $-Log_{10}$ $p$-value (from linear mixed model GWAS using GEMMA) for each locus's effect on female (top) and male (bottom) early-life fitness.
 
 ## Investigating pleiotropy and polygenicity of fitness
 
@@ -446,6 +450,8 @@ boyle_plot <- bind_rows(p1_data, p2_data) %>%
 
 boyle_plot
 ```
+
+***Figure 3***: Estimated mean effect size for groups of 1,000 variants, on male and female early-life (panel A) and late-life (panel B) fitness. The variant groups were created by sorting variants by their estimated effect size on female fitness, then dividing the sorted list into groups of 1,000. This analysis was performed on a pruned set of 208,987 variants in approximate linkage disequilibrium with one another. The observed positive relationships imply that large numbers of loci have small effects on the fitness of both sexes (see main text). The fit lines are from a quadratic linear regression, and the shaded area shows the standard error. 
 
 ```{r save_boyle_plot, echo=FALSE, fig.showtext=TRUE, message = FALSE}
 pdf("figures/fig3_boyle_plot.pdf", height = 3.5, width = 6)
@@ -571,6 +577,13 @@ mut_model <- brm(bf(
   warmup = 2000, iter = 8000, chains = 4, cores = 4) 
 ```
 
+#### Inspect model summary
+
+```{r comment=''}
+summary(mut_model)
+```
+
+
 #### Model checks (posterior predictive plots) 
 
 Here, we plot the distribution of the model's posterior predictions, for each of the four response variables, for 50 samples from the posterior. If the model's assumptions and prior are suitable, there should be a good match between the posterior predictions (shown in blue; one line per sample from the posterior) and the original data (shown in black). See `?pp_check`.
@@ -592,9 +605,7 @@ grid.arrange(
 ```
 
 
-### Plot mutation load against line mean fitness
-
-Here, we make the plot showing the mutation load versus line mean fitness. The regression line and its 95% CIs come from the `brms` model.
+### Estimated effect size of mutation load on fitness {.tabset}
 
 ```{r fig.showtext=TRUE}
 mut_plot_data <- conditional_effects(mut_model, plot = F)
@@ -644,11 +655,9 @@ mut_load_correlation_plot <- get_regression_line_data(mut_plot_data) %>%
         legend.position = "none")
 ```
 
-### Estimated effect size of mutation load on fitness {.tabset}
-
 #### Plot
 
-The left plot shows the posterior estimates of the effect size of mutation load on fitness (i.e. the 'regression slope' from the previous figure). The coloured area shows the posterior distribution, and the horizontal bar summarises its median and 66% and 95% credible intervals. The right plot shows the difference in this effect size between fitness traits, e.g. FE - FL shows the difference in regression slope between female early-life and late-life fitness. A positive sign indicates that mutation load has more negative effect on the second trait (e.g. mutations appear more costly to older females than younger).
+***Figure 4***: Panels A-D show the relationship across DGRP lines between mutation load and line mean fitness; the regression lines are from a Bayesian multivariate model that accounts for the covariance in line mean fitness. Panel E shows the posterior estimates of the four regression slopes (i.e. the effect size of 100 mutations on fitness, where fitness is measured in standard units on the scale of the linear predictor), with the black bars summarising the median and 66% and 95% credible intervals. Panel F shows the posterior estimates of the differences in this effect size between pairs of fitness traits. 
 
 ```{r fig.showtext=TRUE, fig.width=9.55, fig.height=4.7, message=F}
 posterior_muts <- as_draws_df(mut_model, variable = "^b_", regex = T) %>% 
@@ -725,6 +734,8 @@ unlink(list("snp_backing_file.rds",
 
 
 #### Table
+
+The table shows the medians and 95% CIs of the posterior effect size estimates shown in panels E and F of the figure. 
 
 ```{r}
 make_posterior_table <- function(posterior){
@@ -1246,6 +1257,8 @@ ggsave("figures/fig6_antagonism_ratios.pdf", pp, width = 8.5, height = 4.9)
 pp
 ```
 
+***Figure 6***: Distribution of evidence ratios across loci (panel A) and transcripts (panel B), illustrating the strength of evidence for a  concordant relationship with fitness (evidence ratio > 1, blue), or an antagonistic relationship (<1, red). The top row of both panels considers the evidence for concordance/antagonism between the sexes (within each age class), while the bottom row shows concordance/antagonism between age classes (within each sex). The figure illustrates that many loci and transcripts (i.e. those with large evidence ratios) show strong evidence for concordant effects across sexes and age classes. By contrast, there are are relatively few candidate sexually antagonistic loci (i.e. those with evidence ratios well below 1), somewhat more sexually antagonistic transcripts, and essentially zero age antagonistic loci or transcripts.
+
 
 ### Model the evidence ratios
 
@@ -1363,8 +1376,6 @@ summary(intersex_late_model_twas)
 
 #### Plotting key results of these models
 
-Panels A and B show the predicted effects of minor allele frequency and chromosome, respectively, on the probability that a locus is among the top 1% candidate sexually antagonistic loci, as ranked by their evidence ratio. The model predictions come from a binomial GLM with minor allele frequency and chromosome as predictor variables. Panel C shows the predicted effect of average gene expression level on the probability that a transcript is among the top 1% candidate sexually antagonistic transcript, from a binomial GLM with expression level as a predictor. The dashed lines and error bars show 95% confidence intervals, estimated as 1.96SE. 
-
 
 ```{r ER_figure, fig.showtext=T, fig.height=7, fig.width=7} 
 # plotting models
@@ -1463,6 +1474,8 @@ grid.arrange(arrangeGrob(p1, p2, ncol = 2),
              arrangeGrob(blank, p3, blank, nrow = 1, widths = c(0.2,0.6,0.2)))
 invisible(dev.off())
 ```
+
+***Figure 7***: Panels A and B show the predicted effects of minor allele frequency and chromosome, respectively, on the probability that a locus is among the top 1% candidate sexually antagonistic loci, as ranked by their evidence ratio. Panel C shows the predicted effect of average gene expression level on the probability that a transcript is among the top 1% candidate sexually antagonistic transcript. The dashed lines and error bars show 95% confidence intervals, estimated as 1.96SE, and predictions are from binomial GLMs (one for panels A-B, another for Panel C).
 
 
 ### GO enrichment of transcripts with extreme evidence ratios {.tabset}

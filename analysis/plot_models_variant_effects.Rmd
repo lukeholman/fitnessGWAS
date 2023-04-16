@@ -19,7 +19,7 @@ knitr::opts_chunk$set(warning=FALSE, message=FALSE)
 ```{r message=FALSE, warning=FALSE, results="hide"}
 library(tidyverse)
 library(gridExtra)
-library(qqman)
+# library(qqman)
 library(ggbeeswarm)
 library(Hmisc)
 library(showtext) # For fancy Google font in figures
@@ -141,35 +141,35 @@ univariate_lmm_results <- univariate_lmm_results %>%
 <!-- ``` -->
 
 
-## Q-Q plots {.tabset}
+<!-- ## Q-Q plots {.tabset} -->
 
-Here are some quantile-quantile plots, which are commonly used to check GWAS results, and to test the hypothesis that there are more SNPs than expected showing large effects on the trait of interest. There is a modest excess of loci with effects on female fitness, but not much of a visible excess for males. These plots use the raw $p$-values results from GEMMA.
+<!-- Here are some quantile-quantile plots, which are commonly used to check GWAS results, and to test the hypothesis that there are more SNPs than expected showing large effects on the trait of interest. There is a modest excess of loci with effects on female fitness, but not much of a visible excess for males. These plots use the raw $p$-values results from GEMMA. -->
 
-### Female early-life fitness
+<!-- ### Female early-life fitness -->
 
-```{r qqplot1}
-univariate_lmm_pvals <- SNP_clumps %>%
-  select(contains("pvalue")) %>% filter(LD_subset) %>% as.data.frame()
-qqman::qq(univariate_lmm_pvals$pvalue_female_early_raw)
-```
+<!-- ```{r qqplot1} -->
+<!-- univariate_lmm_pvals <- SNP_clumps %>% -->
+<!--   select(contains("pvalue")) %>% filter(LD_subset) %>% as.data.frame() -->
+<!-- qqman::qq(univariate_lmm_pvals$pvalue_female_early_raw) -->
+<!-- ``` -->
 
-### Female late-life fitness
+<!-- ### Female late-life fitness -->
 
-```{r qqplot2}
-qqman::qq(univariate_lmm_pvals$pvalue_female_late_raw)
-```
+<!-- ```{r qqplot2} -->
+<!-- qqman::qq(univariate_lmm_pvals$pvalue_female_late_raw) -->
+<!-- ``` -->
 
-### Male early-life fitness
+<!-- ### Male early-life fitness -->
 
-```{r qqplot3}
-qqman::qq(univariate_lmm_pvals$pvalue_male_early_raw)
-```
+<!-- ```{r qqplot3} -->
+<!-- qqman::qq(univariate_lmm_pvals$pvalue_male_early_raw) -->
+<!-- ``` -->
 
-### Male late-life fitness
+<!-- ### Male late-life fitness -->
 
-```{r qqplot4}
-qqman::qq(univariate_lmm_pvals$pvalue_male_late_raw)
-```
+<!-- ```{r qqplot4} -->
+<!-- qqman::qq(univariate_lmm_pvals$pvalue_male_late_raw) -->
+<!-- ``` -->
 
 ## Hex bin plots and correlations in variant effect sizes
 

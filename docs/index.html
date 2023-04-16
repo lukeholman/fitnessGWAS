@@ -307,7 +307,7 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2023-03-21
+<strong>Last updated:</strong> 2023-04-16
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -354,15 +354,15 @@ results.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreebe63a3f316b86e523a0e48df113e6844dc62d1datargetblankbe63a3fa">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree41d5725c2eeb662a0225375a896824757322d6b3targetblank41d5725a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/be63a3f316b86e523a0e48df113e6844dc62d1da" target="_blank">be63a3f</a>
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/41d5725c2eeb662a0225375a896824757322d6b3" target="_blank">41d5725</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreebe63a3f316b86e523a0e48df113e6844dc62d1datargetblankbe63a3fa"
+id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree41d5725c2eeb662a0225375a896824757322d6b3targetblank41d5725a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -372,7 +372,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/be63a3f316b86e523a0e48df113e6844dc62d1da" target="_blank">be63a3f</a>.
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/41d5725c2eeb662a0225375a896824757322d6b3" target="_blank">41d5725</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -409,6 +409,7 @@ Ignored files:
     Ignored:    old_analyses/.DS_Store
 
 Untracked files:
+    Untracked:  code/~$in_paper_figures.docx
     Untracked:  old_analyses/Data for old analyses/
     Untracked:  old_analyses/eQTL_analysis.Rmd
     Untracked:  old_analyses/fitness_data.csv
@@ -416,12 +417,10 @@ Untracked files:
     Untracked:  old_analyses/quantitative_genetics_OLD_brms.Rmd
 
 Unstaged changes:
-    Modified:   analysis/get_predicted_line_means.Rmd
-    Modified:   figures/fig3_boyle_plot.pdf
-    Modified:   figures/fig4_mutation_load.pdf
-    Modified:   figures/fig5_quartiles_plot.pdf
-    Modified:   figures/fig6_antagonism_ratios.pdf
-    Modified:   figures/fig7_models.pdf
+    Modified:   code/main_paper_figures.Rmd
+    Modified:   code/main_paper_figures.docx
+    Modified:   code/pdf_supp_material.Rmd
+    Modified:   code/pdf_supp_material.pdf
 
 </code></pre>
 <p>
@@ -466,6 +465,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/41d5725c2eeb662a0225375a896824757322d6b3/analysis/index.Rmd" target="_blank">41d5725</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-04-16
+</td>
+<td>
+wflow_publish("analysis/index.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/71237e864af5ae11914f301bbe78067d64203a20/docs/index.html" target="_blank">71237e8</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-03-21
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1119,9 +1152,9 @@ Initial commit
 </div>
 </div>
 </div>
-<p>This website relates to the forthcoming paper ‘A genome-wide scan for
-pleiotropic fitness effects on sexes and age classes in
-<em>Drosophila</em>’, by Wong and Holman (for contact info, see <a
+<p>This website relates to the forthcoming paper ‘Pleiotropic fitness
+effects across sexes and age classes in the <em>Drosophila</em> genome
+and transcriptome’, by Wong and Holman (for contact info, see <a
 href="https://www.lukeholman.org/">lukeholman.org</a>).</p>
 <p>Click the headings below to see the code, results, plots, tables and
 figures associated with this study.</p>
@@ -1131,10 +1164,10 @@ class="section level3">
 <h3><a href="make_annotation_database.html">1. Setting up a database to
 hold variant/gene annotations and GWAS results</a></h3>
 <p>This script creates a SQLite3 database holding two tables: one with
-annotations for each variant (annotations created by the Mackay lab),
-and one with annotations for each gene (from annotation hub). In step 4
-below, we also add the GWAS results to this database, allowing
-memory-efficient handling of the results.</p>
+annotations for each SNP/indel variant (annotations created by the
+Mackay lab), and one with annotations for each gene (from annotation
+hub). In step 4 below, we also add the GWAS results to this database,
+allowing memory-efficient handling of the results.</p>
 </div>
 <div id="estimating-line-mean-fitness-using-bayesian-models"
 class="section level3">

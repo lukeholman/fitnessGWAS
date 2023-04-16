@@ -528,15 +528,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree52e29cd1e12eae1b73cbc204ebb8c6a2892a33a4targetblank52e29cda">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree2bda0cf0b2e6e1f8b643836bb033aecd8f073a29targetblank2bda0cfa">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/52e29cd1e12eae1b73cbc204ebb8c6a2892a33a4" target="_blank">52e29cd</a>
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/2bda0cf0b2e6e1f8b643836bb033aecd8f073a29" target="_blank">2bda0cf</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree52e29cd1e12eae1b73cbc204ebb8c6a2892a33a4targetblank52e29cda"
+id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree2bda0cf0b2e6e1f8b643836bb033aecd8f073a29targetblank2bda0cfa"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -546,7 +546,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/52e29cd1e12eae1b73cbc204ebb8c6a2892a33a4" target="_blank">52e29cd</a>.
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/2bda0cf0b2e6e1f8b643836bb033aecd8f073a29" target="_blank">2bda0cf</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -592,16 +592,6 @@ Untracked files:
 
 Unstaged changes:
     Modified:   analysis/index.Rmd
-    Modified:   code/main_paper_figures.Rmd
-    Modified:   code/main_paper_figures.docx
-    Modified:   code/pdf_supp_material.Rmd
-    Modified:   code/pdf_supp_material.pdf
-    Deleted:    figures/fig1.pdf
-    Modified:   figures/fig3_boyle_plot.pdf
-    Modified:   figures/fig4_mutation_load.pdf
-    Modified:   figures/fig5_quartiles_plot.pdf
-    Modified:   figures/fig6_antagonism_ratios.pdf
-    Modified:   figures/fig7_models.pdf
 
 </code></pre>
 <p>
@@ -648,6 +638,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/2bda0cf0b2e6e1f8b643836bb033aecd8f073a29/analysis/plot_models_variant_effects.Rmd" target="_blank">2bda0cf</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-04-16
+</td>
+<td>
+wflow_publish("analysis/plot_models_variant_effects.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/d22c0f8d62d6eaf0e3ba757c52ab7e11fc6a16ba/docs/plot_models_variant_effects.html" target="_blank">d22c0f8</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-04-16
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1337,7 +1361,7 @@ big first commit 2021
 </div>
 <pre class="r"><code>library(tidyverse)
 library(gridExtra)
-library(qqman)
+# library(qqman)
 library(ggbeeswarm)
 library(Hmisc)
 library(showtext) # For fancy Google font in figures
@@ -1439,229 +1463,26 @@ univariate_lmm_results &lt;- univariate_lmm_results %&gt;%
 <!-- xx<- select(merged, SNP, ruzicka_MAF) %>% left_join(tbl(db, "variants") %>% select(SNP, MAF) %>%  filter(SNP %in% !!merged$SNP) %>% collect(n=Inf)) -->
 <!-- cor(xx$ruzicka_MAF, xx$MAF, use = "pairwise.complete.obs") -->
 <!-- ``` -->
-<div id="q-q-plots" class="section level2 tabset">
-<h2 class="tabset">Q-Q plots</h2>
-<p>Here are some quantile-quantile plots, which are commonly used to
-check GWAS results, and to test the hypothesis that there are more SNPs
-than expected showing large effects on the trait of interest. There is a
-modest excess of loci with effects on female fitness, but not much of a
-visible excess for males. These plots use the raw <span
-class="math inline">\(p\)</span>-values results from GEMMA.</p>
-<div id="female-early-life-fitness" class="section level3">
-<h3>Female early-life fitness</h3>
-<pre class="r"><code>univariate_lmm_pvals &lt;- SNP_clumps %&gt;%
-  select(contains(&quot;pvalue&quot;)) %&gt;% filter(LD_subset) %&gt;% as.data.frame()
-qqman::qq(univariate_lmm_pvals$pvalue_female_early_raw)</code></pre>
-<p><img src="figure/plot_models_variant_effects.Rmd/qqplot1-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qqplot1-1">
-Past versions of qqplot1-1.png
-</button>
-</p>
-<div id="fig-qqplot1-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/c63ff6283bcda0ea9a7db6dc201d1d3bf3bdb4b0/docs/figure/plot_models_variant_effects.Rmd/qqplot1-1.png" target="_blank">c63ff62</a>
-</td>
-<td>
-lukeholman
-</td>
-<td>
-2023-03-15
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/8d14298b4d59c2198b6f9c62d415e6adc9b7e658/docs/figure/plot_models_variant_effects.Rmd/qqplot1-1.png" target="_blank">8d14298</a>
-</td>
-<td>
-lukeholman
-</td>
-<td>
-2021-09-26
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-<div id="female-late-life-fitness" class="section level3">
-<h3>Female late-life fitness</h3>
-<pre class="r"><code>qqman::qq(univariate_lmm_pvals$pvalue_female_late_raw)</code></pre>
-<p><img src="figure/plot_models_variant_effects.Rmd/qqplot2-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qqplot2-1">
-Past versions of qqplot2-1.png
-</button>
-</p>
-<div id="fig-qqplot2-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/c63ff6283bcda0ea9a7db6dc201d1d3bf3bdb4b0/docs/figure/plot_models_variant_effects.Rmd/qqplot2-1.png" target="_blank">c63ff62</a>
-</td>
-<td>
-lukeholman
-</td>
-<td>
-2023-03-15
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/8d14298b4d59c2198b6f9c62d415e6adc9b7e658/docs/figure/plot_models_variant_effects.Rmd/qqplot2-1.png" target="_blank">8d14298</a>
-</td>
-<td>
-lukeholman
-</td>
-<td>
-2021-09-26
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-<div id="male-early-life-fitness" class="section level3">
-<h3>Male early-life fitness</h3>
-<pre class="r"><code>qqman::qq(univariate_lmm_pvals$pvalue_male_early_raw)</code></pre>
-<p><img src="figure/plot_models_variant_effects.Rmd/qqplot3-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qqplot3-1">
-Past versions of qqplot3-1.png
-</button>
-</p>
-<div id="fig-qqplot3-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/c63ff6283bcda0ea9a7db6dc201d1d3bf3bdb4b0/docs/figure/plot_models_variant_effects.Rmd/qqplot3-1.png" target="_blank">c63ff62</a>
-</td>
-<td>
-lukeholman
-</td>
-<td>
-2023-03-15
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/8d14298b4d59c2198b6f9c62d415e6adc9b7e658/docs/figure/plot_models_variant_effects.Rmd/qqplot3-1.png" target="_blank">8d14298</a>
-</td>
-<td>
-lukeholman
-</td>
-<td>
-2021-09-26
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-<div id="male-late-life-fitness" class="section level3">
-<h3>Male late-life fitness</h3>
-<pre class="r"><code>qqman::qq(univariate_lmm_pvals$pvalue_male_late_raw)</code></pre>
-<p><img src="figure/plot_models_variant_effects.Rmd/qqplot4-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qqplot4-1">
-Past versions of qqplot4-1.png
-</button>
-</p>
-<div id="fig-qqplot4-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/c63ff6283bcda0ea9a7db6dc201d1d3bf3bdb4b0/docs/figure/plot_models_variant_effects.Rmd/qqplot4-1.png" target="_blank">c63ff62</a>
-</td>
-<td>
-lukeholman
-</td>
-<td>
-2023-03-15
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/lukeholman/fitnessGWAS/blob/8d14298b4d59c2198b6f9c62d415e6adc9b7e658/docs/figure/plot_models_variant_effects.Rmd/qqplot4-1.png" target="_blank">8d14298</a>
-</td>
-<td>
-lukeholman
-</td>
-<td>
-2021-09-26
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-</div>
+<!-- ## Q-Q plots {.tabset} -->
+<!-- Here are some quantile-quantile plots, which are commonly used to check GWAS results, and to test the hypothesis that there are more SNPs than expected showing large effects on the trait of interest. There is a modest excess of loci with effects on female fitness, but not much of a visible excess for males. These plots use the raw $p$-values results from GEMMA. -->
+<!-- ### Female early-life fitness -->
+<!-- ```{r qqplot1} -->
+<!-- univariate_lmm_pvals <- SNP_clumps %>% -->
+<!--   select(contains("pvalue")) %>% filter(LD_subset) %>% as.data.frame() -->
+<!-- qqman::qq(univariate_lmm_pvals$pvalue_female_early_raw) -->
+<!-- ``` -->
+<!-- ### Female late-life fitness -->
+<!-- ```{r qqplot2} -->
+<!-- qqman::qq(univariate_lmm_pvals$pvalue_female_late_raw) -->
+<!-- ``` -->
+<!-- ### Male early-life fitness -->
+<!-- ```{r qqplot3} -->
+<!-- qqman::qq(univariate_lmm_pvals$pvalue_male_early_raw) -->
+<!-- ``` -->
+<!-- ### Male late-life fitness -->
+<!-- ```{r qqplot4} -->
+<!-- qqman::qq(univariate_lmm_pvals$pvalue_male_late_raw) -->
+<!-- ``` -->
 <div id="hex-bin-plots-and-correlations-in-variant-effect-sizes"
 class="section level2">
 <h2>Hex bin plots and correlations in variant effect sizes</h2>
@@ -2353,6 +2174,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/d22c0f8d62d6eaf0e3ba757c52ab7e11fc6a16ba/docs/figure/plot_models_variant_effects.Rmd/manhattan-1.png" target="_blank">d22c0f8</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-04-16
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/lukeholman/fitnessGWAS/blob/024f4b96ab5e6c5a5f1135ec8102ecb3795fbe07/docs/figure/plot_models_variant_effects.Rmd/manhattan-1.png" target="_blank">024f4b9</a>
 </td>
 <td>
@@ -2648,39 +2480,39 @@ Formula: Female_fitness_early ~ mutation_count
 
 Population-Level Effects: 
                                   Estimate Est.Error l-95% CI u-95% CI Rhat
-Femalefitnessearly_Intercept          0.60      0.42    -0.21     1.41 1.00
-Femalefitnesslate_Intercept           1.00      0.42     0.19     1.82 1.00
-Malefitnessearly_Intercept            0.44      0.42    -0.38     1.26 1.00
-Malefitnesslate_Intercept             0.74      0.42    -0.08     1.56 1.00
-Femalefitnessearly_mutation_count    -0.03      0.02    -0.07     0.01 1.00
+Femalefitnessearly_Intercept          0.60      0.41    -0.21     1.41 1.00
+Femalefitnesslate_Intercept           1.01      0.41     0.20     1.83 1.00
+Malefitnessearly_Intercept            0.44      0.41    -0.35     1.26 1.00
+Malefitnesslate_Intercept             0.75      0.42    -0.06     1.56 1.00
+Femalefitnessearly_mutation_count    -0.03      0.02    -0.08     0.01 1.00
 Femalefitnesslate_mutation_count     -0.05      0.02    -0.10    -0.01 1.00
 Malefitnessearly_mutation_count      -0.02      0.02    -0.07     0.02 1.00
 Malefitnesslate_mutation_count       -0.04      0.02    -0.08     0.00 1.00
                                   Bulk_ESS Tail_ESS
-Femalefitnessearly_Intercept         24860    18830
-Femalefitnesslate_Intercept          22887    19597
-Malefitnessearly_Intercept           23982    18759
-Malefitnesslate_Intercept            24670    18497
-Femalefitnessearly_mutation_count    24869    18660
-Femalefitnesslate_mutation_count     23264    18599
-Malefitnessearly_mutation_count      24075    18924
-Malefitnesslate_mutation_count       25307    17659
+Femalefitnessearly_Intercept         24316    18023
+Femalefitnesslate_Intercept          22056    17044
+Malefitnessearly_Intercept           20998    18202
+Malefitnesslate_Intercept            21088    18804
+Femalefitnessearly_mutation_count    24205    17619
+Femalefitnesslate_mutation_count     22038    17718
+Malefitnessearly_mutation_count      21066    18315
+Malefitnesslate_mutation_count       21083    18691
 
 Residual Correlations: 
                                              Estimate Est.Error l-95% CI
 rescor(Femalefitnessearly,Femalefitnesslate)     0.75      0.03     0.68
 rescor(Femalefitnessearly,Malefitnessearly)      0.21      0.08     0.04
 rescor(Femalefitnesslate,Malefitnessearly)       0.29      0.08     0.13
-rescor(Femalefitnessearly,Malefitnesslate)       0.14      0.08    -0.02
+rescor(Femalefitnessearly,Malefitnesslate)       0.15      0.08    -0.02
 rescor(Femalefitnesslate,Malefitnesslate)        0.28      0.08     0.12
 rescor(Malefitnessearly,Malefitnesslate)         0.86      0.02     0.81
                                              u-95% CI Rhat Bulk_ESS Tail_ESS
-rescor(Femalefitnessearly,Femalefitnesslate)     0.81 1.00    34851    17186
-rescor(Femalefitnessearly,Malefitnessearly)      0.36 1.00    25752    17508
-rescor(Femalefitnesslate,Malefitnessearly)       0.43 1.00    25194    18088
-rescor(Femalefitnessearly,Malefitnesslate)       0.30 1.00    25591    18434
-rescor(Femalefitnesslate,Malefitnesslate)        0.43 1.00    24643    18675
-rescor(Malefitnessearly,Malefitnesslate)         0.89 1.00    33146    18696
+rescor(Femalefitnessearly,Femalefitnesslate)     0.81 1.00    33200    16722
+rescor(Femalefitnessearly,Malefitnessearly)      0.36 1.00    21174    18682
+rescor(Femalefitnesslate,Malefitnessearly)       0.44 1.00    21472    18193
+rescor(Femalefitnessearly,Malefitnesslate)       0.30 1.00    21148    18554
+rescor(Femalefitnesslate,Malefitnesslate)        0.43 1.00    21755    18142
+rescor(Malefitnessearly,Malefitnesslate)         0.89 1.00    31300    17029
 
 Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -2732,6 +2564,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/d22c0f8d62d6eaf0e3ba757c52ab7e11fc6a16ba/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-12-1.png" target="_blank">d22c0f8</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-04-16
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/lukeholman/fitnessGWAS/blob/024f4b96ab5e6c5a5f1135ec8102ecb3795fbe07/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-12-1.png" target="_blank">024f4b9</a>
@@ -2982,6 +2825,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/d22c0f8d62d6eaf0e3ba757c52ab7e11fc6a16ba/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-14-1.png" target="_blank">d22c0f8</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-04-16
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/lukeholman/fitnessGWAS/blob/442294c3ed93114bd89f047804f4ea47cb179937/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-14-1.png" target="_blank">442294c</a>
 </td>
 <td>
@@ -3094,7 +2948,7 @@ Female early-life (FE)
 0.022
 </td>
 <td style="text-align:right;">
--0.074
+-0.076
 </td>
 <td style="text-align:right;">
 0.011
@@ -3114,7 +2968,7 @@ Female late-life (FL)
 -0.097
 </td>
 <td style="text-align:right;">
--0.010
+-0.011
 </td>
 </tr>
 <tr>
@@ -3131,7 +2985,7 @@ Male late-life (ME)
 -0.067
 </td>
 <td style="text-align:right;">
-0.019
+0.018
 </td>
 </tr>
 <tr>
@@ -3145,10 +2999,10 @@ Male late-life (ML)
 0.022
 </td>
 <td style="text-align:right;">
--0.084
+-0.083
 </td>
 <td style="text-align:right;">
-0.003
+0.002
 </td>
 </tr>
 <tr>
@@ -3173,7 +3027,7 @@ FE - FL
 ME - ML
 </td>
 <td style="text-align:right;">
-0.016
+0.017
 </td>
 <td style="text-align:right;">
 0.012
@@ -3190,13 +3044,13 @@ ME - ML
 ME - FE
 </td>
 <td style="text-align:right;">
-0.008
+0.009
 </td>
 <td style="text-align:right;">
-0.028
+0.027
 </td>
 <td style="text-align:right;">
--0.046
+-0.045
 </td>
 <td style="text-align:right;">
 0.063
@@ -3210,10 +3064,10 @@ ML - FE
 -0.008
 </td>
 <td style="text-align:right;">
-0.029
+0.028
 </td>
 <td style="text-align:right;">
--0.065
+-0.063
 </td>
 <td style="text-align:right;">
 0.049
@@ -3230,10 +3084,10 @@ ME - FL
 0.026
 </td>
 <td style="text-align:right;">
--0.022
+-0.021
 </td>
 <td style="text-align:right;">
-0.082
+0.081
 </td>
 </tr>
 <tr>
@@ -3247,7 +3101,7 @@ ML - FL
 0.026
 </td>
 <td style="text-align:right;">
--0.039
+-0.038
 </td>
 <td style="text-align:right;">
 0.065
@@ -3370,6 +3224,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/d22c0f8d62d6eaf0e3ba757c52ab7e11fc6a16ba/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-16-1.png" target="_blank">d22c0f8</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-04-16
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/lukeholman/fitnessGWAS/blob/442294c3ed93114bd89f047804f4ea47cb179937/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-16-1.png" target="_blank">442294c</a>
@@ -4139,6 +4004,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/d22c0f8d62d6eaf0e3ba757c52ab7e11fc6a16ba/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-18-1.png" target="_blank">d22c0f8</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-04-16
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/lukeholman/fitnessGWAS/blob/1bb603c18144f3ad95844a63f1f0dedcab9e2d0b/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-18-1.png" target="_blank">1bb603c</a>
@@ -4964,6 +4840,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/d22c0f8d62d6eaf0e3ba757c52ab7e11fc6a16ba/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-21-1.png" target="_blank">d22c0f8</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-04-16
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/lukeholman/fitnessGWAS/blob/1bb603c18144f3ad95844a63f1f0dedcab9e2d0b/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-21-1.png" target="_blank">1bb603c</a>
 </td>
 <td>
@@ -5748,6 +5635,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/d22c0f8d62d6eaf0e3ba757c52ab7e11fc6a16ba/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-25-1.png" target="_blank">d22c0f8</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-04-16
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/lukeholman/fitnessGWAS/blob/8d14298b4d59c2198b6f9c62d415e6adc9b7e658/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-25-1.png" target="_blank">8d14298</a>
@@ -7700,12 +7598,11 @@ other attached packages:
 [25] mashr_0.2.69         ashr_2.2-54          showtext_0.9-5      
 [28] showtextdb_3.0       sysfonts_0.8.8       Hmisc_4.7-2         
 [31] Formula_1.2-4        survival_3.4-0       lattice_0.20-45     
-[34] ggbeeswarm_0.7.1     qqman_0.1.8          gridExtra_2.3       
-[37] lubridate_1.9.2      forcats_1.0.0        stringr_1.5.0       
-[40] dplyr_1.1.0          purrr_1.0.1          readr_2.1.4         
-[43] tidyr_1.3.0          tibble_3.1.8         ggplot2_3.4.1       
-[46] tidyverse_2.0.0      knitrhooks_0.0.4     knitr_1.42          
-[49] workflowr_1.7.0.4   
+[34] ggbeeswarm_0.7.1     gridExtra_2.3        lubridate_1.9.2     
+[37] forcats_1.0.0        stringr_1.5.0        dplyr_1.1.0         
+[40] purrr_1.0.1          readr_2.1.4          tidyr_1.3.0         
+[43] tibble_3.1.8         ggplot2_3.4.1        tidyverse_2.0.0     
+[46] knitrhooks_0.0.4     knitr_1.42           workflowr_1.7.0.4   
 
 loaded via a namespace (and not attached):
   [1] bigreadr_0.2.5         coda_0.19-4            ragg_1.2.5            
@@ -7721,50 +7618,50 @@ loaded via a namespace (and not attached):
  [31] promises_1.2.0.1       fansi_1.0.4            dbplyr_2.3.0          
  [34] igraph_1.3.5           DBI_1.1.3              htmlwidgets_1.6.1     
  [37] tensorA_0.36.2         ellipsis_0.3.2         crosstalk_1.2.0       
- [40] backports_1.4.1        calibrate_1.7.7        markdown_1.4          
- [43] RcppParallel_5.1.6     deldir_1.0-6           vctrs_0.5.2           
- [46] abind_1.4-5            cachem_1.0.7           withr_2.5.0           
- [49] checkmate_2.1.0        vroom_1.6.1            xts_0.12.2            
- [52] prettyunits_1.1.1      svglite_2.1.1          cluster_2.1.4         
- [55] crayon_1.5.2           pkgconfig_2.0.3        labeling_0.4.2        
- [58] GenomeInfoDb_1.34.9    nlme_3.1-160           vipor_0.4.5           
- [61] nnet_7.3-18            rlang_1.0.6            lifecycle_1.0.3       
- [64] miniUI_0.1.1.1         colourpicker_1.2.0     invgamma_1.1          
- [67] distributional_0.3.1   tcltk_4.2.2            rprojroot_2.0.3       
- [70] matrixStats_0.63.0     rngtools_1.5.2         Matrix_1.5-1          
- [73] loo_2.5.1              base64enc_0.1-3        beeswarm_0.4.0        
- [76] whisker_0.4.1          processx_3.8.0         png_0.1-8             
- [79] viridisLite_0.4.1      bitops_1.0-7           getPass_0.2-2         
- [82] Biostrings_2.66.0      blob_1.2.3             doRNG_1.8.6           
- [85] mixsqp_0.3-48          SQUAREM_2021.1         parallelly_1.34.0     
- [88] mapplots_1.5.1         jpeg_0.1-10            shinystan_2.6.0       
- [91] rstatix_0.7.2          ggsignif_0.6.4         rmeta_3.0             
- [94] scales_1.2.1           memoise_2.0.1          magrittr_2.0.3        
- [97] plyr_1.8.8             hexbin_1.28.2          zlibbioc_1.44.0       
-[100] threejs_0.3.3          compiler_4.2.2         rstantools_2.2.0      
-[103] flock_0.7              cli_3.6.0              XVector_0.38.0        
-[106] ps_1.7.2               bigsparser_0.6.1       Brobdingnag_1.2-9     
-[109] htmlTable_2.4.1        MASS_7.3-58.1          mgcv_1.8-41           
-[112] tidyselect_1.2.0       stringi_1.7.12         textshaping_0.3.6     
-[115] highr_0.10             yaml_2.3.7             svUnit_1.0.6          
-[118] latticeExtra_0.6-30    bridgesampling_1.1-2   sass_0.4.5            
-[121] tools_4.2.2            bigassertr_0.1.6       timechange_0.2.0      
-[124] parallel_4.2.2         rstudioapi_0.14        foreach_1.5.2         
-[127] foreign_0.8-83         git2r_0.31.0           rmio_0.4.0            
-[130] posterior_1.3.1        farver_2.1.1           digest_0.6.31         
-[133] shiny_1.7.4            ff_4.0.9               GenomicRanges_1.50.2  
-[136] broom_1.0.3            later_1.3.0            bigparallelr_0.3.2    
-[139] httr_1.4.5             colorspace_2.1-0       rvest_1.0.3           
-[142] fs_1.6.1               truncnorm_1.0-8        splines_4.2.2         
-[145] shinythemes_1.2.0      systemfonts_1.0.4      xtable_1.8-4          
-[148] jsonlite_1.8.4         rstan_2.21.8           R6_2.5.1              
-[151] pillar_1.8.1           htmltools_0.5.4        mime_0.12             
-[154] fastmap_1.1.1          DT_0.27                codetools_0.2-18      
-[157] pkgbuild_1.4.0         mvtnorm_1.1-3          utf8_1.2.2            
-[160] bslib_0.4.2            arrayhelpers_1.1-0     curl_5.0.0            
-[163] gtools_3.9.4           shinyjs_2.1.0          interp_1.1-3          
-[166] rmarkdown_2.20         munsell_0.5.0          GenomeInfoDbData_1.2.9
-[169] iterators_1.0.14       reshape2_1.4.4         gtable_0.3.1          
+ [40] backports_1.4.1        markdown_1.4           RcppParallel_5.1.6    
+ [43] deldir_1.0-6           vctrs_0.5.2            abind_1.4-5           
+ [46] cachem_1.0.7           withr_2.5.0            checkmate_2.1.0       
+ [49] vroom_1.6.1            xts_0.12.2             prettyunits_1.1.1     
+ [52] svglite_2.1.1          cluster_2.1.4          crayon_1.5.2          
+ [55] pkgconfig_2.0.3        labeling_0.4.2         GenomeInfoDb_1.34.9   
+ [58] nlme_3.1-160           vipor_0.4.5            nnet_7.3-18           
+ [61] rlang_1.0.6            lifecycle_1.0.3        miniUI_0.1.1.1        
+ [64] colourpicker_1.2.0     invgamma_1.1           distributional_0.3.1  
+ [67] tcltk_4.2.2            rprojroot_2.0.3        matrixStats_0.63.0    
+ [70] rngtools_1.5.2         Matrix_1.5-1           loo_2.5.1             
+ [73] base64enc_0.1-3        beeswarm_0.4.0         whisker_0.4.1         
+ [76] processx_3.8.0         png_0.1-8              viridisLite_0.4.1     
+ [79] bitops_1.0-7           getPass_0.2-2          Biostrings_2.66.0     
+ [82] blob_1.2.3             doRNG_1.8.6            mixsqp_0.3-48         
+ [85] SQUAREM_2021.1         parallelly_1.34.0      mapplots_1.5.1        
+ [88] jpeg_0.1-10            shinystan_2.6.0        rstatix_0.7.2         
+ [91] ggsignif_0.6.4         rmeta_3.0              scales_1.2.1          
+ [94] memoise_2.0.1          magrittr_2.0.3         plyr_1.8.8            
+ [97] hexbin_1.28.2          zlibbioc_1.44.0        threejs_0.3.3         
+[100] compiler_4.2.2         rstantools_2.2.0       flock_0.7             
+[103] cli_3.6.0              XVector_0.38.0         ps_1.7.2              
+[106] bigsparser_0.6.1       Brobdingnag_1.2-9      htmlTable_2.4.1       
+[109] MASS_7.3-58.1          mgcv_1.8-41            tidyselect_1.2.0      
+[112] stringi_1.7.12         textshaping_0.3.6      highr_0.10            
+[115] yaml_2.3.7             svUnit_1.0.6           latticeExtra_0.6-30   
+[118] bridgesampling_1.1-2   sass_0.4.5             tools_4.2.2           
+[121] bigassertr_0.1.6       timechange_0.2.0       parallel_4.2.2        
+[124] rstudioapi_0.14        foreach_1.5.2          foreign_0.8-83        
+[127] git2r_0.31.0           rmio_0.4.0             posterior_1.3.1       
+[130] farver_2.1.1           digest_0.6.31          shiny_1.7.4           
+[133] ff_4.0.9               GenomicRanges_1.50.2   broom_1.0.3           
+[136] later_1.3.0            bigparallelr_0.3.2     httr_1.4.5            
+[139] colorspace_2.1-0       rvest_1.0.3            fs_1.6.1              
+[142] truncnorm_1.0-8        splines_4.2.2          shinythemes_1.2.0     
+[145] systemfonts_1.0.4      xtable_1.8-4           jsonlite_1.8.4        
+[148] rstan_2.21.8           R6_2.5.1               pillar_1.8.1          
+[151] htmltools_0.5.4        mime_0.12              fastmap_1.1.1         
+[154] DT_0.27                codetools_0.2-18       pkgbuild_1.4.0        
+[157] mvtnorm_1.1-3          utf8_1.2.2             bslib_0.4.2           
+[160] arrayhelpers_1.1-0     curl_5.0.0             gtools_3.9.4          
+[163] shinyjs_2.1.0          interp_1.1-3           rmarkdown_2.20        
+[166] munsell_0.5.0          GenomeInfoDbData_1.2.9 iterators_1.0.14      
+[169] reshape2_1.4.4         gtable_0.3.1          
 </pre>
 </div>
 </div>

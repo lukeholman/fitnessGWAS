@@ -329,8 +329,7 @@ The code chunk below makes the Manhattan plot, and combines it with the plot abo
 
 ```{r manhattan, fig.showtext=TRUE, fig.height = 8, fig.width = 8}
 manhattan_data <- tbl(db, "univariate_lmm_results") %>% 
-  select(SNP, starts_with("P_"),
-         pvalue_female_early_raw, pvalue_male_early_raw) %>%
+  select(SNP, pvalue_female_early_raw, pvalue_male_early_raw) %>%
   distinct() %>%
   collect(n=Inf) %>%
   mutate(position = str_split(SNP, "_"),
@@ -348,11 +347,13 @@ manhattan_data <- manhattan_data %>%
     left_join(max_pos, by = "chr") %>%
     mutate(position = position + max_pos) 
 
+manhat_cols <- c("#1B96C6", "#456990", "#EEB868", "#EF767A", "#49DCB1")
+
 p1 <- manhattan_data %>%
   ggplot(aes(position, -1 * log10(pvalue_female_early_raw), 
              group = chr, colour = chr, stroke = 0.2)) + 
   geom_point(size = 0.5) +
-  scale_colour_brewer(palette = "Paired", name = "Chromosome") + 
+  scale_colour_manual(values = manhat_cols, name = "Chromosome") +
   scale_y_continuous(limits = c(0,8)) +
   ylab("") +  xlab("") +
   theme_bw() + 
@@ -361,11 +362,12 @@ p1 <- manhattan_data %>%
         panel.border = element_blank(),
         axis.ticks.x = element_blank())
 
+
 p2 <- manhattan_data %>%
   ggplot(aes(position, -1 * log10(pvalue_male_early_raw), 
              group = chr, colour = chr, stroke = 0.2)) + 
   geom_point(size = 0.5) +
-  scale_colour_brewer(palette = "Paired", name = "Chromosome") + 
+  scale_colour_manual(values = manhat_cols) +
   xlab("Position") + ylab("") +
   scale_y_reverse(limits = c(8,0)) +
   theme_bw() + 
@@ -384,7 +386,7 @@ grid_arrange_shared_legend <- function(..., ncol = length(list(...)), nrow = 1) 
   gl <- lapply(plots, function(x) x + theme(legend.position = "none"))
   gl <- c(gl, ncol = ncol, nrow = nrow)
   
-  left_label <- text_grob(expression(Effect~on~early-life~fitness~(-Log[10]~p)), 
+  left_label <- text_grob(expression(Effect~on~`early-life`~fitness~(-Log[10]~p)), 
                           size = 12, family = "Raleway", rot = 90)
 
   combined <- arrangeGrob(

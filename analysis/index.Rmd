@@ -6,13 +6,13 @@ output:
     toc: false
 ---
 
-This website relates to the forthcoming paper 'A genome-wide scan for pleiotropic fitness effects on sexes and age classes in _Drosophila_', by Wong and Holman (for contact info, see [lukeholman.org](https://www.lukeholman.org/)).
+This website relates to the forthcoming paper 'Pleiotropic fitness effects across sexes and age classes in the _Drosophila_ genome and transcriptome', by Wong and Holman (for contact info, see [lukeholman.org](https://www.lukeholman.org/)).
 
 Click the headings below to see the code, results, plots, tables and figures associated with this study. 
 
 ### [1. Setting up a database to hold variant/gene annotations and GWAS results](make_annotation_database.html)
 
-This script creates a SQLite3 database holding two tables: one with annotations for each variant (annotations created by the Mackay lab), and one with annotations for each gene (from annotation hub). In step 4 below, we also add the GWAS results to this database, allowing memory-efficient handling of the results. 
+This script creates a SQLite3 database holding two tables: one with annotations for each SNP/indel variant (annotations created by the Mackay lab), and one with annotations for each gene (from annotation hub). In step 4 below, we also add the GWAS results to this database, allowing memory-efficient handling of the results. 
 
 ### [2. Estimating line mean fitness using Bayesian models](get_predicted_line_means.html)
 

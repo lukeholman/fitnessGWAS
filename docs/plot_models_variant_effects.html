@@ -528,15 +528,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree2bda0cf0b2e6e1f8b643836bb033aecd8f073a29targetblank2bda0cfa">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree67235d7163d7f79332d9725b4e8d864bf2056aeftargetblank67235d7a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/2bda0cf0b2e6e1f8b643836bb033aecd8f073a29" target="_blank">2bda0cf</a>
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/67235d7163d7f79332d9725b4e8d864bf2056aef" target="_blank">67235d7</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree2bda0cf0b2e6e1f8b643836bb033aecd8f073a29targetblank2bda0cfa"
+id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree67235d7163d7f79332d9725b4e8d864bf2056aeftargetblank67235d7a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -546,7 +546,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/2bda0cf0b2e6e1f8b643836bb033aecd8f073a29" target="_blank">2bda0cf</a>.
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/67235d7163d7f79332d9725b4e8d864bf2056aef" target="_blank">67235d7</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -591,7 +591,14 @@ Untracked files:
     Untracked:  old_analyses/quantitative_genetics_OLD_brms.Rmd
 
 Unstaged changes:
-    Modified:   analysis/index.Rmd
+    Modified:   code/pdf_supp_material.Rmd
+    Modified:   code/pdf_supp_material.pdf
+    Modified:   figures/fig2_SNPs_manhattan_plot.png
+    Modified:   figures/fig3_boyle_plot.pdf
+    Modified:   figures/fig4_mutation_load.pdf
+    Modified:   figures/fig5_quartiles_plot.pdf
+    Modified:   figures/fig6_antagonism_ratios.pdf
+    Modified:   figures/fig7_models.pdf
 
 </code></pre>
 <p>
@@ -638,6 +645,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/67235d7163d7f79332d9725b4e8d864bf2056aef/analysis/plot_models_variant_effects.Rmd" target="_blank">67235d7</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-04-16
+</td>
+<td>
+wflow_publish("analysis/plot_models_variant_effects.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/8166ce471e73f557111c329c98730f673f4a0f98/docs/plot_models_variant_effects.html" target="_blank">8166ce4</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-04-16
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -2076,8 +2117,7 @@ rbind(mod1$coefficients,
 <p>The code chunk below makes the Manhattan plot, and combines it with
 the plot above to make the composite Figure 2 shown in the paper.</p>
 <pre class="r"><code>manhattan_data &lt;- tbl(db, &quot;univariate_lmm_results&quot;) %&gt;% 
-  select(SNP, starts_with(&quot;P_&quot;),
-         pvalue_female_early_raw, pvalue_male_early_raw) %&gt;%
+  select(SNP, pvalue_female_early_raw, pvalue_male_early_raw) %&gt;%
   distinct() %&gt;%
   collect(n=Inf) %&gt;%
   mutate(position = str_split(SNP, &quot;_&quot;),
@@ -2095,11 +2135,13 @@ manhattan_data &lt;- manhattan_data %&gt;%
     left_join(max_pos, by = &quot;chr&quot;) %&gt;%
     mutate(position = position + max_pos) 
 
+manhat_cols &lt;- c(&quot;#1B96C6&quot;, &quot;#456990&quot;, &quot;#EEB868&quot;, &quot;#EF767A&quot;, &quot;#49DCB1&quot;)
+
 p1 &lt;- manhattan_data %&gt;%
   ggplot(aes(position, -1 * log10(pvalue_female_early_raw), 
              group = chr, colour = chr, stroke = 0.2)) + 
   geom_point(size = 0.5) +
-  scale_colour_brewer(palette = &quot;Paired&quot;, name = &quot;Chromosome&quot;) + 
+  scale_colour_manual(values = manhat_cols, name = &quot;Chromosome&quot;) +
   scale_y_continuous(limits = c(0,8)) +
   ylab(&quot;&quot;) +  xlab(&quot;&quot;) +
   theme_bw() + 
@@ -2108,11 +2150,12 @@ p1 &lt;- manhattan_data %&gt;%
         panel.border = element_blank(),
         axis.ticks.x = element_blank())
 
+
 p2 &lt;- manhattan_data %&gt;%
   ggplot(aes(position, -1 * log10(pvalue_male_early_raw), 
              group = chr, colour = chr, stroke = 0.2)) + 
   geom_point(size = 0.5) +
-  scale_colour_brewer(palette = &quot;Paired&quot;, name = &quot;Chromosome&quot;) + 
+  scale_colour_manual(values = manhat_cols) +
   xlab(&quot;Position&quot;) + ylab(&quot;&quot;) +
   scale_y_reverse(limits = c(8,0)) +
   theme_bw() + 
@@ -2131,7 +2174,7 @@ grid_arrange_shared_legend &lt;- function(..., ncol = length(list(...)), nrow = 
   gl &lt;- lapply(plots, function(x) x + theme(legend.position = &quot;none&quot;))
   gl &lt;- c(gl, ncol = ncol, nrow = nrow)
   
-  left_label &lt;- text_grob(expression(Effect~on~early-life~fitness~(-Log[10]~p)), 
+  left_label &lt;- text_grob(expression(Effect~on~`early-life`~fitness~(-Log[10]~p)), 
                           size = 12, family = &quot;Raleway&quot;, rot = 90)
 
   combined &lt;- arrangeGrob(
@@ -2480,39 +2523,39 @@ Formula: Female_fitness_early ~ mutation_count
 
 Population-Level Effects: 
                                   Estimate Est.Error l-95% CI u-95% CI Rhat
-Femalefitnessearly_Intercept          0.60      0.41    -0.21     1.41 1.00
-Femalefitnesslate_Intercept           1.01      0.41     0.20     1.83 1.00
-Malefitnessearly_Intercept            0.44      0.41    -0.35     1.26 1.00
+Femalefitnessearly_Intercept          0.60      0.42    -0.22     1.42 1.00
+Femalefitnesslate_Intercept           1.01      0.42     0.18     1.82 1.00
+Malefitnessearly_Intercept            0.44      0.42    -0.37     1.25 1.00
 Malefitnesslate_Intercept             0.75      0.42    -0.06     1.56 1.00
 Femalefitnessearly_mutation_count    -0.03      0.02    -0.08     0.01 1.00
 Femalefitnesslate_mutation_count     -0.05      0.02    -0.10    -0.01 1.00
 Malefitnessearly_mutation_count      -0.02      0.02    -0.07     0.02 1.00
 Malefitnesslate_mutation_count       -0.04      0.02    -0.08     0.00 1.00
                                   Bulk_ESS Tail_ESS
-Femalefitnessearly_Intercept         24316    18023
-Femalefitnesslate_Intercept          22056    17044
-Malefitnessearly_Intercept           20998    18202
-Malefitnesslate_Intercept            21088    18804
-Femalefitnessearly_mutation_count    24205    17619
-Femalefitnesslate_mutation_count     22038    17718
-Malefitnessearly_mutation_count      21066    18315
-Malefitnesslate_mutation_count       21083    18691
+Femalefitnessearly_Intercept         24428    19596
+Femalefitnesslate_Intercept          23673    18496
+Malefitnessearly_Intercept           20796    18131
+Malefitnesslate_Intercept            21636    18760
+Femalefitnessearly_mutation_count    24482    19212
+Femalefitnesslate_mutation_count     23761    18198
+Malefitnessearly_mutation_count      20830    18500
+Malefitnesslate_mutation_count       21610    18163
 
 Residual Correlations: 
                                              Estimate Est.Error l-95% CI
 rescor(Femalefitnessearly,Femalefitnesslate)     0.75      0.03     0.68
-rescor(Femalefitnessearly,Malefitnessearly)      0.21      0.08     0.04
+rescor(Femalefitnessearly,Malefitnessearly)      0.21      0.08     0.05
 rescor(Femalefitnesslate,Malefitnessearly)       0.29      0.08     0.13
-rescor(Femalefitnessearly,Malefitnesslate)       0.15      0.08    -0.02
+rescor(Femalefitnessearly,Malefitnesslate)       0.14      0.08    -0.02
 rescor(Femalefitnesslate,Malefitnesslate)        0.28      0.08     0.12
 rescor(Malefitnessearly,Malefitnesslate)         0.86      0.02     0.81
                                              u-95% CI Rhat Bulk_ESS Tail_ESS
-rescor(Femalefitnessearly,Femalefitnesslate)     0.81 1.00    33200    16722
-rescor(Femalefitnessearly,Malefitnessearly)      0.36 1.00    21174    18682
-rescor(Femalefitnesslate,Malefitnessearly)       0.44 1.00    21472    18193
-rescor(Femalefitnessearly,Malefitnesslate)       0.30 1.00    21148    18554
-rescor(Femalefitnesslate,Malefitnesslate)        0.43 1.00    21755    18142
-rescor(Malefitnessearly,Malefitnesslate)         0.89 1.00    31300    17029
+rescor(Femalefitnessearly,Femalefitnesslate)     0.81 1.00    31883    16292
+rescor(Femalefitnessearly,Malefitnessearly)      0.35 1.00    22398    18389
+rescor(Femalefitnesslate,Malefitnessearly)       0.43 1.00    22042    17756
+rescor(Femalefitnessearly,Malefitnesslate)       0.30 1.00    22052    18326
+rescor(Femalefitnesslate,Malefitnesslate)        0.43 1.00    22156    18124
+rescor(Malefitnessearly,Malefitnesslate)         0.89 1.00    31992    17552
 
 Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -2564,6 +2607,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/8166ce471e73f557111c329c98730f673f4a0f98/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-12-1.png" target="_blank">8166ce4</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-04-16
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/lukeholman/fitnessGWAS/blob/d22c0f8d62d6eaf0e3ba757c52ab7e11fc6a16ba/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-12-1.png" target="_blank">d22c0f8</a>
@@ -2825,6 +2879,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/8166ce471e73f557111c329c98730f673f4a0f98/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-14-1.png" target="_blank">8166ce4</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-04-16
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/lukeholman/fitnessGWAS/blob/d22c0f8d62d6eaf0e3ba757c52ab7e11fc6a16ba/docs/figure/plot_models_variant_effects.Rmd/unnamed-chunk-14-1.png" target="_blank">d22c0f8</a>
 </td>
 <td>
@@ -2968,7 +3033,7 @@ Female late-life (FL)
 -0.097
 </td>
 <td style="text-align:right;">
--0.011
+-0.010
 </td>
 </tr>
 <tr>
@@ -2985,7 +3050,7 @@ Male late-life (ME)
 -0.067
 </td>
 <td style="text-align:right;">
-0.018
+0.019
 </td>
 </tr>
 <tr>
@@ -2999,7 +3064,7 @@ Male late-life (ML)
 0.022
 </td>
 <td style="text-align:right;">
--0.083
+-0.084
 </td>
 <td style="text-align:right;">
 0.002
@@ -3047,13 +3112,13 @@ ME - FE
 0.009
 </td>
 <td style="text-align:right;">
-0.027
+0.028
 </td>
 <td style="text-align:right;">
--0.045
+-0.046
 </td>
 <td style="text-align:right;">
-0.063
+0.064
 </td>
 </tr>
 <tr>
@@ -3064,10 +3129,10 @@ ML - FE
 -0.008
 </td>
 <td style="text-align:right;">
-0.028
+0.029
 </td>
 <td style="text-align:right;">
--0.063
+-0.065
 </td>
 <td style="text-align:right;">
 0.049
@@ -3084,10 +3149,10 @@ ME - FL
 0.026
 </td>
 <td style="text-align:right;">
--0.021
+-0.022
 </td>
 <td style="text-align:right;">
-0.081
+0.082
 </td>
 </tr>
 <tr>
@@ -3098,13 +3163,13 @@ ML - FL
 0.013
 </td>
 <td style="text-align:right;">
-0.026
+0.027
 </td>
 <td style="text-align:right;">
--0.038
+-0.039
 </td>
 <td style="text-align:right;">
-0.065
+0.066
 </td>
 </tr>
 </tbody>

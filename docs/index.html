@@ -354,15 +354,15 @@ results.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree41d5725c2eeb662a0225375a896824757322d6b3targetblank41d5725a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree67235d7163d7f79332d9725b4e8d864bf2056aeftargetblank67235d7a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/41d5725c2eeb662a0225375a896824757322d6b3" target="_blank">41d5725</a>
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/67235d7163d7f79332d9725b4e8d864bf2056aef" target="_blank">67235d7</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree41d5725c2eeb662a0225375a896824757322d6b3targetblank41d5725a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree67235d7163d7f79332d9725b4e8d864bf2056aeftargetblank67235d7a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -372,7 +372,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/41d5725c2eeb662a0225375a896824757322d6b3" target="_blank">41d5725</a>.
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/67235d7163d7f79332d9725b4e8d864bf2056aef" target="_blank">67235d7</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -417,10 +417,14 @@ Untracked files:
     Untracked:  old_analyses/quantitative_genetics_OLD_brms.Rmd
 
 Unstaged changes:
-    Modified:   code/main_paper_figures.Rmd
-    Modified:   code/main_paper_figures.docx
     Modified:   code/pdf_supp_material.Rmd
     Modified:   code/pdf_supp_material.pdf
+    Modified:   figures/fig2_SNPs_manhattan_plot.png
+    Modified:   figures/fig3_boyle_plot.pdf
+    Modified:   figures/fig4_mutation_load.pdf
+    Modified:   figures/fig5_quartiles_plot.pdf
+    Modified:   figures/fig6_antagonism_ratios.pdf
+    Modified:   figures/fig7_models.pdf
 
 </code></pre>
 <p>
@@ -465,6 +469,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/67235d7163d7f79332d9725b4e8d864bf2056aef/analysis/index.Rmd" target="_blank">67235d7</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-04-16
+</td>
+<td>
+wflow_publish("analysis/plot_models_variant_effects.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/b41137de3488bc91036af6849a190b77584fd248/docs/index.html" target="_blank">b41137d</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-04-16
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1154,10 +1192,10 @@ Initial commit
 </div>
 <p>This website relates to the forthcoming paper ‘Pleiotropic fitness
 effects across sexes and age classes in the <em>Drosophila</em> genome
-and transcriptome’, by Wong and Holman (for contact info, see <a
-href="https://www.lukeholman.org/">lukeholman.org</a>).</p>
-<p>Click the headings below to see the code, results, plots, tables and
-figures associated with this study.</p>
+and transcriptome’.</p>
+<!-- by Wong and Holman (for contact info, see [lukeholman.org](https://www.lukeholman.org/)). -->
+<p>Click the headings below to see code, results, plots, tables and
+figures from this study.</p>
 <div
 id="setting-up-a-database-to-hold-variantgene-annotations-and-gwas-results"
 class="section level3">
@@ -1261,8 +1299,8 @@ and <span class="math inline">\(p\)</span>-values for each.</p>
 analyses</a></h3>
 <p>Here, we present various plots and statistical analyses of the GWAS
 and TWAS results, specifically:</p>
+<!-- - Q-Q plots of the GWAS results -->
 <ul>
-<li>Q-Q plots of the GWAS results</li>
 <li>Hex bin plots showing the correlations in effect sizes from GWAS
 across the 4 fitness traits</li>
 <li>A statistical test showing that minor alleles tend to be associated

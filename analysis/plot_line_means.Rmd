@@ -88,7 +88,7 @@ make_figure_1()
 pdf("figures/fig1.pdf", height = 7, width = 7)
 make_figure_1()
 invisible(dev.off())
-remove_pages(1, "figures/fig1.pdf", "figures/fig1.pdf")
+invisible(remove_pages(1, "figures/fig1.pdf", "figures/fig1.pdf"))
 ```
 <br></br>
 **Figure 1**: Correlations among estimated line means for male and female early and late-life fitness. The line means were estimated from Bayesian mixed models that account for block effects and the non-independence of our early- and late-life fitness measurements. The grey ellipses show where 95% of genotypes are expected to fall in bivariate trait space, and the histograms show the variation in line means.

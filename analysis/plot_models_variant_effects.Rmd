@@ -349,16 +349,24 @@ manhattan_data <- manhattan_data %>%
 
 manhat_cols <- c("#1B96C6", "#456990", "#EEB868", "#EF767A", "#49DCB1")
 
+x_labels <- manhattan_data %>% 
+  group_by(chr) %>% 
+  summarise(position = min(position) + (max(position) - min(position))/2)
+
+
 p1 <- manhattan_data %>%
   ggplot(aes(position, -1 * log10(pvalue_female_early_raw), 
              group = chr, colour = chr, stroke = 0.2)) + 
   geom_point(size = 0.5) +
-  scale_colour_manual(values = manhat_cols, name = "Chromosome") +
+  scale_colour_manual(values = manhat_cols) +
   scale_y_continuous(limits = c(0,8)) +
+  scale_x_continuous(breaks = x_labels$position, labels = x_labels$chr) +
   ylab("") +  xlab("") +
   theme_bw() + 
-  theme(axis.text.x = element_blank(),
+  theme(legend.position = "none",
         text = element_text(family = "Raleway", size = 12),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
         panel.border = element_blank(),
         axis.ticks.x = element_blank())
 
@@ -368,42 +376,30 @@ p2 <- manhattan_data %>%
              group = chr, colour = chr, stroke = 0.2)) + 
   geom_point(size = 0.5) +
   scale_colour_manual(values = manhat_cols) +
-  xlab("Position") + ylab("") +
+  xlab("Genomic position") + ylab("") +
   scale_y_reverse(limits = c(8,0)) +
   theme_bw() + 
   theme(axis.text.x = element_blank(),
+        legend.position = "none",
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
         text = element_text(family = "Raleway", size = 12),
         panel.border = element_blank(),
         axis.ticks.x = element_blank())
 
-grid_arrange_shared_legend <- function(..., ncol = length(list(...)), nrow = 1) {
+left_label <- text_grob(expression(Effect~on~`early-life`~fitness~(-Log[10]~p)), 
+                        size = 12, family = "Raleway", rot = 90)
 
-  plots <- list(...)
-  g <- ggplotGrob(plots[[1]] + theme(legend.position = "right"))$grobs
-  legend <- g[[which(sapply(g, function(x) x$name) == "guide-box")]]
-  lheight <- sum(legend$height)
-  lwidth <- sum(legend$width)
-  gl <- lapply(plots, function(x) x + theme(legend.position = "none"))
-  gl <- c(gl, ncol = ncol, nrow = nrow)
-  
-  left_label <- text_grob(expression(Effect~on~`early-life`~fitness~(-Log[10]~p)), 
-                          size = 12, family = "Raleway", rot = 90)
-
-  combined <- arrangeGrob(
-    arrangeGrob(gl[[1]], gl[[2]], nrow = 2, 
-                left = left_label),
-    legend,
-    ncol = 2,
-    widths = unit.c(unit(1, "npc") - lwidth, lwidth))
-  return(combined)
-}
+combined_manhattan <- arrangeGrob(
+  arrangeGrob(p1, p2, nrow = 2, 
+              left = left_label))
 
 png("figures/fig2_SNPs_manhattan_plot.png", 
     height = 8, width = 8, res = 300, units = "in")
-grid.arrange(fig2_top, grid_arrange_shared_legend(p1, p2))
+grid.arrange(fig2_top, combined_manhattan)
 invisible(dev.off())
 
-grid.arrange(fig2_top, grid_arrange_shared_legend(p1, p2))
+grid.arrange(fig2_top, combined_manhattan)
 ```
 
 ***Figure 2***: Panels A and B show the mashr-adjusted effect sizes of 1,207,357 polymorphic loci on male and female early- and late-life fitness. The data have been binned into hexagons, with the colour and contour lines indicating the number of loci in each bin. Positive effect sizes indicate that the minor allele is associated with higher fitness and the major allele with lower fitness. Panel C shows a pair of Manhattan plots, showing the chromosomal position and $-Log_{10}$ $p$-value (from linear mixed model GWAS using GEMMA) for each locus's effect on female (top) and male (bottom) early-life fitness.

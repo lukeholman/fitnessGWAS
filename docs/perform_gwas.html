@@ -525,15 +525,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree4714d507528bff9e0542864fcf00122b37b64f33targetblank4714d50a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree9abaadc60b339d6a80a791e96a34465ee1468dc6targetblank9abaadca">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/4714d507528bff9e0542864fcf00122b37b64f33" target="_blank">4714d50</a>
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/9abaadc60b339d6a80a791e96a34465ee1468dc6" target="_blank">9abaadc</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree4714d507528bff9e0542864fcf00122b37b64f33targetblank4714d50a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree9abaadc60b339d6a80a791e96a34465ee1468dc6targetblank9abaadca"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -543,7 +543,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/4714d507528bff9e0542864fcf00122b37b64f33" target="_blank">4714d50</a>.
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/9abaadc60b339d6a80a791e96a34465ee1468dc6" target="_blank">9abaadc</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -647,6 +647,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/9abaadc60b339d6a80a791e96a34465ee1468dc6/analysis/perform_gwas.Rmd" target="_blank">9abaadc</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-05-15
+</td>
+<td>
+wflow_publish("analysis/perform_gwas.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/0ba3c2040e08c3b4c287d46874f9669923849c28/docs/perform_gwas.html" target="_blank">0ba3c20</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-05-15
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1325,18 +1359,22 @@ id="add-the-allele-ids-and-minor-allele-frequencies-mafs-to-variant-annotation-d
 class="section level3">
 <h3>Add the allele IDs and minor allele frequencies (MAFs) to variant
 annotation database</h3>
-<p>This part uses the full DGRP panel, because our aim is to determine
-how common these alleles are in the original wild population from which
-the DGRP was captured. These MAFs are the ones used in our statistical
+<p>This part uses the full DGRP panel, since our aim is to determine how
+common these alleles are in the original wild population from which the
+DGRP was captured. These MAFs are the ones used in our statistical
 analyses and plots.</p>
 <pre class="r"><code># Extract and save the MAFs, SNP positions, and major/minor alleles
-MAFs &lt;- read.table(&quot;data/derived/plink.frq&quot;, header = TRUE, stringsAsFactors = FALSE) %&gt;% 
-  mutate(position = map_chr(strsplit(SNP, split = &quot;_&quot;), function(x) x[2])) %&gt;%
+MAFs &lt;- read.table(&quot;data/derived/plink.frq&quot;, 
+                   header = TRUE, stringsAsFactors = FALSE) %&gt;% 
+  mutate(position = map_chr(
+    strsplit(SNP, split = &quot;_&quot;), 
+    function(x) x[2])) %&gt;%
   select(SNP, position, MAF, A1, A2) %&gt;% 
   rename(minor_allele = A1,
          major_allele = A2) 
 
-db &lt;- DBI::dbConnect(RSQLite::SQLite(), &quot;data/derived/annotations.sqlite3&quot;, create = FALSE)
+db &lt;- DBI::dbConnect(RSQLite::SQLite(), 
+                     &quot;data/derived/annotations.sqlite3&quot;, create = FALSE)
 
 MAFs &lt;- tbl(db, &quot;variants&quot;) %&gt;% 
   select(SNP, FBID, site.class, distance.to.gene, chr) %&gt;% collect() %&gt;%
@@ -1351,10 +1389,8 @@ db %&gt;% copy_to(MAFs,
                indexes = list(&quot;SNP&quot;, &quot;FBID&quot;, &quot;chr&quot;, &quot;site.class&quot;)) 
 rm(MAFs)</code></pre>
 </div>
-<div id="clean-up-the-gemma-results" class="section level3">
-<h3>Clean up the GEMMA results</h3>
-<p>Discard columns we don’t need, and give the columns more sensible
-names (<code>rs</code> becomes <code>SNP</code>).</p>
+<div id="clean-up-the-gemma-results-files" class="section level3">
+<h3>Clean up the GEMMA results files</h3>
 <pre class="r"><code># The 4 univariate files:
 c(&quot;data/derived/output/female_early_lmm.assoc.txt&quot;,
   &quot;data/derived/output/female_late_lmm.assoc.txt&quot;,
@@ -1448,21 +1484,16 @@ all_univariate_lmm_results &lt;- load_gwas_results(&quot;female_early&quot;) %&g
   full_join(load_gwas_results(&quot;male_early&quot;), by = &quot;SNP&quot;) %&gt;%
   full_join(load_gwas_results(&quot;male_late&quot;), by = &quot;SNP&quot;) </code></pre>
 </div>
-<div id="prune-snps-that-are-in-100-linkage-disequilibrium"
+<div id="group-together-snps-that-are-in-100-linkage-disequilibrium"
 class="section level2">
-<h2>Prune SNPs that are in 100% linkage disequilibrium</h2>
-<p>Because GEMMA is quick and easy to run, we did not bother working out
-how to edit PLINK files to identify SNPs that are in complete linkage
-disequilibrium with one another (and there is lots of short- and
-long-range LD in the dataset). However, it is easy to perform LD pruning
-at this stage, because we can take advantage of the fact that SNPs in
-perfect LD with each other will have identical estimates of <span
+<h2>Group together SNPs that are in 100% linkage disequilibrium</h2>
+<p>Here, we take advantage of the fact that SNPs in 100% LD with one
+another other have identical estimates of <span
 class="math inline">\(|\beta|\)</span> and its standard error, for all
 four fitness traits. The following code groups together SNPs that have
-identical association test results, producing a data frame in which the
-number of rows is equal to the number of unique datasets
-(i.e. combinations of genotypes and phenotypes) that were statistically
-analysed by GEMMA.</p>
+identical association test statistics, producing a data frame in which
+the number of rows is equal to the number of individual SNPs and groups
+of SNPs in 100% LD.</p>
 <pre class="r"><code># Group loci with identical GWAS results (these are in 100% LD with each other)
 all_univariate_lmm_results &lt;- all_univariate_lmm_results %&gt;%
   mutate(pasted = paste(beta_female_early, beta_female_late, beta_male_early, beta_male_late, 
@@ -1485,8 +1516,8 @@ all_univariate_lmm_results &lt;- all_univariate_lmm_results %&gt;%
   arrange(SNPs)
 
 
-# a handful of SNPs with low MAF could not be estimated and they have &#39;NA&#39; for beta and SE, so remove them now
-# I think these are SNPs where the only lines with the minor allele were the lines where we measured female but not male fitness
+# A handful of SNPs with low MAF could not be estimated and they have &#39;NA&#39; for beta and SE, so remove them now
+# These are SNPs where removing line 354 (where we measured female but not male fitness) pushes the MAF below 0.05 for males
 SNPs_to_remove &lt;- all_univariate_lmm_results$SNPs[!complete.cases(all_univariate_lmm_results)] 
 
 all_univariate_lmm_results &lt;- all_univariate_lmm_results %&gt;% 

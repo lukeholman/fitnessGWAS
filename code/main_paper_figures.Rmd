@@ -9,13 +9,13 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 ```
 
 
-![](../docs/figure/plot_line_means.Rmd/unnamed-chunk-2-1.png)
+![](../figures/fig1.pdf)
 
-***Figure 1***: Correlations among estimated line means for male and female early and late-life fitness. The line means were estimated from Bayesian mixed models that account for block effects and the non-independence of our early- and late-life fitness measurements. The grey ellipses show where 95% of genotypes are expected to fall in bivariate trait space, and the histograms show the variation in line means.
+***Figure 1***: Correlations among estimated line means for male and female early and late-life fitness. The line means were estimated from Bayesian mixed models that account for block effects and the non-independence of our early- and late-life fitness measurements. The grey ellipses show where 95% of genotypes are expected to fall in bivariate trait space, and the histograms show variation in line means.
 
 \newpage
 
-![](../figures/fig2_SNPs_manhattan_plot.png)
+![](../figures/fig2_SNPs_manhattan_plot_edited.png)
 
 ***Figure 2***: Panels A and B show the mashr-adjusted effect sizes of 1,207,357 polymorphic loci on male and female early- and late-life fitness. The data have been binned into hexagons, with the colour and contour lines indicating the number of loci in each bin. Positive effect sizes indicate that the minor allele is associated with higher fitness and the major allele with lower fitness. Panel C shows a pair of Manhattan plots, showing the chromosomal position and $-Log_{10}$ $p$-value (from linear mixed model GWAS using GEMMA) for each locus's effect on female (top) and male (bottom) early-life fitness.
 
@@ -47,5 +47,5 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 ![](../figures/fig7_models.pdf)
 
-***Figure 7***: Panels A and B show the predicted effects of minor allele frequency and chromosome, respectively, on the probability that a locus is among the top 1% candidate sexually antagonistic loci, as ranked by their evidence ratio. Panel C shows the predicted effect of average gene expression level on the probability that a transcript is among the top 1% candidate sexually antagonistic transcript. The dashed lines and error bars show 95% confidence intervals, estimated as 1.96SE, and predictions are from binomial GLMs (one for panels A-B, another for Panel C).
+***Figure 7***: Panels A and B show the predicted effects of minor allele frequency and chromosome, respectively, on the probability that a locus is among the top 1% candidate sexually antagonistic loci, ranked by evidence ratio. Panel C shows the predicted effect of average log2 gene expression level on the probability that a transcript is among the top 1% candidate sexually antagonistic transcript. The dashed lines and error bars show 95% confidence intervals, estimated as 1.96SE, and predictions are from binomial GLMs (one GLM for panels A-B, another for Panel C).
 

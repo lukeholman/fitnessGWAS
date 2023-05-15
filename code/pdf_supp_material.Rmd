@@ -2,6 +2,7 @@
 output: pdf_document
 header-includes: 
   \usepackage{booktabs}
+  \usepackage{hanging}
   \usepackage{microtype}
   \usepackage{longtable}
   \usepackage[margin=1in]{geometry}
@@ -54,17 +55,59 @@ make_table_no_linespaces <- function(tabl, digits = getOption("digits"), BT = TR
 \begin{center}
 \huge{\textbf{Online Supplementary Material}}
 \end{center}
-\vspace{0.5cm}
-\textbf{Pleiotropic fitness effects across sexes and age classes in the \textit{Drosophila} genome and transcriptome}, by
-Luke Holman and Heidi Wong.
-\vspace{0.5cm}
 
 
 
 The figures and tables in this document, along with the with the R code used to generate them, can also be viewed online at `lukeholman.github.io/fitnessGWAS`.
 
+\section*{Supplementary methods}
+
+\subsection*{Fitness assays}
+
+To measure female fitness, 5 females from the focal DGRP line were housed with 15 _GFP_ males and 10 _bw_ females in a lightly yeasted food vial (the `interaction vial'), and allowed to interact and mate for 3 days. All flies were initially 2- to 3-day-old virgins. To measure female early-life fitness, the 5 DGRP females were moved to an ‘egg collection’ 20mm vial containing 8mL grape juice agar and allowed to oviposit for 24h, before being returned to their original interaction vial. The eggs were allowed to develop into L1 larvae, and the number of L1s was counted (i.e. unhatched eggs did not count towards female fitness). To measure female late-life fitness, we waited a further 8 days (tipping once into a fresh interaction vial), and replaced the old _GFP_ males with 15 new 2- to 3 days-old virgin _GFP_ males, and allowed the flies to interact for 3 days (note that dead DGRP females or their _bw_ competitors were not replaced). The groups of DGRP females were then moved to new egg collection vials and allowed to oviposit for 24h, and we again counted the number of emerging L1s. Females were therefore aged 5-6 days at the start of the first 24h egg collection period, and 17-18 days at the start of the second 24h egg collection period.
+
+To measure male fitness, we placed 5 males from the focal DGRP line in an interaction vial with 10 _GFP_ males and 15 _bw_ females. All flies were initially 2- to 3-day-old virgins. After allowing the flies to interact and mate for 3 days, we moved the _bw_ females to an egg collection vial and allowed them to oviposit for 24h. The females were then transferred back to their original interaction vial with the surviving DGRP and _GFP_ males. The collected eggs were allowed to develop for 24h, and a random sample of up to 200 first instar larvae was collected and scored for _GFP_ as a measure of male early-life fitness. The flies were then left to age in the interaction vial for 8 days, and were tipped into a fresh vial once during this time. Then, when the DGRP and _GFP_ males were 14-15 days old, the _bw_ females were replaced with 15 new 2- to 3-day-old virgin _bw_ females, and the flies left to interact for 3 days (dead DGRP males or their _GFP_ competitors were not replaced). The females were then placed in a new egg collection vial to oviposit for 24h, and the _GFP_ status of the resulting L1s was scored as a measure of male late-life fitness.
+
+The fitness assays were run in nine blocks, and DGRP line 352 was included in every block, serving as a common reference point to improve statistical power to estimate block effects on fitness. There were 8-17 lines per block, not including line 352. 
+
+To estimate the line mean values for female early- and late-life fitness, we used the R package `brms` (Bürkner, 2017) to fit a Bayesian multivariate generalised linear mixed model with early- and life-life offspring number as the response variables, line, block, and vial as random factors (with correlated effects on each response variable), and Poisson errors. We then used the model to find the posterior predictions of the line means, on the scale of the linear predictor. This modelling approach allows us to estimate and correct for block effects, to utilise the information provided by our repeated measures of vials, lines, and blocks, and to avoid pseudoreplication. We similarly used a `brms` model to obtain corrected values for line mean male fitness, except that the two response variables were the proportion of offspring sired (rather than the number) in the early- and late-life assays, and the model used binomial rather than Poisson errors. Because we used predicted fitness values on the scale of the linear predictor (de Villemereuil et al., 2016), the line means of both male and female fitness are approximately normally distributed around zero. The predicted line means for the four fitness traits were used in all downstream analyses of the fitness data.
+
+\subsection*{Genome-wide associations with fitness (GWAS)}
+
+We downloaded DGRP genotypes from http://dgrp2.gnets.ncsu.edu/, then used `PLINK` v1.90 (Purcell et al., 2007) to remove variants with a minor allele frequency below 0.05, and those with $\ge$ 10% of missing genotypes, and imputed missing genotypes using `Beagle` 5.4 (Browning et al., 2018). Next, we tested for associations between each variant and each of the fitness traits using univariate linear mixed models implemented in `GEMMA` (Zhou & Stephens, 2012), using the decomposed genomic relatedness matrix to adjust for population stratification. We defined the reference allele as the one that was most common across all sequenced DGRP lines, such that positive effect sizes mean that DGRP lines carrying the minor (i.e. rarer) allele have higher average fitness. 
+We also created an LD-pruned subset of SNPs via the command `--indep-pairwise 100 10 0.2` in `PLINK.` This LD-pruned subset makes possible computationally intensive analyses using `mashr` (see Methods), and ameliorates issues of statistical nonindependence for some downstream analyses. We used the variant annotations generated by the creators of the DGRP, who used `SnpEff` (Cingolani et al., 2012) to map variants to genes and identify mutational effects.
+
+\subsection*{Transcriptome-wide associations with fitness (TWAS)}
+
+Using the expression data of Huang et al. (2015) we tested for associations between the line mean expression level for each expressed transcript, and the line mean for each of the four fitness traits, to perform a `transcriptome-wide association study' (TWAS). For each transcript-trait combination, we fit a linear model to calculate the effect size of transcript abundance on the fitness trait, as well as the associated standard error. For models involving male early- or late-life fitness, the predictor variable was the line mean expression level in male whole body RNA extracts (scaled to mean 0, variance 1), while for models of female fitness, the predictor was the scaled line mean expression level in female whole bodies. For each transcript, we also calculated the average expression level (across individuals of both sexes) and the average sex difference in expression (expressed as a log ratio) for use in downstream analyses.
+
+\subsection*{References}
+
+Browning, B. L., Zhou, Y., & Browning, S. R. (2018). A one-penny imputed genome from next-generation reference panels. _American Journal of Human Genetics_, 103(3), 338–348.
+
+Bürkner, P.-C. (2017). brms: An R package for Bayesian multilevel models using Stan. _Journal of Statistical Software_, Articles, 80(1), 1–28.
+
+Cingolani, P., Platts, A., Wang, L. L., Coon, M., Nguyen, T., Wang, L., Land, S. J., Lu, X., & Ruden, D. M. (2012). A program for annotating and predicting the effects of single nucleotide polymorphisms, SnpEff. _Fly_, 6, 80–92.
+
+de Villemereuil, P., Schielzeth, H., Nakagawa, S., & Morrissey, M. (2016). General methods for evolutionary quantitative genetic inference from generalized mixed models. _Genetics_, 204(3), 1281–1294.
+
+Huang, W., Carbone, M. A., Magwire, M. M., Peiffer, J. A., Lyman, R. F., Stone, E. A., Anholt, R. R. H., & Mackay, T. F. C. (2015). Genetic basis of transcriptome diversity in _Drosophila melanogaster_. _PNAS_, 112(44), E6010–E6019.
+
+Purcell, S., Neale, B., Todd-Brown, K., Thomas, L., Ferreira, M. A. R., Bender, D., Maller, J., Sklar, P., de Bakker, P. I. W., Daly, M. J., & Sham, P. C. (2007). PLINK: a tool set for whole-genome association and population-based linkage analyses. _American Journal of Human Genetics_, 81(3), 559–575.
+
+Zhou, X., & Stephens, M. (2012). Genome-wide efficient mixed-model analysis for association studies. _Nature Genetics_, 44(7), 821–824.
+
 
 \newpage
+
+\section*{Legends for Supplementary Datasets}
+
+***Dataset S1:*** This dataset (provided as a .csv file) shows the 517 transcripts that were associated with one or more of the four phenotypes, with a p-value less than 0.01). For each transcript, the table gives the gene name and Flybase ID, the chromosome, the extent of male bias in gene expression (as log fold change) and average expression level (calculated from the DGRP expression data from Huang et al. 2015, _PNAS_), and the average effect size and $p$-value for each fitness components (calculated using linear models relating mean expression level to mean fitness across lines).
+
+\newpage
+
+\section*{Supplmentary tables}
+
 
 ***Table S1***: Recipe for _Drosophila_ food used in this study.
 
@@ -103,7 +146,7 @@ readRDS("../data/derived/line_mean_corrs.rds") %>%
 
 \newpage
 
-***Table S4***: This table shows variants that passed the statistical significance threshold of $p < 10^{-5}$ for at least one of the four phenotypes, in a linear mixed model GWAS implemented in GEMMA. Columns 2 identifies genes that overlap the variant, and column 3 shows the site class. Columns 4-5 show the estimated effect size of the variant on the four phenotypes (where positive values mean that the minor allele is associated with higher fitness, and negative values that the minor allele is associated with lower fitness), with the $p$-value in parentheses ($-log_{10}$ transformed, with significant values starred). A searchable HTML version of this table, with additional information such as full gene names, is provided at https://lukeholman.github.io/fitnessGWAS/GWAS_tables.html.
+***Table S4***: This table shows variants that passed the statistical significance threshold of $p < 10^{-5}$ for at least one of the four phenotypes, in a linear mixed model GWAS implemented in GEMMA. Columns 2 identifies genes that overlap the variant, and column 3 shows the site class. Columns 4-5 show the estimated effect size of the variant on the four phenotypes (where positive values mean that the minor allele is associated with higher fitness, and negative values that the minor allele is associated with lower fitness), with the $p$-value in parentheses ($-log_{10}$ transformed, with significant values starred). A searchable HTML version of this table, with additional information such as full gene names, is provided in the Github code repository.
 
 
 ```{r, results='asis'}
@@ -159,10 +202,7 @@ readRDS("../data/derived/supp_table_mutation_load_effects.rds") %>%
 ```
 \newpage
 
-***Table S8:*** The table showing the 517 transcripts that were associated with one or more of the four phenotypes (with a p-value less than 0.01) is too large to display here, and is provided at the following URL: https://lukeholman.github.io/fitnessGWAS/TWAS_tables.html. For each transcript, the table gives the gene name and Flybase ID, the chromosome, the extent of male bias in gene expression (as log fold change) and average expression level (calculated from the DGRP expression data from Huang et al. 2015, _PNAS_), and the average effect size and $p$-value for each fitness components (calculated using linear models relating mean expression level to mean fitness across lines).
-\newpage
-
-***Table S9:*** The table tallies the numbers of transcripts showing a particular relationship with fitness (rows) for various different $p$-value thresholds (columns). See Table S5 for the meanings of each row. As in Table S5, all categories are mutually exclusive, such that transcripts are only counted towards the most specific category that applies to them, and the method has low power to detect transcripts that correlate with two or more fitness metrics, because there are two or more opportunities to make a 'false negative' error.
+***Table S8:*** The table tallies the numbers of transcripts showing a particular relationship with fitness (rows) for various different $p$-value thresholds (columns). See Table S5 for the meanings of each row. As in Table S5, all categories are mutually exclusive, such that transcripts are only counted towards the most specific category that applies to them, and the method has low power to detect transcripts that correlate with two or more fitness metrics, because there are two or more opportunities to make a 'false negative' error.
 
 ```{r}
 readRDS("../data/derived/TWAS_tally_table.rds") %>% 
@@ -171,7 +211,7 @@ readRDS("../data/derived/TWAS_tally_table.rds") %>%
 ```
 \newpage
 
-***Table S10:*** Tabular version of the information in Figures 5A and 5B, focusing on cross-sex effects in the genome. The fourth column of the table shows the numbers of variants comprising each of the 32 coloured panels in Figures 5A and 5B. The fifth column gives these numbers as a percentage of the total number of variants, while the sixth column shows the number as a percentage among the variants that have the same association with female fitness. 
+***Table S9:*** Tabular version of the information in Figures 5A and 5B, focusing on cross-sex effects in the genome. The fourth column of the table shows the numbers of variants comprising each of the 32 coloured panels in Figures 5A and 5B. The fifth column gives these numbers as a percentage of the total number of variants, while the sixth column shows the number as a percentage among the variants that have the same association with female fitness. 
 ```{r}
 readRDS("../data/derived/supp_tabl_gwas_intersex.rds") %>%
   mutate(`Age class` = str_remove_all(`Age class`, "[ABCD][.] ")) %>% 
@@ -184,7 +224,7 @@ readRDS("../data/derived/supp_tabl_gwas_intersex.rds") %>%
 ```
 \newpage
 
-***Table S11:*** Tabular version of the information in Figures 5C and 5D, focusing on cross-sex effects in the transcriptome. The fourth column of the table shows the numbers of transcripts comprising each of the 32 coloured panels in Figures 5C and 5D. The fifth column gives these numbers as a percentage of the total number of transcripts, while the sixth column shows the number as a percentage among the transcripts that have the same association with female fitness. 
+***Table S10:*** Tabular version of the information in Figures 5C and 5D, focusing on cross-sex effects in the transcriptome. The fourth column of the table shows the numbers of transcripts comprising each of the 32 coloured panels in Figures 5C and 5D. The fifth column gives these numbers as a percentage of the total number of transcripts, while the sixth column shows the number as a percentage among the transcripts that have the same association with female fitness. 
 ```{r}
 readRDS("../data/derived/supp_tabl_twas_intersex.rds") %>%
   mutate(`Age class` = str_remove_all(`Age class`, "[ABCD][.] ")) %>% 
@@ -197,7 +237,7 @@ readRDS("../data/derived/supp_tabl_twas_intersex.rds") %>%
 ```
 \newpage
 
-***Table S12:*** Tabular version of the information in Figures 5A and 5B, focusing on cross-age effects in the genome. The table shows similar information to Table S10, except that we now tabulate the number of variants that have various associations with early- and late-life fitness (separately within each sex). Note that there are essentially no variants with opposing effects on early- and late-life fitness, in either sex.
+***Table S11:*** Tabular version of the information in Figures 5A and 5B, focusing on cross-age effects in the genome. The table shows similar information to Table S9, except that we now tabulate the number of variants that have various associations with early- and late-life fitness (separately within each sex). Note that there are essentially no variants with opposing effects on early- and late-life fitness, in either sex.
 ```{r}
 readRDS("../data/derived/supp_tabl_gwas_interage.rds") %>%
   mutate(Sex = str_remove_all(Sex, "[ABCD][.] ")) %>% 
@@ -210,7 +250,7 @@ readRDS("../data/derived/supp_tabl_gwas_interage.rds") %>%
 ```
 \newpage
 
-***Table S13:*** Tabular version of the information in Figures 5C and 5D, focusing on cross-age effects in the transcriptome. The table shows similar information to Table S11, except that we now tabulate the number of transcripts that have various associations with early- and late-life fitness (separately within each sex). Note that there are essentially no transcripts with opposing effects on early- and late-life fitness, in either sex.
+***Table S12:*** Tabular version of the information in Figures 5C and 5D, focusing on cross-age effects in the transcriptome. The table shows similar information to Table S10, except that we now tabulate the number of transcripts that have various associations with early- and late-life fitness (separately within each sex). Note that there are essentially no transcripts with opposing effects on early- and late-life fitness, in either sex.
 
 ```{r}
 readRDS("../data/derived/supp_tabl_twas_interage.rds") %>%
@@ -227,7 +267,7 @@ readRDS("../data/derived/supp_tabl_twas_interage.rds") %>%
 \newpage
 
 
-***Table S14:*** A list of all the GO terms with a family wise error rate (FWER) threshold of FWER < 0.05, when testing for GO enrichment among genes with a high evidence ratio (indicating greater likelihood of being sexually concordant, as measured in the early-life fitness assay). The results imply directional, sexually concordant selection on the whole-body expression levels of genes involved in the functions listed here, such as cytoplasmic translation and peptide metabolic processes.
+***Table S13:*** A list of all the GO terms with a family wise error rate (FWER) threshold of FWER < 0.05, when testing for GO enrichment among genes with a high evidence ratio (indicating greater likelihood of being sexually concordant, as measured in the early-life fitness assay). The results imply directional, sexually concordant selection on the whole-body expression levels of genes involved in the functions listed here, such as cytoplasmic translation and peptide metabolic processes.
 
 ```{r}
 readRDS("../data/derived/supp_table_GO_terms.rds") %>%

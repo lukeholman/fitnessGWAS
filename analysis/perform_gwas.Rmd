@@ -244,17 +244,21 @@ c("gemma -bfile {bed} {GRM_female} -lmm 1 -n 1 -o female_early_lmm",
 
 ### Add the allele IDs and minor allele frequencies (MAFs) to variant annotation database
 
-This part uses the full DGRP panel, because our aim is to determine how common these alleles are in the original wild population from which the DGRP was captured. These MAFs are the ones used in our statistical analyses and plots.
+This part uses the full DGRP panel, since our aim is to determine how common these alleles are in the original wild population from which the DGRP was captured. These MAFs are the ones used in our statistical analyses and plots.
 
 ```{r get_MAF, eval=FALSE}
 # Extract and save the MAFs, SNP positions, and major/minor alleles
-MAFs <- read.table("data/derived/plink.frq", header = TRUE, stringsAsFactors = FALSE) %>% 
-  mutate(position = map_chr(strsplit(SNP, split = "_"), function(x) x[2])) %>%
+MAFs <- read.table("data/derived/plink.frq", 
+                   header = TRUE, stringsAsFactors = FALSE) %>% 
+  mutate(position = map_chr(
+    strsplit(SNP, split = "_"), 
+    function(x) x[2])) %>%
   select(SNP, position, MAF, A1, A2) %>% 
   rename(minor_allele = A1,
          major_allele = A2) 
 
-db <- DBI::dbConnect(RSQLite::SQLite(), "data/derived/annotations.sqlite3", create = FALSE)
+db <- DBI::dbConnect(RSQLite::SQLite(), 
+                     "data/derived/annotations.sqlite3", create = FALSE)
 
 MAFs <- tbl(db, "variants") %>% 
   select(SNP, FBID, site.class, distance.to.gene, chr) %>% collect() %>%
@@ -272,8 +276,7 @@ rm(MAFs)
 
 
 
-### Clean up the GEMMA results
-Discard columns we don't need, and give the columns more sensible names (`rs` becomes `SNP`).
+### Clean up the GEMMA results files
 ```{r clean_up, eval=FALSE}
 # The 4 univariate files:
 c("data/derived/output/female_early_lmm.assoc.txt",
@@ -380,9 +383,9 @@ all_univariate_lmm_results <- load_gwas_results("female_early") %>%
 ```
 
 
-## Prune SNPs that are in 100% linkage disequilibrium
+## Group together SNPs that are in 100% linkage disequilibrium
 
-Because GEMMA is quick and easy to run, we did not bother working out how to edit PLINK files to identify SNPs that are in complete linkage disequilibrium with one another (and there is lots of short- and long-range LD in the dataset). However, it is easy to perform LD pruning at this stage, because we can take advantage of the fact that SNPs in perfect LD with each other will have identical estimates of $|\beta|$ and its standard error, for all four fitness traits. The following code groups together SNPs that have identical association test results, producing a data frame in which the number of rows is equal to the number of unique datasets (i.e. combinations of genotypes and phenotypes) that were statistically analysed by GEMMA. 
+Here, we take advantage of the fact that SNPs in 100% LD with one another other have identical estimates of $|\beta|$ and its standard error, for all four fitness traits. The following code groups together SNPs that have identical association test statistics, producing a data frame in which the number of rows is equal to the number of individual SNPs and groups of SNPs in 100% LD. 
 
 
 ```{r eval=FALSE}
@@ -408,8 +411,8 @@ all_univariate_lmm_results <- all_univariate_lmm_results %>%
   arrange(SNPs)
 
 
-# a handful of SNPs with low MAF could not be estimated and they have 'NA' for beta and SE, so remove them now
-# I think these are SNPs where the only lines with the minor allele were the lines where we measured female but not male fitness
+# A handful of SNPs with low MAF could not be estimated and they have 'NA' for beta and SE, so remove them now
+# These are SNPs where removing line 354 (where we measured female but not male fitness) pushes the MAF below 0.05 for males
 SNPs_to_remove <- all_univariate_lmm_results$SNPs[!complete.cases(all_univariate_lmm_results)] 
 
 all_univariate_lmm_results <- all_univariate_lmm_results %>% 

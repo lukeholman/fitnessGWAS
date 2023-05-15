@@ -10,7 +10,29 @@ library(tidyverse)
 library(DT)
 
 # Create a function to build HTML searchable tables
-my_data_table <- function(df){
+# my_data_table <- function(df){
+#   datatable(
+#     df, rownames=FALSE,
+#     autoHideNavigation = TRUE,
+#     extensions = c("Scroller",  "Buttons"),
+#     options = list(
+#       autoWidth = TRUE,
+#       dom = 'Bfrtip',
+#       deferRender=TRUE,
+#       scrollX=TRUE, scrollY=1000,
+#       scrollCollapse=TRUE,
+#       buttons =
+#         list('pageLength', 'csv', list(
+#           extend = 'pdf',
+#           pageSize = 'A4',
+#           orientation = 'landscape',
+#           filename = 'Holman_Wong_Table')),
+#       pageLength = 10
+#     )
+#   )
+# }
+
+my_data_table <- function(df, filename){
   datatable(
     df, rownames=FALSE,
     autoHideNavigation = TRUE,
@@ -22,11 +44,9 @@ my_data_table <- function(df){
       scrollX=TRUE, scrollY=1000,
       scrollCollapse=TRUE,
       buttons =
-        list('pageLength', 'csv', list(
-          extend = 'pdf',
-          pageSize = 'A4',
-          orientation = 'landscape',
-          filename = 'Holman_Wong_Table')),
+        list('pageLength', 
+             list(extend = 'csv',
+                  filename = filename)),
       pageLength = 10
     )
   )
@@ -51,7 +71,7 @@ predicted_line_means <- read_csv("data/derived/predicted_line_means.csv") %>%
   
 ```
 
-To facilitate data re-use, we here provide tables showing the raw data (i.e. the measurements of male and female fitness that were collected on each individual replicate vial), as well as the estimated line means that were calculated in [this script](get_predicted_line_means.html).
+To facilitate data re-use, we here provide tables showing the raw data (i.e. the measurements of male and female fitness that were collected on each individual replicate vial), as well as the estimated line means that were calculated in [this script](get_predicted_line_means.html). Press the `CSV` button to download a particular table as a `.csv` file.
 
 ## Raw data
 
@@ -64,7 +84,8 @@ To facilitate data re-use, we here provide tables showing the raw data (i.e. the
 - `Female fitness late` gives the number of L1 larvae produced by the DGRP females, in the late-life measurement.
 
 ```{r}
-my_data_table(raw_female_fitness)
+my_data_table(raw_female_fitness,
+              "female_fitness_raw_data")
 ```
 
 ### Male fitness
@@ -78,7 +99,8 @@ my_data_table(raw_female_fitness)
 - `Late male focal` gives the number of L1 larvae sired by the focal DGRP males, in the late-life measurement.
 
 ```{r}
-my_data_table(raw_male_fitness)
+my_data_table(raw_male_fitness,
+              "male_fitness_raw_data")
 ```
 
 ## Estimated line means
@@ -86,6 +108,7 @@ my_data_table(raw_male_fitness)
 The four columns other than `Line` give the line mean fitness for each of the four fitness traits. Fitness was estimated from Bayesian multivariate Poisson or Binomial models described in [this script](get_predicted_line_means.html). The fitness values were expressed on the scale of the linear predictor (and thus are approximately normally distributed), and have been scaled to have a mean of zero and variance of one. Thus, a line with mean fitness equal to 1.5 is 1.5 standard deviations above average, on the scale of the linear predictor. Note that male fitness was not measured in `line_354` due to experimenter error.
 
 ```{r}
-my_data_table(predicted_line_means)
+my_data_table(predicted_line_means,
+              "line_mean_fitness_data")
 ```
 

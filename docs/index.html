@@ -354,15 +354,15 @@ results.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree9fb232d1a8d88bffcd52948989ec1c77dcc9a0fdtargetblank9fb232da">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree79f4aa3aa3ac81edc8a3d879fb52d56cdb5491a6targetblank79f4aa3a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/9fb232d1a8d88bffcd52948989ec1c77dcc9a0fd" target="_blank">9fb232d</a>
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/79f4aa3aa3ac81edc8a3d879fb52d56cdb5491a6" target="_blank">79f4aa3</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree9fb232d1a8d88bffcd52948989ec1c77dcc9a0fdtargetblank9fb232da"
+id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree79f4aa3aa3ac81edc8a3d879fb52d56cdb5491a6targetblank79f4aa3a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -372,7 +372,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/9fb232d1a8d88bffcd52948989ec1c77dcc9a0fd" target="_blank">9fb232d</a>.
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/79f4aa3aa3ac81edc8a3d879fb52d56cdb5491a6" target="_blank">79f4aa3</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -475,6 +475,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/79f4aa3aa3ac81edc8a3d879fb52d56cdb5491a6/analysis/index.Rmd" target="_blank">79f4aa3</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-05-15
+</td>
+<td>
+wflow_publish("analysis/index.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/0ddcb5b62a99fd4c199e29e63d8bb46f7554f361/docs/index.html" target="_blank">0ddcb5b</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-05-15
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1283,9 +1317,9 @@ dataset of SNPs and indels for the DGRP (e.g filtering by MAF). Second,
 it runs mixed model association tests on our four phenotypes using the
 software <a
 href="http://www.xzlab.org/software/GEMMAmanual.pdf">GEMMA</a>. Third,
-it uses PLINK to identify groups of loci that are in complete linkage
-disequilibrium (‘SNP clumps’), and to identify a subset of SNPs that are
-in approximate LD for downstream analyses.</p>
+it groups SNPs/indels that are in complete linkage disequilibrium in our
+sample of DGRP lines. Fourth, it uses PLINK to identify a subset of SNPs
+that are in approximate LD for downstream analyses.</p>
 </div>
 <div id="applying-adaptive-shrinkage-to-the-gwas-results"
 class="section level3">
@@ -1339,7 +1373,6 @@ and <span class="math inline">\(p\)</span>-values for each.</p>
 analyses</a></h3>
 <p>Here, we present various plots and statistical analyses of the GWAS
 and TWAS results, specifically:</p>
-<!-- - Q-Q plots of the GWAS results -->
 <ul>
 <li>Hex bin plots showing the correlations in effect sizes from GWAS
 across the 4 fitness traits</li>

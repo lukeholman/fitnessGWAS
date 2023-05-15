@@ -30,7 +30,7 @@ We first present a table showing the proportion of variance in fitness explained
 
 ### [5. Running the GWAS](perform_gwas.html)
 
-This script first performs quality control and imputation on the dataset of SNPs and indels for the DGRP (e.g filtering by MAF). Second, it runs mixed model association tests on our four phenotypes using the software [GEMMA](http://www.xzlab.org/software/GEMMAmanual.pdf). Third, it uses PLINK to identify groups of loci that are in complete linkage disequilibrium ('SNP clumps'), and to identify a subset of SNPs that are in approximate LD for downstream analyses.
+This script first performs quality control and imputation on the dataset of SNPs and indels for the DGRP (e.g filtering by MAF). Second, it runs mixed model association tests on our four phenotypes using the software [GEMMA](http://www.xzlab.org/software/GEMMAmanual.pdf). Third, it groups SNPs/indels that are in complete linkage disequilibrium in our sample of DGRP lines. Fourth, it uses PLINK to identify a subset of SNPs that are in approximate LD for downstream analyses.
 
 ### [6. Applying adaptive shrinkage to the GWAS results](gwas_adaptive_shrinkage.html)
 
@@ -63,7 +63,6 @@ This script presents a searchable HTML table showing a list of significant trans
 
 Here, we present various plots and statistical analyses of the GWAS and TWAS results, specifically:
 
-<!-- - Q-Q plots of the GWAS results -->
 - Hex bin plots showing the correlations in effect sizes from GWAS across the 4 fitness traits
 - A statistical test showing that minor alleles tend to be associated with lower fitness
 - A plot inspired by Boyle et al. 2017 ("An expanded view of complex traits: from polygenic to omnigenic", _Cell_) illustrating that fitness is highly polygenic ('omnigenic') and pleiotropy between male and female fitness is common. 

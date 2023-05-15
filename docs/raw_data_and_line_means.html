@@ -541,15 +541,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree03df59929125c5be80e4fdeece6584f08c7e3ba7targetblank03df599a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreeefa957cddd3c8e4231de842df903f63d210efb51targetblankefa957ca">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/03df59929125c5be80e4fdeece6584f08c7e3ba7" target="_blank">03df599</a>
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/efa957cddd3c8e4231de842df903f63d210efb51" target="_blank">efa957c</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree03df59929125c5be80e4fdeece6584f08c7e3ba7targetblank03df599a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreeefa957cddd3c8e4231de842df903f63d210efb51targetblankefa957ca"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -559,7 +559,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/03df59929125c5be80e4fdeece6584f08c7e3ba7" target="_blank">03df599</a>.
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/efa957cddd3c8e4231de842df903f63d210efb51" target="_blank">efa957c</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -664,6 +664,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/efa957cddd3c8e4231de842df903f63d210efb51/analysis/raw_data_and_line_means.Rmd" target="_blank">efa957c</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-05-15
+</td>
+<td>
+wflow_publish("analysis/raw_data_and_line_means.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/7d3c2ef446d7de1da77123649206f66d9ae165c9/docs/raw_data_and_line_means.html" target="_blank">7d3c2ef</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-05-15
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -794,28 +828,6 @@ wflow_publish("analysis/raw_data_and_line_means.Rmd")
 library(DT)
 
 # Create a function to build HTML searchable tables
-# my_data_table &lt;- function(df){
-#   datatable(
-#     df, rownames=FALSE,
-#     autoHideNavigation = TRUE,
-#     extensions = c(&quot;Scroller&quot;,  &quot;Buttons&quot;),
-#     options = list(
-#       autoWidth = TRUE,
-#       dom = &#39;Bfrtip&#39;,
-#       deferRender=TRUE,
-#       scrollX=TRUE, scrollY=1000,
-#       scrollCollapse=TRUE,
-#       buttons =
-#         list(&#39;pageLength&#39;, &#39;csv&#39;, list(
-#           extend = &#39;pdf&#39;,
-#           pageSize = &#39;A4&#39;,
-#           orientation = &#39;landscape&#39;,
-#           filename = &#39;Holman_Wong_Table&#39;)),
-#       pageLength = 10
-#     )
-#   )
-# }
-
 my_data_table &lt;- function(df, filename){
   datatable(
     df, rownames=FALSE,

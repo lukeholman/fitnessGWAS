@@ -123,7 +123,7 @@ big_table <- sig_TWAS_results %>%
   left_join(read_csv("data/derived/TWAS/TWAS_results.csv") %>% 
               select(FBID, gene_name, chromosome, male_bias_in_expression, AveExpr), by = c("gene" = "FBID")) %>% 
   select(gene, gene_name, chromosome, male_bias_in_expression, AveExpr,  starts_with("beta"), starts_with("pval")) %>%
-  mutate(across(where(is.numeric), rnd)) %>%
+  # mutate(across(where(is.numeric), rnd)) %>%
   rename(`Gene name` = gene_name,
          Chromosome = chromosome,
          `Female early effect` = beta_FE,
@@ -136,6 +136,11 @@ big_table <- sig_TWAS_results %>%
          `Male late pval` = pval_ML,
          `Male bias in expression (logFC)` = male_bias_in_expression,
          `Average expression level` = AveExpr) 
+
+write_csv(big_table, "data/derived/Supplementary Dataset S1.csv")
+
+big_table <- big_table %>% 
+  mutate(across(where(is.numeric), rnd)) 
 ```
 
 

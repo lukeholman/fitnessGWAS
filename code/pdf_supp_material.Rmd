@@ -58,7 +58,6 @@ make_table_no_linespaces <- function(tabl, digits = getOption("digits"), BT = TR
 
 
 
-The figures and tables in this document, along with the with the R code used to generate them, can also be viewed online at `lukeholman.github.io/fitnessGWAS`.
 
 \section*{Supplementary methods}
 
@@ -79,7 +78,7 @@ We also created an LD-pruned subset of SNPs via the command `--indep-pairwise 10
 
 \subsection*{Transcriptome-wide associations with fitness (TWAS)}
 
-Using the expression data of Huang et al. (2015) we tested for associations between the line mean expression level for each expressed transcript, and the line mean for each of the four fitness traits, to perform a `transcriptome-wide association study' (TWAS). For each transcript-trait combination, we fit a linear model to calculate the effect size of transcript abundance on the fitness trait, as well as the associated standard error. For models involving male early- or late-life fitness, the predictor variable was the line mean expression level in male whole body RNA extracts (scaled to mean 0, variance 1), while for models of female fitness, the predictor was the scaled line mean expression level in female whole bodies. For each transcript, we also calculated the average expression level (across individuals of both sexes) and the average sex difference in expression (expressed as a log ratio) for use in downstream analyses.
+Using the expression data of Huang et al. (2015) we tested for associations between the line mean expression level for each expressed transcript, and the line mean for each of the four fitness traits, to perform a 'transcriptome-wide association study' (TWAS). For each transcript-trait combination, we fit a linear model to calculate the effect size of transcript abundance on the fitness trait, as well as the associated standard error. For models involving male early- or late-life fitness, the predictor variable was the line mean expression level in male whole body RNA extracts (scaled to mean 0, variance 1), while for models of female fitness, the predictor was the scaled line mean expression level in female whole bodies. For each transcript, we also used `limma` (Ritchie et al., 2015) to calculate the average expression level (across individuals of both sexes) and the average sex difference in expression (expressed as a log ratio) for use in downstream analyses.
 
 \subsection*{References}
 
@@ -94,6 +93,8 @@ de Villemereuil, P., Schielzeth, H., Nakagawa, S., & Morrissey, M. (2016). Gener
 Huang, W., Carbone, M. A., Magwire, M. M., Peiffer, J. A., Lyman, R. F., Stone, E. A., Anholt, R. R. H., & Mackay, T. F. C. (2015). Genetic basis of transcriptome diversity in _Drosophila melanogaster_. _PNAS_, 112(44), E6010–E6019.
 
 Purcell, S., Neale, B., Todd-Brown, K., Thomas, L., Ferreira, M. A. R., Bender, D., Maller, J., Sklar, P., de Bakker, P. I. W., Daly, M. J., & Sham, P. C. (2007). PLINK: a tool set for whole-genome association and population-based linkage analyses. _American Journal of Human Genetics_, 81(3), 559–575.
+
+Ritchie, M. E., Phipson, B., Wu, D. I., Hu, Y., Law, C. W., Shi, W., & Smyth, G. K. (2015). limma powers differential expression analyses for RNA-sequencing and microarray studies. _Nucleic Acids Research_, 43(7), e47-e47.
 
 Zhou, X., & Stephens, M. (2012). Genome-wide efficient mixed-model analysis for association studies. _Nature Genetics_, 44(7), 821–824.
 
@@ -119,7 +120,7 @@ data.frame(Ingredients = c("Water", "Dextrose", "Cornmeal", "Yeast", "Soy flour"
 
 \newpage
 
-***Table S2***: Proportion of variance ($R$) in fitness explained by 'DGRP line', with associated standard errors and 95% confidence intervals estimated using parametric bootstrapping. $R$ was calculated from univariate generalised linear mixed models of each fitness trait, which included the random effect of experimental block, and had either Poisson errors (for females) or Binomial errors (for males), using the `rpt` function from the `rptR` package for R. 
+***Table S2***: Proportion of variance ($R$) in fitness explained by 'DGRP line', with associated standard errors and 95% confidence intervals estimated using parametric bootstrapping. $R$ was calculated from univariate generalised linear mixed models of each fitness trait, which included the random effect of experimental block, and had either Poisson errors (for females) or Binomial errors (for males), using the `rpt` function from the `rptR` package for R. $R$ approximates the broad-sense heritability.
 
 
 ```{r, results='asis'}
@@ -198,7 +199,7 @@ readRDS("../data/derived/supp_table_of_variant_effect_means.rds") %>%
 ***Table S7:*** Estimated effect sizes (or differences in effect size) for the relationship between mutation load and fitness, from a Bayesian multivariate model. The columns shown the median of the posterior, its error, and the 95% credible intervals. These estimates are plotted in Figures 4E and 4F.
 ```{r, results='asis'}
 readRDS("../data/derived/supp_table_mutation_load_effects.rds") %>% 
-  make_table(digits = 3) 
+  make_table_no_linespaces(digits = 3) 
 ```
 \newpage
 

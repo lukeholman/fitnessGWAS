@@ -16,7 +16,7 @@ library(glue)
 library(kableExtra)
 library(gridExtra)
 
-# Get the list of SNPs (or chunks of 100% SNP clumps) that are in approx. LD with one another
+# Get the list of SNPs (or SNP clumps in 100% LD) which are in approx. LD with one another
 get_mashr_data <- function(){
   
   SNPs_in_LD <- read.table("data/derived/SNPs_in_LD", header = FALSE)

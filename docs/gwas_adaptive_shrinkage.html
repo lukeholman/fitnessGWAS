@@ -395,7 +395,7 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2023-03-21
+<strong>Last updated:</strong> 2023-07-31
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -526,15 +526,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreea5026e756507f24bd0cf7c395914164748e68f77targetblanka5026e7a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree926d76f46d3853c29d793048d1c9ec4b23f9bec4targetblank926d76fa">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/a5026e756507f24bd0cf7c395914164748e68f77" target="_blank">a5026e7</a>
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/926d76f46d3853c29d793048d1c9ec4b23f9bec4" target="_blank">926d76f</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStreea5026e756507f24bd0cf7c395914164748e68f77targetblanka5026e7a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomlukeholmanfitnessGWAStree926d76f46d3853c29d793048d1c9ec4b23f9bec4targetblank926d76fa"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -544,7 +544,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/lukeholman/fitnessGWAS/tree/a5026e756507f24bd0cf7c395914164748e68f77" target="_blank">a5026e7</a>.
+<a href="https://github.com/lukeholman/fitnessGWAS/tree/926d76f46d3853c29d793048d1c9ec4b23f9bec4" target="_blank">926d76f</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -566,7 +566,6 @@ Ignored files:
     Ignored:    .httr-oauth
     Ignored:    .pversion
     Ignored:    analysis/.DS_Store
-    Ignored:    analysis/figure/
     Ignored:    code/.DS_Store
     Ignored:    code/Drosophila_GWAS.Rmd
     Ignored:    data/.DS_Store
@@ -579,21 +578,13 @@ Ignored files:
     Ignored:    data/input/dgrp2.fam
     Ignored:    data/input/huang_transcriptome/
     Ignored:    figures/.DS_Store
-    Ignored:    old_analyses/.DS_Store
 
 Untracked files:
-    Untracked:  old_analyses/Data for old analyses/
-    Untracked:  old_analyses/eQTL_analysis.Rmd
-    Untracked:  old_analyses/fitness_data.csv
-    Untracked:  old_analyses/gcta_quant_genetics_OLD.Rmd
-    Untracked:  old_analyses/quantitative_genetics_OLD_brms.Rmd
-
-Unstaged changes:
-    Modified:   figures/fig3_boyle_plot.pdf
-    Modified:   figures/fig4_mutation_load.pdf
-    Modified:   figures/fig5_quartiles_plot.pdf
-    Modified:   figures/fig6_antagonism_ratios.pdf
-    Modified:   figures/fig7_models.pdf
+    Untracked:  JAGS-4.3.0/
+    Untracked:  analysis/Copy_Of_gwas_adaptive_shrinkage.Rmd
+    Untracked:  biv_mod.jags
+    Untracked:  code/JAGS-4.3.1.pkg
+    Untracked:  old_analyses/
 
 </code></pre>
 <p>
@@ -640,6 +631,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/lukeholman/fitnessGWAS/blob/926d76f46d3853c29d793048d1c9ec4b23f9bec4/analysis/gwas_adaptive_shrinkage.Rmd" target="_blank">926d76f</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-07-31
+</td>
+<td>
+wflow_publish("analysis/gwas_adaptive_shrinkage.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/lukeholman/fitnessGWAS/3a5750d27bd2a271c583d40eae71f0ac91f48159/docs/gwas_adaptive_shrinkage.html" target="_blank">3a5750d</a>
+</td>
+<td>
+lukeholman
+</td>
+<td>
+2023-03-21
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -825,7 +850,7 @@ library(glue)
 library(kableExtra)
 library(gridExtra)
 
-# Get the list of SNPs (or chunks of 100% SNP clumps) that are in approx. LD with one another
+# Get the list of SNPs (or SNP clumps in 100% LD) which are in approx. LD with one another
 get_mashr_data &lt;- function(){
   
   SNPs_in_LD &lt;- read.table(&quot;data/derived/SNPs_in_LD&quot;, header = FALSE)

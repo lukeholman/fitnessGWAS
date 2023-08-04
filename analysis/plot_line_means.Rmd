@@ -23,7 +23,7 @@ predicted_line_means <- read_csv("data/derived/predicted_line_means.csv")
 
 ## Variance and covariance in line mean phenotypes
 Generally there is positive covariance between line means for different traits, and all 4 measures of fitness exhibit considerable phenotypic variance across lines.
-```{r message=FALSE, warning=FALSE, fig.showtext=TRUE, fig.height = 6, fig.width = 6}
+```{r message=FALSE, warning=FALSE, fig.showtext=TRUE, fig.height = 7.65, fig.width = 5.85}
 lims <- c(1.1*min(apply(predicted_line_means[,2:5], 2, min)), 
           1.1*max(apply(predicted_line_means[,2:5], 2, max)))
 
@@ -68,6 +68,10 @@ make_figure_1 <- function(){
        v2 == "male.fitness.late") cols <- c("lightblue", "steelblue")
     if(v1 == "female.fitness.early" & 
        v2 == "female.fitness.late") cols <- c("pink", "deeppink2")
+    if(v1 == "female.fitness.early" & 
+       v2 == "male.fitness.late") cols <- c("pink", "steelblue")
+    if(v1 == "male.fitness.early" & 
+       v2 == "female.fitness.late") cols <- c("lightblue", "deeppink2")
     
     ggExtra::ggMarginal(pp, 
                         type = "histogram", 
@@ -80,18 +84,20 @@ make_figure_1 <- function(){
   p2 <- nice.plot(predicted_line_means, "male.fitness.late", "female.fitness.late")
   p3 <- nice.plot(predicted_line_means, "male.fitness.early", "male.fitness.late")
   p4 <- nice.plot(predicted_line_means, "female.fitness.early", "female.fitness.late")
-  full_plot <- grid.arrange(p1, p2, p3, p4)
+  p5 <- nice.plot(predicted_line_means, "female.fitness.early", "male.fitness.late")
+  p6 <- nice.plot(predicted_line_means, "male.fitness.early", "female.fitness.late")
+  full_plot <- grid.arrange(p1, p2, p3, p4, p5, p6)
   
 }
 make_figure_1()
 
-pdf("figures/fig1.pdf", height = 7, width = 7)
+pdf("figures/fig1.pdf", height = 7.65, width = 5.85)
 make_figure_1()
 invisible(dev.off())
 invisible(remove_pages(1, "figures/fig1.pdf", "figures/fig1.pdf"))
 ```
 <br></br>
-**Figure 1**: Correlations among estimated line means for male and female early and late-life fitness. The line means were estimated from Bayesian mixed models that account for block effects and the non-independence of our early- and late-life fitness measurements. The grey ellipses show where 95% of genotypes are expected to fall in bivariate trait space, and the histograms show the variation in line means.
+**Figure 1**: Correlations among estimated line means for fitness between sexes and age classes. The line means were estimated from Bayesian mixed models that account for block effects and the non-independence of our early- and late-life fitness measurements. Grey ellipses show where 95% of genotypes are expected to fall in bivariate trait space, and histograms show the variation in line means.
 
 
 <!-- ## Interaction plot showing trait covariance across lines -->

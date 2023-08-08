@@ -1297,8 +1297,6 @@ intersex_early_model_gwas <- glm(antagonistic ~ chromosome + MAF + major_effect,
                         quantile(dat$inter_sex_early, probs = 0.01))), 
     family = "binomial")
 car::Anova(intersex_early_model_gwas, type = 3)
-intersex_early_model_gwas <- update(intersex_early_model_gwas,  ~ . -major_effect)
-car::Anova(intersex_early_model_gwas, type = 3)
 
 summary(intersex_early_model_gwas)
 ```
@@ -1316,8 +1314,6 @@ intersex_late_model_gwas <- glm(antagonistic ~ chromosome + MAF + major_effect,
                mutate(antagonistic = inter_sex_late <= 
                         quantile(dat$inter_sex_late, probs = 0.01)), 
     family = "binomial")
-car::Anova(intersex_late_model_gwas, type = 3)
-intersex_late_model_gwas <- update(intersex_late_model_gwas,  ~ . -major_effect)
 car::Anova(intersex_late_model_gwas, type = 3)
 
 summary(intersex_late_model_gwas)
@@ -1343,10 +1339,6 @@ intersex_early_twas <- glm(
   data = twas_model_data, 
   family = "binomial")
 car::Anova(intersex_early_twas, type = 3)
-intersex_early_twas <- update(
-  intersex_early_twas,  
-  ~ . -absolute_sex_bias_in_expression -chromosome)
-car::Anova(intersex_early_twas, type = 3)
 summary(intersex_early_twas)
 ```
 
@@ -1365,48 +1357,43 @@ intersex_late_model_twas <- glm(
   family = "binomial")
 
 car::Anova(intersex_late_model_twas, type = 3)
-intersex_late_model_twas <- update(
-  intersex_late_model_twas, 
-  ~ . -absolute_sex_bias_in_expression -chromosome)
-car::Anova(intersex_late_model_twas, type = 3)
 summary(intersex_late_model_twas)
 ```
 
 #### Plotting key results of these models
 
-
 ```{r ER_figure, fig.showtext=T, fig.height=7, fig.width=7} 
-# plotting models
-new <- data.frame(MAF = seq(from = 0.05, to = 0.5, by = 0.01), chromosome = "X")
 inv_logit <- function(x) exp(x)/(1+exp(x))
-preds <- data.frame(new, 
-                    prop = predict(intersex_early_model_gwas, 
-                                   newdata = new, 
-                                   se.fit=T, type = "link")) %>% 
-  mutate(y = prop.fit, 
-         lwr = prop.fit - 1.96*prop.se.fit, 
-         upr = prop.fit + 1.96*prop.se.fit,
-         y = inv_logit(y), 
-         lwr = inv_logit(lwr), 
-         upr = inv_logit(upr))
 
-p1 <- preds %>% 
-  mutate(panel = "A.") %>% 
-  ggplot(aes(MAF,  y)) + geom_line() + 
-  geom_hline(yintercept = .01, linetype = 3) + 
-  geom_line(aes(y = upr), linetype = 2) + 
-  geom_line(aes(y = lwr), linetype = 2) + 
-  scale_x_continuous(limits = c(0, 0.5)) + 
-  scale_y_continuous(limits = c(0, max(preds$y))) + 
-  facet_wrap( ~ panel) + 
-  theme_bw() + 
-  theme(text = element_text(family = "Raleway", size = 12)) +
-  theme(strip.background = element_blank(), 
-        strip.text = element_text(hjust = 0)) +
-  ylab("Probability of being in the top 1%\nsexually antagonistic loci (\u00B1 95% CIs)") +
-  xlab("Minor allele frequency")
+# new <- data.frame(MAF = seq(from = 0.05, to = 0.5, by = 0.01), chromosome = "X", major_effect = "No")
+# preds <- data.frame(new, 
+#                     prop = predict(intersex_early_model_gwas, 
+#                                    newdata = new, 
+#                                    se.fit=T, type = "link")) %>% 
+#   mutate(y = prop.fit, 
+#          lwr = prop.fit - 1.96*prop.se.fit, 
+#          upr = prop.fit + 1.96*prop.se.fit,
+#          y = inv_logit(y), 
+#          lwr = inv_logit(lwr), 
+#          upr = inv_logit(upr))
 
-new2 <- data.frame(chromosome = levels(dat$chromosome), MAF = 0.3)
+# p1 <- preds %>% 
+#   mutate(panel = "A.") %>% 
+#   ggplot(aes(MAF,  y)) + geom_line() + 
+#   geom_hline(yintercept = .01, linetype = 3) + 
+#   geom_line(aes(y = upr), linetype = 2) + 
+#   geom_line(aes(y = lwr), linetype = 2) + 
+#   scale_x_continuous(limits = c(0, 0.5)) + 
+#   scale_y_continuous(limits = c(0, max(preds$y))) + 
+#   facet_wrap( ~ panel) + 
+#   theme_bw() + 
+#   theme(text = element_text(family = "Raleway", size = 12)) +
+#   theme(strip.background = element_blank(), 
+#         strip.text = element_text(hjust = 0)) +
+#   ylab("Probability of being in the top 1%\nsexually antagonistic loci (\u00B1 95% CIs)") +
+#   xlab("Minor allele frequency")
+
+new2 <- data.frame(chromosome = levels(dat$chromosome), MAF = 0.3, major_effect = "No")
 inv_logit <- function(x) exp(x)/(1+exp(x))
 preds2 <- data.frame(new2, prop = predict(intersex_early_model_gwas, newdata = new2, se.fit=T, type = "link")) %>% 
   mutate(y = prop.fit, 
@@ -1417,7 +1404,7 @@ preds2 <- data.frame(new2, prop = predict(intersex_early_model_gwas, newdata = n
          upr = inv_logit(upr))
 
 p2 <- preds2 %>% 
-  mutate(panel = "B.") %>%
+  mutate(panel = "A.") %>%
   ggplot(aes(chromosome,  y)) + 
   geom_point(size = 3) + 
   geom_errorbar(aes(ymin = lwr, ymax = upr), width = 0) + 
@@ -1425,7 +1412,7 @@ p2 <- preds2 %>%
   theme_bw() +
   theme(text = element_text(family = "Raleway", size = 12)) +
   theme(strip.background = element_blank(), strip.text = element_text(hjust = 0)) +
-  ylab(" \n ") +
+  ylab("Probability of being in the top 1%\nsexually antagonistic loci (\u00B1 95% CIs)") +
   xlab("Chromosome arm")
 
 new <- data.frame(
@@ -1448,7 +1435,7 @@ preds <- data.frame(new,
          upr = inv_logit(upr))
 
 p3 <- preds %>% 
-  mutate(panel = "C.") %>%
+  mutate(panel = "B.") %>%
   ggplot(aes(mean_expression_level,  y)) + geom_line() + 
   geom_hline(yintercept = .01, linetype = 3) + 
   geom_line(aes(y = upr), linetype = 2) + 
@@ -1460,17 +1447,26 @@ p3 <- preds %>%
   theme(text = element_text(family = "Raleway", size = 12)) +
   theme(strip.background = element_blank(), strip.text = element_text(hjust = 0)) 
 
+grid.arrange(p2, p3, ncol = 2)
 
-blank <- ggplot() + theme_void()
-
-grid.arrange(arrangeGrob(p1, p2, ncol = 2), 
-             arrangeGrob(blank, p3, blank, nrow = 1, widths = c(0.2,0.6,0.2)))
-
-
-pdf("figures/fig7_models.pdf", height = 7, width = 7)
-grid.arrange(arrangeGrob(p1, p2, ncol = 2), 
-             arrangeGrob(blank, p3, blank, nrow = 1, widths = c(0.2,0.6,0.2)))
+pdf("figures/fig7_models.pdf", height = 3.9, width = 7)
+grid.arrange(p2, p3, ncol = 2)
 invisible(dev.off())
+# 
+# grid.arrange(arrangeGrob(p1, p2, ncol = 2), 
+#              arrangeGrob(blank, p3, blank, nrow = 1, widths = c(0.2,0.6,0.2)))
+# 
+# 
+# blank <- ggplot() + theme_void()
+# 
+# grid.arrange(arrangeGrob(p1, p2, ncol = 2), 
+#              arrangeGrob(blank, p3, blank, nrow = 1, widths = c(0.2,0.6,0.2)))
+# 
+# 
+# pdf("figures/fig7_models.pdf", height = 7, width = 7)
+# grid.arrange(arrangeGrob(p1, p2, ncol = 2), 
+#              arrangeGrob(blank, p3, blank, nrow = 1, widths = c(0.2,0.6,0.2)))
+# invisible(dev.off())
 ```
 
 ***Figure 7***: Panels A and B show the predicted effects of minor allele frequency and chromosome, respectively, on the probability that a locus is among the top 1% candidate sexually antagonistic loci, as ranked by their evidence ratio. Panel C shows the predicted effect of average gene expression level on the probability that a transcript is among the top 1% candidate sexually antagonistic transcript. The dashed lines and error bars show 95% confidence intervals, estimated as 1.96SE, and predictions are from binomial GLMs (one for panels A-B, another for Panel C).

@@ -337,6 +337,9 @@ db %>% copy_to(all_univariate_lmm_results,
                "univariate_lmm_results", temporary = FALSE)
 ```
 
+
+
+
 <!-- ### Log likelihood -->
 
 <!-- The data-driven covariance matrices have a likelihood that is 99.2% as high as for the canonical matrices, even though the canonical analysis has far, far more parameters (46 matrices vs 6). This indicates that the data-driven covariance matrices provide a better fit to the data, as expected (see: https://stephenslab.github.io/mashr/articles/simulate_noncanon.html). Thus, we use the data-driven covariance matrices when we wish to derive 'adjusted' effect sizes for each SNP (i.e. adjusted for winner's/loser's curse effects, and for the statistically inferred covariance structure for the variant effects on the four phenotypes). The canonical covariance matrices are instead used for classifying SNPs into easy-to-see categories (e.g. sex-specific, sexually antagonistic, concordant, etc), and estimating the % SNPs that belong to each category -->

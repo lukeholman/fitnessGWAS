@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 ![](../figures/fig1.pdf)
 
-***Figure 1***: Correlations among estimated line means for male and female early and late-life fitness. The line means were estimated from Bayesian mixed models that account for block effects and the non-independence of our early- and late-life fitness measurements. The grey ellipses show where 95% of genotypes are expected to fall in bivariate trait space, and the histograms show variation in line means.
+***Figure 1***: Correlations among estimated line means for fitness between sexes and age classes. The line means were estimated from Bayesian mixed models that account for block effects and the non-independence of our early- and late-life fitness measurements. Grey ellipses show where 95% of genotypes are expected to fall in bivariate trait space, and histograms show the variation in line means.
 
 \newpage
 
@@ -47,5 +47,5 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 ![](../figures/fig7_models.pdf)
 
-***Figure 7***: Panels A and B show the predicted effects of minor allele frequency and chromosome, respectively, on the probability that a locus is among the top 1% candidate sexually antagonistic loci, ranked by evidence ratio. Panel C shows the predicted effect of average log2 gene expression level on the probability that a transcript is among the top 1% candidate sexually antagonistic transcript. The dashed lines and error bars show 95% confidence intervals, estimated as 1.96SE, and predictions are from binomial GLMs (one GLM for panels A-B, another for Panel C).
+***Figure 7***: Panel A shows the predicted probability that a locus is among the top 1% candidate sexually antagonistic loci, ranked by evidence ratio, for each of the major chromosome arms. Panel B shows the predicted relationship between average log2 gene expression level and the probability that a transcript is among the top 1% candidate sexually antagonistic transcript. The predictions are from binomial GLMs, and the error bars and dashed lines show 95% confidence intervals estimated as 1.96SE.
 

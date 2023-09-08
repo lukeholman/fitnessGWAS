@@ -69,4 +69,4 @@ Here, we present various plots and statistical analyses of the GWAS and TWAS res
 - Statistics indicating that the frequency of sexually antagonistic loci declines with age
 - Plots of the evidence ratio for each locus and transcript, where the ER compares evidence for the hypotheses that 1) the locus is concordant between sexes or ages, and B) the locus is antagonistic between sexes or ages. This plot avoids having to create a binary distinction between antagonistic and concordant loci, when in reality there is a continuum of evidence.
 - Statistical models of the evidence ratios, showing _inter alia_ that candidate sexually antagonistic alleles tend to be more common and to be enriched on the X chromosome.
-- GO enrichment of the top 1% most sexually antagonistic transcripts, implicating GO terms relating to mitochondria among other things.  
+- GO enrichment of candidate sexually antagonistic transcripts.  

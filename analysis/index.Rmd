@@ -1,14 +1,12 @@
 ---
-title: "The genetic basis of fitness in _Drosophila_; A genome-wide association study"
+title: "Pleiotropic fitness effects across sexes and ages in the Drosophila genome and transcriptome"
 site: workflowr::wflow_site
 output:
   workflowr::wflow_html:
     toc: false
 ---
 
-This website relates to the forthcoming paper 'Pleiotropic fitness effects across sexes and age classes in the _Drosophila_ genome and transcriptome'. 
-
-<!-- by Wong and Holman (for contact info, see [lukeholman.org](https://www.lukeholman.org/)). -->
+This website relates to the paper 'Pleiotropic fitness effects across sexes and ages in the _Drosophila_ genome and transcriptome' by Wong and Holman, published in 2023 in the journal _Evolution_.
 
 Click the headings below to see code, results, plots, tables and figures from this study. 
 
